@@ -1,0 +1,19 @@
+--2026-08-28 01:33:16--  https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip
+Загружен сертификат CA «/etc/ssl/certs/ca-certificates.crt»
+Распознаётся alphacephei.com (alphacephei.com)… 188.40.21.16, 2a01:4f8:13a:279f::2
+Подключение к alphacephei.com (alphacephei.com)|188.40.21.16|:443... соединение установлено.
+HTTP-запрос отправлен. Ожидание ответа… 200 OK
+Длина: 46236750 (44M) [application/zip]
+Сохранение в: ‘vosk-model-small-ru-0.22.zip’
+
+vosk-model-small-ru-0.22.zip                 0%[                                                                                         ]  15,75K  --.-KB/s    ост 762d   vosk-model-small-ru-0.22.zip                 0%[                                                                                         ]  15,75K  --.-KB/s    за 6h 23m  
+
+2026-08-28 11:51:26 (0,70 B/s) - Ошибка чтения, позиция 16131/46236750 (Время ожидания соединения истекло). Повтор.
+
+--2026-08-28 11:51:27--  (попытка: 2)  https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip
+Подключение к alphacephei.com (alphacephei.com)|188.40.21.16|:443... соединение установлено.
+HTTP-запрос отправлен. Ожидание ответа… 206 Partial Content
+Длина: 46236750 (44M), 46220619 (44M) осталось [application/zip]
+Сохранение в: ‘vosk-model-small-ru-0.22.zip’
+
+     0K ,,,,,,,,,, ,,,,,..... .......... .

@@ -1,0 +1,15 @@
+{
+  "install_uv": true,
+  "clone_repo": true,
+  "copy_scripts": true,
+  "create_venv": true,
+  "editable_install": true,
+  "install_ollama": true,
+  "start_ollama": true,
+  "pull_default_model": true,
+  "write_config": true,
+  "install_symlinks": true,
+  "ensure_path": true,
+  "detach_bg_orchestrator": true,
+  "wsl": false
+}

@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Аура
+aura_data/
+*.log
+*.db
+*.sqlite
+
+# Секреты
+.env
+*.token
+vault.json
+memory_registry.json
+vosk_model/
+*.onnx
+
+# IDE
+.vscode/
+.idea/
+*.swp

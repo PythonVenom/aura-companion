@@ -26,3 +26,24 @@ logs/
 
 # OS
 .DS_Store
+
+# Старые версии
+aura_agent*.py
+aura_*_backup.py
+aura_*.bak
+aura_interrupt.py
+aura_optimized.py
+aura.py
+aura_smart.py
+aura_ui.py
+system_aura.py
+tray_icon.py
+
+# Тесты и скриншоты
+*.png
+*.wav
+
+# Архивы
+*.7z
+*.zip
+*.tar.bz2

@@ -33,7 +33,7 @@ import sys
 import time
 
 # Слух и голос — из старой папки agents/ (проверенные, работают)
-from agents.listener import AgentListener
+from aura.agents.listener import AgentListener
 from agents.speaker import AgentSpeaker
 
 # Новая модульная сборка

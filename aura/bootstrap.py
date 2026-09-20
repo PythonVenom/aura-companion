@@ -18,13 +18,16 @@ from aura.agents import (
     AgentAudioPult,
     AgentAudioRouter,
     AgentBrowserTabs,
+    AgentFunctions,
     AgentInternet,
     AgentJournal,
     AgentMediaSearch,
     AgentPower,
     AgentRAGMemory,
+    AgentRegistry,
     AgentScreenReader,
     AgentTime,
+    AgentUpdates,
     AgentVKMusic,
     AgentWindowControl,
 )
@@ -37,8 +40,8 @@ def build_orchestrator() -> Orchestrator:
 
     Порядок регистрации (важен!):
     1. Простые и точные (time, power, audio_pult) — самые узкие ключи
-    2. Дневник и память (journal, rag_memory) — специфичные команды
-    3. Аудио-маршрутизация (audio_router) — "проверь аудио", "какая гарнитура"
+    2. Дневник, память, реестр, функции, обновления — специфичные команды
+    3. Аудио-маршрутизация — "проверь аудио", "какая гарнитура"
     4. Специфичные "открой X" (vk_music, browser_tabs)
     5. Опасные, но широкие ключи (app_launcher, window_control, screen_reader)
     6. Медиа (media_search — перехватывает "включи")
@@ -54,9 +57,12 @@ def build_orchestrator() -> Orchestrator:
     orch.register(AgentPower())
     orch.register(AgentAudioPult())
 
-    # --- Уровень 2: дневник и память ---
+    # --- Уровень 2: дневник, память, реестр, функции, обновления ---
     orch.register(AgentJournal())
     orch.register(AgentRAGMemory())
+    orch.register(AgentRegistry())
+    orch.register(AgentFunctions())
+    orch.register(AgentUpdates())
 
     # --- Уровень 3: аудио-маршрутизация ---
     orch.register(AgentAudioRouter())

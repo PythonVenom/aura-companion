@@ -71,6 +71,7 @@ class AuraOrchestrator:
         self.rag_memory = _get_agent(self.orch, "rag_memory")
         self.audio_router = _get_agent(self.orch, "audio_router")
         self.vk_music = _get_agent(self.orch, "vk_music")
+        self.registry = _get_agent(self.orch, "registry")
 
     def _print_last_session(self) -> None:
         """Показать последнюю сессию журнала при старте."""
@@ -165,6 +166,12 @@ class AuraOrchestrator:
                     # Даём время аудио-системе вернуться в норму
                     time.sleep(0.2)
 
+                if self.registry:
+                    try:
+                        self.registry.log("command", {"command": cmd})
+                    except Exception as e:
+                        print(f"⚠️ Registry не записал: {e}")
+
                 print(f"📝 Команда: {cmd}")
 
                 # === ГЛАВНОЕ ОТЛИЧИЕ: process через Orchestrator ===
@@ -174,6 +181,12 @@ class AuraOrchestrator:
                 self.speaker.say(response)
 
                 # === RAG-ПАМЯТЬ И ЖУРНАЛ (после ответа) ===
+                if self.registry:
+                    try:
+                        self.registry.log("dialog", {"user": cmd, "aura": response})
+                    except Exception as e:
+                        print(f"⚠️ Registry не записал диалог: {e}")
+
                 if self.rag_memory:
                     try:
                         result = self.rag_memory.remember(cmd, response)

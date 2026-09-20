@@ -23,7 +23,7 @@ def orch():
 
 class TestBootstrapAssembly:
     def test_all_agents_registered(self, orch) -> None:
-        """Проверяем, что все 13 агентов на месте."""
+        """Проверяем, что все 16 агентов на месте."""
         names = set(orch.registry.list_names())
         expected = {
             "time",
@@ -31,6 +31,9 @@ class TestBootstrapAssembly:
             "audio_pult",
             "journal",
             "rag_memory",
+            "registry",
+            "functions",
+            "updates",
             "audio_router",
             "app_launcher",
             "window_control",
@@ -43,7 +46,7 @@ class TestBootstrapAssembly:
         assert names == expected
 
     def test_agent_count(self, orch) -> None:
-        assert len(orch) == 13
+        assert len(orch) == 16
 
 
 class TestRouting:
@@ -52,7 +55,6 @@ class TestRouting:
     @pytest.mark.asyncio
     async def test_time_routed_to_time_agent(self, orch) -> None:
         result = await orch.process("который час")
-        # AgentTime отвечает что-то про время суток
         assert "Создатель" in result or "час" in result.lower()
 
     @pytest.mark.asyncio
@@ -80,6 +82,37 @@ class TestRouting:
             result = await orch.process("громкость 5")
             assert "50" in result
 
+    @pytest.mark.asyncio
+    async def test_functions_routed(self, orch) -> None:
+        result = await orch.process("что ты умеешь")
+        assert "Доступные функции" in result
+
+    @pytest.mark.asyncio
+    async def test_updates_routed(self, orch) -> None:
+        with patch("aura.agents.updates.subprocess.run") as mock_run:
+            from unittest.mock import MagicMock
+
+            mock_run.return_value = MagicMock(stdout="0\n", returncode=0)
+
+            result = await orch.process("проверь обновления")
+            assert "обновлена" in result.lower() or "Доступно" in result
+
+    @pytest.mark.asyncio
+    async def test_registry_routed(self, orch, tmp_path, monkeypatch) -> None:
+        """Проверяем, что registry отвечает на "покажи память"."""
+        from aura.agents.registry import AgentRegistry
+
+        test_file = tmp_path / "reg_test.json"
+        monkeypatch.setattr(AgentRegistry, "MEMORY_FILE", str(test_file))
+
+        # Пересобираем оркестратор с новым путём
+        from aura.bootstrap import build_orchestrator as rebuild
+        local_orch = rebuild()
+
+        result = await local_orch.process("покажи память")
+        # registry вернёт JSON с last_command
+        assert "last_command" in result
+
 
 class TestFallback:
     """Проверяем, что неизвестный запрос уходит в fallback."""
@@ -95,7 +128,5 @@ class TestOrder:
 
     def test_registration_order(self, orch) -> None:
         names = orch.registry.list_names()
-        # time должен быть первым (простые — раньше)
         assert names[0] == "time"
-        # internet последним (сеть — в конце)
         assert names[-1] == "internet"

@@ -7,6 +7,7 @@
 
 from aura.agents.app_launcher import AgentAppLauncher
 from aura.agents.audio_pult import AgentAudioPult
+from aura.agents.internet import AgentInternet
 from aura.agents.power import AgentPower
 from aura.agents.time import AgentTime
 
@@ -15,4 +16,5 @@ __all__ = [
     "AgentPower",
     "AgentAudioPult",
     "AgentAppLauncher",
+    "AgentInternet",
 ]

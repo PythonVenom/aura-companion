@@ -18,7 +18,9 @@ from aura.bootstrap import build_orchestrator
 @pytest.fixture
 def orch():
     """Собрать полный Orchestrator."""
-    return build_orchestrator()
+    with patch("aura.agents.brain.AgentBrain.ask", return_value="❌ mock"), \
+         patch("aura.agents.tool_router.AgentToolRouter.route", return_value=None):
+        yield build_orchestrator()
 
 
 class TestBootstrapAssembly:

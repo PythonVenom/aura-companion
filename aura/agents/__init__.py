@@ -21,6 +21,8 @@ from aura.agents.time import AgentTime
 from aura.agents.updates import AgentUpdates
 from aura.agents.vk_music import AgentVKMusic
 from aura.agents.window_control import AgentWindowControl
+from aura.agents.brain import AgentBrain
+from aura.agents.tool_router import AgentToolRouter
 
 __all__ = [
     "AgentTime",
@@ -39,4 +41,6 @@ __all__ = [
     "AgentBrowserTabs",
     "AgentMediaSearch",
     "AgentVKMusic",
+    "AgentBrain",
+    "AgentToolRouter",
 ]

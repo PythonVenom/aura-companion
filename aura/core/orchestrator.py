@@ -21,6 +21,9 @@
 
 from __future__ import annotations
 
+import asyncio
+
+
 from aura.core.protocol import AgentRequest, AgentResponse, AgentStatus
 from aura.core.registry import AgentRegistry
 
@@ -37,8 +40,10 @@ class Orchestrator:
         response = await orch.process("который час")
     """
 
-    def __init__(self) -> None:
+    def __init__(self, tool_router=None, brain=None) -> None:
         self.registry = AgentRegistry()
+        self.tool_router = tool_router
+        self.brain = brain
         self.fallback_text = "Не расслышала, Создатель, повторите"
 
     def register(self, agent) -> None:
@@ -57,6 +62,25 @@ class Orchestrator:
 
         agent = self.registry.find(request)
         if agent is None:
+            # 2. ToolRouter
+            if self.tool_router is not None:
+                try:
+                    result = await asyncio.to_thread(self.tool_router.route, text)
+                    if result:
+                        t = result.get("type")
+                        rtext = result.get("response", "")
+                        if t in ("tool", "text") and rtext and len(rtext) > 2:
+                            return rtext
+                except Exception as e:
+                    print(f"⚠️ ToolRouter: {e}")
+            # 3. Brain
+            if self.brain is not None:
+                try:
+                    result = await asyncio.to_thread(self.brain.ask, text)
+                    if result and not result.startswith("❌"):
+                        return result
+                except Exception as e:
+                    print(f"⚠️ Brain: {e}")
             return self.fallback_text
 
         try:

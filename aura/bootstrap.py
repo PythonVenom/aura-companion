@@ -17,6 +17,7 @@ from aura.agents import (
     AgentAppLauncher,
     AgentAudioPult,
     AgentAudioRouter,
+    AgentBrain,
     AgentBrowserTabs,
     AgentFunctions,
     AgentInternet,
@@ -27,6 +28,7 @@ from aura.agents import (
     AgentRegistry,
     AgentScreenReader,
     AgentTime,
+    AgentToolRouter,
     AgentUpdates,
     AgentVKMusic,
     AgentWindowControl,
@@ -50,7 +52,9 @@ def build_orchestrator() -> Orchestrator:
     Returns:
         Orchestrator с зарегистрированными агентами.
     """
-    orch = Orchestrator()
+    tool_router = AgentToolRouter()
+    brain = AgentBrain()
+    orch = Orchestrator(tool_router=tool_router, brain=brain)
 
     # --- Уровень 1: простые и точные ---
     orch.register(AgentTime())

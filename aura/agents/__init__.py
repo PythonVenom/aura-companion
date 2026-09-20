@@ -9,6 +9,7 @@ from aura.agents.app_launcher import AgentAppLauncher
 from aura.agents.audio_pult import AgentAudioPult
 from aura.agents.internet import AgentInternet
 from aura.agents.power import AgentPower
+from aura.agents.screen_reader import AgentScreenReader
 from aura.agents.time import AgentTime
 from aura.agents.window_control import AgentWindowControl
 
@@ -19,4 +20,5 @@ __all__ = [
     "AgentAppLauncher",
     "AgentInternet",
     "AgentWindowControl",
+    "AgentScreenReader",
 ]

@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "Aura Bridge",
+  "version": "1.0",
+  "description": "Мост между Аурой и вкладками Firefox",
+  "permissions": [
+    "tabs",
+    "nativeMessaging",
+    "activeTab"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "aura-bridge@pythonvenom.local",
+      "strict_min_version": "91.0"
+    }
+  }
+}

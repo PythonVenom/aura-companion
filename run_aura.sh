@@ -1,6 +1,12 @@
 #!/bin/bash
+# Ждём XAUTHORITY
+while [ -z "$XAUTHORITY" ] || [ ! -f "$XAUTHORITY" ]; do
+    export XAUTHORITY=$(ls /tmp/xauth_* 2>/dev/null | head -1)
+    [ -n "$XAUTHORITY" ] && break
+    sleep 1
+done
+
 export DISPLAY=:0
-xhost +SI:localuser:pythonvenom
-cd ~/aura_project
+cd /home/pythonvenom/aura_project
 source venv/bin/activate
-python aura_agent_parallel.py
+exec python3 aura_core.py

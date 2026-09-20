@@ -1,28 +1,28 @@
-# Python
 __pycache__/
 *.py[cod]
-*.egg-info/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.venv/
+*$py.class
+*.so
 venv/
+.venv/
 
-# Аура
-aura_data/
-*.log
-*.db
-*.sqlite
+# Large models (не коммитим)
+gigaam_model/
+sherpa-onnx-streaming-t-one-russian-2025-09-08/
+vosk_model_streaming/
+vosk_model_big/
+voices/
 
-# Секреты
+# Secrets
+vk_token.txt
 .env
-*.token
-vault.json
-memory_registry.json
-vosk_model/
-*.onnx
+
+# Logs
+*.log
+logs/
 
 # IDE
 .vscode/
 .idea/
-*.swp
+
+# OS
+.DS_Store

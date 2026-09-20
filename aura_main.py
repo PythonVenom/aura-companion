@@ -34,7 +34,7 @@ import time
 
 # Слух и голос — из старой папки agents/ (проверенные, работают)
 from aura.agents.listener import AgentListener
-from agents.speaker import AgentSpeaker
+from aura.agents.speaker import AgentSpeaker
 
 # Новая модульная сборка
 from aura.bootstrap import build_orchestrator

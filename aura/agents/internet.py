@@ -107,7 +107,7 @@ class AgentInternet(BaseAgent):
     def get_weather(self, city: str) -> str:
         """Погода через wttr.in (plain text, русский)."""
         try:
-            url = f"https://wttr.in/{urllib.parse.quote(city)}?format=%l:+%c+%t,+ветер+%w&lang=ru"
+            url = f"https://wttr.in/{urllib.parse.quote(city)}?format=%l:+%c+%t,+wind:+%w&lang=ru"
             req = urllib.request.Request(url, headers={"User-Agent": "curl/8.0"})
             with urllib.request.urlopen(req, timeout=10) as resp:
                 data = resp.read().decode("utf-8").strip()

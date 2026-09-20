@@ -47,3 +47,10 @@ tray_icon.py
 *.7z
 *.zip
 *.tar.bz2
+
+# Runtime data (не коммитим — это данные, не код)
+memory_registry.json
+*.db
+*.sqlite
+chroma/
+chroma_db/

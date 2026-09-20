@@ -22,6 +22,7 @@ from aura.agents import (
     AgentPower,
     AgentScreenReader,
     AgentTime,
+    AgentVKMusic,
     AgentWindowControl,
 )
 from aura.core.orchestrator import Orchestrator
@@ -31,32 +32,36 @@ def build_orchestrator() -> Orchestrator:
     """
     Собрать Orchestrator со всеми агентами.
 
-    Порядок регистрации:
-    1. Простые и точные (time, power, audio) — раньше
-    2. Опасные (app_launcher, window_control) — после простых
-    3. Медиа (media_search) — после опасных
-    4. Интернет и вкладки — в конце (могут перехватить лишнее)
+    Порядок регистрации (важен!):
+    1. Простые и точные (time, power, audio)
+    2. Опасные (app_launcher, window_control)
+    3. Медиа (media_search — перехватывает "включи")
+    4. VK Music (перехватывает "найди ... вк")
+    5. Internet (общий "найди", "что такое") — последним
 
     Returns:
         Orchestrator с зарегистрированными агентами.
     """
     orch = Orchestrator()
 
-    # --- Уровень 1: простые, детерминированные ---
+    # --- Уровень 1: простые ---
     orch.register(AgentTime())
     orch.register(AgentPower())
     orch.register(AgentAudioPult())
 
-    # --- Уровень 2: опасные, но точные по ключевым словам ---
+    # --- Уровень 2: специфичные "открой X" — раньше AppLauncher ---
+    orch.register(AgentVKMusic())
+    orch.register(AgentBrowserTabs())
+
+    # --- Уровень 3: опасные, но широкие ключи ---
     orch.register(AgentAppLauncher())
     orch.register(AgentWindowControl())
     orch.register(AgentScreenReader())
-    orch.register(AgentBrowserTabs())
 
-    # --- Уровень 3: медиа (может перехватить "включи") ---
+    # --- Уровень 4: медиа (перехватывает "включи") ---
     orch.register(AgentMediaSearch())
 
-    # --- Уровень 4: сеть (могут перехватить "найди", "что такое") ---
+    # --- Уровень 5: Internet — последним (общий "найди") ---
     orch.register(AgentInternet())
 
     return orch

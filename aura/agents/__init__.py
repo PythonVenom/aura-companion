@@ -13,6 +13,7 @@ from aura.agents.media_search import AgentMediaSearch
 from aura.agents.power import AgentPower
 from aura.agents.screen_reader import AgentScreenReader
 from aura.agents.time import AgentTime
+from aura.agents.vk_music import AgentVKMusic
 from aura.agents.window_control import AgentWindowControl
 
 __all__ = [
@@ -25,4 +26,5 @@ __all__ = [
     "AgentScreenReader",
     "AgentBrowserTabs",
     "AgentMediaSearch",
+    "AgentVKMusic",
 ]

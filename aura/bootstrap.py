@@ -18,6 +18,7 @@ from aura.agents import (
     AgentAudioPult,
     AgentBrowserTabs,
     AgentInternet,
+    AgentMediaSearch,
     AgentPower,
     AgentScreenReader,
     AgentTime,
@@ -33,7 +34,8 @@ def build_orchestrator() -> Orchestrator:
     Порядок регистрации:
     1. Простые и точные (time, power, audio) — раньше
     2. Опасные (app_launcher, window_control) — после простых
-    3. Интернет и медиа — в конце (могут перехватить лишнее)
+    3. Медиа (media_search) — после опасных
+    4. Интернет и вкладки — в конце (могут перехватить лишнее)
 
     Returns:
         Orchestrator с зарегистрированными агентами.
@@ -51,7 +53,10 @@ def build_orchestrator() -> Orchestrator:
     orch.register(AgentScreenReader())
     orch.register(AgentBrowserTabs())
 
-    # --- Уровень 3: сеть (могут перехватить "найди", "что такое") ---
+    # --- Уровень 3: медиа (может перехватить "включи") ---
+    orch.register(AgentMediaSearch())
+
+    # --- Уровень 4: сеть (могут перехватить "найди", "что такое") ---
     orch.register(AgentInternet())
 
     return orch

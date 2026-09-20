@@ -23,7 +23,7 @@ def orch():
 
 class TestBootstrapAssembly:
     def test_all_agents_registered(self, orch) -> None:
-        """Проверяем, что все 8 агентов на месте."""
+        """Проверяем, что все 9 агентов на месте."""
         names = set(orch.registry.list_names())
         expected = {
             "time",
@@ -33,12 +33,13 @@ class TestBootstrapAssembly:
             "window_control",
             "screen_reader",
             "browser_tabs",
+            "media_search",
             "internet",
         }
         assert names == expected
 
     def test_agent_count(self, orch) -> None:
-        assert len(orch) == 8
+        assert len(orch) == 9
 
 
 class TestRouting:

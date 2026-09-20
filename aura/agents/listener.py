@@ -1,11 +1,21 @@
 """
 Машинка 01: Слух (AgentListener) — T-one streaming через sherpa-onnx.
 
-Копия agents/listener.py для модульной архитектуры (Strangler Fig, Фаза 1).
-Изменена ОДНА строка: импорт MicroAgent — теперь из aura.agents.base,
-а не из agents.base.
+Мигрирован из agents/listener.py (монолит, копия в Фазе 1).
+Логика listen() переписана в Фазе 3.1:
+- Streaming-цикл с endpoint detection (recognizer.is_endpoint)
+- Ранний выход по тишине (0.8 сек после речи)
+- reset(s) после endpoint — не склеиваем фразы
+- Один create_stream на вызов (не батч в конце)
 
-Логика НЕ менялась. Тесты должны быть идентичны монолиту.
+Это фикс дублей T-one (проблема 3 из ADR-002):
+«аура который час аура которыйч» → «который час».
+
+Что НЕ менялось:
+- __init__ (загрузка T-one)
+- _audio_callback
+- get_stream
+- execute
 """
 
 import os
@@ -63,7 +73,7 @@ class AgentListener(MicroAgent):
             self.stream = self.sd.InputStream(
                 samplerate=self.sample_rate,
                 channels=1,
-                dtype='int16',
+                dtype="int16",
                 blocksize=1600,
                 callback=self._audio_callback,
             )
@@ -71,6 +81,14 @@ class AgentListener(MicroAgent):
         return self.stream
 
     def listen(self, timeout=6):
+        """
+        Слушать микрофон до endpoint, тишины или таймаута.
+
+        Возвращает строку (распознанный текст) или None.
+
+        Streaming-режим: один create_stream, декодирование по фреймам,
+        endpoint detection — возвращаем сразу, не ждём 6 сек.
+        """
         if not self.ready or not self.active:
             return None
         try:
@@ -85,34 +103,64 @@ class AgentListener(MicroAgent):
                 except queue.Empty:
                     break
 
-            frames = []
-            start = time.time()
-            while time.time() - start < timeout:
-                try:
-                    data = self.audio_queue.get(timeout=0.5)
-                    frames.append(data)
-                except queue.Empty:
-                    pass
-
-            if not frames:
-                return None
-
-            audio_data = self.np.concatenate(frames).astype(self.np.float32).flatten() / 32768.0
-            print(f"🎤 Записано: {len(audio_data)} сэмплов ({len(audio_data)/self.sample_rate:.1f} сек)")
-
+            # Один streaming-объект на весь вызов
             s = self.recognizer.create_stream()
             left_padding = self.np.zeros(2400, dtype=self.np.float32)
             s.accept_waveform(self.sample_rate, left_padding)
-            s.accept_waveform(self.sample_rate, audio_data)
+
+            start = time.time()
+            last_voice_ts = None          # когда последний раз видели текст
+            silence_after_voice = 0.0     # сколько секунд тишины после речи
+
+            while time.time() - start < timeout:
+                try:
+                    data = self.audio_queue.get(timeout=0.2)
+                except queue.Empty:
+                    data = None
+
+                if data is not None:
+                    chunk = data.astype(self.np.float32).flatten() / 32768.0
+                    s.accept_waveform(self.sample_rate, chunk)
+                    while self.recognizer.is_ready(s):
+                        self.recognizer.decode_stream(s)
+
+                text_now = self.recognizer.get_result(s).strip().lower()
+
+                if text_now:
+                    if last_voice_ts is None:
+                        last_voice_ts = time.time()
+                    silence_after_voice = 0.0
+                elif last_voice_ts is not None:
+                    silence_after_voice = time.time() - last_voice_ts
+
+                # Эндпоинт: модель сама говорит «фраза закончена»
+                if self.recognizer.is_endpoint(s):
+                    text = self.recognizer.get_result(s).strip().lower()
+                    self.recognizer.reset(s)
+                    if text and len(text) > 2:
+                        print(f"🎤 Распознано: {text}")
+                        return text
+                    last_voice_ts = None
+                    silence_after_voice = 0.0
+                    continue
+
+                # Ранний выход: была речь, и 0.8с тишины — забираем, что есть
+                if last_voice_ts is not None and silence_after_voice >= 0.8:
+                    text = self.recognizer.get_result(s).strip().lower()
+                    if text and len(text) > 2:
+                        print(f"🎤 Распознано (тишина): {text}")
+                        return text
+                    last_voice_ts = None
+                    silence_after_voice = 0.0
+
+            # Таймаут: отдаём то, что успели распознать
             tail_padding = self.np.zeros(4800, dtype=self.np.float32)
             s.accept_waveform(self.sample_rate, tail_padding)
-            s.input_finished()
-
             while self.recognizer.is_ready(s):
                 self.recognizer.decode_stream(s)
-
             text = self.recognizer.get_result(s).strip().lower()
             if text and len(text) > 2:
+                print(f"🎤 Распознано (таймаут): {text}")
                 return text
             return None
         except Exception as e:

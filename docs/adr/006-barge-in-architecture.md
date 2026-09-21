@@ -98,3 +98,40 @@ Barge-in держит **свой** InputStream открытым. VAD в фоне
 - ADR-004 — ревизия мёртвого кода
 - docs/vision.md — barge-in как у Алисы
 - docs/capability-audit.md — barge-in не работает
+
+---
+
+## Обновление 2026-09-21: эксперимент провалился
+
+**Что сделали:**
+- Реализовали `aura/agents/barge_in.py` (Уровень 3).
+- Интегрировали в `aura_main.py`:
+  - `set_aura_speaking(is_speaking)` — VAD активен только когда Аура говорит.
+  - `if is_speaking: continue` — ANTИ-ЭХО для `listener`.
+- Убрали костыль `set-sink-volume @DEFAULT_SINK@ 30%` (он мешал).
+
+**Что произошло:**
+- Первый прогон: Аура говорила 30+ сек, 8 раз `🎤 Распознано` — **эхо голоса Ауры**.
+- Второй прогон (без костыля): Аура **начала говорить и затихла** — `stop_speaking()` **сработал на её собственном голосе** через микрофон.
+- **Barge-in без AEC — не работает.**
+
+**Диагностика:**
+- `module-echo-cancel` (PipeWire) доступен.
+- `echo-cancel-source` работает (`parecord` пишет).
+- `sounddevice` видит `pipewire` (7), `pulse` (8), `default` (10).
+- **Но** `echo-cancel-source` **не** сделан default. **PortAudio** видит **default** — **не** AEC.
+
+**Решение:**
+1. Откатили `aura_main.py` к рабочей версии (с костылём, без barge_in).
+2. `aura/agents/barge_in.py` и тесты — **сохранены, не подключены**.
+3. **Перед повторной попыткой нужно:**
+   - Сделать `echo-cancel-source` default source: `pactl set-default-source echo-cancel-source`.
+   - Проверить, что AEC **реально** вычитает голос Ауры из микрофона.
+   - **Потом** — подключить `barge_in` снова.
+
+**Статус:** отложено до реализации AEC.
+
+**Связанные артефакты:**
+- `aura/agents/barge_in.py` — код (не подключён).
+- `tests/test_barge_in.py` — 6 тестов (зелёные).
+- Костыль `set-sink-volume` — вернули (временно, до AEC).

@@ -146,15 +146,6 @@ class AuraOrchestrator:
                 cmd = heard.replace('аура', '').replace('aura', '').strip()
                 cmd = cmd.replace('Аура', '').replace('Aura', '').strip()
 
-                # Понижаем громкость во время обработки (как в монолите)
-                try:
-                    subprocess.run(
-                        ['pactl', 'set-sink-volume', '@DEFAULT_SINK@', '30%'],
-                        check=False,
-                    )
-                except Exception:
-                    pass
-
                 if not cmd:
                     time.sleep(0.3)
                     continue
@@ -211,15 +202,6 @@ class AuraOrchestrator:
                 else:
                     time.sleep(0.5)
                 self.speaker.active = False
-
-                # Возвращаем громкость
-                try:
-                    subprocess.run(
-                        ['pactl', 'set-sink-volume', '@DEFAULT_SINK@', '100%'],
-                        check=False,
-                    )
-                except Exception:
-                    pass
 
                 time.sleep(0.1)
 

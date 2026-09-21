@@ -246,8 +246,9 @@ class AgentAudioRouter(BaseAgent):
             return (profile, None)
 
         if profile in ("headset", "internal"):
-            self._set_default_source(self.DEFAULT_SOURCE)
-            self._set_default_sink(self.DEFAULT_SINK)
+            # НЕ трогаем default-source/sink: PipeWire управляет сам,
+            # audio_router выбивал echo-cancel-source (AEC слетал).
+            # См. ADR-007.
             self.current_source = self.DEFAULT_SOURCE
             self.current_sink = self.DEFAULT_SINK
             self._fix_speaker_volume()

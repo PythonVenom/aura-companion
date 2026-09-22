@@ -14,6 +14,9 @@
 - «Открой ВК» создавал новую вкладку вместо фокуса на открытой.
   Решение: сначала find_tab, если найдено — activate, иначе open.
 
+Фаза 8.3: алиасы кириллица→латиница. В Firefox вкладка «MAX»,
+а пользователь говорит «макс». Раньше find_tab не находил.
+
 См. ADR-004, Фаза 8.
 """
 
@@ -43,6 +46,27 @@ KNOWN_URLS = {
     "дипсик": "https://chat.deepseek.com",
     "гитхаб": "https://github.com",
     "github": "https://github.com",
+}
+
+# Алиасы кириллица→латиница для поиска вкладок.
+# Firefox держит title на латинице/смеси, пользователь говорит по-русски.
+ALIASES = {
+    "макс": "max",
+    "максим": "max",
+    "вк": "vk",
+    "вконтакте": "vk",
+    "ютуб": "youtube",
+    "ютьюб": "youtube",
+    "телеграм": "telegram",
+    "телега": "telegram",
+    "тг": "telegram",
+    "дипсик": "deepseek",
+    "гитхаб": "github",
+    "гугл": "google",
+    "яндекс": "yandex",
+    "почта": "mail",
+    "музыка": "music",
+    "видео": "video",
 }
 
 
@@ -80,7 +104,6 @@ class AgentBrowserTabs(BaseAgent):
 
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
-        # «открой вкладку» перехватывает NEW — но «открой X» (сайт) может быть find/open
         if any(kw in text for kw in self.NEW_KEYWORDS):
             return True
         all_kw = (
@@ -89,7 +112,6 @@ class AgentBrowserTabs(BaseAgent):
         )
         if any(kw in text for kw in all_kw):
             return True
-        # «открой вк», «открой телеграм» и т.п.
         if text.startswith("открой ") or text.startswith("открыть "):
             rest = text.split(" ", 1)[1] if " " in text else ""
             if any(name in rest for name in KNOWN_URLS):
@@ -106,7 +128,6 @@ class AgentBrowserTabs(BaseAgent):
             return AgentResponse.ok(self.new_tab(), self.name)
 
         if any(kw in text for kw in self.CLOSE_KEYWORDS):
-            # «закрой вкладку X» — закрыть по имени
             name = self._extract_after(text, self.CLOSE_KEYWORDS)
             if name:
                 return AgentResponse.ok(self.close_tab_by_name(name), self.name)
@@ -124,7 +145,6 @@ class AgentBrowserTabs(BaseAgent):
                 return AgentResponse.ok("Какую вкладку искать?", self.name)
             return AgentResponse.ok(self.find_and_activate(name), self.name)
 
-        # «открой X» — сначала find, иначе open url
         if text.startswith("открой ") or text.startswith("открыть "):
             rest = text.split(" ", 1)[1].strip()
             return AgentResponse.ok(self.open_or_focus(rest), self.name)
@@ -135,21 +155,34 @@ class AgentBrowserTabs(BaseAgent):
 
     @staticmethod
     def _extract_after(text: str, keywords: tuple[str, ...]) -> str:
-        """Взять текст после ключевой фразы."""
         for kw in keywords:
             if kw in text:
                 idx = text.index(kw) + len(kw)
                 return text[idx:].strip().strip(".,!?").strip()
         return ""
 
+    # --- Нормализация запроса ---
+
+    @staticmethod
+    def _normalize_query(query: str) -> str:
+        """Заменить кириллические алиасы на латиницу. «макс» → «max».
+
+        Ключи сортируются по убыванию длины — сначала длинные фразы.
+        Иначе «вконтакте» → «vkонтакте» (замена «вк» раньше «вконтакте»).
+        """
+        q = query.lower()
+        # Сортируем по длине ключа: «вконтакте» (9) раньше «вк» (2).
+        for ru in sorted(ALIASES.keys(), key=len, reverse=True):
+            if ru in q:
+                q = q.replace(ru, ALIASES[ru])
+        return q
+
     # --- Открытие/фокус ---
 
     def open_or_focus(self, what: str) -> str:
-        """Найти открытую вкладку по имени/URL; если нет — открыть известный URL."""
         if not what:
             return "Что открыть?"
 
-        # Нормализуем: если what — ключ из KNOWN_URLS, ищем по ключу + открываем url
         url = None
         search_term = what
         for key, u in KNOWN_URLS.items():
@@ -158,11 +191,10 @@ class AgentBrowserTabs(BaseAgent):
                 search_term = key
                 break
 
-        # Сначала пытаемся найти уже открытую
-        found = self._send_command({"action": "find_tab", "query": search_term})
-        if found and "tabs" in found and found["tabs"]:
-            tab = found["tabs"][0]
-            tab_id = tab.get("id")
+        # Сначала пытаемся найти открытую — по исходному и по нормализованному
+        found = self._find_tab_try_both(search_term)
+        if found:
+            tab_id = found.get("id")
             if tab_id is not None:
                 act = self._send_command({"action": "activate_tab", "tab_id": tab_id})
                 if act and act.get("success"):
@@ -170,28 +202,21 @@ class AgentBrowserTabs(BaseAgent):
                     return f"🌐 Переключилась на «{title[:60]}»"
                 return self._error_text(act)
 
-        # Не нашли — открываем
         if url:
             res = self._send_command({"action": "open_tab", "url": url, "active": True})
             if res and res.get("success"):
                 return f"🌐 Открыла {url}"
             return self._error_text(res)
 
-        # Нет известного URL — поиск в Google
         res = self._send_command({"action": "new_tab_search", "query": what})
         if res and res.get("success"):
             return f"🌐 Ищу «{what[:60]}»"
         return self._error_text(res)
 
     def find_and_activate(self, query: str) -> str:
-        """Найти вкладку и переключиться."""
-        found = self._send_command({"action": "find_tab", "query": query})
-        if not found or "error" in found:
-            return self._error_text(found)
-        tabs = found.get("tabs", [])
-        if not tabs:
+        tab = self._find_tab_try_both(query)
+        if tab is None:
             return f"🌐 Вкладка «{query}» не найдена"
-        tab = tabs[0]
         tab_id = tab.get("id")
         if tab_id is None:
             return "🌐 Найдена вкладка без id"
@@ -199,6 +224,31 @@ class AgentBrowserTabs(BaseAgent):
         if act and act.get("success"):
             return f"🌐 Переключилась на «{act.get('title', query)[:60]}»"
         return self._error_text(act)
+
+    def _find_tab_try_both(self, query: str) -> dict | None:
+        """Найти вкладку: сначала по оригиналу, потом по алиасам.
+        Возвращает первую найденную или None."""
+        # 1. По оригиналу
+        found = self._send_command({"action": "find_tab", "query": query})
+        if found and found.get("tabs"):
+            return found["tabs"][0]
+
+        # 2. По нормализованному (кириллица→латиница)
+        normalized = self._normalize_query(query)
+        if normalized != query.lower():
+            found = self._send_command({"action": "find_tab", "query": normalized})
+            if found and found.get("tabs"):
+                return found["tabs"][0]
+
+        # 3. Обрезанный (T-one иногда глотает окончания: «мак» вместо «макс»)
+        #     Ищем по первым 3 символам исходного И нормализованного
+        for term in {query.lower(), normalized}:
+            if len(term) >= 3:
+                found = self._send_command({"action": "find_tab", "query": term[:3]})
+                if found and found.get("tabs"):
+                    return found["tabs"][0]
+
+        return None
 
     # --- Команды ---
 
@@ -209,7 +259,6 @@ class AgentBrowserTabs(BaseAgent):
         return "🌐 Открыла новую вкладку"
 
     def close_active_tab(self) -> str:
-        """Закрыть активную вкладку: найти её id через list_tabs."""
         listed = self._send_command({"action": "list_tabs"})
         if not listed or "error" in listed:
             return self._error_text(listed)
@@ -224,7 +273,12 @@ class AgentBrowserTabs(BaseAgent):
         return "🌐 Закрыла вкладку"
 
     def close_tab_by_name(self, query: str) -> str:
+        # Попробуем исходное имя, потом нормализованное
         result = self._send_command({"action": "close_tab_by_name", "query": query})
+        if result is None or result.get("error") == "not found":
+            normalized = self._normalize_query(query)
+            if normalized != query.lower():
+                result = self._send_command({"action": "close_tab_by_name", "query": normalized})
         if result is None or "error" in result:
             if result and result.get("error") == "not found":
                 return f"🌐 Вкладка «{query}» не найдена"
@@ -261,15 +315,12 @@ class AgentBrowserTabs(BaseAgent):
     # --- Протокол ---
 
     def _send_command(self, cmd: dict) -> dict | None:
-        """Отправить команду (length-prefix) и получить ответ."""
         try:
             payload = json.dumps(cmd, ensure_ascii=False).encode("utf-8")
             with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
                 s.settimeout(5.0)
                 s.connect(self.socket_path)
                 s.sendall(struct.pack("@I", len(payload)) + payload)
-
-                # Читаем 4 байта длины + тело
                 header = self._recv_exact(s, 4)
                 if not header:
                     return None

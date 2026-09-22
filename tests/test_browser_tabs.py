@@ -287,7 +287,9 @@ async def test_open_vk_focuses_if_open():
 
 @pytest.mark.asyncio
 async def test_open_vk_opens_if_not_open():
+    # 3 ответа: find_tab("вк") пусто, find_tab("vk") пусто, open_tab success
     replies = [
+        {"tabs": []},
         {"tabs": []},
         {"success": True, "tabId": 9},
     ]
@@ -297,9 +299,13 @@ async def test_open_vk_opens_if_not_open():
     finally:
         p.stop()
     assert "Открыла" in resp.text
+    # 3 вызова: find_tab("вк"), find_tab("vk"), open_tab("https://vk.com")
     assert fake.sent[0]["action"] == "find_tab"
-    assert fake.sent[1]["action"] == "open_tab"
-    assert fake.sent[1]["url"] == "https://vk.com"
+    assert fake.sent[0]["query"] == "вк"
+    assert fake.sent[1]["action"] == "find_tab"
+    assert fake.sent[1]["query"] == "vk"
+    assert fake.sent[2]["action"] == "open_tab"
+    assert fake.sent[2]["url"] == "https://vk.com"
 
 
 @pytest.mark.asyncio
@@ -383,3 +389,75 @@ def test_send_command_file_not_found():
     with patch("aura.agents.browser_tabs.socket.socket", side_effect=no_file):
         result = agent._send_command({"action": "ping"})
     assert result == {"error": "bridge_not_running"}
+
+
+# --- Фаза 8.3: алиасы кириллица→латиница ---
+
+def test_normalize_query_max():
+    a = AgentBrowserTabs()
+    assert a._normalize_query("макс") == "max"
+    assert a._normalize_query("МАКС") == "max"
+
+
+def test_normalize_query_vk():
+    a = AgentBrowserTabs()
+    assert a._normalize_query("вк") == "vk"
+    assert a._normalize_query("вконтакте") == "vk"
+
+
+def test_normalize_query_deepseek():
+    a = AgentBrowserTabs()
+    assert a._normalize_query("дипсик") == "deepseek"
+
+
+def test_normalize_query_no_alias():
+    a = AgentBrowserTabs()
+    assert a._normalize_query("python") == "python"
+    assert a._normalize_query("что-то") == "что-то"
+
+
+@pytest.mark.asyncio
+async def test_find_tab_via_normalization():
+    """«найди вкладку макс»: сначала find_tab("макс") пусто,
+    потом find_tab("max") находит — это и есть фикс Фазы 8.3."""
+    replies = [
+        {"tabs": []},                                    # find_tab("макс")
+        {"tabs": [{"id": 7, "title": "MAX"}]},          # find_tab("max")
+        {"success": True, "title": "MAX"},              # activate_tab
+    ]
+    agent, fake, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="найди вкладку макс"))
+    finally:
+        p.stop()
+    assert "Переключилась" in resp.text
+    assert "MAX" in resp.text
+    # Проверяем последовательность запросов
+    assert fake.sent[0]["action"] == "find_tab"
+    assert fake.sent[0]["query"] == "макс"
+    assert fake.sent[1]["action"] == "find_tab"
+    assert fake.sent[1]["query"] == "max"
+    assert fake.sent[2]["action"] == "activate_tab"
+    assert fake.sent[2]["tab_id"] == 7
+
+
+@pytest.mark.asyncio
+async def test_find_tab_via_truncation():
+    """T-one глотает окончания: «мак» вместо «макс».
+    После нормализации "мак" — нет алиаса. Но "макс"[:3] = "мак",
+    а "max"[:3] = "max" — должно найтись через truncation."""
+    # Для «макс»: find_tab("макс") пусто, find_tab("max") пусто,
+    # обрезка "мак" пусто, обрезка "max" находит.
+    replies = [
+        {"tabs": []},                                    # find_tab("макс")
+        {"tabs": []},                                    # find_tab("max")
+        {"tabs": []},                                    # find_tab("мак")
+        {"tabs": [{"id": 7, "title": "MAX"}]},          # find_tab("max") — truncation
+        {"success": True, "title": "MAX"},              # activate_tab
+    ]
+    agent, fake, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="найди вкладку макс"))
+    finally:
+        p.stop()
+    assert "Переключилась" in resp.text

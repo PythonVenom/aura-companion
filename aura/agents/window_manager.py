@@ -4,13 +4,15 @@
 Рабочие столы (wmctrl или qdbus для KDE), split screen.
 
 Мигрирован из agents/window_manager.py (монолит, мёртвый по ADR-004).
-Изменения:
-- Контракт BaseAgent: can_handle / handle
-- Автоопределение Wayland (_detect_wayland) и KDE (_detect_kde)
-- Поддержка KDE Plasma 6 через qdbus6 (Фаза 7.3)
-- Парсер словесных числительных («два» → 2) — T-one распознаёт словами
+Фазы:
+- 6: порт как заготовка
+- 7.2: подключён в bootstrap
+- 7.3: KDE Plasma 6 через qdbus6
+- 7.3.1: словесные числительные («два» → 2)
+- 7.3.2: проверка результата (не врать про несуществующий стол)
+         + «новый рабочий стол» → createDesktop
 
-Подключён в Фазе 7.2. См. ADR-004.
+См. ADR-004.
 """
 
 from __future__ import annotations
@@ -57,6 +59,10 @@ class AgentWindowManager(BaseAgent):
         "раб стол",
         "следующий стол",
         "предыдущий стол",
+        "новый стол",
+        "новый рабочий стол",
+        "создай стол",
+        "создай рабочий стол",
         "раздели экран",
         "половина экрана",
     )
@@ -86,29 +92,71 @@ class AgentWindowManager(BaseAgent):
 
         return AgentResponse.not_handled(agent_name=self.name)
 
-    def _kde_call(self, method: str, arg: str | None = None) -> bool:
-        cmd = [self.QDBUS_BIN, "org.kde.KWin", "/KWin", method]
-        if arg is not None:
-            cmd.append(arg)
+    def _kde_call(self, method: str, *args: str) -> str:
+        """Вызвать qdbus6. Вернуть stdout (строку). Пусто — ошибка."""
+        cmd = [self.QDBUS_BIN, "org.kde.KWin", "/KWin", method, *args]
         try:
-            subprocess.run(cmd, capture_output=True, text=True, timeout=3)
-            return True
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=3,
+            )
+            return result.stdout.strip()
+        except Exception:
+            return ""
+
+    def _kde_desktop_count(self) -> int:
+        try:
+            result = subprocess.run(
+                [
+                    self.QDBUS_BIN,
+                    "org.kde.KWin",
+                    "/VirtualDesktopManager",
+                    "org.kde.KWin.VirtualDesktopManager.count",
+                ],
+                capture_output=True, text=True, timeout=3,
+            )
+            return int(result.stdout.strip())
+        except Exception:
+            return 0
+
+    def _kde_create_desktop(self, name: str = "Новый") -> bool:
+        """Создать новый стол в конце. qdbus возвращает void, проверяем по count."""
+        before = self._kde_desktop_count()
+        try:
+            subprocess.run(
+                [
+                    self.QDBUS_BIN, "org.kde.KWin",
+                    "/VirtualDesktopManager",
+                    "org.kde.KWin.VirtualDesktopManager.createDesktop",
+                    str(before), name,
+                ],
+                capture_output=True, text=True, timeout=3,
+            )
         except Exception:
             return False
+        after = self._kde_desktop_count()
+        return after > before
 
     def _parse_number(self, cmd: str) -> int | None:
         """Извлечь номер стола: цифрой или словом."""
-        # Сначала цифры
         nums = re.findall(r"\d+", cmd)
         if nums:
             return int(nums[0])
-        # Потом слова
         for word, num in NUMBERS.items():
             if word in cmd:
                 return num
         return None
 
     def _desktop(self, cmd: str) -> str:
+        # Новый стол
+        if "новый" in cmd or "создай" in cmd:
+            if self.is_kde:
+                if self._kde_create_desktop():
+                    # Переключиться на только что созданный (последний)
+                    self._kde_call("nextDesktop")
+                    return "Создала новый рабочий стол."
+                return "Не удалось создать рабочий стол."
+            return "Создание столов поддерживается только в KDE."
+
         if "следующий" in cmd or "след" in cmd:
             if self.is_kde:
                 self._kde_call("nextDesktop")
@@ -128,10 +176,13 @@ class AgentWindowManager(BaseAgent):
             if target is None:
                 return "Какой номер стола?"
             if self.is_kde:
-                self._kde_call("setCurrentDesktop", str(target))
+                result = self._kde_call("setCurrentDesktop", str(target))
+                if result.lower() != "true":
+                    return f"Стол {target} не существует."
+                return f"Переместила на рабочий стол {target}."
             elif not self.is_wayland:
                 subprocess.run(["wmctrl", "-s", str(target - 1)], check=False)
-            return f"Переместила на рабочий стол {target}."
+                return f"Переместила на рабочий стол {target}."
 
         return "Не поняла команду стола."
 

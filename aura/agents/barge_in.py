@@ -32,8 +32,10 @@ class AgentBargeIn:
     SAMPLE_RATE = 16000
     FRAME_DURATION_MS = 30
     FRAME_SIZE = int(SAMPLE_RATE * FRAME_DURATION_MS / 1000)  # 480
-    VAD_AGGRESSIVENESS = 2
+    VAD_AGGRESSIVENESS = 3            # было 2, ужесточили после AEC
     QUEUE_MAXSIZE = 50
+    GATE_SECONDS = 1.0                # не дёргать callback первые 1с речи Ауры
+    MIN_SPEECH_FRAMES = 3             # нужно 3 фрейма подряд, не одиночный
 
     def __init__(self):
         self.ready = False
@@ -47,6 +49,8 @@ class AgentBargeIn:
         self.on_speech = None
         self._last_speech_ts = 0.0
         self._cooldown = 0.5  # не дёргать callback чаще 0.5 сек
+        self._speaking_started = 0.0  # когда Аура начала говорить
+        self._consecutive_speech = 0  # счётчик фреймов речи подряд
 
         try:
             import webrtcvad
@@ -111,7 +115,14 @@ class AgentBargeIn:
             self.thread = None
 
     def set_aura_speaking(self, value: bool) -> None:
-        """Аура говорит — VAD активен (callback сработает)."""
+        """Аура говорит — VAD активен (callback сработает).
+
+        При включении: запоминаем время старта (для gate) и сбрасываем
+        счётчик подряд идущих фреймов речи.
+        """
+        if value and not self.aura_speaking:
+            self._speaking_started = time.time()
+            self._consecutive_speech = 0
         self.aura_speaking = value
 
     def _loop(self) -> None:
@@ -125,6 +136,11 @@ class AgentBargeIn:
             if not self.aura_speaking:
                 continue
 
+            # Gate: не дёргать callback первые GATE_SECONDS после старта речи.
+            # AEC вычитает эхо с задержкой ~20 мс — на старте эхо ещё в микрофоне.
+            if time.time() - self._speaking_started < self.GATE_SECONDS:
+                continue
+
             if len(frame) != self.FRAME_SIZE * 2:
                 continue
 
@@ -133,13 +149,21 @@ class AgentBargeIn:
             except Exception:
                 continue
 
+            # Счётчик: нужно MIN_SPEECH_FRAMES подряд. Одиночные всплески
+            # (остатки эха, щелчки) не считаются.
             if not is_speech:
+                self._consecutive_speech = 0
+                continue
+
+            self._consecutive_speech += 1
+            if self._consecutive_speech < self.MIN_SPEECH_FRAMES:
                 continue
 
             now = time.time()
             if now - self._last_speech_ts < self._cooldown:
                 continue
             self._last_speech_ts = now
+            self._consecutive_speech = 0  # сбросили после срабатывания
 
             if self.on_speech is not None:
                 try:

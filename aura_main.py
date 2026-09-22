@@ -35,6 +35,7 @@ import time
 # Слух и голос — из старой папки agents/ (проверенные, работают)
 from aura.agents.listener import AgentListener
 from aura.agents.speaker import AgentSpeaker
+from aura.agents.barge_in import AgentBargeIn
 
 # Новая модульная сборка
 from aura.bootstrap import build_orchestrator
@@ -64,6 +65,7 @@ class AuraOrchestrator:
     def __init__(self) -> None:
         self.listener = AgentListener()
         self.speaker = AgentSpeaker()
+        self.barge_in = AgentBargeIn()
         self.orch = build_orchestrator()
         self.running = True
 
@@ -75,6 +77,23 @@ class AuraOrchestrator:
         self.registry = _get_agent(self.orch, "registry")
         self.ducker = _get_agent(self.orch, "music_ducker")
         self.media_pause = _get_agent(self.orch, "media_pause")
+
+    def _set_barge_speaking(self, value: bool) -> None:
+        """Активировать/деактивировать VAD barge-in. Best-effort."""
+        if not self.barge_in:
+            return
+        try:
+            self.barge_in.set_aura_speaking(value)
+        except Exception as e:
+            print(f"⚠️ BargeIn set_speaking: {e}")
+
+    def _on_barge_in(self) -> None:
+        """Callback при перебивании: остановить речь Ауры."""
+        print("🛑 Перебиваю Ауру (barge-in)...")
+        try:
+            self.speaker.stop_speaking()
+        except Exception as e:
+            print(f"⚠️ BargeIn stop: {e}")
 
     def _print_last_session(self) -> None:
         """Показать последнюю сессию журнала при старте."""
@@ -131,9 +150,11 @@ class AuraOrchestrator:
         (после синтеза piper). Иначе resume срабатывает мгновенно.
         """
         self._duck_on()
+        self._set_barge_speaking(True)
         self.speaker.say(text)
         while self.speaker.is_speaking:
             time.sleep(0.05)
+        self._set_barge_speaking(False)
         self._duck_off()
 
     def run(self) -> None:
@@ -153,6 +174,12 @@ class AuraOrchestrator:
         self.speaker.active = True
 
         set_status("idle")
+
+        # === BARGE-IN: отключён (Фаза 10, ADR-009 — AEC default sink
+        # перебивается WirePlumber. Возврат — после фикса AEC) ===
+        # if self.barge_in and self.barge_in.ready:
+        #     if self.barge_in.start(on_speech=self._on_barge_in):
+        #         print("✅ BargeIn запущен (перебивание работает)")
 
         while self.running:
             try:
@@ -191,13 +218,6 @@ class AuraOrchestrator:
                     time.sleep(0.3)
                     continue
 
-                # === BARGE-IN: если Аура говорит, а мы слышим команду — перебиваем ===
-                if self.speaker.aplay_process and self.speaker.aplay_process.poll() is None:
-                    print("🛑 Перебиваю Ауру...")
-                    self.speaker.stop_speaking()
-                    # Даём время аудио-системе вернуться в норму
-                    time.sleep(0.2)
-
                 if self.registry:
                     try:
                         self.registry.log("command", {"command": cmd})
@@ -213,6 +233,7 @@ class AuraOrchestrator:
                 print(f"🤖 {response}")
                 set_status("speaking", response)
                 self._duck_on()
+                self._set_barge_speaking(True)
                 self.speaker.say(response)
 
                 # === RAG-ПАМЯТЬ И ЖУРНАЛ (после ответа) ===
@@ -239,6 +260,7 @@ class AuraOrchestrator:
                 # Ждём окончания речи — по is_speaking, не aplay_process
                 while self.speaker.is_speaking:
                     time.sleep(0.05)
+                self._set_barge_speaking(False)
                 self._duck_off()
 
                 # Пауза между командами
@@ -253,6 +275,8 @@ class AuraOrchestrator:
 
             except KeyboardInterrupt:
                 print("\n🦾 Аура: До свидания! 👋")
+                if self.barge_in:
+                    self.barge_in.stop()
                 clear_status()
                 break
             except Exception as e:

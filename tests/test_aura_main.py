@@ -13,13 +13,15 @@ import pytest
 from aura_main import AuraOrchestrator
 
 
-def _make_orch_with_mocks(media_pause=True):
+def _make_orch_with_mocks(media_pause=True, barge_in=None):
     """AuraOrchestrator без __init__ — только нужные атрибуты."""
     orch = AuraOrchestrator.__new__(AuraOrchestrator)
     orch.speaker = MagicMock()
     # is_speaking=False — цикл ожидания в _say_with_duck сразу выходит
     orch.speaker.is_speaking = False
     orch.media_pause = MagicMock() if media_pause else None
+    # barge_in=None по умолчанию: _set_barge_speaking просто вернётся
+    orch.barge_in = barge_in
     return orch
 
 
@@ -94,3 +96,30 @@ def test_say_with_duck_immediate_exit():
     orch.media_pause.pause.assert_called_once()
     orch.media_pause.resume.assert_called_once()
     orch.speaker.say.assert_called_once_with("привет")
+
+
+# --- barge-in (Фаза 10) ---
+
+def test_set_barge_speaking_True():
+    mock_barge = MagicMock()
+    orch = _make_orch_with_mocks(barge_in=mock_barge)
+    orch._set_barge_speaking(True)
+    mock_barge.set_aura_speaking.assert_called_once_with(True)
+
+
+def test_set_barge_speaking_no_barge():
+    orch = _make_orch_with_mocks()
+    orch.barge_in = None
+    orch._set_barge_speaking(True)  # не падает
+
+
+def test_on_barge_in_stops_speaker():
+    orch = _make_orch_with_mocks()
+    orch._on_barge_in()
+    orch.speaker.stop_speaking.assert_called_once()
+
+
+def test_on_barge_in_swallows_exception():
+    orch = _make_orch_with_mocks()
+    orch.speaker.stop_speaking.side_effect = RuntimeError("boom")
+    orch._on_barge_in()  # не падает

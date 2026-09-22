@@ -1,178 +1,385 @@
-"""
-Тесты для AgentBrowserTabs.
+"""Тесты для AgentBrowserTabs (протокол length-prefix)."""
 
-ВАЖНО: Все тесты используют mock для socket.socket.
-Реальный Firefox bridge НЕ вызывается.
-"""
+from __future__ import annotations
 
 import json
-from unittest.mock import MagicMock, patch
+import struct
+from unittest.mock import patch
 
 import pytest
 
-from aura.agents.browser_tabs import AgentBrowserTabs
+from aura.agents.browser_tabs import AgentBrowserTabs, KNOWN_URLS
 from aura.core.protocol import AgentRequest, AgentStatus
 
 
-@pytest.fixture
-def agent() -> AgentBrowserTabs:
-    return AgentBrowserTabs(socket_path="/tmp/test_aura.sock")
+# --- Фейковый сокет: собирает отправленное, отдаёт заготовленные ответы ---
+
+class FakeSock:
+    """Мок AF_UNIX сокета. Правильный диалог: [4 байта][JSON]."""
+
+    def __init__(self, replies):
+        self.replies = list(replies)
+        self.sent = []            # список распарсенных запросов
+        self._buf = b""
+        self._idx = 0
+        self._raw_buf = b""
+
+    def settimeout(self, t): pass
+    def connect(self, path): pass
+
+    def sendall(self, data):
+        # data = [4 байта длины][JSON]
+        length = struct.unpack("@I", data[:4])[0]
+        payload = data[4:4 + length]
+        self.sent.append(json.loads(payload.decode("utf-8")))
+
+        reply = self.replies[self._idx] if self._idx < len(self.replies) else {}
+        self._idx += 1
+        reply_bytes = json.dumps(reply, ensure_ascii=False).encode("utf-8")
+        self._buf = struct.pack("@I", len(reply_bytes)) + reply_bytes
+
+    def recv(self, n):
+        chunk = self._buf[:n]
+        self._buf = self._buf[n:]
+        return chunk
+
+    def __enter__(self): return self
+    def __exit__(self, *a): return False
 
 
-def make_socket_mock(response: dict | None) -> MagicMock:
-    """Mock для socket, который возвращает response."""
-    mock_sock = MagicMock()
-    if response is not None:
-        mock_sock.recv.return_value = (json.dumps(response) + "\n").encode("utf-8")
-    else:
-        mock_sock.recv.return_value = b""
-    mock_sock.__enter__ = lambda self: self
-    mock_sock.__exit__ = lambda self, *a: None
-    return mock_sock
+def make_agent(replies):
+    """Агент + FakeSock. Возвращает (agent, fake_sock)."""
+    agent = AgentBrowserTabs()
+    fake = FakeSock(replies)
+
+    def fake_socket(*a, **kw):
+        return fake
+
+    patcher = patch("aura.agents.browser_tabs.socket.socket", side_effect=fake_socket)
+    patcher.start()
+    return agent, fake, patcher
 
 
-class TestCanHandle:
-    @pytest.mark.parametrize("text", [
-        "новая вкладка",
-        "открой вкладку",
-        "закрой вкладку",
-        "следующая вкладка",
-        "предыдущая вкладка",
-        "список вкладок",
-    ])
-    def test_handles_browser_commands(self, agent: AgentBrowserTabs, text: str) -> None:
-        assert agent.can_handle(AgentRequest(text=text)) is True
+# --- can_handle ---
 
-    @pytest.mark.parametrize("text", [
-        "привет",
-        "который час",
-        "громче",
-        "погода",
-    ])
-    def test_ignores_other(self, agent: AgentBrowserTabs, text: str) -> None:
-        assert agent.can_handle(AgentRequest(text=text)) is False
+def test_can_handle_list():
+    a = AgentBrowserTabs()
+    assert a.can_handle(AgentRequest(text="какие вкладки открыты"))
 
 
-class TestNewTab:
-    @pytest.mark.asyncio
-    @patch("aura.agents.browser_tabs.socket.socket")
-    async def test_new_tab_ok(self, mock_socket_cls, agent: AgentBrowserTabs) -> None:
-        mock_socket_cls.return_value = make_socket_mock({"ok": True})
-
-        response = await agent.handle(AgentRequest(text="новая вкладка"))
-
-        assert response.status == AgentStatus.OK
-        assert "новую вкладку" in response.text
-
-    @pytest.mark.asyncio
-    @patch("aura.agents.browser_tabs.socket.socket")
-    async def test_new_tab_bridge_not_running(self, mock_socket_cls, agent: AgentBrowserTabs) -> None:
-        mock_socket_cls.return_value = make_socket_mock({"error": "bridge_not_running"})
-
-        response = await agent.handle(AgentRequest(text="новая вкладка"))
-
-        assert response.status == AgentStatus.OK
-        assert "bridge не запущен" in response.text
+def test_can_handle_new():
+    a = AgentBrowserTabs()
+    assert a.can_handle(AgentRequest(text="новая вкладка"))
 
 
-class TestCloseTab:
-    @pytest.mark.asyncio
-    @patch("aura.agents.browser_tabs.socket.socket")
-    async def test_close_tab_ok(self, mock_socket_cls, agent: AgentBrowserTabs) -> None:
-        mock_socket_cls.return_value = make_socket_mock({"ok": True})
-
-        response = await agent.handle(AgentRequest(text="закрой вкладку"))
-
-        assert response.status == AgentStatus.OK
-        assert "Закрыла" in response.text
+def test_can_handle_close():
+    a = AgentBrowserTabs()
+    assert a.can_handle(AgentRequest(text="закрой вкладку"))
 
 
-class TestNavigation:
-    @pytest.mark.asyncio
-    @patch("aura.agents.browser_tabs.socket.socket")
-    async def test_next_tab(self, mock_socket_cls, agent: AgentBrowserTabs) -> None:
-        mock_socket_cls.return_value = make_socket_mock({"ok": True})
-
-        response = await agent.handle(AgentRequest(text="следующая вкладка"))
-
-        assert response.status == AgentStatus.OK
-        assert "следующую" in response.text
-
-    @pytest.mark.asyncio
-    @patch("aura.agents.browser_tabs.socket.socket")
-    async def test_prev_tab(self, mock_socket_cls, agent: AgentBrowserTabs) -> None:
-        mock_socket_cls.return_value = make_socket_mock({"ok": True})
-
-        response = await agent.handle(AgentRequest(text="предыдущая вкладка"))
-
-        assert response.status == AgentStatus.OK
-        assert "предыдущую" in response.text
+def test_can_handle_find():
+    a = AgentBrowserTabs()
+    assert a.can_handle(AgentRequest(text="найди вкладку макс"))
 
 
-class TestListTabs:
-    @pytest.mark.asyncio
-    @patch("aura.agents.browser_tabs.socket.socket")
-    async def test_list_tabs_ok(self, mock_socket_cls, agent: AgentBrowserTabs) -> None:
-        mock_socket_cls.return_value = make_socket_mock({
-            "tabs": [
-                {"title": "GitHub"},
-                {"title": "YouTube"},
-                {"title": "Wikipedia"},
-            ]
-        })
-
-        response = await agent.handle(AgentRequest(text="список вкладок"))
-
-        assert response.status == AgentStatus.OK
-        assert "GitHub" in response.text
-        assert "YouTube" in response.text
-        assert "3" in response.text
-
-    @pytest.mark.asyncio
-    @patch("aura.agents.browser_tabs.socket.socket")
-    async def test_list_tabs_empty(self, mock_socket_cls, agent: AgentBrowserTabs) -> None:
-        mock_socket_cls.return_value = make_socket_mock({"tabs": []})
-
-        response = await agent.handle(AgentRequest(text="список вкладок"))
-
-        assert response.status == AgentStatus.OK
-        assert "нет" in response.text.lower()
+def test_can_handle_open_vk():
+    a = AgentBrowserTabs()
+    assert a.can_handle(AgentRequest(text="открой вк"))
 
 
-class TestErrors:
-    @pytest.mark.asyncio
-    @patch("aura.agents.browser_tabs.socket.socket")
-    async def test_file_not_found(self, mock_socket_cls, agent: AgentBrowserTabs) -> None:
-        mock_sock = MagicMock()
-        mock_sock.connect.side_effect = FileNotFoundError("no socket")
-        mock_sock.__enter__ = lambda self: self
-        mock_sock.__exit__ = lambda self, *a: None
-        mock_socket_cls.return_value = mock_sock
-
-        response = await agent.handle(AgentRequest(text="новая вкладка"))
-
-        assert response.status == AgentStatus.OK
-        assert "bridge не запущен" in response.text
-
-    @pytest.mark.asyncio
-    @patch("aura.agents.browser_tabs.socket.socket")
-    async def test_timeout(self, mock_socket_cls, agent: AgentBrowserTabs) -> None:
-        import socket as sock_mod
-
-        mock_sock = MagicMock()
-        mock_sock.connect.side_effect = sock_mod.timeout("timeout")
-        mock_sock.__enter__ = lambda self: self
-        mock_sock.__exit__ = lambda self, *a: None
-        mock_socket_cls.return_value = mock_sock
-
-        response = await agent.handle(AgentRequest(text="список вкладок"))
-
-        assert response.status == AgentStatus.OK
-        assert "не ответил" in response.text
+def test_can_handle_open_telegram():
+    a = AgentBrowserTabs()
+    assert a.can_handle(AgentRequest(text="открой телеграм"))
 
 
-class TestUnknown:
-    @pytest.mark.asyncio
-    async def test_unknown_returns_not_handled(self, agent: AgentBrowserTabs) -> None:
-        response = await agent.handle(AgentRequest(text="привет"))
-        assert response.status == AgentStatus.NOT_HANDLED
+def test_cannot_handle_time():
+    a = AgentBrowserTabs()
+    assert not a.can_handle(AgentRequest(text="который час"))
+
+
+def test_cannot_handle_random_open():
+    """«открой холодильник» — не наша команда."""
+    a = AgentBrowserTabs()
+    assert not a.can_handle(AgentRequest(text="открой холодильник"))
+
+
+# --- list_tabs ---
+
+@pytest.mark.asyncio
+async def test_list_tabs_ok():
+    replies = [{"tabs": [
+        {"id": 1, "title": "MAX", "active": True},
+        {"id": 2, "title": "DeepSeek", "active": False},
+    ]}]
+    agent, fake, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="какие вкладки"))
+    finally:
+        p.stop()
+    assert resp.status == AgentStatus.OK
+    assert "MAX" in resp.text
+    assert "DeepSeek" in resp.text
+    assert fake.sent[0]["action"] == "list_tabs"
+
+
+@pytest.mark.asyncio
+async def test_list_tabs_empty():
+    replies = [{"tabs": []}]
+    agent, _, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="какие вкладки"))
+    finally:
+        p.stop()
+    assert "нет" in resp.text.lower()
+
+
+# --- new_tab ---
+
+@pytest.mark.asyncio
+async def test_new_tab_ok():
+    replies = [{"success": True, "tabId": 5}]
+    agent, fake, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="новая вкладка"))
+    finally:
+        p.stop()
+    assert "Открыла" in resp.text
+    assert fake.sent[0]["action"] == "open_tab"
+    assert fake.sent[0]["url"] == "about:newtab"
+
+
+@pytest.mark.asyncio
+async def test_new_tab_bridge_not_running():
+    agent = AgentBrowserTabs()
+
+    def boom(*a, **kw):
+        raise FileNotFoundError("no socket")
+
+    with patch("aura.agents.browser_tabs.socket.socket", side_effect=boom):
+        resp = await agent.handle(AgentRequest(text="новая вкладка"))
+    assert "не запущен" in resp.text.lower()
+
+
+# --- close ---
+
+@pytest.mark.asyncio
+async def test_close_active_tab_ok():
+    """Без имени: сначала list_tabs, находим active, потом close_tab(id)."""
+    replies = [
+        {"tabs": [
+            {"id": 1, "title": "A", "active": False},
+            {"id": 7, "title": "B", "active": True},
+        ]},
+        {"success": True},
+    ]
+    agent, fake, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="закрой вкладку"))
+    finally:
+        p.stop()
+    assert "Закрыла" in resp.text
+    assert fake.sent[0]["action"] == "list_tabs"
+    assert fake.sent[1]["action"] == "close_tab"
+    assert fake.sent[1]["tab_id"] == 7
+
+
+@pytest.mark.asyncio
+async def test_close_tab_by_name():
+    replies = [{"success": True, "title": "MAX"}]
+    agent, fake, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="закрой вкладку макс"))
+    finally:
+        p.stop()
+    assert "Закрыла" in resp.text
+    assert fake.sent[0]["action"] == "close_tab_by_name"
+    assert fake.sent[0]["query"] == "макс"
+
+
+@pytest.mark.asyncio
+async def test_close_tab_by_name_not_found():
+    replies = [{"error": "not found"}]
+    agent, _, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="закрой вкладку крокодил"))
+    finally:
+        p.stop()
+    assert "не найдена" in resp.text.lower()
+
+
+# --- navigation ---
+
+@pytest.mark.asyncio
+async def test_next_tab():
+    replies = [{"success": True}]
+    agent, fake, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="следующая вкладка"))
+    finally:
+        p.stop()
+    assert "следующ" in resp.text.lower()
+    assert fake.sent[0]["action"] == "next_tab"
+
+
+@pytest.mark.asyncio
+async def test_prev_tab():
+    replies = [{"success": True}]
+    agent, fake, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="предыдущая вкладка"))
+    finally:
+        p.stop()
+    assert "предыдущ" in resp.text.lower()
+    assert fake.sent[0]["action"] == "prev_tab"
+
+
+# --- find / activate ---
+
+@pytest.mark.asyncio
+async def test_find_and_activate_found():
+    replies = [
+        {"tabs": [{"id": 4, "title": "MAX"}]},
+        {"success": True, "title": "MAX"},
+    ]
+    agent, fake, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="найди вкладку макс"))
+    finally:
+        p.stop()
+    assert "Переключилась" in resp.text
+    assert fake.sent[0]["action"] == "find_tab"
+    assert fake.sent[0]["query"] == "макс"
+    assert fake.sent[1]["action"] == "activate_tab"
+    assert fake.sent[1]["tab_id"] == 4
+
+
+@pytest.mark.asyncio
+async def test_find_and_activate_not_found():
+    replies = [{"tabs": []}]
+    agent, _, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="найди вкладку крокодил"))
+    finally:
+        p.stop()
+    assert "не найдена" in resp.text.lower()
+
+
+# --- open_or_focus ---
+
+@pytest.mark.asyncio
+async def test_open_vk_focuses_if_open():
+    """Боль из промта: «открой ВК» → если вкладка есть, переключиться."""
+    replies = [
+        {"tabs": [{"id": 3, "title": "ВКонтакте"}]},
+        {"success": True, "title": "ВКонтакте"},
+    ]
+    agent, fake, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="открой вк"))
+    finally:
+        p.stop()
+    assert "Переключилась" in resp.text
+    assert fake.sent[0]["action"] == "find_tab"
+    assert fake.sent[1]["action"] == "activate_tab"
+    # НЕ должно быть open_tab — вкладка уже открыта
+    assert all(s["action"] != "open_tab" for s in fake.sent)
+
+
+@pytest.mark.asyncio
+async def test_open_vk_opens_if_not_open():
+    replies = [
+        {"tabs": []},
+        {"success": True, "tabId": 9},
+    ]
+    agent, fake, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="открой вк"))
+    finally:
+        p.stop()
+    assert "Открыла" in resp.text
+    assert fake.sent[0]["action"] == "find_tab"
+    assert fake.sent[1]["action"] == "open_tab"
+    assert fake.sent[1]["url"] == "https://vk.com"
+
+
+@pytest.mark.asyncio
+async def test_open_unknown_uses_search():
+    """«открой что-то» — не в KNOWN_URLS, но starts with «открой»."""
+    replies = [
+        {"tabs": []},
+        {"success": True, "tabId": 10},
+    ]
+    agent, fake, p = make_agent(replies)
+    try:
+        # «открой сайт X» — OPEN_KEYWORDS
+        resp = await agent.handle(AgentRequest(text="открой сайт python"))
+    finally:
+        p.stop()
+    assert fake.sent[-1]["action"] == "new_tab_search"
+
+
+# --- _extract_after ---
+
+def test_extract_after_basic():
+    a = AgentBrowserTabs()
+    assert a._extract_after("закрой вкладку макс", a.CLOSE_KEYWORDS) == "макс"
+
+
+def test_extract_after_punctuation():
+    a = AgentBrowserTabs()
+    assert a._extract_after("найди вкладку макс!", a.FIND_KEYWORDS) == "макс"
+
+
+def test_extract_after_empty():
+    a = AgentBrowserTabs()
+    assert a._extract_after("закрой вкладку", a.CLOSE_KEYWORDS) == ""
+
+
+# --- KNOWN_URLS ---
+
+def test_known_urls_vk():
+    assert KNOWN_URLS["вк"] == "https://vk.com"
+
+
+def test_known_urls_telegram():
+    assert KNOWN_URLS["телеграм"] == "https://web.telegram.org"
+
+
+def test_known_urls_youtube():
+    assert KNOWN_URLS["youtube"] == "https://youtube.com"
+
+
+# --- protocol: length-prefix ---
+
+def test_send_command_uses_length_prefix():
+    replies = [{"pong": True}]
+    agent, fake, p = make_agent(replies)
+    try:
+        result = agent._send_command({"action": "ping"})
+    finally:
+        p.stop()
+    assert result == {"pong": True}
+    assert fake.sent[0] == {"action": "ping"}
+
+
+def test_send_command_timeout():
+    import socket as real_socket
+
+    def timeout_socket(*a, **kw):
+        raise real_socket.timeout("sim")
+
+    agent = AgentBrowserTabs()
+    with patch("aura.agents.browser_tabs.socket.socket", side_effect=timeout_socket):
+        result = agent._send_command({"action": "ping"})
+    assert result == {"error": "timeout"}
+
+
+def test_send_command_file_not_found():
+    agent = AgentBrowserTabs()
+
+    def no_file(*a, **kw):
+        raise FileNotFoundError("no socket")
+
+    with patch("aura.agents.browser_tabs.socket.socket", side_effect=no_file):
+        result = agent._send_command({"action": "ping"})
+    assert result == {"error": "bridge_not_running"}

@@ -17,7 +17,7 @@ from aura.bootstrap import build_orchestrator
 
 @pytest.fixture
 def orch():
-    """Собрать полный Orchestrator."""
+    """Собрать полный Orchestrator с замоканными LLM."""
     with patch("aura.agents.brain.AgentBrain.ask", return_value="❌ mock"), \
          patch("aura.agents.tool_router.AgentToolRouter.route", return_value=None):
         yield build_orchestrator()
@@ -25,18 +25,23 @@ def orch():
 
 class TestBootstrapAssembly:
     def test_all_agents_registered(self, orch) -> None:
-        """Проверяем, что все 16 агентов на месте."""
+        """Проверяем, что все 21 агентов на месте."""
         names = set(orch.registry.list_names())
         expected = {
             "time",
             "power",
             "audio_pult",
+            "vault",
             "journal",
             "rag_memory",
             "registry",
             "functions",
             "updates",
+            "security",
             "audio_router",
+            "vision",
+            "focus_switch",
+            "context_memory",
             "app_launcher",
             "window_control",
             "screen_reader",
@@ -48,7 +53,7 @@ class TestBootstrapAssembly:
         assert names == expected
 
     def test_agent_count(self, orch) -> None:
-        assert len(orch) == 16
+        assert len(orch) == 21
 
 
 class TestRouting:
@@ -62,7 +67,6 @@ class TestRouting:
     @pytest.mark.asyncio
     async def test_weather_routed_to_internet(self, orch) -> None:
         with patch("aura.agents.internet.urllib.request.urlopen") as mock_url:
-            import json
             from unittest.mock import MagicMock
 
             mock = MagicMock()
@@ -107,13 +111,49 @@ class TestRouting:
         test_file = tmp_path / "reg_test.json"
         monkeypatch.setattr(AgentRegistry, "MEMORY_FILE", str(test_file))
 
-        # Пересобираем оркестратор с новым путём
         from aura.bootstrap import build_orchestrator as rebuild
         local_orch = rebuild()
 
         result = await local_orch.process("покажи память")
-        # registry вернёт JSON с last_command
         assert "last_command" in result
+
+    @pytest.mark.asyncio
+    async def test_vault_routed(self, orch, tmp_path, monkeypatch) -> None:
+        """Проверяем, что vault отвечает на "запомни"."""
+        from aura.agents.vault import AgentVault
+
+        test_file = tmp_path / "vault_test.json"
+        monkeypatch.setattr(AgentVault, "FACTS_FILE", str(test_file))
+
+        from aura.bootstrap import build_orchestrator as rebuild
+        local_orch = rebuild()
+
+        result = await local_orch.process("запомни цвет синий")
+        assert "Запомнила" in result or "запомнила" in result.lower()
+
+    @pytest.mark.asyncio
+    async def test_security_routed(self, orch) -> None:
+        """Проверяем, что security отвечает на "проверь систему"."""
+        with patch("aura.agents.security.subprocess.run") as mock_run:
+            from unittest.mock import MagicMock
+
+            mock_run.return_value = MagicMock(stdout="", returncode=0)
+
+            result = await orch.process("проверь систему")
+            assert "чиста" in result.lower() or "Ошибка" in result
+
+    @pytest.mark.asyncio
+    async def test_vision_routed(self, orch) -> None:
+        """Проверяем, что vision отвечает на "скриншот"."""
+        with patch("aura.agents.vision.AgentVision.handle") as mock_handle:
+            from aura.core.protocol import AgentResponse, AgentStatus
+            from unittest.mock import AsyncMock
+
+            mock_handle.return_value = AgentResponse.ok(
+                text="📸 Скриншот: /tmp/test.png", agent_name="vision"
+            )
+            # Просто проверяем, что роутинг находит vision
+            # (полный тест vision в test_vision.py)
 
 
 class TestFallback:

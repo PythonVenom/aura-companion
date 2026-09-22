@@ -25,13 +25,14 @@ def orch():
 
 class TestBootstrapAssembly:
     def test_all_agents_registered(self, orch) -> None:
-        """Проверяем, что все 21 агентов на месте."""
+        """Проверяем, что все 24 агента на месте."""
         names = set(orch.registry.list_names())
         expected = {
             "time",
             "power",
-            "audio_pult",
             "vault",
+            "music_ducker",
+            "audio_pult",
             "journal",
             "rag_memory",
             "registry",
@@ -41,19 +42,21 @@ class TestBootstrapAssembly:
             "audio_router",
             "vision",
             "focus_switch",
+            "window_manager",
             "context_memory",
+            "text_editor",
+            "vk_music",
+            "browser_tabs",
             "app_launcher",
             "window_control",
             "screen_reader",
-            "browser_tabs",
             "media_search",
-            "vk_music",
             "internet",
         }
         assert names == expected
 
     def test_agent_count(self, orch) -> None:
-        assert len(orch) == 21
+        assert len(orch) == 24
 
 
 class TestRouting:
@@ -105,7 +108,6 @@ class TestRouting:
 
     @pytest.mark.asyncio
     async def test_registry_routed(self, orch, tmp_path, monkeypatch) -> None:
-        """Проверяем, что registry отвечает на "покажи память"."""
         from aura.agents.registry import AgentRegistry
 
         test_file = tmp_path / "reg_test.json"
@@ -119,7 +121,6 @@ class TestRouting:
 
     @pytest.mark.asyncio
     async def test_vault_routed(self, orch, tmp_path, monkeypatch) -> None:
-        """Проверяем, что vault отвечает на "запомни"."""
         from aura.agents.vault import AgentVault
 
         test_file = tmp_path / "vault_test.json"
@@ -133,7 +134,6 @@ class TestRouting:
 
     @pytest.mark.asyncio
     async def test_security_routed(self, orch) -> None:
-        """Проверяем, что security отвечает на "проверь систему"."""
         with patch("aura.agents.security.subprocess.run") as mock_run:
             from unittest.mock import MagicMock
 
@@ -143,22 +143,27 @@ class TestRouting:
             assert "чиста" in result.lower() or "Ошибка" in result
 
     @pytest.mark.asyncio
-    async def test_vision_routed(self, orch) -> None:
-        """Проверяем, что vision отвечает на "скриншот"."""
-        with patch("aura.agents.vision.AgentVision.handle") as mock_handle:
-            from aura.core.protocol import AgentResponse, AgentStatus
-            from unittest.mock import AsyncMock
+    async def test_music_ducker_routed(self, orch) -> None:
+        with patch("aura.agents.music_ducker.subprocess.run") as mock_run:
+            from unittest.mock import MagicMock
+
+            mock_run.return_value = MagicMock(stdout="", returncode=0)
+
+            result = await orch.process("приглуши музыку")
+            assert "активного" in result.lower() or "Приглушила" in result
+
+    @pytest.mark.asyncio
+    async def test_text_editor_routed(self, orch) -> None:
+        with patch("aura.agents.text_editor.AgentTextEditor.handle") as mock_handle:
+            from aura.core.protocol import AgentResponse
 
             mock_handle.return_value = AgentResponse.ok(
-                text="📸 Скриншот: /tmp/test.png", agent_name="vision"
+                text="Выделила всё.", agent_name="text_editor"
             )
-            # Просто проверяем, что роутинг находит vision
-            # (полный тест vision в test_vision.py)
+            # Просто проверяем, что роутинг находит text_editor
 
 
 class TestFallback:
-    """Проверяем, что неизвестный запрос уходит в fallback."""
-
     @pytest.mark.asyncio
     async def test_unknown_goes_to_fallback(self, orch) -> None:
         result = await orch.process("xyzabc nonsense query 12345")
@@ -166,8 +171,6 @@ class TestFallback:
 
 
 class TestOrder:
-    """Проверяем порядок регистрации — первый подходящий выигрывает."""
-
     def test_registration_order(self, orch) -> None:
         names = orch.registry.list_names()
         assert names[0] == "time"

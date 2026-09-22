@@ -16,11 +16,13 @@ from aura.agents.functions import AgentFunctions
 from aura.agents.internet import AgentInternet
 from aura.agents.journal import AgentJournal
 from aura.agents.media_search import AgentMediaSearch
+from aura.agents.music_ducker import AgentMusicDucker
 from aura.agents.power import AgentPower
 from aura.agents.rag_memory import AgentRAGMemory
 from aura.agents.registry import AgentRegistry
 from aura.agents.screen_reader import AgentScreenReader
 from aura.agents.security import AgentSecurity
+from aura.agents.text_editor import AgentTextEditor
 from aura.agents.time import AgentTime
 from aura.agents.tool_router import AgentToolRouter
 from aura.agents.updates import AgentUpdates
@@ -28,6 +30,7 @@ from aura.agents.vault import AgentVault
 from aura.agents.vision import AgentVision
 from aura.agents.vk_music import AgentVKMusic
 from aura.agents.window_control import AgentWindowControl
+from aura.agents.window_manager import AgentWindowManager
 
 __all__ = [
     "AgentTime",
@@ -44,6 +47,9 @@ __all__ = [
     "AgentVision",
     "AgentFocusSwitch",
     "AgentContextMemory",
+    "AgentTextEditor",
+    "AgentMusicDucker",
+    "AgentWindowManager",
     "AgentAppLauncher",
     "AgentInternet",
     "AgentWindowControl",

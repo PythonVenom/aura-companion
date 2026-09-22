@@ -25,11 +25,13 @@ from aura.agents import (
     AgentInternet,
     AgentJournal,
     AgentMediaSearch,
+    AgentMusicDucker,
     AgentPower,
     AgentRAGMemory,
     AgentRegistry,
     AgentScreenReader,
     AgentSecurity,
+    AgentTextEditor,
     AgentTime,
     AgentToolRouter,
     AgentUpdates,
@@ -37,6 +39,7 @@ from aura.agents import (
     AgentVision,
     AgentVKMusic,
     AgentWindowControl,
+    AgentWindowManager,
 )
 from aura.core.orchestrator import Orchestrator
 
@@ -46,14 +49,16 @@ def build_orchestrator() -> Orchestrator:
     Собрать Orchestrator со всеми агентами.
 
     Порядок регистрации (важен!):
-    1. Простые и точные (time, power, audio_pult, vault)
-    2. Дневник, память, реестр, функции, обновления, security
-    3. Аудио-маршрутизация
-    4. X11 специфичные (vision, focus_switch, context_memory)
-    5. Специфичные "открой X" (vk_music, browser_tabs)
-    6. Опасные, но широкие ключи (app_launcher, window_control, screen_reader)
-    7. Медиа (media_search — перехватывает "включи")
-    8. Internet — последним (общий "найди")
+    1. Простые и точные (time, power, vault)
+    2. Узкий ducking (music_ducker — до audio_pult, чтобы не перехватить «громче»)
+    3. audio_pult — широкие «громче/тише»
+    4. Дневник, память, реестр, функции, обновления, security
+    5. Аудио-маршрутизация
+    6. X11 (vision, focus_switch, window_manager, context_memory, text_editor)
+    7. Специфичные «открой X» (vk_music, browser_tabs)
+    8. Опасные, но широкие ключи (app_launcher, window_control, screen_reader)
+    9. Медиа (media_search — перехватывает «включи»)
+    10. Internet — последним (общий «найди»)
 
     Returns:
         Orchestrator с зарегистрированными агентами.
@@ -65,10 +70,15 @@ def build_orchestrator() -> Orchestrator:
     # --- Уровень 1: простые и точные ---
     orch.register(AgentTime())
     orch.register(AgentPower())
-    orch.register(AgentAudioPult())
     orch.register(AgentVault())
 
-    # --- Уровень 2: дневник, память, реестр, функции, обновления, security ---
+    # --- Уровень 2: узкий ducking — ДО audio_pult ---
+    orch.register(AgentMusicDucker())
+
+    # --- Уровень 3: audio_pult — широкие ключи ---
+    orch.register(AgentAudioPult())
+
+    # --- Уровень 4: дневник, память, реестр, функции, обновления, security ---
     orch.register(AgentJournal())
     orch.register(AgentRAGMemory())
     orch.register(AgentRegistry())
@@ -76,27 +86,29 @@ def build_orchestrator() -> Orchestrator:
     orch.register(AgentUpdates())
     orch.register(AgentSecurity())
 
-    # --- Уровень 3: аудио-маршрутизация ---
+    # --- Уровень 5: аудио-маршрутизация ---
     orch.register(AgentAudioRouter())
 
-    # --- Уровень 4: X11 специфичные ---
+    # --- Уровень 6: X11 специфичные ---
     orch.register(AgentVision())
     orch.register(AgentFocusSwitch())
+    orch.register(AgentWindowManager())
     orch.register(AgentContextMemory())
+    orch.register(AgentTextEditor())
 
-    # --- Уровень 5: специфичные "открой X" — раньше AppLauncher ---
+    # --- Уровень 7: специфичные "открой X" — раньше AppLauncher ---
     orch.register(AgentVKMusic())
     orch.register(AgentBrowserTabs())
 
-    # --- Уровень 6: опасные, но широкие ключи ---
+    # --- Уровень 8: опасные, но широкие ключи ---
     orch.register(AgentAppLauncher())
     orch.register(AgentWindowControl())
     orch.register(AgentScreenReader())
 
-    # --- Уровень 7: медиа (перехватывает "включи") ---
+    # --- Уровень 9: медиа (перехватывает "включи") ---
     orch.register(AgentMediaSearch())
 
-    # --- Уровень 8: Internet — последним (общий "найди") ---
+    # --- Уровень 10: Internet — последним (общий "найди") ---
     orch.register(AgentInternet())
 
     return orch

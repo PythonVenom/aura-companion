@@ -182,6 +182,29 @@ async def test_handle_new_desktop_kde(wm_kde):
 # --- fallback ---
 
 @pytest.mark.asyncio
+async def test_handle_desktop_word_without_number_kde(wm_kde):
+    """«первый рабочий стол» → 1 (без слова «номер»)."""
+    mock_result = MagicMock()
+    mock_result.stdout = "true\n"
+    with patch("aura.agents.window_manager.subprocess.run", return_value=mock_result) as mock_run:
+        resp = await wm_kde.handle(AgentRequest(text="первый рабочий стол"))
+    assert "1" in resp.text
+    assert mock_run.call_args_list[-1][0][0] == [
+        "qdbus6", "org.kde.KWin", "/KWin", "setCurrentDesktop", "1"
+    ]
+
+
+@pytest.mark.asyncio
+async def test_handle_desktop_word_dva_kde(wm_kde):
+    """«рабочий стол два» → 2 (без «номер»)."""
+    mock_result = MagicMock()
+    mock_result.stdout = "true\n"
+    with patch("aura.agents.window_manager.subprocess.run", return_value=mock_result):
+        resp = await wm_kde.handle(AgentRequest(text="рабочий стол два"))
+    assert "2" in resp.text
+
+
+@pytest.mark.asyncio
 async def test_handle_desktop_no_number(wm_kde):
     resp = await wm_kde.handle(AgentRequest(text="рабочий стол номер"))
     assert "Какой номер" in resp.text or "номер" in resp.text.lower()

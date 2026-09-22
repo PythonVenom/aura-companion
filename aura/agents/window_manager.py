@@ -171,8 +171,10 @@ class AgentWindowManager(BaseAgent):
                 subprocess.run(["wmctrl", "-s", "-1"], check=False)
             return "Переместила на предыдущий рабочий стол."
 
-        if "номер" in cmd or "по счету" in cmd:
-            target = self._parse_number(cmd)
+        # «номер 2», «по счету 2», «второй», «стол два», «стол 2»
+        target_maybe = self._parse_number(cmd)
+        if "номер" in cmd or "по счету" in cmd or target_maybe is not None:
+            target = target_maybe
             if target is None:
                 return "Какой номер стола?"
             if self.is_kde:

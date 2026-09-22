@@ -128,6 +128,38 @@ def test_focus_window_not_found(wm):
     assert "не найдено" in result.lower()
 
 
+@pytest.mark.asyncio
+async def test_handle_desktop_number_word_kde(wm_kde):
+    """Слово «два» → число 2 (T-one распознаёт словами)."""
+    with patch("aura.agents.window_manager.subprocess.run") as mock_run:
+        resp = await wm_kde.handle(AgentRequest(text="рабочий стол номер два"))
+    assert "2" in resp.text
+    assert mock_run.call_args[0][0] == ["qdbus6", "org.kde.KWin", "/KWin", "setCurrentDesktop", "2"]
+
+
+@pytest.mark.asyncio
+async def test_handle_desktop_number_word_three(wm_kde):
+    with patch("aura.agents.window_manager.subprocess.run") as mock_run:
+        resp = await wm_kde.handle(AgentRequest(text="рабочий стол номер три"))
+    assert "3" in resp.text
+
+
+def test_parse_number_digit(wm):
+    assert wm._parse_number("стол 2") == 2
+
+
+def test_parse_number_word(wm):
+    assert wm._parse_number("стол два") == 2
+
+
+def test_parse_number_ordinal(wm):
+    assert wm._parse_number("второй стол") == 2
+
+
+def test_parse_number_none(wm):
+    assert wm._parse_number("стол какой-то") is None
+
+
 def test_kde_flag(wm, wm_kde):
     assert wm.is_kde is False
     assert wm_kde.is_kde is True

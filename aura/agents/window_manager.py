@@ -7,11 +7,10 @@
 Изменения:
 - Контракт BaseAgent: can_handle / handle
 - Автоопределение Wayland (_detect_wayland) и KDE (_detect_kde)
-- Поддержка KDE Plasma 6 через qdbus6 (nextDesktop/previousDesktop/setCurrentDesktop)
-- Логика _focus_window / _split_screen сохранена
+- Поддержка KDE Plasma 6 через qdbus6 (Фаза 7.3)
+- Парсер словесных числительных («два» → 2) — T-one распознаёт словами
 
-Портирован как заготовка (Фаза 6). Подключён в Фазе 7.2.
-См. ADR-004.
+Подключён в Фазе 7.2. См. ADR-004.
 """
 
 from __future__ import annotations
@@ -31,6 +30,21 @@ def _detect_wayland() -> bool:
 def _detect_kde() -> bool:
     desktop = os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
     return "kde" in desktop or "plasma" in desktop
+
+
+# Числительные словами: T-one часто распознаёт "два", "три" вместо цифр
+NUMBERS = {
+    "один": 1, "одна": 1, "первый": 1, "первом": 1, "первого": 1,
+    "два": 2, "две": 2, "второй": 2, "втором": 2, "второго": 2,
+    "три": 3, "третий": 3, "третьем": 3, "третьего": 3,
+    "четыре": 4, "четвертый": 4, "четвёртый": 4, "четвертом": 4,
+    "пять": 5, "пятый": 5, "пятом": 5,
+    "шесть": 6, "шестой": 6,
+    "семь": 7, "седьмой": 7,
+    "восемь": 8, "восьмой": 8,
+    "девять": 9, "девятый": 9,
+    "десять": 10, "десятый": 10,
+}
 
 
 class AgentWindowManager(BaseAgent):
@@ -82,6 +96,18 @@ class AgentWindowManager(BaseAgent):
         except Exception:
             return False
 
+    def _parse_number(self, cmd: str) -> int | None:
+        """Извлечь номер стола: цифрой или словом."""
+        # Сначала цифры
+        nums = re.findall(r"\d+", cmd)
+        if nums:
+            return int(nums[0])
+        # Потом слова
+        for word, num in NUMBERS.items():
+            if word in cmd:
+                return num
+        return None
+
     def _desktop(self, cmd: str) -> str:
         if "следующий" in cmd or "след" in cmd:
             if self.is_kde:
@@ -98,21 +124,20 @@ class AgentWindowManager(BaseAgent):
             return "Переместила на предыдущий рабочий стол."
 
         if "номер" in cmd or "по счету" in cmd:
-            nums = re.findall(r"\d+", cmd)
-            if nums:
-                target = int(nums[0])
-                if self.is_kde:
-                    self._kde_call("setCurrentDesktop", str(target))
-                elif not self.is_wayland:
-                    subprocess.run(["wmctrl", "-s", str(target - 1)], check=False)
-                return f"Переместила на рабочий стол {target}."
-            return "Какой номер стола?"
+            target = self._parse_number(cmd)
+            if target is None:
+                return "Какой номер стола?"
+            if self.is_kde:
+                self._kde_call("setCurrentDesktop", str(target))
+            elif not self.is_wayland:
+                subprocess.run(["wmctrl", "-s", str(target - 1)], check=False)
+            return f"Переместила на рабочий стол {target}."
 
         return "Не поняла команду стола."
 
     def _focus_window(self, app_name: str, friendly_name: str) -> str:
         if self.is_wayland:
-            return f"⚠️ Фокус на окно недоступен в Wayland"
+            return "⚠️ Фокус на окно недоступен в Wayland"
         try:
             result = subprocess.run(
                 ["wmctrl", "-l"], capture_output=True, text=True, timeout=3,

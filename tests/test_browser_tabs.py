@@ -461,3 +461,29 @@ async def test_find_tab_via_truncation():
     finally:
         p.stop()
     assert "Переключилась" in resp.text
+
+
+# --- Фаза 8.3.1: T-one обрезал «макс» → «мак» ---
+
+def test_normalize_query_mak():
+    """«мак» (обрезок T-one) → «max»."""
+    a = AgentBrowserTabs()
+    assert a._normalize_query("мак") == "max"
+
+
+@pytest.mark.asyncio
+async def test_find_tab_short_mak():
+    """«найди вкладку мак» — T-one обрезал, но алиас спасает."""
+    replies = [
+        {"tabs": []},                                    # find_tab("мак")
+        {"tabs": [{"id": 7, "title": "MAX"}]},          # find_tab("max")
+        {"success": True, "title": "MAX"},              # activate_tab
+    ]
+    agent, fake, p = make_agent(replies)
+    try:
+        resp = await agent.handle(AgentRequest(text="найди вкладку мак"))
+    finally:
+        p.stop()
+    assert "Переключилась" in resp.text
+    assert fake.sent[0]["query"] == "мак"
+    assert fake.sent[1]["query"] == "max"

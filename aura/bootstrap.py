@@ -97,8 +97,10 @@ def build_orchestrator() -> Orchestrator:
     orch.register(AgentTextEditor())
 
     # --- Уровень 7: специфичные "открой X" — раньше AppLauncher ---
-    orch.register(AgentVKMusic())
+    # Порядок важен: browser_tabs специфичнее — «найди вкладку X»
+    # должно уходить сюда, а не в vk_music (у которого SEARCH_KEYWORDS = «найди»).
     orch.register(AgentBrowserTabs())
+    orch.register(AgentVKMusic())
 
     # --- Уровень 8: опасные, но широкие ключи ---
     orch.register(AgentAppLauncher())

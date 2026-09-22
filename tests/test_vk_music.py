@@ -209,3 +209,35 @@ class TestUnknown:
     async def test_unknown(self, agent: AgentVKMusic) -> None:
         response = await agent.handle(AgentRequest(text="привет"))
         assert response.status == AgentStatus.NOT_HANDLED
+
+
+# --- регрессия: vk_music не перехватывает «вкладки» (Фаза 8.2) ---
+
+def test_can_handle_vk_play(agent):
+    """«включи музыку» — наша команда."""
+    assert agent.can_handle(AgentRequest(text="включи музыку"))
+
+
+def test_can_handle_vk_search(agent):
+    """«найди трек» — наша."""
+    assert agent.can_handle(AgentRequest(text="найди трек кино"))
+
+
+def test_cannot_handle_find_tab(agent):
+    """«найди вкладку макс» — НЕ наша, это browser_tabs.
+    Раньше перехватывалось через SEARCH_KEYWORDS = «найди»."""
+    assert not agent.can_handle(AgentRequest(text="найди вкладку макс"))
+
+
+def test_cannot_handle_tab_word(agent):
+    """Любая фраза со словом «вкладка» — не наша."""
+    assert not agent.can_handle(AgentRequest(text="закрой вкладку"))
+    assert not agent.can_handle(AgentRequest(text="какие вкладки открыты"))
+    assert not agent.can_handle(AgentRequest(text="открой вкладку телеграм"))
+
+
+def test_cannot_handle_tab_declension(agent):
+    """Все падежи слова «вкладка»."""
+    assert not agent.can_handle(AgentRequest(text="найди вкладку"))
+    assert not agent.can_handle(AgentRequest(text="найди вкладки"))
+    assert not agent.can_handle(AgentRequest(text="нет вкладок"))

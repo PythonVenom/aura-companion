@@ -93,6 +93,10 @@ class AgentVKMusic(BaseAgent):
 
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
+        # Защита: «вкладка/вкладки/вкладок» — не наша тема,
+        # это browser_tabs. Не перехватываем, даже если есть «найди».
+        if "вкладк" in text or "вкладок" in text:
+            return False
         keywords = (
             self.PLAY_KEYWORDS
             + self.SEARCH_KEYWORDS

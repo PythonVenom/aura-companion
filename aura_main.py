@@ -38,6 +38,7 @@ from aura.agents.speaker import AgentSpeaker
 
 # Новая модульная сборка
 from aura.bootstrap import build_orchestrator
+from aura.status import set_status, clear_status
 
 
 def _get_agent(orch, name):
@@ -114,6 +115,8 @@ class AuraOrchestrator:
         self.listener.active = True
         self.speaker.active = True
 
+        set_status("idle")
+
         while self.running:
             try:
                 # === АУДИО-МАРШРУТИЗАЦИЯ (раз в 5 сек) ===
@@ -132,6 +135,7 @@ class AuraOrchestrator:
                     continue
 
                 # Слушаем (timeout 5 секунд)
+                set_status("listening")
                 heard = self.listener.listen(timeout=5)
 
                 if not heard:
@@ -167,8 +171,10 @@ class AuraOrchestrator:
 
                 # === ГЛАВНОЕ ОТЛИЧИЕ: process через Orchestrator ===
                 self.speaker.active = True
+                set_status("thinking", cmd)
                 response = asyncio.run(self.orch.process(cmd))
                 print(f"🤖 {response}")
+                set_status("speaking", response)
                 self.speaker.say(response)
 
                 # === RAG-ПАМЯТЬ И ЖУРНАЛ (после ответа) ===
@@ -202,11 +208,13 @@ class AuraOrchestrator:
                 else:
                     time.sleep(0.5)
                 self.speaker.active = False
+                set_status("idle")
 
                 time.sleep(0.1)
 
             except KeyboardInterrupt:
                 print("\n🦾 Аура: До свидания! 👋")
+                clear_status()
                 break
             except Exception as e:
                 print(f"❌ Ошибка: {e}")

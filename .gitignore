@@ -54,3 +54,4 @@ memory_registry.json
 *.sqlite
 chroma/
 chroma_db/
+vault.json

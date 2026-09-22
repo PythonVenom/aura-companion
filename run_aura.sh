@@ -1,10 +1,9 @@
 #!/bin/bash
-# Aura launcher — с флагом переключения на модульную архитектуру.
+# Aura launcher — модульная архитектура.
 #
-# По умолчанию — старый монолит (aura_core.py). Работает, проверено.
-# С AURA_USE_ORCHESTRATOR=1 — новый модульный роутинг (aura_main.py).
-#
-# Откат: убрать переменную из systemd-юнита или отсюда.
+# Запускает aura_main.py.
+# Монолит выведен в attic/ (ADR-008, тег legacy-monolith-final).
+# Откат: git checkout legacy-monolith-final.
 
 # Ждём XAUTHORITY
 while [ -z "$XAUTHORITY" ] || [ ! -f "$XAUTHORITY" ]; do
@@ -33,10 +32,5 @@ if command -v pactl > /dev/null 2>&1; then
     fi
 fi
 
-if [ "$AURA_USE_ORCHESTRATOR" = "1" ]; then
-    echo "🦾 Запуск в режиме Orchestrator (модульная архитектура)"
-    exec python3 aura_main.py
-else
-    echo "🦾 Запуск в режиме монолита (aura_core.py)"
-    exec python3 aura_core.py
-fi
+echo "🦾 Запуск Ауры (модульная архитектура)"
+exec python3 aura_main.py

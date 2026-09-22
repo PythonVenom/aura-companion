@@ -29,6 +29,7 @@
 
 import asyncio
 import subprocess
+from pathlib import Path
 import sys
 import time
 
@@ -77,6 +78,12 @@ class AuraOrchestrator:
         self.registry = _get_agent(self.orch, "registry")
         self.ducker = _get_agent(self.orch, "music_ducker")
         self.media_pause = _get_agent(self.orch, "media_pause")
+
+    PAUSE_FLAG = Path("/tmp/aura_pause.flag")
+
+    def _is_paused(self) -> bool:
+        """Проверить файл-флаг паузы (hotkey)."""
+        return self.PAUSE_FLAG.exists()
 
     def _set_barge_speaking(self, value: bool) -> None:
         """Активировать/деактивировать VAD barge-in. Best-effort."""
@@ -183,6 +190,12 @@ class AuraOrchestrator:
 
         while self.running:
             try:
+                # === ПАУЗА (hotkey) ===
+                if self._is_paused():
+                    set_status("paused")
+                    time.sleep(0.2)
+                    continue
+
                 # === АУДИО-МАРШРУТИЗАЦИЯ (раз в 5 сек) ===
                 if self.audio_router:
                     try:

@@ -19,6 +19,7 @@ PlasmoidItem {
         "listening": "#f5c542",
         "thinking":  "#f58742",
         "speaking":  "#42c55a",
+        "paused":    "#666666",
         "error":     "#c54242",
         "unknown":   "#888888"
     })
@@ -28,6 +29,7 @@ PlasmoidItem {
         "listening": "Слушает",
         "thinking":  "Думает",
         "speaking":  "Говорит",
+        "paused":    "На паузе",
         "error":     "Ошибка",
         "unknown":   "Нет данных"
     })

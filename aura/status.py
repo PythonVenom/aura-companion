@@ -9,6 +9,7 @@
 - listening — услышала, распознаёт
 - thinking  — обрабатывает команду
 - speaking  — говорит ответ
+- paused    — на паузе (hotkey)
 - error     — ошибка
 
 По науке:
@@ -28,7 +29,7 @@ from pathlib import Path
 
 STATUS_PATH = Path(os.environ.get("AURA_STATUS_PATH", "/tmp/aura_status.json"))
 
-VALID_STATES = frozenset({"idle", "listening", "thinking", "speaking", "error"})
+VALID_STATES = frozenset({"idle", "listening", "thinking", "speaking", "paused", "error"})
 
 
 def set_status(state: str, text: str = "") -> None:

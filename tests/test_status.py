@@ -84,3 +84,14 @@ def test_status_path_env_override(monkeypatch, tmp_path):
     # Вернуть на место
     monkeypatch.delenv("AURA_STATUS_PATH")
     importlib.reload(status)
+
+
+def test_set_status_paused(tmp_status):
+    """Новое состояние paused (Фаза 9.3.1)."""
+    status.set_status("paused")
+    data = json.loads(tmp_status.read_text(encoding="utf-8"))
+    assert data["state"] == "paused"
+
+
+def test_valid_states_includes_paused():
+    assert "paused" in status.VALID_STATES

@@ -123,3 +123,20 @@ def test_on_barge_in_swallows_exception():
     orch = _make_orch_with_mocks()
     orch.speaker.stop_speaking.side_effect = RuntimeError("boom")
     orch._on_barge_in()  # не падает
+
+
+# --- пауза (Фаза 9.3.1) ---
+
+def test_is_paused_no_flag(tmp_path, monkeypatch):
+    orch = _make_orch_with_mocks()
+    from pathlib import Path
+    monkeypatch.setattr(AuraOrchestrator, "PAUSE_FLAG", tmp_path / "aura_pause.flag")
+    assert orch._is_paused() is False
+
+
+def test_is_paused_flag_exists(tmp_path, monkeypatch):
+    flag = tmp_path / "aura_pause.flag"
+    flag.touch()
+    monkeypatch.setattr(AuraOrchestrator, "PAUSE_FLAG", flag)
+    orch = _make_orch_with_mocks()
+    assert orch._is_paused() is True

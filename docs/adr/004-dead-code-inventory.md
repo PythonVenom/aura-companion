@@ -161,3 +161,69 @@
 - `docs/migration-roadmap.md` — план вывода монолита
 - Fowler, «Refactoring» 2nd ed. — «Preserve knowledge, delete code»
 - YAGNI (Ron Jeffries, XP)
+
+---
+
+## Обновление 2026-09-22: классификация 59 мёртвых
+
+Прочитали **все 59**. Разложили по 4 категориям.
+
+### A. ПОРТИРОВАТЬ как заготовки (12)
+
+Готовые модули, не подключены. Питание — потом.
+
+- `music_ducker` — ducking через sink-inputs (Firefox не работает, VLC да)
+- `focus_switch` — фокус окна через wmctrl (X11)
+- `parallel_universe` — фоновый анализ вкладок (on-demand)
+- `window_manager` — рабочие столы, split screen
+- `context_memory` — история окон, последний источник
+- `media_pult` — YouTube, playerctl
+- `text_editor` — pyautogui ctrl+a/c/v/s/z
+- `vision` — скриншот через pyautogui
+- `mouse` — click/type/press через pyautogui
+- `vault` — key-value JSON
+- `security` — ps scan + порты
+- `task_manager` — JSON задачи (или в journal)
+
+### B. ПЕРЕДЕЛАТЬ (3)
+
+Идея есть, реализация слабая. В ideas.md.
+
+- `context` — анализ паттернов (через __main__, надо DI)
+- `time_loop` — напоминания (нужны реальные таймеры)
+- `task_executor` — очередь задач (спорно)
+
+### C. IDEAS на будущее (4)
+
+В ideas.md.
+
+- `smart_home` — умный дом (заглушка)
+- `life_simulator` — тамагочи
+- `journal_browser` — восстановить Firefox
+- `survivor` — открывает apps (дубль)
+
+### D. УДАЛИТЬ без следа (~40)
+
+Дубли, заглушки, опасные.
+
+**Дубли (мигрированных):**
+- `upgrader`, `update_watcher`, `update_notifier`, `auto_task`, `auto_reboot` — все checkupdates (уже в updates)
+- `smart_browser`, `browser_controller` — дубли browser_tabs
+- `media_center` — дубль media_search
+- `app_controller` — дубль mouse
+- `interrupt` — дубль media_pult
+
+**Через __main__ (устарело):**
+- `router`, `hybrid_core`, `offline_first`
+
+**Заглушки:**
+- `code_helper`, `code_autopilot`, `post_apocalypse`, `digital_twin`, `mirror_world`, `exoskeleton`, `quantum`, `master_key`, `harmonizer`
+
+**ОПАСНО — удалить немедленно:**
+- `self_update` — перезаписывает aura_core.py
+- `grid` — WireGuard + Tor
+- `ghost` — Tor + VPN + honeypots
+
+**Не существуют (устаревшие имена в dead-code.txt):**
+- `life.py`, `mirror.py`, `dream.py`, `emotion.py`, `energy.py`, `vortex.py`, `reality.py`, `cosmic.py`, `keeper.py`, `infinite.py`, `conscious.py`, `future_ui.py`, `global.py`, `prime.py`
+- (файлы называются иначе или удалены ранее)

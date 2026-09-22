@@ -73,6 +73,8 @@ class AuraOrchestrator:
         self.audio_router = _get_agent(self.orch, "audio_router")
         self.vk_music = _get_agent(self.orch, "vk_music")
         self.registry = _get_agent(self.orch, "registry")
+        self.ducker = _get_agent(self.orch, "music_ducker")
+        self.media_pause = _get_agent(self.orch, "media_pause")
 
     def _print_last_session(self) -> None:
         """Показать последнюю сессию журнала при старте."""
@@ -98,6 +100,41 @@ class AuraOrchestrator:
             print("✅ VK Music готов (токен загружен)")
         else:
             print("⚠️ VK Music: токен не найден, проверьте vk_token.txt")
+
+    def _duck_on(self) -> None:
+        """Пауза музыки перед речью. Best-effort.
+
+        Ducking (pactl set-sink-input-volume) не работает на Firefox/PipeWire —
+        stream пересоздаётся. Пауза через MPRIS работает везде.
+        """
+        if not self.media_pause:
+            return
+        try:
+            self.media_pause.pause()
+        except Exception as e:
+            print(f"⚠️ Pause: {e}")
+
+    def _duck_off(self) -> None:
+        """Возобновить музыку после речи. Best-effort."""
+        if not self.media_pause:
+            return
+        try:
+            self.media_pause.resume()
+        except Exception as e:
+            print(f"⚠️ Resume: {e}")
+
+    def _say_with_duck(self, text: str) -> None:
+        """Сказать короткое сообщение с паузой музыки (блокирующе).
+
+        Ждём is_speaking, а не aplay_process: say() ставит флаг
+        синхронно, а aplay_process создаётся в потоке позже
+        (после синтеза piper). Иначе resume срабатывает мгновенно.
+        """
+        self._duck_on()
+        self.speaker.say(text)
+        while self.speaker.is_speaking:
+            time.sleep(0.05)
+        self._duck_off()
 
     def run(self) -> None:
         """Главный цикл — паритет с AuraCore.run."""
@@ -125,7 +162,7 @@ class AuraOrchestrator:
                         _profile, audio_msg = self.audio_router.check_route()
                         if audio_msg:
                             print(f"🔊 {audio_msg}")
-                            self.speaker.say(audio_msg)
+                            self._say_with_duck(audio_msg)
                     except Exception as e:
                         print(f"⚠️ AudioRouter: {e}")
 
@@ -175,6 +212,7 @@ class AuraOrchestrator:
                 response = asyncio.run(self.orch.process(cmd))
                 print(f"🤖 {response}")
                 set_status("speaking", response)
+                self._duck_on()
                 self.speaker.say(response)
 
                 # === RAG-ПАМЯТЬ И ЖУРНАЛ (после ответа) ===
@@ -198,9 +236,10 @@ class AuraOrchestrator:
                     except Exception as e:
                         print(f"⚠️ Журнал не сохранил: {e}")
 
-                # Ждём окончания речи
-                if self.speaker.aplay_process:
-                    self.speaker.aplay_process.wait()
+                # Ждём окончания речи — по is_speaking, не aplay_process
+                while self.speaker.is_speaking:
+                    time.sleep(0.05)
+                self._duck_off()
 
                 # Пауза между командами
                 if "\n" in response:

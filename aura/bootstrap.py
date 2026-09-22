@@ -26,6 +26,7 @@ from aura.agents import (
     AgentJournal,
     AgentMediaSearch,
     AgentMusicDucker,
+    AgentMediaPause,
     AgentPower,
     AgentRAGMemory,
     AgentRegistry,
@@ -74,6 +75,7 @@ def build_orchestrator() -> Orchestrator:
 
     # --- Уровень 2: узкий ducking — ДО audio_pult ---
     orch.register(AgentMusicDucker())
+    orch.register(AgentMediaPause())
 
     # --- Уровень 3: audio_pult — широкие ключи ---
     orch.register(AgentAudioPult())

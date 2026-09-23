@@ -8,8 +8,22 @@ license = { text = "MIT" }
 authors = [{ name = "pythonvenom" }]
 
 dependencies = [
+    # Core
     "pydantic>=2.0",
     "platformdirs>=4.0",
+    # RAG
+    "chromadb>=1.5",
+    # ASR / TTS
+    "sherpa-onnx>=1.13",
+    "piper-tts>=1.8",
+    "sounddevice>=0.5",
+    "webrtcvad>=2.0",
+    "numpy>=2.0",
+    # HTTP
+    "requests>=2.30",
+    # GUI automation
+    "pyautogui>=0.9",
+    "pyperclip>=1.8",
 ]
 
 [project.optional-dependencies]

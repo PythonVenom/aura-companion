@@ -111,6 +111,10 @@ class AgentListener(MicroAgent):
             start = time.time()
             last_voice_ts = None          # когда последний раз видели текст
             silence_after_voice = 0.0     # сколько секунд тишины после речи
+            last_text = ""                # последний текст модели
+            last_text_change_ts = None    # когда текст менялся последний раз
+            TEXT_STABLE_SECONDS = 0.6     # сколько держится стабильно
+            SILENCE_FALLBACK = 1.2        # fallback по тишине
 
             while time.time() - start < timeout:
                 try:
@@ -125,6 +129,14 @@ class AgentListener(MicroAgent):
                         self.recognizer.decode_stream(s)
 
                 text_now = self.recognizer.get_result(s).strip().lower()
+
+                # Обновляем таймстамп изменения текста модели.
+                # T-one дописывает последнее слово через 0.3-0.5 сек после
+                # окончания звука — ждём именно стабильности текста,
+                # а не тишины в микрофоне.
+                if text_now != last_text:
+                    last_text = text_now
+                    last_text_change_ts = time.time()
 
                 if text_now:
                     if last_voice_ts is None:
@@ -142,16 +154,27 @@ class AgentListener(MicroAgent):
                         return text
                     last_voice_ts = None
                     silence_after_voice = 0.0
+                    last_text = ""
+                    last_text_change_ts = None
                     continue
 
-                # Ранний выход: была речь, и 0.8с тишины — забираем, что есть
-                if last_voice_ts is not None and silence_after_voice >= 0.8:
+                # Основной выход: текст модели стабилен TEXT_STABLE_SECONDS.
+                if (last_text and last_text_change_ts is not None
+                        and (time.time() - last_text_change_ts) >= TEXT_STABLE_SECONDS
+                        and len(last_text) > 2):
+                    print(f"🎤 Распознано (стабильно): {last_text}")
+                    return last_text
+
+                # Fallback: 1.2с тишины в микрофоне (если модель не даёт текст).
+                if last_voice_ts is not None and silence_after_voice >= SILENCE_FALLBACK:
                     text = self.recognizer.get_result(s).strip().lower()
                     if text and len(text) > 2:
                         print(f"🎤 Распознано (тишина): {text}")
                         return text
                     last_voice_ts = None
                     silence_after_voice = 0.0
+                    last_text = ""
+                    last_text_change_ts = None
 
             # Таймаут: отдаём то, что успели распознать
             tail_padding = self.np.zeros(4800, dtype=self.np.float32)

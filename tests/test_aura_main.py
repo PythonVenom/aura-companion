@@ -140,3 +140,27 @@ def test_is_paused_flag_exists(tmp_path, monkeypatch):
     monkeypatch.setattr(AuraOrchestrator, "PAUSE_FLAG", flag)
     orch = _make_orch_with_mocks()
     assert orch._is_paused() is True
+
+
+# --- Ctrl+C без traceback (техдолг) ---
+
+def test_main_catches_keyboard_interrupt():
+    """KeyboardInterrupt из aura.run() не должен давать traceback."""
+    from unittest.mock import patch as _patch
+    import aura_main
+
+    with _patch.object(aura_main.AuraOrchestrator, "__init__", return_value=None), \
+         _patch.object(aura_main.AuraOrchestrator, "run",
+                       side_effect=KeyboardInterrupt()):
+        # Не должно бросить наружу
+        result = aura_main.main()
+        assert result == 0
+
+
+def test_main_returns_zero_on_success():
+    from unittest.mock import patch as _patch
+    import aura_main
+
+    with _patch.object(aura_main.AuraOrchestrator, "__init__", return_value=None), \
+         _patch.object(aura_main.AuraOrchestrator, "run", return_value=None):
+        assert aura_main.main() == 0

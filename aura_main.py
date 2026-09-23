@@ -287,10 +287,15 @@ class AuraOrchestrator:
                 time.sleep(0.1)
 
             except KeyboardInterrupt:
-                print("\n🦾 Аура: До свидания! 👋")
-                if self.barge_in:
-                    self.barge_in.stop()
-                clear_status()
+                # Обработка первого Ctrl+C: чистим и выходим.
+                # Второй Ctrl+C во время очистки игнорируем — иначе traceback.
+                try:
+                    print("\n🦾 Аура: До свидания! 👋")
+                    if self.barge_in:
+                        self.barge_in.stop()
+                    clear_status()
+                except KeyboardInterrupt:
+                    pass
                 break
             except Exception as e:
                 print(f"❌ Ошибка: {e}")
@@ -299,7 +304,12 @@ class AuraOrchestrator:
 
 def main() -> int:
     aura = AuraOrchestrator()
-    aura.run()
+    try:
+        aura.run()
+    except KeyboardInterrupt:
+        # Второй Ctrl+C (или Ctrl+C вне цикла) — выходим чисто.
+        print()
+        return 0
     return 0
 
 

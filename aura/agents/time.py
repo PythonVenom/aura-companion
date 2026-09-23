@@ -23,6 +23,7 @@ class AgentTime(BaseAgent):
     """
 
     name = "time"
+    MODULE_ALWAYS = True
 
     # Ключевые слова для can_handle
     TIME_KEYWORDS = ("время", "час", "сколько времени", "который час")

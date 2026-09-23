@@ -31,6 +31,7 @@ class AgentScreenReader(BaseAgent):
     """
 
     name = "screen_reader"
+    MODULE_ALWAYS = True
 
     READ_SCREEN_KEYWORDS = ("прочитай экран", "что на экране", "прочти экран")
     READ_WINDOW_KEYWORDS = ("прочитай окно", "что в окне", "прочти окно")

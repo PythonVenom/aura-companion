@@ -30,6 +30,7 @@ class AgentPower(BaseAgent):
     """
 
     name = "power"
+    MODULE_ALWAYS = True
 
     SHUTDOWN_KEYWORDS = ("выключи", "выключить", "poweroff", "shutdown")
     REBOOT_KEYWORDS = ("перезагрузи", "перезагрузить", "reboot", "restart")

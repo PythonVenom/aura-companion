@@ -33,6 +33,7 @@ class AgentFunctions(BaseAgent):
     """
 
     name = "functions"
+    MODULE_ALWAYS = True
 
     # Ключевые слова для can_handle
     KEYWORDS = (

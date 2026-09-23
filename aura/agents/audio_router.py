@@ -38,6 +38,7 @@ class AgentAudioRouter(BaseAgent):
     """
 
     name = "audio_router"
+    MODULE_ALWAYS = True
 
     # Интервал проверки в главном цикле (секунды)
     CHECK_INTERVAL = 5

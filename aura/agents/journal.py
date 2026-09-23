@@ -52,6 +52,7 @@ class AgentJournal(BaseAgent):
     """
 
     name = "journal"
+    MODULE_ALWAYS = True
 
     # Путь к журналу — не меняем при миграции
     JOURNAL_FILE = os.path.expanduser("~/aura_project/JOURNAL.md")

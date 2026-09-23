@@ -30,6 +30,7 @@ class AgentWindowControl(BaseAgent):
     """
 
     name = "window_control"
+    MODULE_ALWAYS = True
 
     FOCUS_KEYWORDS = ("фокус", "переключись", "активируй", "на передний план")
     FULLSCREEN_KEYWORDS = ("разверни", "на весь экран", "fullscreen", "во весь экран")

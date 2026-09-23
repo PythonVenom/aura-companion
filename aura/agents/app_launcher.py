@@ -31,6 +31,7 @@ class AgentAppLauncher(BaseAgent):
     """
 
     name = "app_launcher"
+    MODULE_ALWAYS = True
 
     OPEN_KEYWORDS = ("открой", "запусти", "открыть", "запустить")
     CLOSE_KEYWORDS = ("закрой", "закрыть", "выключи приложение")

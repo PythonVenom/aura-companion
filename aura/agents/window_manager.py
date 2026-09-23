@@ -53,6 +53,7 @@ class AgentWindowManager(BaseAgent):
     """Менеджер окон: столы, split."""
 
     name = "window_manager"
+    MODULE_ALWAYS = True
 
     KEYWORDS = (
         "рабочий стол",

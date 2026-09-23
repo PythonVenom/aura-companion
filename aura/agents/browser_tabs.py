@@ -87,6 +87,7 @@ class AgentBrowserTabs(BaseAgent):
     """
 
     name = "browser_tabs"
+    MODULE_ALWAYS = True
 
     LIST_KEYWORDS = (
         "какие вкладки", "список вкладок", "открытые вкладки",

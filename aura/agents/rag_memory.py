@@ -47,6 +47,7 @@ class AgentRAGMemory(BaseAgent):
     """
 
     name = "rag_memory"
+    MODULE_ALWAYS = True
 
     # Ключевые слова для can_handle
     SEARCH_KEYWORDS = ("вспомни", "что я говорил", "поиск по памяти", "найди в памяти")

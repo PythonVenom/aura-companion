@@ -13,6 +13,9 @@ Bootstrap Ауры.
 
 from __future__ import annotations
 
+import tomllib
+from pathlib import Path
+
 from aura.agents import (
     AgentAppLauncher,
     AgentAudioPult,
@@ -45,6 +48,44 @@ from aura.agents import (
 from aura.core.orchestrator import Orchestrator
 
 
+MODULES_CONFIG_PATH = Path.home() / ".config" / "aura" / "modules.toml"
+
+
+def load_modules_config() -> dict:
+    """Прочитать ~/.config/aura/modules.toml. Пусто если нет."""
+    if not MODULES_CONFIG_PATH.exists():
+        return {}
+    try:
+        with open(MODULES_CONFIG_PATH, "rb") as f:
+            data = tomllib.load(f)
+        return data.get("modules", {})
+    except Exception:
+        return {}
+
+
+def is_module_enabled(agent_class, config: dict) -> bool:
+    """Включён ли модуль (ADR-011)."""
+    if getattr(agent_class, "MODULE_ALWAYS", False):
+        return True
+    if not MODULES_CONFIG_PATH.exists():
+        return True
+    module_name = getattr(agent_class, "MODULE_NAME", agent_class.__name__.lower())
+    # Default — включён. Пользователь явно выключает (ADR-011).
+    return bool(config.get(module_name, True))
+
+
+def _try_register(orch, agent_class, config: dict) -> bool:
+    """Зарегистрировать агента, если его модуль включён (ADR-011)."""
+    if not is_module_enabled(agent_class, config):
+        return False
+    try:
+        orch.register(agent_class())
+        return True
+    except Exception as e:
+        print(f"⚠️ Не зарегистрирован {agent_class.__name__}: {e}")
+        return False
+
+
 def build_orchestrator() -> Orchestrator:
     """
     Собрать Orchestrator со всеми агентами.
@@ -67,53 +108,54 @@ def build_orchestrator() -> Orchestrator:
     tool_router = AgentToolRouter()
     brain = AgentBrain()
     orch = Orchestrator(tool_router=tool_router, brain=brain)
+    modules_config = load_modules_config()
 
     # --- Уровень 1: простые и точные ---
-    orch.register(AgentTime())
-    orch.register(AgentPower())
-    orch.register(AgentVault())
+    _try_register(orch, AgentTime, modules_config)
+    _try_register(orch, AgentPower, modules_config)
+    _try_register(orch, AgentVault, modules_config)
 
     # --- Уровень 2: узкий ducking — ДО audio_pult ---
-    orch.register(AgentMusicDucker())
-    orch.register(AgentMediaPause())
+    _try_register(orch, AgentMusicDucker, modules_config)
+    _try_register(orch, AgentMediaPause, modules_config)
 
     # --- Уровень 3: audio_pult — широкие ключи ---
-    orch.register(AgentAudioPult())
+    _try_register(orch, AgentAudioPult, modules_config)
 
     # --- Уровень 4: дневник, память, реестр, функции, обновления, security ---
-    orch.register(AgentJournal())
-    orch.register(AgentRAGMemory())
-    orch.register(AgentRegistry())
-    orch.register(AgentFunctions())
-    orch.register(AgentUpdates())
-    orch.register(AgentSecurity())
+    _try_register(orch, AgentJournal, modules_config)
+    _try_register(orch, AgentRAGMemory, modules_config)
+    _try_register(orch, AgentRegistry, modules_config)
+    _try_register(orch, AgentFunctions, modules_config)
+    _try_register(orch, AgentUpdates, modules_config)
+    _try_register(orch, AgentSecurity, modules_config)
 
     # --- Уровень 5: аудио-маршрутизация ---
-    orch.register(AgentAudioRouter())
+    _try_register(orch, AgentAudioRouter, modules_config)
 
     # --- Уровень 6: X11 специфичные ---
-    orch.register(AgentVision())
-    orch.register(AgentFocusSwitch())
-    orch.register(AgentWindowManager())
-    orch.register(AgentContextMemory())
-    orch.register(AgentTextEditor())
+    _try_register(orch, AgentVision, modules_config)
+    _try_register(orch, AgentFocusSwitch, modules_config)
+    _try_register(orch, AgentWindowManager, modules_config)
+    _try_register(orch, AgentContextMemory, modules_config)
+    _try_register(orch, AgentTextEditor, modules_config)
 
     # --- Уровень 7: специфичные "открой X" — раньше AppLauncher ---
     # Порядок важен: browser_tabs специфичнее — «найди вкладку X»
     # должно уходить сюда, а не в vk_music (у которого SEARCH_KEYWORDS = «найди»).
-    orch.register(AgentBrowserTabs())
-    orch.register(AgentVKMusic())
+    _try_register(orch, AgentBrowserTabs, modules_config)
+    _try_register(orch, AgentVKMusic, modules_config)
 
     # --- Уровень 8: опасные, но широкие ключи ---
-    orch.register(AgentAppLauncher())
-    orch.register(AgentWindowControl())
-    orch.register(AgentScreenReader())
+    _try_register(orch, AgentAppLauncher, modules_config)
+    _try_register(orch, AgentWindowControl, modules_config)
+    _try_register(orch, AgentScreenReader, modules_config)
 
     # --- Уровень 9: медиа (перехватывает "включи") ---
-    orch.register(AgentMediaSearch())
+    _try_register(orch, AgentMediaSearch, modules_config)
 
     # --- Уровень 10: Internet — последним (общий "найди") ---
-    orch.register(AgentInternet())
+    _try_register(orch, AgentInternet, modules_config)
 
     return orch
 

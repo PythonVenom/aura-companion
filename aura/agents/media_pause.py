@@ -36,6 +36,7 @@ class AgentMediaPause(BaseAgent):
     """
 
     name = "media_pause"
+    MODULE_ALWAYS = True
 
     KEYWORDS = (
         "поставь на паузу",

@@ -94,9 +94,25 @@ class BaseAgent:
 
     Наследники переопределяют can_handle и handle.
     По умолчанию агент ничего не умеет — это безопасно.
+
+    MODULE_* — метаданные модуля (см. ADR-011):
+    - MODULE_NAME — имя модуля для modules.toml.
+    - MODULE_DESCRIPTION — краткое описание для GUI.
+    - MODULE_REQUIRES — зависимости (другие модули).
+    - MODULE_ALWAYS — True если модуль критичен (нельзя выключить).
     """
 
     name: str = "base"
+    MODULE_NAME: str = "base"
+    MODULE_DESCRIPTION: str = ""
+    MODULE_REQUIRES: tuple = ()
+    MODULE_ALWAYS: bool = False
+
+    def __init_subclass__(cls, **kwargs):
+        """Авто-заполнение MODULE_NAME из name (ADR-011)."""
+        super().__init_subclass__(**kwargs)
+        if cls.MODULE_NAME == "base" and cls.name != "base":
+            cls.MODULE_NAME = cls.name
 
     def can_handle(self, request: AgentRequest) -> bool:
         return False

@@ -44,6 +44,7 @@ class AgentRegistry(BaseAgent):
     """
 
     name = "registry"
+    MODULE_ALWAYS = True
 
     # Путь к файлу — не меняем при миграции
     MEMORY_FILE = os.path.expanduser("~/aura_project/memory_registry.json")

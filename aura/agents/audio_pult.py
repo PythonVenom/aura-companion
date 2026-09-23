@@ -31,6 +31,7 @@ class AgentAudioPult(BaseAgent):
     """
 
     name = "audio_pult"
+    MODULE_ALWAYS = True
 
     VOLUME_KEYWORDS = ("громкость", "громко", "звук")
     LOUDER_KEYWORDS = ("громче", "прибавь", "плюс", "увеличь", "добавь")

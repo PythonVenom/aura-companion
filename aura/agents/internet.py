@@ -33,6 +33,7 @@ class AgentInternet(BaseAgent):
     """
 
     name = "internet"
+    MODULE_ALWAYS = True
 
     WEATHER_KEYWORDS = ("погода", "погоду", "weather")
     CURRENCY_KEYWORDS = ("курс", "доллар", "евро", "юань", "валюта")

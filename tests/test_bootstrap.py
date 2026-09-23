@@ -16,8 +16,13 @@ from aura.bootstrap import build_orchestrator
 
 
 @pytest.fixture
-def orch():
-    """Собрать полный Orchestrator с замоканными LLM."""
+def orch(tmp_path, monkeypatch):
+    """Собрать полный Orchestrator с замоканными LLM.
+
+    Config path → несуществующий файл, все модули включены (ADR-011).
+    """
+    fake_cfg = tmp_path / "modules.toml"
+    monkeypatch.setattr("aura.bootstrap.MODULES_CONFIG_PATH", fake_cfg)
     with patch("aura.agents.brain.AgentBrain.ask", return_value="❌ mock"), \
          patch("aura.agents.tool_router.AgentToolRouter.route", return_value=None):
         yield build_orchestrator()

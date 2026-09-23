@@ -28,6 +28,7 @@
 """
 
 import asyncio
+import json
 import subprocess
 from pathlib import Path
 import sys
@@ -247,6 +248,14 @@ class AuraOrchestrator:
                 self.speaker.active = True
                 set_status("thinking", cmd)
                 response = asyncio.run(self.orch.process(cmd))
+                # Пишем последний диалог для виджета.
+                try:
+                    Path("/tmp/aura_last_dialog.json").write_text(
+                        json.dumps({"user": cmd, "aura": response}, ensure_ascii=False),
+                        encoding="utf-8",
+                    )
+                except Exception:
+                    pass
                 print(f"🤖 {response}")
                 set_status("speaking", response)
                 self._duck_on()

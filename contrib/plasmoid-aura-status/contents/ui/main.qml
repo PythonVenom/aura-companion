@@ -12,6 +12,8 @@ PlasmoidItem {
 
     property string auraState: "unknown"
     property string auraText: ""
+    property string lastUser: ""
+    property string lastAura: ""
     property bool fetching: false
 
     readonly property var stateColors: ({
@@ -61,6 +63,32 @@ PlasmoidItem {
         }
     }
 
+    Plasma5Support.DataSource {
+        id: dialogSource
+        engine: "executable"
+        connectedSources: []
+
+        onNewData: (sourceName, data) => {
+            var stdout = (data["stdout"] || "").trim();
+            if (stdout.length > 0) {
+                try {
+                    var parsed = JSON.parse(stdout);
+                    var u = parsed.user || "";
+                    var a = parsed.aura || "";
+                    if (u !== root.lastUser) root.lastUser = u;
+                    if (a !== root.lastAura) root.lastAura = a;
+                } catch (e) {
+                    console.log("[Aura Widget] dialog parse error:", e);
+                }
+            }
+            dialogSource.disconnectSource(sourceName);
+        }
+
+        function fetch() {
+            connectSource("cat /tmp/aura_last_dialog.json 2>/dev/null");
+        }
+    }
+
     Timer {
         interval: 500
         running: true
@@ -70,6 +98,7 @@ PlasmoidItem {
             if (root.fetching) return;
             root.fetching = true;
             execSource.fetch();
+            dialogSource.fetch();
         }
     }
 
@@ -103,7 +132,7 @@ PlasmoidItem {
     // --- Развёрнутый вид ---
     fullRepresentation: Item {
         Layout.preferredWidth: 240
-        Layout.preferredHeight: 110
+        Layout.preferredHeight: 200
 
         ColumnLayout {
             anchors.fill: parent
@@ -140,12 +169,41 @@ PlasmoidItem {
                 text: root.auraText || "—"
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
-                Layout.fillHeight: true
                 font.pixelSize: Kirigami.Units.gridUnit * 0.8
                 color: Kirigami.Theme.textColor
                 opacity: 0.85
                 elide: Text.ElideRight
-                maximumLineCount: 3
+                maximumLineCount: 2
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
+                color: Kirigami.Theme.textColor
+                opacity: 0.2
+            }
+
+            Text {
+                text: "Ты: " + (root.lastUser || "—")
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+                font.pixelSize: Kirigami.Units.gridUnit * 0.75
+                color: Kirigami.Theme.textColor
+                opacity: 0.9
+                elide: Text.ElideRight
+                maximumLineCount: 2
+            }
+
+            Text {
+                text: "Аура: " + (root.lastAura || "—")
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                font.pixelSize: Kirigami.Units.gridUnit * 0.75
+                color: Kirigami.Theme.textColor
+                opacity: 0.9
+                elide: Text.ElideRight
+                maximumLineCount: 4
             }
         }
     }

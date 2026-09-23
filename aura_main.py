@@ -41,6 +41,7 @@ from aura.agents.barge_in import AgentBargeIn
 # Новая модульная сборка
 from aura.bootstrap import build_orchestrator
 from aura.status import set_status, clear_status
+from aura.heartbeat import Heartbeat
 
 
 def _get_agent(orch, name):
@@ -67,6 +68,7 @@ class AuraOrchestrator:
         self.listener = AgentListener()
         self.speaker = AgentSpeaker()
         self.barge_in = AgentBargeIn()
+        self.heartbeat = Heartbeat()
         self.orch = build_orchestrator()
         self.running = True
 
@@ -181,6 +183,7 @@ class AuraOrchestrator:
         self.speaker.active = True
 
         set_status("idle")
+        self.heartbeat.start()
 
         # === BARGE-IN: отключён (Фаза 10, ADR-009 — AEC default sink
         # перебивается WirePlumber. Возврат — после фикса AEC) ===
@@ -190,6 +193,7 @@ class AuraOrchestrator:
 
         while self.running:
             try:
+                self.heartbeat.beat()
                 # === ПАУЗА (hotkey) ===
                 if self._is_paused():
                     set_status("paused")
@@ -293,6 +297,7 @@ class AuraOrchestrator:
                     print("\n🦾 Аура: До свидания! 👋")
                     if self.barge_in:
                         self.barge_in.stop()
+                    self.heartbeat.stop()
                     clear_status()
                 except KeyboardInterrupt:
                     pass

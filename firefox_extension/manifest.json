@@ -6,15 +6,30 @@
   "permissions": [
     "tabs",
     "nativeMessaging",
-    "activeTab"
+    "activeTab",
+    "scripting"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   },
   "browser_specific_settings": {
     "gecko": {
       "id": "aura-bridge@pythonvenom.local",
       "strict_min_version": "91.0"
     }
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.max.ru/*",
+        "*://max.ru/*"
+      ],
+      "js": [
+        "content_max.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
 }

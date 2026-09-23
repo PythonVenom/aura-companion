@@ -30,6 +30,17 @@ function connectNative() {
     }
 }
 
+async function findMaxTab() {
+    // Ищем открытую вкладку max.ru. Если нет — null.
+    const tabs = await browser.tabs.query({});
+    for (const t of tabs) {
+        if (t.url && (t.url.includes("max.ru") || t.url.includes("web.max.ru"))) {
+            return t;
+        }
+    }
+    return null;
+}
+
 async function handleCommand(msg) {
     const action = msg.action;
 
@@ -145,7 +156,24 @@ async function handleCommand(msg) {
             return { success: true, title: tabs[prevIndex].title };
         }
 
-        case "ping":
+                // === Max.ru (Фаза 13.1) ===
+        case "max_dump_structure":
+        case "max_list_chats":
+	case "max_deep_dump":
+        case "max_send_message":
+        case "max_read_last":
+        case "max_find_chat": {
+            const maxTab = await findMaxTab();
+            if (!maxTab) return { error: "max tab not found" };
+            const payload = { action: action };
+            if (msg.query) payload.query = msg.query;
+            try {
+                return await browser.tabs.sendMessage(maxTab.id, payload);
+            } catch (e) {
+                return { error: "content script: " + e.toString() };
+            }
+        }
+	case "ping":
             return { pong: true, version: "1.0" };
 
         default:

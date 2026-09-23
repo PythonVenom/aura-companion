@@ -13,7 +13,12 @@ while [ -z "$XAUTHORITY" ] || [ ! -f "$XAUTHORITY" ]; do
 done
 
 export DISPLAY=:0
-cd /home/pythonvenom/aura_project
+
+# PROJECT_DIR — путь к проекту (не хардкод).
+# Работает при запуске из любого места: bash run_aura.sh,
+# /полный/путь/run_aura.sh, через systemd.
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$PROJECT_DIR"
 source venv/bin/activate
 
 # === AEC (PipeWire echo-cancel) для чистого T-one ===

@@ -26,6 +26,7 @@ from aura.agents import (
     AgentFocusSwitch,
     AgentFunctions,
     AgentInternet,
+    AgentMessenger,
     AgentJournal,
     AgentMediaSearch,
     AgentMusicDucker,
@@ -156,7 +157,7 @@ def build_orchestrator() -> Orchestrator:
 
     # --- Уровень 10: Internet — последним (общий "найди") ---
     _try_register(orch, AgentInternet, modules_config)
-
+    _try_register(orch, AgentMessenger, modules_config)
     return orch
 
 

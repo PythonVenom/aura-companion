@@ -58,11 +58,12 @@ class TestBootstrapAssembly:
             "screen_reader",
             "media_search",
             "internet",
+            "messenger",
         }
         assert names == expected
 
     def test_agent_count(self, orch) -> None:
-        assert len(orch) == 25
+        assert len(orch) == 26
 
 
 class TestRouting:
@@ -180,4 +181,4 @@ class TestOrder:
     def test_registration_order(self, orch) -> None:
         names = orch.registry.list_names()
         assert names[0] == "time"
-        assert names[-1] == "internet"
+        assert names[-1] == "messenger"

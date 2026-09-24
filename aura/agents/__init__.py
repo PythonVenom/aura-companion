@@ -14,6 +14,7 @@ from aura.agents.context_memory import AgentContextMemory
 from aura.agents.focus_switch import AgentFocusSwitch
 from aura.agents.functions import AgentFunctions
 from aura.agents.internet import AgentInternet
+from aura.agents.messenger import AgentMessenger
 from aura.agents.journal import AgentJournal
 from aura.agents.media_search import AgentMediaSearch
 from aura.agents.music_ducker import AgentMusicDucker
@@ -54,6 +55,7 @@ __all__ = [
     "AgentWindowManager",
     "AgentAppLauncher",
     "AgentInternet",
+    "AgentMessenger",
     "AgentWindowControl",
     "AgentScreenReader",
     "AgentBrowserTabs",

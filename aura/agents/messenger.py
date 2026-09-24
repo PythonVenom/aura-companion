@@ -67,22 +67,29 @@ class AgentMessenger(BaseAgent):
         "отправь в макс",
     )
 
+    # Только ошибочные формы T-one. «макс», «максе» — правильные.
+    MAX_ALIASES = ("макте", "макт", "мактэ", "макст")
+
+    def _normalize(self, text: str) -> str:
+        for alias in self.MAX_ALIASES:
+            if alias in text:
+                text = text.replace(alias, "макс")
+        return text
+
     def can_handle(self, request: AgentRequest) -> bool:
-        text = request.text.lower()
+        text = self._normalize(request.text.lower())
         all_kw = (
             self.OPEN_KEYWORDS + self.LIST_KEYWORDS + self.FIND_KEYWORDS
             + self.READ_KEYWORDS + self.SEND_KEYWORDS
         )
-        # Явное «макс».
         if "макс" in text and any(kw in text for kw in all_kw):
             return True
-        # Без «макс», но с «чат» + действие — наше.
         if "чат" in text and any(kw in text for kw in self.FIND_KEYWORDS):
             return True
         return False
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
-        text = request.text.lower()
+        text = self._normalize(request.text.lower())
 
         # 1. Открыть Макс — фокус на вкладку.
         if any(kw in text for kw in self.OPEN_KEYWORDS):

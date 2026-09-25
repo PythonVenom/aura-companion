@@ -43,6 +43,7 @@ from aura.agents.barge_in import AgentBargeIn
 from aura.bootstrap import build_orchestrator
 from aura.status import set_status, clear_status
 from aura.heartbeat import Heartbeat
+from aura.dialog_fsm import get_state as fsm_get, clear_state as fsm_clear
 
 
 def _get_agent(orch, name):
@@ -167,6 +168,70 @@ class AuraOrchestrator:
         self._set_barge_speaking(False)
         self._duck_off()
 
+    def _handle_fsm(self) -> bool:
+        """Обработать FSM-состояние диалога (ADR-012).
+
+        Возвращает True если состояние активно и цикл должен continue.
+        """
+        fsm = fsm_get()
+        state = fsm.get("state", "idle")
+        if state == "idle":
+            return False
+
+        chat = fsm.get("chat", "")
+        # Слушаем БЕЗ активации «Аура».
+        heard = self.listener.listen(timeout=5)
+        if not heard:
+            return True
+
+        text = heard.lower().strip()
+        print(f"💬 FSM[{state}]: {heard}")
+
+        # Новая «Аура ...» — сброс.
+        if "аура" in text or "aura" in text:
+            print("🔔 Активация — сброс FSM")
+            fsm_clear()
+            return False
+
+        # Отмена.
+        if any(w in text for w in ("отмена", "отменить", "стоп")):
+            fsm_clear()
+            self._say_with_duck("Отменила")
+            return True
+
+        if state == "ask_text":
+            # Всё что сказано — текст сообщения.
+            messenger = _get_agent(self.orch, "messenger")
+            if not messenger:
+                fsm_clear()
+                return True
+            resp = messenger.send_message(chat, heard)
+            from aura.dialog_fsm import set_state as fsm_set
+            fsm_set("ask_confirm", chat=chat)
+            self._say_with_duck(resp)
+            return True
+
+        if state == "ask_confirm":
+            if any(w in text for w in ("да", "отправ", "ок", "yes")):
+                messenger = _get_agent(self.orch, "messenger")
+                if messenger:
+                    resp = messenger.finalize_send()
+                    self._say_with_duck(resp)
+                fsm_clear()
+                return True
+            if any(w in text for w in ("нет", "no")):
+                messenger = _get_agent(self.orch, "messenger")
+                if messenger:
+                    messenger.clear_input()
+                fsm_clear()
+                self._say_with_duck("Отменила")
+                return True
+            # Другое — напомним.
+            self._say_with_duck("Скажи да или нет")
+            return True
+
+        return False
+
     def run(self) -> None:
         """Главный цикл — паритет с AuraCore.run."""
         print("\n" + "=" * 60)
@@ -195,6 +260,7 @@ class AuraOrchestrator:
         while self.running:
             try:
                 self.heartbeat.beat()
+
                 # === ПАУЗА (hotkey) ===
                 if self._is_paused():
                     set_status("paused")
@@ -214,6 +280,10 @@ class AuraOrchestrator:
                 # === АНТИ-ЭХО: не слушаем, пока говорим ===
                 if self.speaker.is_speaking:
                     time.sleep(0.1)
+                    continue
+
+                # === DIALOG FSM (ADR-012) ===
+                if self._handle_fsm():
                     continue
 
                 # Слушаем (timeout 5 секунд)

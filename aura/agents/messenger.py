@@ -53,6 +53,8 @@ class AgentMessenger(BaseAgent):
         "найди чат",
         "открой чат",
         "перейди в чат",
+        "напиши в чат",   # «напиши в чат Петруха» — открыть + спросить текст
+        "напиши чат",
     )
     READ_KEYWORDS = (
         "что написали",
@@ -64,6 +66,8 @@ class AgentMessenger(BaseAgent):
         "напиши в макс",
         "напиши макс",
         "напиши сообщение",
+        "напиши сообщ",   # T-one обрезает окончание
+        "напиши смс",
     )
     FINALIZE_KEYWORDS = ("отправь", "отправить", "давай отправим", "отправляй")
     CLEAR_KEYWORDS = ("отмени", "отмена", "очисти", "удали текст")
@@ -85,8 +89,21 @@ class AgentMessenger(BaseAgent):
         )
         if "макс" in text and any(kw in text for kw in all_kw):
             return True
-        if "чат" in text and any(kw in text for kw in self.FIND_KEYWORDS):
+        if "чат" in text and any(kw in text for kw in self.FIND_KEYWORDS + self.READ_KEYWORDS):
             return True
+        # «Напиши X: Y» или «Напиши сообщение X Y» — без «макс».
+        if "напиши" in text and ("сообщение" in text or ":" in text):
+            return True
+        # «Напиши X Y» — без «макс», без «сообщение», но с двумя словами.
+        # НЕ перехватываем: «напиши код», «напиши стих», «напиши письмо».
+        if "напиши" in text:
+            brain_words = ("код", "стих", "истори", "рассказ",
+                           "письмо", "текст", "анекдот", "шутк",
+                           "песн", "сказк", "программ")
+            if not any(w in text for w in brain_words):
+                after = text.split("напиши", 1)[1].strip().split()
+                if len(after) >= 2:
+                    return True
         return False
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
@@ -100,12 +117,16 @@ class AgentMessenger(BaseAgent):
         if any(kw in text for kw in self.LIST_KEYWORDS):
             return AgentResponse.ok(self.list_chats(), self.name)
 
-        # 3. Найти чат.
+        # 3. Найти чат / написать в чат.
         if any(kw in text for kw in self.FIND_KEYWORDS):
             query = self._extract_chat_name(text)
             if not query:
-                return AgentResponse.ok("Какой чат искать?", self.name)
-            return AgentResponse.ok(self.find_chat(query), self.name)
+                return AgentResponse.ok("Какой чат?", self.name)
+            result = self.find_chat(query)
+            # Если «напиши в чат X» — открыли чат, спрашиваем текст.
+            if "напиши" in text and "не найден" not in result:
+                return AgentResponse.ok(result + " Что написать?", self.name)
+            return AgentResponse.ok(result, self.name)
 
         # 4. Прочитать последнее.
         if any(kw in text for kw in self.READ_KEYWORDS):
@@ -241,7 +262,11 @@ class AgentMessenger(BaseAgent):
         if " сообщение " in rest:
             chat, msg = rest.split(" сообщение ", 1)
             return chat.strip(), msg.strip()
-        # Только «кому» — что спросим отдельно.
+        # Без разделителя: первое слово = имя, остальное = текст.
+        parts = rest.split(None, 1)
+        if len(parts) == 2:
+            return parts[0].strip(), parts[1].strip()
+        # Только одно слово — что спросим отдельно.
         return rest.strip(), ""
 
 

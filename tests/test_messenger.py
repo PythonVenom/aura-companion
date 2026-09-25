@@ -153,3 +153,32 @@ async def test_handle_bridge_error():
     with patch("aura.agents.messenger.send_command", side_effect=lambda c, t=5.0: reply):
         resp = await a.handle(AgentRequest(text="какие чаты в максе"))
     assert "макс" in resp.text.lower() or "вкладка" in resp.text.lower()
+
+
+# --- Фаза 13.3: отправка и отмена ---
+
+@pytest.mark.asyncio
+async def test_handle_finalize_send():
+    a = AgentMessenger()
+    reply = {"ok": True, "data": {"sent": True}}
+    with patch("aura.agents.messenger.send_command", side_effect=lambda c, t=5.0: reply):
+        resp = await a.handle(AgentRequest(text="аура отправь в макс"))
+    assert "отправила" in resp.text.lower()
+
+
+@pytest.mark.asyncio
+async def test_handle_clear_input():
+    a = AgentMessenger()
+    reply = {"ok": True, "data": {"cleared": True}}
+    with patch("aura.agents.messenger.send_command", side_effect=lambda c, t=5.0: reply):
+        resp = await a.handle(AgentRequest(text="аура отмени в макс"))
+    assert "очистила" in resp.text.lower()
+
+
+@pytest.mark.asyncio
+async def test_handle_finalize_error():
+    a = AgentMessenger()
+    reply = {"ok": True, "data": {"sent": False, "error": "no input"}}
+    with patch("aura.agents.messenger.send_command", side_effect=lambda c, t=5.0: reply):
+        resp = await a.handle(AgentRequest(text="аура отправь в макс"))
+    assert "не удалось" in resp.text.lower()

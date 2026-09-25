@@ -26,6 +26,12 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             case "max_send_message":
                 sendResponse({ ok: true, data: sendMessageReal(msg.text) });
                 break;
+            case "max_send_finalize":
+                sendResponse({ ok: true, data: sendMessageFinalize() });
+                break;
+            case "max_clear_input":
+                sendResponse({ ok: true, data: clearMessageInput() });
+                break;
             case "max_read_last":
                 sendResponse({ ok: true, data: readLastMessage() });
                 break;
@@ -292,6 +298,55 @@ function findChatFromButtons(query) {
         }
     }
     return { found: false, query: q };
+}
+
+
+function sendMessageFinalize() {
+    // Отправить уже введённый текст. Пробуем Enter, потом кнопку.
+    const input = findMessageInput();
+    if (input === null) return { sent: false, error: "message input not found" };
+
+    // Способ 1: симулируем Enter.
+    input.focus();
+    const enterEvent = new KeyboardEvent("keydown", {
+        key: "Enter",
+        code: "Enter",
+        keyCode: 13,
+        which: 13,
+        bubbles: true,
+        cancelable: true,
+    });
+    input.dispatchEvent(enterEvent);
+
+    // Способ 2 (fallback): ищем кнопку «Отправить».
+    // По дампу кнопки в Максе без aria-label, но с иконкой.
+    // Попробуем найти по type=submit или рядом с полем.
+    setTimeout(() => {
+        // Если поле пустое — значит Enter сработал.
+        const val = (input.innerText || input.value || "").trim();
+        if (val.length > 0) {
+            const submit = document.querySelector('button[type=submit], [aria-label*="тправить" i]');
+            if (submit) submit.click();
+        }
+    }, 300);
+
+    return { sent: true };
+}
+
+function clearMessageInput() {
+    // Очистить поле ввода.
+    const input = findMessageInput();
+    if (input === null) return { cleared: false, error: "message input not found" };
+
+    input.focus();
+    if (input.tagName === "TEXTAREA" || input.tagName === "INPUT") {
+        input.value = "";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+    } else {
+        input.innerText = "";
+        input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    }
+    return { cleared: true };
 }
 
 

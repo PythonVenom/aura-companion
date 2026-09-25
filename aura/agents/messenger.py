@@ -64,9 +64,9 @@ class AgentMessenger(BaseAgent):
         "напиши в макс",
         "напиши макс",
         "напиши сообщение",
-        "отправь в макс",
     )
-
+    FINALIZE_KEYWORDS = ("отправь", "отправить", "давай отправим", "отправляй")
+    CLEAR_KEYWORDS = ("отмени", "отмена", "очисти", "удали текст")
     # Только ошибочные формы T-one. «макс», «максе» — правильные.
     MAX_ALIASES = ("макте", "макт", "мактэ", "макст", "максу", "макса", "максы", "максэ", "максом")
 
@@ -81,6 +81,7 @@ class AgentMessenger(BaseAgent):
         all_kw = (
             self.OPEN_KEYWORDS + self.LIST_KEYWORDS + self.FIND_KEYWORDS
             + self.READ_KEYWORDS + self.SEND_KEYWORDS
+            + self.FINALIZE_KEYWORDS + self.CLEAR_KEYWORDS
         )
         if "макс" in text and any(kw in text for kw in all_kw):
             return True
@@ -118,6 +119,12 @@ class AgentMessenger(BaseAgent):
             if not msg:
                 return AgentResponse.ok(f"Что написать {chat}?", self.name)
             return AgentResponse.ok(self.send_message(chat, msg), self.name)
+
+        # 6. Отправка / отмена введённого.
+        if any(kw in text for kw in self.FINALIZE_KEYWORDS):
+            return AgentResponse.ok(self.finalize_send(), self.name)
+        if any(kw in text for kw in self.CLEAR_KEYWORDS):
+            return AgentResponse.ok(self.clear_input(), self.name)
 
         return AgentResponse.not_handled(self.name)
 
@@ -185,6 +192,23 @@ class AgentMessenger(BaseAgent):
                 f"Скажи «отправь» для отправки."
             )
         return "🌐 Не удалось ввести текст"
+
+    def finalize_send(self) -> str:
+        """Отправить введённое сообщение (нажать Enter)."""
+        result = send_command({"action": "max_send_finalize"})
+        if result is None or "error" in result:
+            return error_text(result)
+        data = result.get("data", {})
+        if data.get("sent"):
+            return "🌐 Отправила сообщение"
+        return f"🌐 Не удалось отправить: {data.get('error', 'unknown')}"
+
+    def clear_input(self) -> str:
+        """Очистить поле ввода в Максе."""
+        result = send_command({"action": "max_clear_input"})
+        if result is None or "error" in result:
+            return error_text(result)
+        return "🌐 Очистила поле ввода"
 
     # --- Разбор аргументов ---
 

@@ -181,4 +181,5 @@ class TestOrder:
     def test_registration_order(self, orch) -> None:
         names = orch.registry.list_names()
         assert names[0] == "time"
-        assert names[-1] == "messenger"
+        assert names[-1] == "internet"
+        assert "messenger" in names

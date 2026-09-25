@@ -21,6 +21,7 @@
 from __future__ import annotations
 
 from aura.core.bridge import send_command, error_text
+from aura.dialog_fsm import set_state as fsm_set
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 
@@ -125,7 +126,8 @@ class AgentMessenger(BaseAgent):
             result = self.find_chat(query)
             # Если «напиши в чат X» — открыли чат, спрашиваем текст.
             if "напиши" in text and "не найден" not in result:
-                return AgentResponse.ok(result + " Что написать?", self.name)
+                fsm_set("ask_text", chat=query)
+                return AgentResponse.ok(result + " Что написать?", self.name, fsm_state="ask_text", chat=query)
             return AgentResponse.ok(result, self.name)
 
         # 4. Прочитать последнее.
@@ -139,13 +141,16 @@ class AgentMessenger(BaseAgent):
                 return AgentResponse.ok("Кому написать?", self.name)
             if not msg:
                 return AgentResponse.ok(f"Что написать {chat}?", self.name)
-            return AgentResponse.ok(self.send_message(chat, msg), self.name)
+            fsm_set("ask_confirm", chat=chat, text=msg)
+            return AgentResponse.ok(self.send_message(chat, msg), self.name, fsm_state="ask_confirm", chat=chat)
 
         # 6. Отправка / отмена введённого.
         if any(kw in text for kw in self.FINALIZE_KEYWORDS):
-            return AgentResponse.ok(self.finalize_send(), self.name)
+            fsm_set("idle")
+            return AgentResponse.ok(self.finalize_send(), self.name, fsm_state="idle")
         if any(kw in text for kw in self.CLEAR_KEYWORDS):
-            return AgentResponse.ok(self.clear_input(), self.name)
+            fsm_set("idle")
+            return AgentResponse.ok(self.clear_input(), self.name, fsm_state="idle")
 
         return AgentResponse.not_handled(self.name)
 

@@ -145,6 +145,7 @@ def build_orchestrator() -> Orchestrator:
     # Порядок важен: browser_tabs специфичнее — «найди вкладку X»
     # должно уходить сюда, а не в vk_music (у которого SEARCH_KEYWORDS = «найди»).
     _try_register(orch, AgentBrowserTabs, modules_config)
+    _try_register(orch, AgentMessenger, modules_config)
     _try_register(orch, AgentVKMusic, modules_config)
 
     # --- Уровень 8: опасные, но широкие ключи ---
@@ -157,7 +158,6 @@ def build_orchestrator() -> Orchestrator:
 
     # --- Уровень 10: Internet — последним (общий "найди") ---
     _try_register(orch, AgentInternet, modules_config)
-    _try_register(orch, AgentMessenger, modules_config)
     return orch
 
 

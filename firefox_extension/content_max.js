@@ -284,6 +284,10 @@ function listChatsFromButtons() {
 function findChatFromButtons(query) {
     const q = (query || "").toLowerCase().trim();
     if (q.length === 0) return { found: false, error: "empty query" };
+    // Fuzzy: обрезаем окончания для падежей.
+    const stems = [q];
+    if (q.length > 4) stems.push(q.substring(0, q.length - 1));
+    if (q.length > 5) stems.push(q.substring(0, q.length - 2));
     const buttons = document.querySelectorAll("button");
     for (const el of buttons) {
         const rect = el.getBoundingClientRect();
@@ -291,10 +295,12 @@ function findChatFromButtons(query) {
         if (rect.width < 100) continue;
         const text = (el.innerText || "").toLowerCase();
         if (text === "еще") continue;
-        if (text.includes(q)) {
-            el.click();
-            const lines = text.split("\n").filter(l => l.trim());
-            return { found: true, name: lines[0] || "" };
+        for (const stem of stems) {
+            if (text.includes(stem)) {
+                el.click();
+                const lines = text.split("\n").filter(l => l.trim());
+                return { found: true, name: lines[0] || "", matched: stem };
+            }
         }
     }
     return { found: false, query: q };

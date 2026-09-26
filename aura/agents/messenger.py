@@ -178,6 +178,7 @@ class AgentMessenger(BaseAgent):
         return "\n".join(out)
 
     def find_chat(self, query: str) -> str:
+        self._focus_firefox()
         result = send_command({"action": "max_find_chat", "query": query})
         if result is None or "error" in result:
             return error_text(result)
@@ -196,6 +197,19 @@ class AgentMessenger(BaseAgent):
         if not last:
             return "🌐 Нет новых сообщений"
         return f"🌐 Последнее сообщение: {last[:200]}"
+
+    @staticmethod
+    def _focus_firefox() -> None:
+        """Поднять окно Firefox (для зрительной фиксации)."""
+        import subprocess
+        try:
+            subprocess.run(
+                ["wmctrl", "-a", "firefox"],
+                check=False, timeout=2,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            )
+        except Exception:
+            pass
 
     def send_message(self, chat: str, message: str) -> str:
         """Открыть чат, ввести текст (без отправки)."""

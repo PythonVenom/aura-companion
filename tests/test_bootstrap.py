@@ -59,11 +59,12 @@ class TestBootstrapAssembly:
             "media_search",
             "internet",
             "messenger",
+            "music_local",
         }
         assert names == expected
 
     def test_agent_count(self, orch) -> None:
-        assert len(orch) == 26
+        assert len(orch) == 27
 
 
 class TestRouting:

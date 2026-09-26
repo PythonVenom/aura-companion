@@ -18,6 +18,7 @@ from aura.agents.messenger import AgentMessenger
 from aura.agents.journal import AgentJournal
 from aura.agents.media_search import AgentMediaSearch
 from aura.agents.music_ducker import AgentMusicDucker
+from aura.agents.music_local import AgentMusicLocal
 from aura.agents.media_pause import AgentMediaPause
 from aura.agents.power import AgentPower
 from aura.agents.rag_memory import AgentRAGMemory
@@ -51,6 +52,7 @@ __all__ = [
     "AgentContextMemory",
     "AgentTextEditor",
     "AgentMusicDucker",
+    "AgentMusicLocal",
     "AgentMediaPause",
     "AgentWindowManager",
     "AgentAppLauncher",

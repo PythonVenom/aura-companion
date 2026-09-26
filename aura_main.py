@@ -45,6 +45,7 @@ from aura.status import set_status, clear_status
 from aura.heartbeat import Heartbeat
 from aura.dialog_fsm import get_state as fsm_get, clear_state as fsm_clear, set_state as fsm_set
 from aura.dialogue_manager import DialogueManager, SCENARIOS
+from aura.agents.proactive import default_engine
 
 
 def _get_agent(orch, name):
@@ -89,6 +90,9 @@ class AuraOrchestrator:
             SCENARIOS,
             get_agent=lambda n: _get_agent(self.orch, n),
         )
+
+        # Proactive Engine (ADR-014)
+        self.proactive = default_engine()
 
     PAUSE_FLAG = Path("/tmp/aura_pause.flag")
 
@@ -354,6 +358,13 @@ class AuraOrchestrator:
                     continue
 
                 # === DIALOG FSM (ADR-012) ===
+                # === PROACTIVE (ADR-014) ===
+                proactive_msg = self.proactive.check()
+                if proactive_msg:
+                    print(f"💡 Proactive: {proactive_msg}")
+                    self._say_with_duck(proactive_msg)
+                    continue
+
                 if self._handle_fsm():
                     continue
 

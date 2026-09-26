@@ -251,6 +251,23 @@ class AuraOrchestrator:
             self._say_with_duck("Отменила")
             return True
 
+        if state == "pending_read":
+            # Ответ на «Зачитать?» (Фаза 13.5).
+            fsm_clear()
+            if any(w in text for w in ("да", "зачитай", "читай", "конечно", "давай")):
+                msg_text = fsm.get("text", "")
+                if msg_text:
+                    self._say_with_duck(f"Сообщение: {msg_text}")
+                else:
+                    self._say_with_duck("Сообщение пустое")
+                return True
+            if any(w in text for w in ("нет", "не надо", "потом", "позже", "отмена")):
+                self._say_with_duck("Хорошо")
+                return True
+            # Нераспознанное — напомнить.
+            self._say_with_duck("Зачитать?")
+            return True
+
         if state == "awaiting_command":
             # Команда после активации без «Аура».
             print(f"📝 Команда (после активации): {heard}")

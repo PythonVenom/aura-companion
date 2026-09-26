@@ -186,6 +186,13 @@ def max_new_message_trigger(get_agent) -> Trigger:
         try:
             data = json.loads(PENDING_PATH.read_text(encoding="utf-8"))
             chat = data.get("chat", "")
+            preview = data.get("preview", "")
+            # FSM: ждать ответа «да/нет» (ADR-013).
+            try:
+                from aura.dialog_fsm import set_state as fsm_set
+                fsm_set("pending_read", chat=chat, text=preview)
+            except Exception:
+                pass
             if chat:
                 return f"Создатель, новое сообщение от {chat}. Зачитать?"
             return "Создатель, новое сообщение в Максе. Зачитать?"

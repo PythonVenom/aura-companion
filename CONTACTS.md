@@ -5,7 +5,7 @@
 - **GitHub Discussions** — общие темы: [discussions](https://github.com/PythonVenom/aura-companion/discussions)
 
 ## Поддержка проекта
-- **CloudTips:** <вписать после регистрации>
+- **CloudTips:** https://pay.cloudtips.ru/p/9ce9959c
 - **DonationAlerts:** <вписать после регистрации>
 - **Boosty:** <вписать после регистрации>
 

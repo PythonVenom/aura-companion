@@ -387,10 +387,15 @@ class AuraOrchestrator:
 
                 print(f"📝 Команда: {cmd}")
 
-                # === ГЛАВНОЕ ОТЛИЧИЕ: process через Orchestrator ===
+                # === DIALOGUE MANAGER (ADR-013) ===
                 self.speaker.active = True
                 set_status("thinking", cmd)
-                response = asyncio.run(self.orch.process(cmd))
+                scenario = self.dm.detect(cmd)
+                if scenario:
+                    self.dm.start(scenario)
+                    response = self.dm.process(cmd) or "Не расслышала"
+                else:
+                    response = asyncio.run(self.orch.process(cmd))
                 # Пишем последний диалог для виджета.
                 try:
                     Path("/tmp/aura_last_dialog.json").write_text(

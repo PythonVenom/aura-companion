@@ -169,6 +169,8 @@ async function handleCommand(msg) {
             if (!maxTab) return { error: "max tab not found" };
             const payload = { action: action };
             if (msg.query) payload.query = msg.query;
+            if (msg.text) payload.text = msg.text;
+            if (msg.tab_id) payload.tab_id = msg.tab_id;
             try {
                 return await browser.tabs.sendMessage(maxTab.id, payload);
             } catch (e) {

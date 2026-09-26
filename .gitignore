@@ -55,3 +55,19 @@ memory_registry.json
 chroma/
 chroma_db/
 vault.json
+
+# Приватное — не публикуем
+JOURNAL.md
+MISE_EN_PLACE.md
+TODO.md
+docs/context-for-new-chat.md
+docs/dead-code.txt
+docs/vision-archive-*.md
+logs/
+gigaam_model
+sherpa-onnx*
+vosk_model*
+voices/
+aura.tar.gz
+vm_script.sh
+nohup.out

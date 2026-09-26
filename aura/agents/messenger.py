@@ -227,10 +227,7 @@ class AgentMessenger(BaseAgent):
             return error_text(send)
         sd = send.get("data", {})
         if sd.get("typed"):
-            return (
-                f"🌐 Открыла чат «{chat}», ввела текст. "
-                f"Скажи «отправь» для отправки."
-            )
+            return f"🌐 Ввела текст в чат «{chat}»"
         return "🌐 Не удалось ввести текст"
 
     def finalize_send(self) -> str:

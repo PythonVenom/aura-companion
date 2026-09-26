@@ -92,7 +92,7 @@ class AuraOrchestrator:
         )
 
         # Proactive Engine (ADR-014)
-        self.proactive = default_engine()
+        self.proactive = default_engine(get_agent=lambda n: _get_agent(self.orch, n))
 
     PAUSE_FLAG = Path("/tmp/aura_pause.flag")
 

@@ -90,7 +90,44 @@ class ProactiveEngine:
         return None
 
 
-def morning_briefing_trigger() -> Trigger:
+def _collect_briefing(get_agent) -> str:
+    """Собрать утренний брифинг из блоков."""
+    blocks = []
+
+    # Блок 1: приветствие + время
+    time_agent = get_agent("time") if get_agent else None
+    if time_agent:
+        try:
+            blocks.append("Доброе утро, Создатель.")
+        except Exception:
+            blocks.append("Доброе утро, Создатель.")
+    else:
+        blocks.append("Доброе утро, Создатель.")
+
+    # Блок 2: погода (internet)
+    internet = get_agent("internet") if get_agent else None
+    if internet:
+        try:
+            # Используем публичный метод internet — спросить погоду.
+            # Заглушка — Фаза 17.2 доработает.
+            pass
+        except Exception:
+            pass
+
+    # Блок 3: задачи (journal)
+    journal = get_agent("journal") if get_agent else None
+    if journal and hasattr(journal, "get_pending_tasks"):
+        try:
+            tasks = journal.get_pending_tasks()
+            if tasks:
+                blocks.append(f"Незакрытых задач: {len(tasks)}.")
+        except Exception:
+            pass
+
+    return " ".join(blocks) if blocks else "Доброе утро, Создатель."
+
+
+def morning_briefing_trigger(get_agent=None) -> Trigger:
     """Утренний брифинг: 1 раз в день, 07:30-09:30."""
     def condition(state: dict) -> bool:
         now = datetime.now()
@@ -103,7 +140,7 @@ def morning_briefing_trigger() -> Trigger:
         return True
 
     def action() -> str:
-        return "Доброе утро, Создатель. Готов брифинг."
+        return _collect_briefing(get_agent)
 
     return Trigger(
         name="morning_briefing",
@@ -114,10 +151,10 @@ def morning_briefing_trigger() -> Trigger:
     )
 
 
-def default_engine() -> ProactiveEngine:
+def default_engine(get_agent=None) -> ProactiveEngine:
     """Стандартный набор триггеров."""
     engine = ProactiveEngine()
-    engine.register(morning_briefing_trigger())
+    engine.register(morning_briefing_trigger(get_agent))
     return engine
 
 

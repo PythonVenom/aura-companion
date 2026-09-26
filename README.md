@@ -139,5 +139,25 @@ pythonvenom (один разработчик + ИИ-ассистент).
 
 ## Связь
 
-- **Баги и предложения:** GitHub Issues
-- **Прямые вопросы:** контакты будут добавлены в ближайшие дни
+- **Баги, идеи, вопросы:** [GitHub Issues](https://github.com/PythonVenom/aura-companion/issues)
+- **Обсуждения:** [GitHub Discussions](https://github.com/PythonVenom/aura-companion/discussions)
+- **Полный список контактов:** [CONTACTS.md](CONTACTS.md)
+
+## Поддержать проект
+
+Aura — независимый open-source проект. Всё локально, без подписок и рекламы. Если проект помогает — можно поддержать разработку:
+
+- **CloudTips** — <вписать ссылку>
+- **DonationAlerts** — <вписать ссылку>
+- **Boosty** — <вписать ссылку>
+
+Средства идут на: тестовое железо (N100, Strix Halo), модели, работу над кросс-платформой.
+
+## Партнёрство
+
+Проект открыт для:
+- **Спонсорства** (модель AMD ↔ Blender: независимый разработчик + open source)
+- **Грантов** на accessibility / AI / Linux
+- **Железо** для тестов (AMD Strix Halo, Intel AI PC, Qualcomm ARM)
+
+Подробности: [PARTNERSHIP.md](PARTNERSHIP.md). Контакт — через GitHub Issues с меткой `partnership`.

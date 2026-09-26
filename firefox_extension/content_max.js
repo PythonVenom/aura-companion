@@ -359,3 +359,37 @@ function clearMessageInput() {
 }
 
 
+
+
+// --- MutationObserver: новые сообщения в чате (Фаза 13.4) ---
+let _lastMsgTs = 0;
+
+function _startObserver() {
+    const observer = new MutationObserver((mutations) => {
+        const now = Date.now();
+        if (now - _lastMsgTs < 3000) return;
+        for (const m of mutations) {
+            for (const node of m.addedNodes) {
+                if (!node || node.nodeType !== 1) continue;
+                if (!node.matches || !node.matches("[role=listitem]")) continue;
+                const rect = node.getBoundingClientRect();
+                if (rect.left < 500) continue;  // только сообщения, не чаты
+                const text = (node.innerText || "").trim();
+                if (!text || text.length < 2) continue;
+                _lastMsgTs = now;
+                try {
+                    browser.runtime.sendMessage({
+                        action: "max_new_message",
+                        text: text.substring(0, 200),
+                        ts: now,
+                    });
+                } catch (e) {}
+                return;
+            }
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    console.log("[Aura Max] observer started");
+}
+
+_startObserver();

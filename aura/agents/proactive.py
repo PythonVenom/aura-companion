@@ -152,30 +152,32 @@ def morning_briefing_trigger(get_agent=None) -> Trigger:
 
 
 def max_new_message_trigger(get_agent) -> Trigger:
-    """Новое сообщение в Максе (по изменению title)."""
+    """Новое сообщение в Максе (по файлу /tmp/aura_new_message.json)."""
+    MSG_PATH = Path("/tmp/aura_new_message.json")
+
     def condition(state: dict) -> bool:
-        if get_agent is None:
-            return False
-        messenger = get_agent("messenger")
-        if messenger is None or not hasattr(messenger, "get_title"):
-            return False
         try:
-            data = messenger.get_title()
-            title = data.get("title", "")
-            if not title:
+            if not MSG_PATH.exists():
                 return False
-            last = state.get("max_last_title", "")
-            if title == last:
+            data = json.loads(MSG_PATH.read_text(encoding="utf-8"))
+            ts = data.get("ts", 0)
+            last_ts = state.get("max_last_msg_ts", 0)
+            if ts <= last_ts:
                 return False
-            state["max_last_title"] = title
-            if title == "MAX":
-                return False
+            state["max_last_msg_ts"] = ts
+            state["max_last_msg_text"] = data.get("text", "")[:200]
             return True
         except Exception:
             return False
 
     def action() -> str:
-        return "Создатель, в Максе новое сообщение."
+        try:
+            data = json.loads(MSG_PATH.read_text(encoding="utf-8"))
+            text = data.get("text", "")[:100]
+            MSG_PATH.unlink(missing_ok=True)
+            return f"Создатель, в Максе новое сообщение: {text}"
+        except Exception:
+            return "Создатель, в Максе новое сообщение."
 
     return Trigger(
         name="max_new_message",

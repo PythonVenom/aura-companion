@@ -178,6 +178,13 @@ async function handleCommand(msg) {
                 return { error: "content script: " + e.toString() };
             }
         }
+        case "max_new_message": {
+            if (nativePort) {
+                try { nativePort.postMessage({ action: "max_new_message", text: msg.text, ts: msg.ts }); } catch (e) {}
+            }
+            return { ok: true };
+        }
+
 	case "ping":
             return { pong: true, version: "1.0" };
 

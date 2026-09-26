@@ -44,6 +44,7 @@ from aura.bootstrap import build_orchestrator
 from aura.status import set_status, clear_status
 from aura.heartbeat import Heartbeat
 from aura.dialog_fsm import get_state as fsm_get, clear_state as fsm_clear, set_state as fsm_set
+from aura.dialogue_manager import DialogueManager, SCENARIOS
 
 
 def _get_agent(orch, name):
@@ -82,6 +83,12 @@ class AuraOrchestrator:
         self.registry = _get_agent(self.orch, "registry")
         self.ducker = _get_agent(self.orch, "music_ducker")
         self.media_pause = _get_agent(self.orch, "media_pause")
+
+        # Dialogue Manager (ADR-013)
+        self.dm = DialogueManager(
+            SCENARIOS,
+            get_agent=lambda n: _get_agent(self.orch, n),
+        )
 
     PAUSE_FLAG = Path("/tmp/aura_pause.flag")
 
@@ -189,6 +196,26 @@ class AuraOrchestrator:
             result = result.replace(a, "")
         return " ".join(result.split()).strip(".,!? ")
 
+    def _handle_dialog(self) -> bool:
+        """DialogueManager активен — слушаем без активации (ADR-013)."""
+        if not self.dm.is_active():
+            return False
+        set_status("listening")
+        heard = self.listener.listen(timeout=5)
+        if not heard:
+            return True
+        print(f"💬 DM: {heard}")
+        # Активация → сброс DM, дальше как обычная команда.
+        if self._is_activated(heard):
+            print("🔔 Активация — сброс DM")
+            self.dm.reset()
+            return False
+        resp = self.dm.process(heard)
+        if resp:
+            print(f"🤖 {resp}")
+            self._say_with_duck(resp)
+        return True
+
     def _handle_fsm(self) -> bool:
         """Обработать FSM-состояние диалога (ADR-012).
 
@@ -224,6 +251,15 @@ class AuraOrchestrator:
             # Команда после активации без «Аура».
             print(f"📝 Команда (после активации): {heard}")
             fsm_clear()
+            # Проверка DM-сценария (ADR-013).
+            scenario = self.dm.detect(heard)
+            if scenario:
+                self.dm.start(scenario)
+                resp = self.dm.process(heard)
+                if resp:
+                    print(f"🤖 {resp}")
+                    self._say_with_duck(resp)
+                return True
             try:
                 import asyncio as _asyncio
                 response = _asyncio.run(self.orch.process(heard))
@@ -319,6 +355,9 @@ class AuraOrchestrator:
 
                 # === DIALOG FSM (ADR-012) ===
                 if self._handle_fsm():
+                    continue
+
+                if self._handle_dialog():
                     continue
 
                 # Слушаем (timeout 5 секунд)

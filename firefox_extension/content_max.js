@@ -32,6 +32,9 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             case "max_clear_input":
                 sendResponse({ ok: true, data: clearMessageInput() });
                 break;
+            case "max_title":
+                sendResponse({ ok: true, data: { title: document.title, url: location.href } });
+                break;
             case "max_read_last":
                 sendResponse({ ok: true, data: readLastMessage() });
                 break;

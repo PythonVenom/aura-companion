@@ -177,6 +177,13 @@ class AgentMessenger(BaseAgent):
             out.append(f"{i}. {c.get('name', '?')[:50]}")
         return "\n".join(out)
 
+    def get_title(self) -> dict:
+        """Вернуть {title, url} активной вкладки Макса."""
+        result = send_command({"action": "max_title"})
+        if result is None or "error" in result:
+            return {}
+        return result.get("data", {})
+
     def find_chat(self, query: str) -> str:
         self._focus_firefox()
         result = send_command({"action": "max_find_chat", "query": query})

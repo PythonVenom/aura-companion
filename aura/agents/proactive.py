@@ -151,10 +151,46 @@ def morning_briefing_trigger(get_agent=None) -> Trigger:
     )
 
 
+def max_new_message_trigger(get_agent) -> Trigger:
+    """Новое сообщение в Максе (по изменению title)."""
+    def condition(state: dict) -> bool:
+        if get_agent is None:
+            return False
+        messenger = get_agent("messenger")
+        if messenger is None or not hasattr(messenger, "get_title"):
+            return False
+        try:
+            data = messenger.get_title()
+            title = data.get("title", "")
+            if not title:
+                return False
+            last = state.get("max_last_title", "")
+            if title == last:
+                return False
+            state["max_last_title"] = title
+            if title == "MAX":
+                return False
+            return True
+        except Exception:
+            return False
+
+    def action() -> str:
+        return "Создатель, в Максе новое сообщение."
+
+    return Trigger(
+        name="max_new_message",
+        priority=8,
+        cooldown_sec=120,
+        condition=condition,
+        action=action,
+    )
+
+
 def default_engine(get_agent=None) -> ProactiveEngine:
     """Стандартный набор триггеров."""
     engine = ProactiveEngine()
     engine.register(morning_briefing_trigger(get_agent))
+    engine.register(max_new_message_trigger(get_agent))
     return engine
 
 

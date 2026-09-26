@@ -164,6 +164,7 @@ async function handleCommand(msg) {
         case "max_clear_input":
         case "max_send_message":
         case "max_read_last":
+        case "max_title":
         case "max_find_chat": {
             const maxTab = await findMaxTab();
             if (!maxTab) return { error: "max tab not found" };

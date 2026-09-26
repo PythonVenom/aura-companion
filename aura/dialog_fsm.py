@@ -27,8 +27,9 @@ from pathlib import Path
 
 
 FSM_PATH = Path(os.environ.get("AURA_FSM_PATH", "/tmp/aura_fsm.json"))
-VALID_STATES = frozenset({"idle", "ask_text", "ask_confirm"})
+VALID_STATES = frozenset({"idle", "awaiting_command", "ask_text", "ask_confirm"})
 TIMEOUT_SEC = 30.0
+TIMEOUT_AWAITING = 10.0
 
 
 def set_state(state: str, chat: str = "", text: str = "") -> None:
@@ -58,12 +59,14 @@ def get_state() -> dict:
         state = data.get("state", "idle")
         if state not in VALID_STATES:
             return {"state": "idle", "chat": "", "text": ""}
-        # Таймаут — только для ask_*.
-        if state in ("ask_text", "ask_confirm"):
-            ts = data.get("ts", 0)
-            if time.time() - ts > TIMEOUT_SEC:
-                clear_state()
-                return {"state": "idle", "chat": "", "text": ""}
+        # Таймаут по состоянию.
+        ts = data.get("ts", 0)
+        if state == "awaiting_command" and time.time() - ts > TIMEOUT_AWAITING:
+            clear_state()
+            return {"state": "idle", "chat": "", "text": ""}
+        if state in ("ask_text", "ask_confirm") and time.time() - ts > TIMEOUT_SEC:
+            clear_state()
+            return {"state": "idle", "chat": "", "text": ""}
         return data
     except Exception:
         return {"state": "idle", "chat": "", "text": ""}

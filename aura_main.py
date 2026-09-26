@@ -43,7 +43,7 @@ from aura.agents.barge_in import AgentBargeIn
 from aura.bootstrap import build_orchestrator
 from aura.status import set_status, clear_status
 from aura.heartbeat import Heartbeat
-from aura.dialog_fsm import get_state as fsm_get, clear_state as fsm_clear
+from aura.dialog_fsm import get_state as fsm_get, clear_state as fsm_clear, set_state as fsm_set
 
 
 def _get_agent(orch, name):
@@ -172,6 +172,8 @@ class AuraOrchestrator:
         "аура", "ауру", "ауры", "ауре", "ауро",
         "ара", "аро", "ару",
         "ура", "уру",
+        "алла", "алло", "ала", "ало", "олла",
+        "аула", "ауло",
         "aura",
     )
 
@@ -216,6 +218,20 @@ class AuraOrchestrator:
         if any(w in text for w in ("отмена", "отменить", "стоп")):
             fsm_clear()
             self._say_with_duck("Отменила")
+            return True
+
+        if state == "awaiting_command":
+            # Команда после активации без «Аура».
+            print(f"📝 Команда (после активации): {heard}")
+            fsm_clear()
+            try:
+                import asyncio as _asyncio
+                response = _asyncio.run(self.orch.process(heard))
+                print(f"🤖 {response}")
+                self._say_with_duck(response)
+            except Exception as e:
+                print(f"⚠️ Ошибка обработки: {e}")
+                self._say_with_duck("Не расслышала")
             return True
 
         if state == "ask_text":
@@ -320,6 +336,7 @@ class AuraOrchestrator:
                 print("🔔 Активация!")
                 cmd = self._strip_activation(heard).strip()
                 if not cmd:
+                    fsm_set("awaiting_command")
                     time.sleep(0.3)
                     continue
 

@@ -177,6 +177,17 @@ class AgentMessenger(BaseAgent):
             out.append(f"{i}. {c.get('name', '?')[:50]}")
         return "\n".join(out)
 
+    def get_last_message_preview(self) -> dict:
+        """Вернуть {chat, preview} первого (свежего) чата."""
+        result = send_command({"action": "max_list_chats"})
+        if result is None or "error" in result:
+            return {}
+        chats = result.get("data", {}).get("chats", [])
+        if not chats:
+            return {}
+        first = chats[0]
+        return {"chat": first.get("name", ""), "preview": first.get("preview", "")}
+
     def get_title(self) -> dict:
         """Вернуть {title, url} активной вкладки Макса."""
         result = send_command({"action": "max_title"})

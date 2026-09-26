@@ -152,30 +152,43 @@ def morning_briefing_trigger(get_agent=None) -> Trigger:
 
 
 def max_new_message_trigger(get_agent) -> Trigger:
-    """Новое сообщение в Максе (по файлу /tmp/aura_new_message.json)."""
-    MSG_PATH = Path("/tmp/aura_new_message.json")
+    """Новое сообщение в Максе — pull через list_chats (без observer)."""
+    PENDING_PATH = Path("/tmp/aura_max_pending.json")
 
     def condition(state: dict) -> bool:
+        if get_agent is None:
+            return False
+        messenger = get_agent("messenger")
+        if messenger is None or not hasattr(messenger, "get_last_message_preview"):
+            return False
         try:
-            if not MSG_PATH.exists():
+            data = messenger.get_last_message_preview()
+            chat = data.get("chat", "")
+            preview = data.get("preview", "")
+            if not chat or not preview:
                 return False
-            data = json.loads(MSG_PATH.read_text(encoding="utf-8"))
-            ts = data.get("ts", 0)
-            last_ts = state.get("max_last_msg_ts", 0)
-            if ts <= last_ts:
+            key = f"{chat}:{preview}"
+            if key == state.get("max_last_key", ""):
                 return False
-            state["max_last_msg_ts"] = ts
-            state["max_last_msg_text"] = data.get("text", "")[:200]
+            state["max_last_key"] = key
+            try:
+                PENDING_PATH.write_text(
+                    json.dumps({"chat": chat, "preview": preview}, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+            except Exception:
+                pass
             return True
         except Exception:
             return False
 
     def action() -> str:
         try:
-            data = json.loads(MSG_PATH.read_text(encoding="utf-8"))
-            text = data.get("text", "")[:100]
-            MSG_PATH.unlink(missing_ok=True)
-            return f"Создатель, в Максе новое сообщение: {text}"
+            data = json.loads(PENDING_PATH.read_text(encoding="utf-8"))
+            chat = data.get("chat", "")
+            if chat:
+                return f"Создатель, новое сообщение от {chat}. Зачитать?"
+            return "Создатель, новое сообщение в Максе. Зачитать?"
         except Exception:
             return "Создатель, в Максе новое сообщение."
 

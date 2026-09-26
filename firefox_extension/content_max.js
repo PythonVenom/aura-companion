@@ -4,7 +4,7 @@
 // По науке: сначала изучаем DOM, потом делаем действия.
 // Все селекторы — эвристики, потому что вёрстка меняется.
 
-console.log("[Aura Max] content script loaded:", location.href);
+console.log("[Aura Max] v2.2 content script loaded:", location.href);
 
 // --- Слушаем команды от background.js ---
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -364,23 +364,54 @@ function clearMessageInput() {
 // --- MutationObserver: новые сообщения в чате (Фаза 13.4) ---
 let _lastMsgTs = 0;
 
+function _getActiveChat() {
+    // Имя активного чата — из верхней области (header).
+    try {
+        const header = document.querySelector("main header, [class*=header]");
+        if (header) {
+            const t = (header.innerText || "").split("\n")[0].trim();
+            if (t && t !== "MAX") return t.substring(0, 50);
+        }
+    } catch (e) {}
+    return "";
+}
+
+function _isHeaderText(text) {
+    // Header: «Окно чата с X», «X — В контакты Заблокировать» — не сообщения.
+    return text.startsWith("Окно чата") || text.length > 300;
+}
+
 function _startObserver() {
     const observer = new MutationObserver((mutations) => {
         const now = Date.now();
-        if (now - _lastMsgTs < 3000) return;
+        if (now - _lastMsgTs < 2000) return;
         for (const m of mutations) {
             for (const node of m.addedNodes) {
                 if (!node || node.nodeType !== 1) continue;
-                if (!node.matches || !node.matches("[role=listitem]")) continue;
-                const rect = node.getBoundingClientRect();
-                if (rect.left < 500) continue;  // только сообщения, не чаты
-                const text = (node.innerText || "").trim();
+                // Родитель-сообщение (новое сообщение внутри существующего listitem).
+                let target = node;
+                if (!target.matches || !target.matches("[role=listitem]")) {
+                    target = node.closest ? node.closest("[role=listitem]") : null;
+                }
+                if (!target) continue;
+                const rect = target.getBoundingClientRect();
+                if (rect.left < 400) continue;  // только правая панель (сообщения)
+                if (rect.width > 1000) continue;  // слишком широкое — контейнер, не сообщение
+                const text = (target.innerText || "").trim();
                 if (!text || text.length < 2) continue;
+                // Только сообщения с буквами (отбрасываем timestamp «00:05»).
+                if (!/[а-яА-Яa-zA-Z]/.test(text)) continue;
+                if (_isHeaderText(text)) continue;
+                // Отбрасываем системные строки.
+                if (text.startsWith("Чат") || text.startsWith("Был(") || text.startsWith("Была")) continue;
                 _lastMsgTs = now;
+                const chat = _getActiveChat();
+                console.log("[Aura Max] new message:", text.substring(0, 50), "| chat:", chat);
                 try {
                     browser.runtime.sendMessage({
                         action: "max_new_message",
-                        text: text.substring(0, 200),
+                        text: text.substring(0, 500),
+                        chat: chat,
                         ts: now,
                     });
                 } catch (e) {}

@@ -31,10 +31,6 @@ if command -v pactl > /dev/null 2>&1; then
         pactl load-module module-echo-cancel > /dev/null 2>&1 || true
         sleep 2
     fi
-    if [ "$(pactl get-default-source 2>/dev/null)" != "echo-cancel-source" ]; then
-        echo "🎙️ Устанавливаю default source = echo-cancel-source"
-        pactl set-default-source echo-cancel-source > /dev/null 2>&1 || true
-    fi
 fi
 
 echo "🦾 Запуск Ауры (модульная архитектура)"

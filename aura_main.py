@@ -168,6 +168,25 @@ class AuraOrchestrator:
         self._set_barge_speaking(False)
         self._duck_off()
 
+    ACTIVATION = (
+        "аура", "ауру", "ауры", "ауре", "ауро",
+        "ара", "аро", "ару",
+        "ура", "уру",
+        "aura",
+    )
+
+    @classmethod
+    def _is_activated(cls, heard: str) -> bool:
+        text = heard.lower()
+        return any(a in text for a in cls.ACTIVATION)
+
+    @classmethod
+    def _strip_activation(cls, heard: str) -> str:
+        result = heard.lower()
+        for a in cls.ACTIVATION:
+            result = result.replace(a, "")
+        return " ".join(result.split()).strip(".,!? ")
+
     def _handle_fsm(self) -> bool:
         """Обработать FSM-состояние диалога (ADR-012).
 
@@ -294,14 +313,12 @@ class AuraOrchestrator:
                     time.sleep(0.1)
                     continue
 
-                if 'аура' not in heard.lower() and 'aura' not in heard.lower():
+                if not self._is_activated(heard):
                     time.sleep(0.1)
                     continue
 
                 print("🔔 Активация!")
-                cmd = heard.replace('аура', '').replace('aura', '').strip()
-                cmd = cmd.replace('Аура', '').replace('Aura', '').strip()
-
+                cmd = self._strip_activation(heard).strip()
                 if not cmd:
                     time.sleep(0.3)
                     continue

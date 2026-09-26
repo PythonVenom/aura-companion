@@ -155,32 +155,64 @@ def max_new_message_trigger(get_agent) -> Trigger:
     """Новое сообщение в Максе — pull через list_chats (без observer)."""
     PENDING_PATH = Path("/tmp/aura_max_pending.json")
 
+    def _fetch_previews(messenger):
+        """get_all_previews с fallback на get_last_message_preview (Strangler Fig)."""
+        try:
+            if hasattr(messenger, "get_all_previews"):
+                return messenger.get_all_previews() or []
+            if hasattr(messenger, "get_last_message_preview"):
+                one = messenger.get_last_message_preview() or {}
+                if one.get("chat") and one.get("preview"):
+                    return [one]
+        except Exception:
+            pass
+        return []
+
     def condition(state: dict) -> bool:
         if get_agent is None:
             return False
         messenger = get_agent("messenger")
-        if messenger is None or not hasattr(messenger, "get_last_message_preview"):
+        if messenger is None:
             return False
-        try:
-            data = messenger.get_last_message_preview()
-            chat = data.get("chat", "")
-            preview = data.get("preview", "")
+
+        previews = _fetch_previews(messenger)
+
+        # Фильтр: пустые и «Вы: ...» (Bug 3 — свои сообщения).
+        filtered = []
+        for p in previews:
+            chat = p.get("chat", "")
+            preview = p.get("preview", "")
             if not chat or not preview:
-                return False
-            key = f"{chat}:{preview}"
-            if key == state.get("max_last_key", ""):
-                return False
-            state["max_last_key"] = key
-            try:
-                PENDING_PATH.write_text(
-                    json.dumps({"chat": chat, "preview": preview}, ensure_ascii=False),
-                    encoding="utf-8",
-                )
-            except Exception:
-                pass
-            return True
-        except Exception:
+                continue
+            if preview.strip().startswith("Вы:"):
+                continue
+            filtered.append({"chat": chat, "preview": preview})
+
+        seen = set(state.get("max_seen_keys", []))
+        current = {f"{p['chat']}:{p['preview']}" for p in filtered}
+
+        # Первый прогон — populate без триггера.
+        if not seen:
+            state["max_seen_keys"] = sorted(current)
             return False
+
+        new_keys = current - seen
+        if not new_keys:
+            return False
+
+        # Выбираем первое новое (Bug 4 — по имени, не по индексу).
+        new_one = next(p for p in filtered
+                       if f"{p['chat']}:{p['preview']}" in new_keys)
+        state["max_seen_keys"] = sorted(seen | current)
+        try:
+            PENDING_PATH.write_text(
+                json.dumps({"chat": new_one["chat"], "preview": new_one["preview"]},
+                           ensure_ascii=False),
+                encoding="utf-8",
+            )
+        except Exception:
+            pass
+        return True
 
     def action() -> str:
         try:

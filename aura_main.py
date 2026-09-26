@@ -239,6 +239,30 @@ class AuraOrchestrator:
         text = heard.lower().strip()
         print(f"💬 FSM[{state}]: {heard}")
 
+        # В pending_read сначала проверяем «да/нет» (Bug 1 fix).
+        # T-one часто добавляет «аура» рефлекторно — не считаем это сбросом.
+        if state == "pending_read":
+            if any(w in text for w in ("да", "зачитай", "читай", "конечно", "давай")):
+                fsm_clear()
+                msg_text = fsm.get("text", "")
+                if msg_text:
+                    self._say_with_duck(f"Сообщение: {msg_text}")
+                else:
+                    self._say_with_duck("Сообщение пустое")
+                return True
+            if any(w in text for w in ("нет", "не надо", "потом", "позже", "отмена", "стоп", "отменить")):
+                fsm_clear()
+                self._say_with_duck("Хорошо")
+                return True
+            # Если «аура» — сброс, новая команда.
+            if "аура" in text or "aura" in text:
+                print("🔔 Активация — сброс FSM")
+                fsm_clear()
+                return False
+            # Другое — напомнить.
+            self._say_with_duck("Зачитать?")
+            return True
+
         # Новая «Аура ...» — сброс.
         if "аура" in text or "aura" in text:
             print("🔔 Активация — сброс FSM")
@@ -249,23 +273,6 @@ class AuraOrchestrator:
         if any(w in text for w in ("отмена", "отменить", "стоп")):
             fsm_clear()
             self._say_with_duck("Отменила")
-            return True
-
-        if state == "pending_read":
-            # Ответ на «Зачитать?» (Фаза 13.5).
-            fsm_clear()
-            if any(w in text for w in ("да", "зачитай", "читай", "конечно", "давай")):
-                msg_text = fsm.get("text", "")
-                if msg_text:
-                    self._say_with_duck(f"Сообщение: {msg_text}")
-                else:
-                    self._say_with_duck("Сообщение пустое")
-                return True
-            if any(w in text for w in ("нет", "не надо", "потом", "позже", "отмена")):
-                self._say_with_duck("Хорошо")
-                return True
-            # Нераспознанное — напомнить.
-            self._say_with_duck("Зачитать?")
             return True
 
         if state == "awaiting_command":

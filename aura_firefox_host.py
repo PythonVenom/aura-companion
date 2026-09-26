@@ -105,17 +105,6 @@ def firefox_reader():
             print("[Host] Firefox closed", file=sys.stderr)
             break
 
-        # Уведомление от content script — писать в файл.
-        if msg.get('action') == 'max_new_message':
-            try:
-                import pathlib as _pl
-                _pl.Path('/tmp/aura_new_message.json').write_text(
-                    json.dumps(msg, ensure_ascii=False), encoding='utf-8'
-                )
-            except Exception:
-                pass
-            continue
-
         msg_id = msg.get('id')
         with pending_lock:
             conn = pending.pop(msg_id, None)

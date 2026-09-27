@@ -216,3 +216,25 @@ def test_ics_export(tmp_path, monkeypatch):
     assert "BEGIN:VCALENDAR" in ics
     assert "BEGIN:VEVENT" in ics
     assert "2026-09-28" in ics or "20260928" in ics
+
+
+def test_day_summary_morning(tmp_path, monkeypatch):
+    """Утренняя сводка: события сегодня + неотвеченные."""
+    from aura.agents import chat_sense
+    from datetime import datetime as dt
+    monkeypatch.setattr(chat_sense, "CALENDAR_PATH", tmp_path / "cal.json")
+    today = dt.now().strftime("%Y-%m-%d")
+    chat_sense.save_event({
+        "when": f"{today}T14:00",
+        "chat": "Аня",
+        "text": "массаж",
+        "trigger": "массаж",
+    })
+    s = chat_sense.summary_day()
+    assert "Аня" in s or "14:00" in s
+
+
+def test_day_summary_empty(tmp_path, monkeypatch):
+    from aura.agents import chat_sense
+    monkeypatch.setattr(chat_sense, "CALENDAR_PATH", tmp_path / "cal.json")
+    assert chat_sense.summary_day() == ""

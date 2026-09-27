@@ -78,6 +78,14 @@ def purge_old(now: datetime | None = None) -> None:
         _save_calendar(fresh)
 
 
+def summary_day(now: datetime | None = None) -> str:
+    """Комбинированная сводка: события сегодня. Позже — + неотвеченные."""
+    today = summary_today(now=now)
+    if today:
+        return today
+    return ""
+
+
 def summary_tomorrow(now: datetime | None = None) -> str:
     """Голосовая сводка событий на завтра."""
     if now is None:
@@ -290,6 +298,71 @@ def extract_events(previews: list, now: datetime | None = None) -> list:
             "trigger": trigger,
         })
     return out
+
+
+_ACTIONS = {
+    "call": ("позвони", "позвонить", "набери", "созвонись"),
+    "meet": ("встреча", "встречу", "встретиться", "увидимся"),
+    "remind": ("напомни", "напомнить", "не забудь"),
+    "pay": ("оплати", "оплатить", "заплати", "переведи"),
+}
+
+
+def parse_action_ru(text: str, now: datetime | None = None) -> dict | None:
+    """Извлечь действие из текста (для чатов).
+
+    Возвращает {'action', 'target', 'when', 'text'} или None.
+    """
+    import re
+    if not text:
+        return None
+    if now is None:
+        now = datetime.now()
+    low = text.lower().strip()
+
+    # Определить действие
+    action = None
+    trigger_word = ""
+    for act, words in _ACTIONS.items():
+        for w in words:
+            if w in low:
+                action = act
+                trigger_word = w
+                break
+        if action:
+            break
+
+    if not action:
+        return None
+
+    # Целевой объект — после триггера
+    idx = low.index(trigger_word) + len(trigger_word)
+    rest = text[idx:].strip(" .,!?:;")
+
+    # Отрезаем временную часть
+    time_m = re.search(r"\s+в\s+\d{1,2}:?\d{0,2}", rest)
+    target = rest
+    if time_m:
+        target = rest[:time_m.start()].strip()
+    elif " завтра" in rest:
+        target = rest.split(" завтра")[0].strip()
+    elif " сегодня" in rest:
+        target = rest.split(" сегодня")[0].strip()
+
+    # Отрезаем «до X»
+    if " до " in target:
+        target = target.split(" до ")[0].strip()
+
+    # Парсим дату
+    when = parse_date_ru(text, now=now)
+    when_str = when.strftime("%Y-%m-%dT%H:%M") if when else ""
+
+    return {
+        "action": action,
+        "target": target[:60],
+        "when": when_str,
+        "text": text[:120],
+    }
 
 
 def prioritize(items: list, vip: list | None = None) -> list:

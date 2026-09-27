@@ -65,3 +65,27 @@ def test_pending_read_garbage_repeats(orch, monkeypatch):
     assert result is True
     assert cleared == []
     orch._say_with_duck.assert_called_once_with("Зачитать?")
+
+
+def test_pending_read_da_ty_pro(orch, monkeypatch):
+    """Bug 11: ASR коверкает «да аура зачитай» в «да ты про».
+    Первое слово «да» — подтверждение, даже если остальное мусор."""
+    result, cleared = _run(orch, monkeypatch, "pending_read", "да ты про")
+    assert result is True
+    assert cleared == [True]
+    orch._say_with_duck.assert_called_once_with("Сообщение: привет из макса")
+
+
+def test_pending_read_net_chto_to(orch, monkeypatch):
+    """«нет что-то» — отказ по первому слову."""
+    result, cleared = _run(orch, monkeypatch, "pending_read", "нет что то не то")
+    assert result is True
+    assert cleared == [True]
+    orch._say_with_duck.assert_called_once_with("Хорошо")
+
+
+def test_pending_read_short_net(orch, monkeypatch):
+    result, cleared = _run(orch, monkeypatch, "pending_read", "нет")
+    assert result is True
+    assert cleared == [True]
+    orch._say_with_duck.assert_called_once_with("Хорошо")

@@ -217,7 +217,7 @@ def extract_events(previews: list, now: datetime | None = None) -> list:
         now = datetime.now()
     out = []
     for p in previews:
-        chat = p.get("chat", "").strip()
+        chat = (p.get("chat") or p.get("name") or "").strip()
         prev = p.get("preview", "").strip()
         if not chat or not prev:
             continue
@@ -249,14 +249,15 @@ def find_unanswered(previews: list) -> list:
     """
     out = []
     for p in previews:
-        chat = p.get("chat", "").strip()
+        # Bridge отдаёт "name", наш код — "chat". Поддерживаем оба.
+        chat = (p.get("chat") or p.get("name") or "").strip()
         prev = p.get("preview", "").strip()
         if not chat or not prev:
             continue
         if prev.startswith("Вы:"):
             continue
-        # Системные/инфо-чаты
-        if any(x in chat.lower() for x in ("коды подтверждения", "max на iphone")):
+        _sys = ("коды подтверждения", "max на iphone", "аура")
+        if any(x in chat.lower() for x in _sys):
             continue
         out.append({"chat": chat, "preview": prev, "reason": "unanswered"})
     return out

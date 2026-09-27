@@ -13,11 +13,6 @@ import pytest
 from aura.agents.media_pause import AgentMediaPause
 from aura.core.protocol import AgentRequest, AgentStatus
 
-
-@pytest.fixture
-import pytest
-
-
 @pytest.fixture(autouse=True)
 def _set_vk_active():
     """Bug 14 ph.3: media_pause ловит только при last_active=vk/mpris."""
@@ -28,6 +23,7 @@ def _set_vk_active():
 
 
 
+@pytest.fixture
 def agent():
     with patch("aura.agents.media_pause.shutil.which", return_value="/usr/bin/playerctl"):
         return AgentMediaPause()

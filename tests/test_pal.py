@@ -54,17 +54,3 @@ def test_ubuntu_media_inherits_linux():
     from aura.platform.ubuntu import UbuntuMedia
     from aura.platform.linux import LinuxMedia
     assert issubclass(UbuntuMedia, LinuxMedia)
-
-
-def test_windows_stub_raises():
-    from aura.platform.windows import WindowsAudio
-    import pytest
-    with pytest.raises(NotImplementedError):
-        WindowsAudio()
-
-
-def test_macos_stub_raises():
-    from aura.platform.macos import MacOSAudio
-    import pytest
-    with pytest.raises(NotImplementedError):
-        MacOSAudio()

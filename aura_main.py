@@ -42,6 +42,7 @@ from aura.agents.barge_in import AgentBargeIn
 # Новая модульная сборка
 from aura.bootstrap import build_orchestrator
 from aura.status import set_status, clear_status
+from aura import settings
 from aura.heartbeat import Heartbeat
 from aura.dialog_fsm import get_state as fsm_get, clear_state as fsm_clear, set_state as fsm_set
 from aura.dialogue_manager import DialogueManager, SCENARIOS
@@ -180,6 +181,22 @@ class AuraOrchestrator:
         self._set_barge_speaking(False)
         self._duck_off()
 
+    @classmethod
+    def _activation_words(cls):
+        """Слова активации из settings + базовые."""
+        base = (
+            "аура", "ауру", "ауры", "ауре", "ауро",
+            "ара", "аро", "ару",
+            "ура", "уру",
+            "алла", "алло", "ала", "ало", "олла",
+            "аула", "ауло", "aura",
+        )
+        try:
+            custom = settings.get_activation_words()
+            return tuple(custom) + base
+        except Exception:
+            return base
+
     ACTIVATION = (
         "аура", "ауру", "ауры", "ауре", "ауро",
         "ара", "аро", "ару",
@@ -192,7 +209,7 @@ class AuraOrchestrator:
     @classmethod
     def _is_activated(cls, heard: str) -> bool:
         text = heard.lower()
-        return any(a in text for a in cls.ACTIVATION)
+        return any(a in text for a in cls._activation_words())
 
     @classmethod
     def _strip_activation(cls, heard: str) -> str:

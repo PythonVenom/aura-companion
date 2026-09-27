@@ -86,6 +86,18 @@ class AgentSpeaker(MicroAgent):
             except Exception as e:
                 print(f"❌ Ошибка озвучивания: {e}")
 
+    def _get_voice_settings(self):
+        """Получить настройки голоса из settings."""
+        try:
+            from aura import settings as _s
+            return {
+                "voice": _s.get("tts_voice", "ru_RU-irina-medium"),
+                "speed": float(_s.get("tts_speed", 1.0)),
+                "volume": int(_s.get("volume", 100)),
+            }
+        except Exception:
+            return {"voice": "ru_RU-irina-medium", "speed": 1.0, "volume": 100}
+
     def _make_text_smart(self, text):
         if 'создатель' not in text.lower():
             if len(text) < 50:

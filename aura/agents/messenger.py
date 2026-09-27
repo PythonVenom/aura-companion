@@ -19,10 +19,44 @@
 """
 
 from __future__ import annotations
+import time
 
 from aura.core.bridge import send_command, error_text
 from aura.dialog_fsm import set_state as fsm_set
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
+
+
+# --- Bug 13: помним свои отправленные сообщения ---
+_sent_recent: list = []   # [(chat, text, ts)]
+_SENT_TTL = 300.0         # 5 минут
+
+
+def _remember_sent(chat: str, text: str) -> None:
+    """Запомнить: мы только что отправили text в chat."""
+    if not chat or not text:
+        return
+    _sent_recent.append((chat, text.strip(), time.time()))
+    cutoff = time.time() - _SENT_TTL
+    _sent_recent[:] = [x for x in _sent_recent if x[2] > cutoff]
+
+
+def is_own_message(chat: str, preview: str) -> bool:
+    """True если preview — наше недавнее сообщение (Bug 13).
+
+    MAX не всегда добавляет «Вы:», поэтому проверяем по совпадению
+    с недавно отправленным текстом.
+    """
+    if not preview or not chat:
+        return False
+    p = preview.strip().lower()
+    for c, t, ts in _sent_recent:
+        if time.time() - ts > _SENT_TTL:
+            continue
+        if c != chat:
+            continue
+        if t and t.lower() in p:
+            return True
+    return False
 
 
 class AgentMessenger(BaseAgent):
@@ -259,6 +293,7 @@ class AgentMessenger(BaseAgent):
             return error_text(send)
         sd = send.get("data", {})
         if sd.get("typed"):
+            _remember_sent(chat, message)   # Bug 13
             return f"🌐 Ввела текст в чат «{chat}»"
         return "🌐 Не удалось ввести текст"
 

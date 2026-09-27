@@ -18,6 +18,7 @@ import time
 from datetime import datetime
 from dataclasses import dataclass
 import re
+from aura.agents.messenger import is_own_message
 from pathlib import Path
 from typing import Callable
 
@@ -212,6 +213,12 @@ def max_new_message_trigger(get_agent) -> Trigger:
                 continue
             if preview.strip().startswith("Вы:"):
                 continue
+            # Bug 13: не триггерить на собственные отправленные.
+            try:
+                if is_own_message(chat, preview):
+                    continue
+            except Exception:
+                pass
             filtered.append({"chat": chat, "preview": preview})
 
         seen = set(state.get("max_seen_keys", []))

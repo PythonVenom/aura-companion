@@ -24,6 +24,7 @@ from aura.agents import (
     AgentAtSpi,
     AgentMcp,
     AgentTelegram,
+    AgentVKWeb,
     AgentBrowserTabs,
     AgentChecklist,
     AgentContextMemory,
@@ -150,6 +151,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentAtSpi, modules_config)
     _try_register(orch, AgentMcp, modules_config)
     _try_register(orch, AgentTelegram, modules_config)
+    _try_register(orch, AgentVKWeb, modules_config)
 
     # --- Уровень 7: специфичные "открой X" — раньше AppLauncher ---
     # Порядок важен: browser_tabs специфичнее — «найди вкладку X»

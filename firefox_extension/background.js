@@ -30,6 +30,11 @@ function connectNative() {
     }
 }
 
+async function findVKTab() {
+    const tabs = await browser.tabs.query({ url: "*://vk.com/*" });
+    return tabs[0] || null;
+}
+
 async function findMaxTab() {
     // Ищем открытую вкладку max.ru. Если нет — null.
     const tabs = await browser.tabs.query({});
@@ -166,6 +171,19 @@ async function handleCommand(msg) {
         case "max_send_message":
         case "max_read_last":
         case "max_title":
+        case "vk_list_shortcuts":
+        case "vk_navigate":
+        case "vk_current": {
+            const vkTab = await findVKTab();
+            if (!vkTab) return { error: "vk tab not found" };
+            const payload = { action: action };
+            if (msg.section) payload.section = msg.section;
+            try {
+                return await browser.tabs.sendMessage(vkTab.id, payload);
+            } catch (e) {
+                return { error: "content script: " + e.toString() };
+            }
+        }
         case "max_find_chat": {
             const maxTab = await findMaxTab();
             if (!maxTab) return { error: "max tab not found" };

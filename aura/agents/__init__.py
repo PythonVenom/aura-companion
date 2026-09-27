@@ -36,6 +36,7 @@ from aura.agents.updates import AgentUpdates
 from aura.agents.vault import AgentVault
 from aura.agents.vision import AgentVision
 from aura.agents.vk_music import AgentVKMusic
+from aura.agents.vk_web import AgentVKWeb
 from aura.agents.window_control import AgentWindowControl
 from aura.agents.window_manager import AgentWindowManager
 
@@ -73,4 +74,5 @@ __all__ = [
     "AgentAtSpi",
     "AgentMcp",
     "AgentTelegram",
+    "AgentVKWeb",
 ]

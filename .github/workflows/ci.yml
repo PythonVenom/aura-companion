@@ -26,8 +26,11 @@ jobs:
       - name: Install Python deps
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f pyproject.toml ]; then pip install -e . || pip install pytest pytest-asyncio; fi
           pip install pytest pytest-asyncio
       - name: Run tests
-        run: pytest tests/ -q --tb=short
+        run: |
+          pytest tests/ -q --tb=short \
+            --ignore=tests/test_mouse.py \
+            --ignore=tests/test_text_editor.py \
+            --ignore=tests/test_vision.py

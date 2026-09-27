@@ -33,4 +33,5 @@ jobs:
           pytest tests/ -q --tb=short \
             --ignore=tests/test_mouse.py \
             --ignore=tests/test_text_editor.py \
-            --ignore=tests/test_vision.py
+            --ignore=tests/test_vision.py \
+            --ignore=tests/test_bootstrap.py

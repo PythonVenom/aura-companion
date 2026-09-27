@@ -10,6 +10,7 @@ from aura.agents.audio_pult import AgentAudioPult
 from aura.agents.audio_router import AgentAudioRouter
 from aura.agents.brain import AgentBrain
 from aura.agents.browser_tabs import AgentBrowserTabs
+from aura.agents.checklist import AgentChecklist
 from aura.agents.context_memory import AgentContextMemory
 from aura.agents.focus_switch import AgentFocusSwitch
 from aura.agents.functions import AgentFunctions
@@ -65,4 +66,5 @@ __all__ = [
     "AgentVKMusic",
     "AgentBrain",
     "AgentToolRouter",
+    "AgentChecklist",
 ]

@@ -8,6 +8,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from aura.agents.base import MicroAgent
+
 
 CHECKLIST_PATH = Path.home() / "aura_private" / "CHECKLIST.md"
 _UNCHECKED = re.compile(r"^\s*-\s*\[\s*\]\s*(.+?)\s*$")
@@ -77,4 +79,64 @@ def summary() -> str:
     return f"В чек-листе {len(items)}: {head}{tail}"
 
 
-__all__ = ["read_today", "add_item", "complete_item", "summary", "CHECKLIST_PATH"]
+# === AgentChecklist: BaseAgent обёртка ===
+
+from aura.core.protocol import AgentRequest, AgentResponse, AgentStatus
+
+
+class AgentChecklist(MicroAgent):
+    """Голосовое управление чек-листом."""
+
+    KEYWORDS = (
+        "чек-лист", "чеклист", "чек лист",
+        "что осталось", "что в чек",
+        "добавь в чек", "запиши в чек",
+        "выполнил", "выполнено", "готово в чек",
+    )
+
+    def __init__(self):
+        super().__init__("checklist", "Чек-лист")
+
+    def can_handle(self, request: AgentRequest) -> bool:
+        text = request.text.lower()
+        return any(kw in text for kw in self.KEYWORDS)
+
+    async def handle(self, request: AgentRequest) -> AgentResponse:
+        if not self.can_handle(request):
+            return AgentResponse.not_handled(self.name)
+        text = request.text
+        low = text.lower().strip()
+
+        # «выполнил X» / «готово X в чек»
+        for kw in ("выполнил ", "выполнено ", "готово "):
+            if kw in low:
+                idx = low.index(kw) + len(kw)
+                item = text[idx:].strip(" .,!?:")
+                item = item.replace("в чек-листе", "").replace("в чек", "").strip()
+                if item and complete_item(item):
+                    return AgentResponse.ok(f"✅ Отметила: {item}", self.name)
+                return AgentResponse.ok(f"❌ Не нашла: {item}", self.name)
+
+        # «добавь в чек-лист: X» / «запиши в чек: X»
+        for kw in ("добавь в чек-лист", "добавь в чеклист", "добавь в чек",
+                   "запиши в чек-лист", "запиши в чеклист", "запиши в чек"):
+            if kw in low:
+                idx = low.index(kw) + len(kw)
+                item = text[idx:].strip(" :.,!?")
+                if item:
+                    add_item(item)
+                    return AgentResponse.ok(f"✅ Добавила: {item}", self.name)
+                return AgentResponse.ok("Что добавить?", self.name)
+
+        # «что осталось» / «чек-лист» → сводка
+        s = summary()
+        if s:
+            return AgentResponse.ok(s, self.name)
+        return AgentResponse.ok("Чек-лист пуст 🎉", self.name)
+
+
+
+__all__ = [
+    "read_today", "add_item", "complete_item", "summary",
+    "CHECKLIST_PATH", "AgentChecklist",
+]

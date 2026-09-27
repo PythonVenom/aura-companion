@@ -22,6 +22,7 @@ from aura.agents import (
     AgentAudioRouter,
     AgentBrain,
     AgentBrowserTabs,
+    AgentChecklist,
     AgentContextMemory,
     AgentFocusSwitch,
     AgentFunctions,

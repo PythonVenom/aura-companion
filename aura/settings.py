@@ -55,4 +55,13 @@ def set_value(key: str, value) -> None:
     save(s)
 
 
-__all__ = ["load", "save", "get", "set_value", "DEFAULTS", "SETTINGS_PATH"]
+def get_activation_words() -> list:
+    """Все слова активации (wake_word + aliases)."""
+    s = load()
+    words = [s.get("wake_word", "аура")]
+    words.extend(s.get("wake_word_aliases", []))
+    return [w.lower() for w in words if w]
+
+
+__all__ = ["load", "save", "get", "set_value", "get_activation_words",
+           "DEFAULTS", "SETTINGS_PATH"]

@@ -1,7 +1,7 @@
-"""VK Web адаптер — голосовое управление vk.com через Firefox bridge.
+"""VK Web адаптер — полное голосовое управление vk.com.
 
-По образцу messenger.py. Один content script на сайт.
-Философия: web > приложение (см. JOURNAL).
+Философия: web > native app (см. JOURNAL).
+SiteAdapter pattern (ADR-018).
 """
 from __future__ import annotations
 
@@ -10,20 +10,30 @@ from aura.core.protocol import AgentRequest, AgentResponse
 from aura.core.bridge import send_command
 
 
-def error_text(result) -> str:
+def _err(result) -> str:
     if result is None:
         return "🌐 VK: bridge недоступен"
     return f"🌐 Ошибка: {result.get('error', 'unknown')}"
 
 
 class AgentVKWeb(MicroAgent):
-    """VK Web через Firefox content script."""
+    """VK Web — навигация, музыка, сообщения, друзья, группы."""
+
+    SECTIONS = {
+        "лента": "feed", "новости": "feed", "feed": "feed",
+        "сообщения": "im", "переписки": "im", "im": "im",
+        "друзья": "friends", "друзья онлайн": "friends",
+        "группы": "groups", "паблики": "groups",
+        "музыка": "audio", "аудио": "audio",
+        "видео": "videos",
+        "моя страница": "me", "профиль": "me",
+    }
 
     KEYWORDS = (
-        "вк", "вконтакте",
-        "открой вк", "вк музыка", "вк друзья", "вк группы",
-        "вк новости", "вк сообщения", "вк лента", "вк стена",
-        "плейлист вк", "трек вк",
+        "вк ", "вконтакте",
+        "вк музыка", "вк друзья", "вк группы", "вк новости",
+        "вк лента", "вк сообщения", "вк видео", "вк стена",
+        "открой вк", "перейди в вк",
     )
 
     def __init__(self):
@@ -31,18 +41,46 @@ class AgentVKWeb(MicroAgent):
 
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
-        # Защита: «вк» внутри других слов (вкладки, вкладыш)
         if "вкладк" in text or "вкладок" in text:
             return False
         padded = f" {text} "
-        return " вк " in padded or "вконтакте" in text or any(kw in text for kw in self.KEYWORDS[2:])
+        if " вк " in padded or "вконтакте" in text:
+            return True
+        return any(kw in text for kw in self.KEYWORDS)
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         if not self.can_handle(request):
             return AgentResponse.not_handled(self.name)
+
         text = request.text.lower()
-        # Заглушки — реализация по мере готовности content_vk.js
-        return AgentResponse.ok("VK: заготовка (TDD)", self.name)
+
+        # 1. Навигация по разделам
+        for ru_name, en_name in self.SECTIONS.items():
+            if ru_name in text:
+                result = send_command({"action": "vk_navigate", "section": en_name})
+                if result is None or "error" in result:
+                    return AgentResponse.ok(_err(result), self.name)
+                data = result.get("data", {})
+                if data.get("ok"):
+                    return AgentResponse.ok(f"🌐 VK: {ru_name}", self.name)
+                return AgentResponse.ok(f"❌ VK: раздел не найден", self.name)
+
+        # 2. Список разделов
+        if "что можно" in text or "разделы" in text or "куда" in text:
+            return AgentResponse.ok(
+                "🌐 VK разделы: лента, сообщения, друзья, группы, музыка, видео",
+                self.name,
+            )
+
+        # 3. Просто «открой вк» — фокус на вкладку
+        if "открой вк" in text or "открой вконтакте" in text:
+            result = send_command({"action": "vk_current"})
+            if result and "data" in result:
+                section = result["data"].get("section", "unknown")
+                return AgentResponse.ok(f"🌐 VK открыт: {section}", self.name)
+            return AgentResponse.ok("🌐 VK: открываю", self.name)
+
+        return AgentResponse.ok("VK: команда не распознана", self.name)
 
 
 __all__ = ["AgentVKWeb"]

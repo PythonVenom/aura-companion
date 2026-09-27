@@ -15,7 +15,7 @@ Messenger пишет состояние в файл, aura_main.py читает.
 - ask_text    — открыт чат, ждём текст сообщения
 - ask_confirm — текст введён, ждём «отправить? да/нет»
 
-Таймаут — 30 секунд. При таймауте — НЕ отправляем.
+Таймауты: awaiting_command 10с, pending_read 180с, ask_* 30с.
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ FSM_PATH = Path(os.environ.get("AURA_FSM_PATH", "/tmp/aura_fsm.json"))
 VALID_STATES = frozenset({"idle", "awaiting_command", "pending_read", "ask_text", "ask_confirm"})
 TIMEOUT_SEC = 30.0
 TIMEOUT_AWAITING = 10.0
-TIMEOUT_PENDING_READ = 60.0
+TIMEOUT_PENDING_READ = 180.0  # Bug 11: пожилым нужно 3 мин на ответ
 
 
 def set_state(state: str, chat: str = "", text: str = "") -> None:

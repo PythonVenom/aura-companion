@@ -32,6 +32,8 @@ class AgentTelegram(MicroAgent):
         padded = f" {text} "
         if " тг " in padded or "телеграм" in text or "телега" in text:
             return True
+        if "telegram" in text or " tg " in padded:
+            return True
         return any(kw in text for kw in self.KEYWORDS)
 
     async def handle(self, request: AgentRequest) -> AgentResponse:

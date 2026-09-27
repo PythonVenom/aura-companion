@@ -242,7 +242,11 @@ class AuraOrchestrator:
 
         chat = fsm.get("chat", "")
         # Слушаем БЕЗ активации «Аура».
-        heard = self.listener.listen(timeout=5)
+        try:
+            heard = self.listener.listen(timeout=5)
+        except Exception as e:
+            print(f"⚠️ FSM listen error: {e}")
+            return True
         if not heard:
             return True
 

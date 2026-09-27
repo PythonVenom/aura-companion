@@ -29,26 +29,37 @@ def _run(cmd: list, timeout: int = 3) -> str:
 
 
 def detect_cpu() -> dict:
-    """Определить CPU: модель, ядра, потоки."""
+    """Определить CPU: модель, ядра, потоки.
+
+    Локаль-независимо: LANG=C lscpu.
+    """
     info = {"cores": 0, "threads": 0, "model": ""}
     try:
-        r = _run(["lscpu"])
+        env = dict(os.environ)
+        env["LANG"] = "C"
+        r = subprocess.run(
+            ["lscpu"], capture_output=True, text=True, timeout=3, env=env,
+        ).stdout
         for line in r.splitlines():
-            if ":" in line:
-                k, v = line.split(":", 1)
-                k = k.strip()
-                v = v.strip()
-                if k == "Model name":
-                    info["model"] = v
-                elif k == "CPU(s)":
+            if ":" not in line:
+                continue
+            k, v = line.split(":", 1)
+            k = k.strip().lower()
+            v = v.strip()
+            if k == "model name":
+                info["model"] = v
+            elif k == "cpu(s)":
+                try:
                     info["threads"] = int(v)
-                elif k == "Core(s) per socket":
-                    cores_per = int(v)
-                    sockets = 1
-                    for ln in r.splitlines():
-                        if ln.startswith("Socket(s):"):
-                            sockets = int(ln.split(":", 1)[1].strip())
-                    info["cores"] = cores_per * sockets
+                except ValueError:
+                    pass
+            elif k == "core(s) per socket":
+                cores_per = int(v)
+                sockets = 1
+                for ln in r.splitlines():
+                    if ln.lower().startswith("socket(s):"):
+                        sockets = int(ln.split(":", 1)[1].strip())
+                info["cores"] = cores_per * sockets
     except Exception:
         pass
     return info

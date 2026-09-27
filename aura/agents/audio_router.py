@@ -233,12 +233,46 @@ class AgentAudioRouter(BaseAgent):
             timeout=3,
         )
 
+    def _ensure_real_sink(self) -> None:
+        """Bug 10: если default sink = echo-cancel — переключить на реальный.
+
+        echo-cancel-sink даёт троение звука (эхо-дублирование при playback).
+        Проверка быстрая (~50 мс), идемпотентная.
+        """
+        try:
+            r = subprocess.run(
+                ["pactl", "info"],
+                capture_output=True, text=True, timeout=2,
+            )
+            for line in r.stdout.split("\n"):
+                if line.startswith("Default Sink:"):
+                    current = line.split(":", 1)[1].strip()
+                    if "echo-cancel" in current:
+                        # Найти реальный sink
+                        r2 = subprocess.run(
+                            ["pactl", "list", "short", "sinks"],
+                            capture_output=True, text=True, timeout=2,
+                        )
+                        for s_line in r2.stdout.split("\n"):
+                            parts = s_line.split("\t")
+                            if len(parts) >= 2 and "echo-cancel" not in parts[1]:
+                                subprocess.run(
+                                    ["pactl", "set-default-sink", parts[1]],
+                                    capture_output=True, timeout=2,
+                                )
+                                print(f"🔊 Sink: {current} → {parts[1]}")
+                                break
+                    break
+        except Exception as e:
+            print(f"⚠️ _ensure_real_sink: {e}")
+
     def detect_and_route(self) -> tuple[str, str | None]:
         """
         Определить профиль и, если сменился, переключить вход/выход.
 
         Возвращает (profile, message | None).
         """
+        self._ensure_real_sink()
         profile = self._detect_profile()
         old_profile = self.current_profile
         self.current_profile = profile

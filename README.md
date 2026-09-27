@@ -148,8 +148,9 @@ pythonvenom (один разработчик + ИИ-ассистент).
 Aura — независимый open-source проект. Всё локально, без подписок и рекламы. Если проект помогает — можно поддержать разработку:
 
 - **CloudTips** — https://pay.cloudtips.ru/p/9ce9959c (0% для донатора)
+- **Boosty** — https://boosty.to/aura_companion
 - **DonationAlerts** — <вписать ссылку>
-- **Boosty** — <вписать ссылку>
+- **Boosty** — https://boosty.to/aura_companion
 
 Средства идут на: тестовое железо (N100, Strix Halo), модели, работу над кросс-платформой.
 

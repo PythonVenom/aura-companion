@@ -6,6 +6,7 @@
 
 ## Поддержка проекта
 - **CloudTips:** https://pay.cloudtips.ru/p/9ce9959c
+- **Boosty:** https://boosty.to/aura_companion
 - **DonationAlerts:** <вписать после регистрации>
 - **Boosty:** <вписать после регистрации>
 

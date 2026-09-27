@@ -32,6 +32,17 @@ SYSTEM_PACKAGES=(
 )
 
 # === Args ===
+# ─── Pre-install system check ───
+if [ -f "aura/system_check.py" ]; then
+    echo ""
+    python3 -c "import sys; sys.path.insert(0, '.'); from aura.system_check import format_report; print(format_report())" 2>/dev/null || true
+    echo ""
+    read -p "Продолжить установку? [Y/n] " ans
+    case "$ans" in
+        n|N|no|NO) echo "Отменено."; exit 0 ;;
+    esac
+fi
+
 DRY_RUN=false
 for arg in "$@"; do
     case "$arg" in

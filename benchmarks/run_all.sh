@@ -4,7 +4,8 @@
 set -e
 cd "$(dirname "$0")/.."
 
-OUT=benchmarks/results-$(date +%Y%m%d-%H%M%S).md
+mkdir -p benchmarks/results
+OUT=benchmarks/results/$(date +%Y%m%d-%H%M%S).md
 mkdir -p benchmarks/results
 
 {
@@ -12,7 +13,7 @@ echo "# Aura Benchmark — $(date -Iseconds)"
 echo ""
 echo "## Hardware"
 echo '```'
-echo "CPU: $(lscpu | grep 'Model name' | head -1 | cut -d: -f2 | xargs)"
+echo "CPU: $(lscpu | grep -iE 'model name' | head -1 | cut -d: -f2- | xargs)"
 echo "GPU: $(nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader 2>/dev/null || echo 'no NVIDIA')"
 echo "RAM: $(free -h | grep Mem | awk '{print $2}')"
 echo '```'

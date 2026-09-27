@@ -25,6 +25,8 @@ class AgentSpeaker(MicroAgent):
         self.aplay_process = None
         self.speech_queue = queue.Queue()
         self.is_speaking = False
+        self._worker = None
+        self._worker_lock = threading.Lock()
 
     def say(self, text):
         if not self.active:
@@ -32,14 +34,24 @@ class AgentSpeaker(MicroAgent):
 
         self.speech_queue.put(text)
 
-        if not self.is_speaking:
-            self.is_speaking = True
-            threading.Thread(target=self._speak_worker, daemon=True).start()
+        # Bug 10 fix: worker жив? иначе запустить. Не полагаемся на
+        # is_speaking — между queue.empty() и is_speaking=False есть окно.
+        with self._worker_lock:
+            if self._worker is None or not self._worker.is_alive():
+                self._worker = threading.Thread(
+                    target=self._speak_worker, daemon=True)
+                self._worker.start()
 
         return f"🗣️ Сказала: {text[:50]}..."
 
     def _speak_worker(self):
         self.is_speaking = True
+        try:
+            self._speak_loop()
+        finally:
+            self.is_speaking = False
+
+    def _speak_loop(self):
         while not self.speech_queue.empty():
             text = self.speech_queue.get()
             try:
@@ -66,7 +78,6 @@ class AgentSpeaker(MicroAgent):
                     subprocess.Popen(['espeak-ng', '-v', 'ru', '-p', '60', '-s', '160', text], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             except Exception as e:
                 print(f"❌ Ошибка озвучивания: {e}")
-        self.is_speaking = False
 
     def _make_text_smart(self, text):
         if 'создатель' not in text.lower():

@@ -155,6 +155,24 @@ function vkPrevTrack() {
     return { ok: false };
 }
 
+
+
+function vkLikePost() {
+    const btn = document.querySelector('.like_button, [aria-label="Нравится"]');
+    if (btn) { btn.click(); return { ok: true }; }
+    return { ok: false };
+}
+
+function vkCommentPost(text) {
+    const input = document.querySelector('[contenteditable="true"][role="textbox"]');
+    if (!input) return { ok: false };
+    input.focus();
+    document.execCommand('selectAll', false, null);
+    document.execCommand('delete', false, null);
+    document.execCommand('insertText', false, text);
+    return { ok: true };
+}
+
 // Слушаем команды от background.js
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     try {
@@ -171,6 +189,12 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
                 break;
             case "vk_finalize":
                 sendResponse({ ok: true, data: finalizeVKMessage() });
+                break;
+            case "vk_like_post":
+                sendResponse({ ok: true, data: vkLikePost() });
+                break;
+            case "vk_comment_post":
+                sendResponse({ ok: true, data: vkCommentPost(msg.text || '') });
                 break;
             case "vk_list_friends":
                 sendResponse({ ok: true, data: listVKFriends() });

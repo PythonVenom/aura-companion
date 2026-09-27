@@ -443,6 +443,22 @@ def search_chats(previews: list, query: str) -> list:
     return out
 
 
+def export_dialogs_markdown(previews: list, path) -> int:
+    """Экспорт всех чатов в markdown-файл. Возвращает количество."""
+    from pathlib import Path as _P
+    out = _P(path)
+    lines = ["# Экспорт чатов Aura", "", f"Всего: {len(previews)}", ""]
+    for p in previews:
+        name = (p.get("chat") or p.get("name") or "?")
+        preview = p.get("preview") or ""
+        lines.append(f"## {name}")
+        lines.append("")
+        lines.append(preview[:500])
+        lines.append("")
+    out.write_text("\n".join(lines), encoding="utf-8")
+    return len(previews)
+
+
 def prioritize(items: list, vip: list | None = None) -> list:
     """Сортировка: VIP-чаты в начале, остальные по порядку."""
     if not vip:

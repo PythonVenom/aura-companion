@@ -79,7 +79,13 @@ class AgentMediaPause(BaseAgent):
     # --- Публичные методы ---
 
     def pause(self) -> bool:
-        """Пауза всех играющих MPRIS-плееров. Возвращает True, если хоть кого-то паузили."""
+        """Пауза. ADR-017: через PAL, fallback на playerctl."""
+        try:
+            ok = get_media().pause_all()
+            if ok:
+                return True
+        except Exception:
+            pass
         if not self.ready:
             return False
         players = [self.player] if self.player else self._list_players()

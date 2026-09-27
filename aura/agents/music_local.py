@@ -162,12 +162,20 @@ class AgentMusicLocal(BaseAgent):
         return self._launch(matches[0])
 
     def pause(self) -> str:
-        return self._playerctl("pause", "⏸️ Пауза")
+        # ADR-017: через PAL
+        try:
+            get_media().pause_all()
+            return "⏸️ Пауза"
+        except Exception:
+            return self._playerctl("pause", "⏸️ Пауза")
 
     def resume(self) -> str:
-        # Если на паузе — просто play.
         if self._vlc_paused():
-            return self._playerctl("play", "▶️ Продолжаю")
+            try:
+                get_media().resume_all()
+                return "▶️ Продолжаю"
+            except Exception:
+                return self._playerctl("play", "▶️ Продолжаю")
         # После стопа — запустить последний трек заново.
         if self._last_track is not None and self._last_track.exists():
             return self._launch(self._last_track)

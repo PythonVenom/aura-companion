@@ -80,6 +80,38 @@ function telegramFinalize() {
 }
 
 
+
+
+function readTelegramLast() {
+    const bubbles = document.querySelectorAll('.bubble .message, .message');
+    if (!bubbles.length) return { text: '' };
+    const last = bubbles[bubbles.length - 1];
+    return { text: (last.innerText || '').substring(0, 500) };
+}
+
+function listTelegramFolders() {
+    const items = document.querySelectorAll('.folder-tabs .menu-horizontal-div-item');
+    const folders = [];
+    items.forEach((el, i) => {
+        const name = (el.innerText || '').trim();
+        if (name) folders.push({ name, index: i });
+    });
+    return folders;
+}
+
+function openTelegramChannel(query) {
+    const q = query.toLowerCase();
+    const items = document.querySelectorAll('.chatlist .chat, .chat-list .chat');
+    for (const el of items) {
+        const name = (el.querySelector('.peer-title, .user-title, .title')?.innerText || '').toLowerCase();
+        if (name.includes(q)) {
+            el.click();
+            return { ok: true, name };
+        }
+    }
+    return { ok: false };
+}
+
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     try {
         const action = msg.action;
@@ -95,6 +127,15 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
                 break;
             case "tg_finalize":
                 sendResponse({ ok: true, data: telegramFinalize() });
+                break;
+            case "tg_read_last":
+                sendResponse({ ok: true, data: readTelegramLast() });
+                break;
+            case "tg_list_folders":
+                sendResponse({ ok: true, data: listTelegramFolders() });
+                break;
+            case "tg_open_channel":
+                sendResponse({ ok: true, data: openTelegramChannel(msg.query || '') });
                 break;
             case "tg_current":
                 sendResponse({ ok: true, data: getTelegramCurrent() });

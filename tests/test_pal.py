@@ -34,3 +34,37 @@ def test_ubuntu_detection_false_on_arch():
 
 def test_list_sinks_returns_list():
     assert isinstance(get_audio().list_sinks(), list)
+
+
+def test_ubuntu_audio_exists():
+    """UbuntuAudio класс существует и совместим с LinuxAudio."""
+    from aura.platform.ubuntu import UbuntuAudio
+    a = UbuntuAudio()
+    assert hasattr(a, "list_sinks")
+    assert hasattr(a, "duck")
+
+
+def test_ubuntu_service_inherits_linux():
+    from aura.platform.ubuntu import UbuntuService
+    from aura.platform.linux import LinuxService
+    assert issubclass(UbuntuService, LinuxService)
+
+
+def test_ubuntu_media_inherits_linux():
+    from aura.platform.ubuntu import UbuntuMedia
+    from aura.platform.linux import LinuxMedia
+    assert issubclass(UbuntuMedia, LinuxMedia)
+
+
+def test_windows_stub_raises():
+    from aura.platform.windows import WindowsAudio
+    import pytest
+    with pytest.raises(NotImplementedError):
+        WindowsAudio()
+
+
+def test_macos_stub_raises():
+    from aura.platform.macos import MacOSAudio
+    import pytest
+    with pytest.raises(NotImplementedError):
+        MacOSAudio()

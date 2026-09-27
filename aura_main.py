@@ -209,7 +209,16 @@ class AuraOrchestrator:
         if not heard:
             return True
         print(f"💬 DM: {heard}")
-        # Активация → сброс DM, дальше как обычная команда.
+        # Bug 6: в awaiting_confirm — сначала пробуем «да/нет/отправ»,
+        # потом уже проверяем активацию. ASR часто добавляет «аура»
+        # рефлекторно в конце («да отправ шаура»).
+        if getattr(self.dm.state, "awaiting_confirm", False):
+            resp = self.dm.process(heard)
+            if resp:
+                print(f"🤖 {resp}")
+                self._say_with_duck(resp)
+            return True
+        # Вне подтверждения — активация сбрасывает DM.
         if self._is_activated(heard):
             print("🔔 Активация — сброс DM")
             self.dm.reset()

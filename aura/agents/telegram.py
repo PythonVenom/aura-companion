@@ -71,7 +71,45 @@ class AgentTelegram(MicroAgent):
                     return AgentResponse.ok(f"🌐 Telegram: {data.get('name')}", self.name)
                 return AgentResponse.ok(f"❌ Telegram: не найден", self.name)
 
-        # 3. Открыть Telegram
+        # 3. Прочитать последнее
+        if "прочитай" in text or "что пишут" in text or "последнее" in text:
+            result = send_command({"action": "tg_read_last"})
+            if result is None or "error" in result:
+                return AgentResponse.ok(_err(result), self.name)
+            data = result.get("data", {})
+            msg = data.get("text", "")
+            if msg:
+                return AgentResponse.ok(f"📱 Telegram: {msg[:200]}", self.name)
+            return AgentResponse.ok("📱 Telegram: пусто", self.name)
+
+        # 4. Папки
+        if "папки" in text or "категории" in text:
+            result = send_command({"action": "tg_list_folders"})
+            if result is None or "error" in result:
+                return AgentResponse.ok(_err(result), self.name)
+            data = result.get("data", [])
+            if not data:
+                return AgentResponse.ok("📱 Telegram: папок нет", self.name)
+            names = [f.get("name", "?") for f in data[:5]]
+            return AgentResponse.ok(f"📱 Telegram папки: {', '.join(names)}", self.name)
+
+        # 5. Открыть канал
+        if "канал" in text or "открой канал" in text:
+            query = ""
+            for kw in ("канал ", "открой канал "):
+                if kw in text:
+                    query = text.split(kw, 1)[1].strip()
+                    break
+            if query:
+                result = send_command({"action": "tg_open_channel", "query": query})
+                if result is None or "error" in result:
+                    return AgentResponse.ok(_err(result), self.name)
+                data = result.get("data", {})
+                if data.get("ok"):
+                    return AgentResponse.ok(f"📱 Telegram: {data.get('name')}", self.name)
+                return AgentResponse.ok("📱 Telegram: не найден", self.name)
+
+        # 6. Открыть Telegram
         if "открой телеграм" in text or "открой телегу" in text:
             return AgentResponse.ok("🌐 Telegram: открыт", self.name)
 

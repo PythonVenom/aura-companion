@@ -180,6 +180,9 @@ async function handleCommand(msg) {
         case "tg_find_chat":
         case "tg_send_message":
         case "tg_finalize":
+        case "tg_read_last":
+        case "tg_list_folders":
+        case "tg_open_channel":
         case "tg_current": {
             const tgTab = await findTelegramTab();
             if (!tgTab) return { error: "telegram tab not found" };

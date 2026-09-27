@@ -43,3 +43,21 @@ async def test_handle_chats_no_bridge(agent):
         resp = await agent.handle(AgentRequest(text="телеграм чаты"))
     assert resp.status == AgentStatus.OK
     assert "🌐" in resp.text
+
+
+@pytest.mark.asyncio
+async def test_handle_read_last(agent):
+    resp = await agent.handle(AgentRequest(text="телеграм прочитай") )
+    assert resp.status == AgentStatus.OK
+
+
+@pytest.mark.asyncio
+async def test_handle_folders(agent):
+    resp = await agent.handle(AgentRequest(text="телеграм папки"))
+    assert resp.status == AgentStatus.OK
+
+
+@pytest.mark.asyncio
+async def test_handle_open_channel(agent):
+    resp = await agent.handle(AgentRequest(text="телеграм открой канал новости"))
+    assert resp.status == AgentStatus.OK

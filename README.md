@@ -125,6 +125,11 @@ Proactive — через `ProactiveEngine` с триггерами и cooldown.
 См. `docs/architecture.md` и `docs/adr/`.
 
 ## Документация
+- [docs/manual.md](docs/manual.md) — руководство пользователя
+- [docs/manual-simple.md](docs/manual-simple.md) — для начинающих
+- [CONTRIBUTING.md](CONTRIBUTING.md) — как помочь
+- [ARCHITECTURE.md](ARCHITECTURE.md) — архитектура
+
 
 - `docs/manifesto.md` — философия, миссия, монетизация
 - `docs/architecture.md` — техника

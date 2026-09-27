@@ -171,6 +171,7 @@ class AuraOrchestrator:
         синхронно, а aplay_process создаётся в потоке позже
         (после синтеза piper). Иначе resume срабатывает мгновенно.
         """
+        print(f"🔊 Скажу: {text[:80]}")
         self._duck_on()
         self._set_barge_speaking(True)
         self.speaker.say(text)

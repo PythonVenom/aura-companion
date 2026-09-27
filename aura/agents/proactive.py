@@ -17,6 +17,7 @@ import os
 import time
 from datetime import datetime
 from dataclasses import dataclass
+import re
 from pathlib import Path
 from typing import Callable
 
@@ -151,6 +152,31 @@ def morning_briefing_trigger(get_agent=None) -> Trigger:
     )
 
 
+def _normalize_preview(preview: str) -> str:
+    """Bug 9: убрать из preview счётчик непрочитанных и timestamp.
+
+    MAX отдаёт preview в виде:
+      "1 | Прогуляться не хочешь"
+      "Привет | 10:45"
+      "1 | текст | 10:45"
+    Нормализуем — иначе ключ меняется каждый пул → триггер дублируется.
+    """
+    if not preview:
+        return ""
+    t = preview.strip()
+    # Ведущий счётчик: "N | "
+    t = re.sub(r"^\d+\s*\|\s*", "", t)
+    # Trailing timestamp: " | HH:MM" или " | 22 сент."
+    t = re.sub(r"\s*\|\s*\d{1,2}:\d{2}\s*$", "", t)
+    t = re.sub(r"\s*\|\s*\d{1,2}\s+[а-яА-Я]{3,}\.?\s*$", "", t)
+    return t.strip()
+
+
+def _extract_chat_cooldown_key(chat: str, preview: str) -> str:
+    """Ключ для cooldown — имя чата + нормализованный preview."""
+    return f"{chat}:{_normalize_preview(preview)}"
+
+
 def max_new_message_trigger(get_agent) -> Trigger:
     """Новое сообщение в Максе — pull через list_chats (без observer)."""
     PENDING_PATH = Path("/tmp/aura_max_pending.json")
@@ -189,7 +215,8 @@ def max_new_message_trigger(get_agent) -> Trigger:
             filtered.append({"chat": chat, "preview": preview})
 
         seen = set(state.get("max_seen_keys", []))
-        current = {f"{p['chat']}:{p['preview']}" for p in filtered}
+        current = {_extract_chat_cooldown_key(p['chat'], p['preview'])
+                   for p in filtered}
 
         # Первый прогон — populate без триггера.
         if not seen:
@@ -200,9 +227,31 @@ def max_new_message_trigger(get_agent) -> Trigger:
         if not new_keys:
             return False
 
-        # Выбираем первое новое (Bug 4 — по имени, не по индексу).
-        new_one = next(p for p in filtered
-                       if f"{p['chat']}:{p['preview']}" in new_keys)
+        # Bug 9: per-chat cooldown — 5 минут. Если уже говорили про этот
+        # чат недавно — пропускаем (защита от изменения preview).
+        now = time.time()
+        per_chat = state.get("max_chat_last_ts", {})
+        COOLDOWN_CHAT = 300.0
+
+        candidates = []
+        for p in filtered:
+            key = _extract_chat_cooldown_key(p['chat'], p['preview'])
+            if key not in new_keys:
+                continue
+            last = per_chat.get(p['chat'], 0)
+            if now - last < COOLDOWN_CHAT:
+                continue
+            candidates.append((p, key))
+
+        if not candidates:
+            # Всё новое — в cooldown. Запоминаем и молчим.
+            state["max_seen_keys"] = sorted(seen | current)
+            return False
+
+        # Берём первый после фильтра (Bug 4 — по имени, не по индексу).
+        new_one, new_key = candidates[0]
+        per_chat[new_one['chat']] = now
+        state["max_chat_last_ts"] = per_chat
         state["max_seen_keys"] = sorted(seen | current)
         try:
             PENDING_PATH.write_text(

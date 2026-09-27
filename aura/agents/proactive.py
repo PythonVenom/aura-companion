@@ -312,6 +312,13 @@ def unanswered_messages_trigger(get_agent) -> Trigger:
             return False
         try:
             previews = messenger.get_all_previews() or []
+            # ph.6: сохраняем события из чатов в календарь
+            try:
+                events = chat_sense.extract_events(previews)
+                for ev in events:
+                    chat_sense.save_event(ev)
+            except Exception:
+                pass
             items = chat_sense.find_unanswered(previews)
             items = chat_sense.filter_by_reminder_ttl(items)
             if not items:

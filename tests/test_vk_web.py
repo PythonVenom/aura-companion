@@ -46,3 +46,33 @@ async def test_handle_list_chats_no_bridge(agent):
     assert resp.status == AgentStatus.OK
     # Текст начинается с 🌐 VK или 🌐 Ошибка
     assert "🌐" in resp.text
+
+
+@pytest.mark.asyncio
+async def test_handle_friends(agent):
+    resp = await agent.handle(AgentRequest(text="вк друзья"))
+    assert resp.status == AgentStatus.OK
+
+
+@pytest.mark.asyncio
+async def test_handle_groups(agent):
+    resp = await agent.handle(AgentRequest(text="вк группы"))
+    assert resp.status == AgentStatus.OK
+
+
+@pytest.mark.asyncio
+async def test_handle_news(agent):
+    resp = await agent.handle(AgentRequest(text="вк новости"))
+    assert resp.status == AgentStatus.OK
+
+
+@pytest.mark.asyncio
+async def test_handle_next_track(agent):
+    resp = await agent.handle(AgentRequest(text="вк следующий трек"))
+    assert resp.status == AgentStatus.OK
+
+
+@pytest.mark.asyncio
+async def test_handle_prev_track(agent):
+    resp = await agent.handle(AgentRequest(text="вк предыдущий трек"))
+    assert resp.status == AgentStatus.OK

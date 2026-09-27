@@ -104,6 +104,57 @@ function finalizeVKMessage() {
     return { sent: true };
 }
 
+
+
+function listVKFriends() {
+    const items = document.querySelectorAll(".friends_list .friends_row, [data-testid='friends-row']");
+    const friends = [];
+    items.forEach((el, i) => {
+        if (i >= 20) return;
+        const name = (el.querySelector('.fname, .friends_field_title')?.innerText || '').trim();
+        if (name) friends.push({ name, index: i });
+    });
+    return friends;
+}
+
+
+function listVKGroups() {
+    const items = document.querySelectorAll('.groups_list .group_row, [data-testid='groups-row']');
+    const groups = [];
+    items.forEach((el, i) => {
+        if (i >= 20) return;
+        const name = (el.querySelector('.group_name, .groups_group_name')?.innerText || '').trim();
+        if (name) groups.push({ name, index: i });
+    });
+    return groups;
+}
+
+
+function listVKNews() {
+    const items = document.querySelectorAll('.wall_post, [data-testid='wall-post']');
+    const news = [];
+    items.forEach((el, i) => {
+        if (i >= 10) return;
+        const text = (el.innerText || '').substring(0, 200);
+        if (text) news.push({ text, index: i });
+    });
+    return news;
+}
+
+
+function vkNextTrack() {
+    const btn = document.querySelector('.audio_player__next, [aria-label='next']');
+    if (btn) { btn.click(); return { ok: true }; }
+    return { ok: false };
+}
+
+
+function vkPrevTrack() {
+    const btn = document.querySelector('.audio_player__prev, [aria-label='prev']');
+    if (btn) { btn.click(); return { ok: true }; }
+    return { ok: false };
+}
+
 // Слушаем команды от background.js
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     try {
@@ -120,6 +171,21 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
                 break;
             case "vk_finalize":
                 sendResponse({ ok: true, data: finalizeVKMessage() });
+                break;
+            case "vk_list_friends":
+                sendResponse({ ok: true, data: listVKFriends() });
+                break;
+            case "vk_list_groups":
+                sendResponse({ ok: true, data: listVKGroups() });
+                break;
+            case "vk_list_news":
+                sendResponse({ ok: true, data: listVKNews() });
+                break;
+            case "vk_next_track":
+                sendResponse({ ok: true, data: vkNextTrack() });
+                break;
+            case "vk_prev_track":
+                sendResponse({ ok: true, data: vkPrevTrack() });
                 break;
             case "vk_list_chats":
                 sendResponse({ ok: true, data: listVKChats() });

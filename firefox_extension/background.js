@@ -195,6 +195,11 @@ async function handleCommand(msg) {
         case "vk_list_shortcuts":
         case "vk_navigate":
         case "vk_list_chats":
+        case "vk_list_friends":
+        case "vk_list_groups":
+        case "vk_list_news":
+        case "vk_next_track":
+        case "vk_prev_track":
         case "vk_send_message":
         case "vk_finalize":
         case "vk_current": {

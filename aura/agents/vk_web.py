@@ -72,7 +72,51 @@ class AgentVKWeb(MicroAgent):
                 self.name,
             )
 
-        # 3. Список сообщений
+        # 3. Друзья
+        if "друзья" in text:
+            result = send_command({"action": "vk_list_friends"})
+            if result is None or "error" in result:
+                return AgentResponse.ok(_err(result), self.name)
+            data = result.get("data", {})
+            friends = data.get("friends", [])
+            if not friends:
+                return AgentResponse.ok("🌐 VK: друзей нет", self.name)
+            lines = ["🌐 VK друзья:"]
+            for i, f in enumerate(friends[:10], 1):
+                lines.append(f"{i}. {f.get('name', '?')[:40]}")
+            return AgentResponse.ok("\n".join(lines), self.name)
+
+        # 4. Группы
+        if "группы" in text or "паблики" in text:
+            result = send_command({"action": "vk_list_groups"})
+            if result is None or "error" in result:
+                return AgentResponse.ok(_err(result), self.name)
+            data = result.get("data", {})
+            groups = data.get("groups", [])
+            if not groups:
+                return AgentResponse.ok("🌐 VK: групп нет", self.name)
+            lines = ["🌐 VK группы:"]
+            for i, g in enumerate(groups[:10], 1):
+                lines.append(f"{i}. {g.get('name', '?')[:40]}")
+            return AgentResponse.ok("\n".join(lines), self.name)
+
+        # 5. Новости / лента
+        if "новости" in text or "лента" in text:
+            result = send_command({"action": "vk_list_news"})
+            if result is None or "error" in result:
+                return AgentResponse.ok(_err(result), self.name)
+            return AgentResponse.ok("🌐 VK: лента", self.name)
+
+        # 6. Музыка: next/prev
+        if "следующий" in text or "дальше" in text:
+            result = send_command({"action": "vk_next_track"})
+            return AgentResponse.ok("⏭️ VK: следующий" if result else "❌", self.name)
+
+        if "предыдущий" in text or "назад" in text:
+            result = send_command({"action": "vk_prev_track"})
+            return AgentResponse.ok("⏮️ VK: предыдущий" if result else "❌", self.name)
+
+        # 7. Список сообщений
         if "сообщения" in text or "переписки" in text or "чаты" in text:
             result = send_command({"action": "vk_list_chats"})
             if result is None or "error" in result:

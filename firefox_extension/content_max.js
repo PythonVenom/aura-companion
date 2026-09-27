@@ -28,6 +28,8 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
                 break;
             case "max_send_finalize":
                 sendResponse({ ok: true, data: sendMessageFinalize() });
+            case "max_dump_send_ui":
+                sendResponse({ ok: true, data: dumpSendUI() });
                 break;
             case "max_clear_input":
                 sendResponse({ ok: true, data: clearMessageInput() });
@@ -240,9 +242,15 @@ function sendMessageReal(text) {
     if (input === null) return { sent: false, error: "message input not found" };
 
     input.focus();
+
     if (input.tagName === "TEXTAREA" || input.tagName === "INPUT") {
         input.value = text;
         input.dispatchEvent(new Event("input", { bubbles: true }));
+    } else if (input.isContentEditable) {
+        // Svelte/DIV: execCommand обновляет внутреннее состояние фреймворка.
+        document.execCommand("selectAll", false, null);
+        document.execCommand("delete", false, null);
+        document.execCommand("insertText", false, text);
     } else {
         input.innerText = text;
         input.dispatchEvent(new InputEvent("input", { bubbles: true }));
@@ -310,31 +318,66 @@ function findChatFromButtons(query) {
 }
 
 
+function dumpSendUI() {
+    const input = findMessageInput();
+    const info = { input: null, buttons: [] };
+    if (input) {
+        info.input = {
+            tagName: input.tagName,
+            role: input.getAttribute("role"),
+            contentEditable: input.isContentEditable,
+            ariaLabel: input.getAttribute("aria-label"),
+            className: (input.className || "").substring(0, 120),
+            placeholder: input.getAttribute("placeholder") || input.getAttribute("data-placeholder"),
+        };
+        // Кнопки рядом
+        const form = input.closest("form") || input.parentElement?.parentElement?.parentElement;
+        if (form) {
+            form.querySelectorAll("button, [role=button], [type=submit]").forEach(b => {
+                info.buttons.push({
+                    tag: b.tagName,
+                    type: b.getAttribute("type"),
+                    role: b.getAttribute("role"),
+                    ariaLabel: b.getAttribute("aria-label"),
+                    title: b.getAttribute("title"),
+                    testId: b.getAttribute("data-testid"),
+                    className: (b.className || "").substring(0, 100),
+                    disabled: b.disabled || false,
+                    visible: b.offsetParent !== null,
+                });
+            });
+        }
+    }
+    return info;
+}
+
 function sendMessageFinalize() {
-    // Отправить уже введённый текст. Пробуем Enter, потом кнопку.
     const input = findMessageInput();
     if (input === null) return { sent: false, error: "message input not found" };
 
-    // Способ 1: симулируем Enter.
     input.focus();
-    const enterEvent = new KeyboardEvent("keydown", {
-        key: "Enter",
-        code: "Enter",
-        keyCode: 13,
-        which: 13,
-        bubbles: true,
-        cancelable: true,
-    });
-    input.dispatchEvent(enterEvent);
 
-    // Способ 2 (fallback): ищем кнопку «Отправить».
-    // По дампу кнопки в Максе без aria-label, но с иконкой.
-    // Попробуем найти по type=submit или рядом с полем.
+    // Полная последовательность Enter — Svelte слушает keydown с composed:true.
+    for (const type of ["keydown", "keypress", "keyup"]) {
+        const ev = new KeyboardEvent(type, {
+            key: "Enter",
+            code: "Enter",
+            keyCode: 13,
+            which: 13,
+            bubbles: true,
+            cancelable: true,
+            composed: true,
+        });
+        input.dispatchEvent(ev);
+    }
+
+    // Fallback: если Enter не сработал — ищем кнопку шире.
     setTimeout(() => {
-        // Если поле пустое — значит Enter сработал.
         const val = (input.innerText || input.value || "").trim();
         if (val.length > 0) {
-            const submit = document.querySelector('button[type=submit], [aria-label*="тправить" i]');
+            const submit = document.querySelector(
+                'button[type=submit], [aria-label*="тправить" i], [data-testid*="send" i], button[class*="send" i]'
+            );
             if (submit) submit.click();
         }
     }, 300);

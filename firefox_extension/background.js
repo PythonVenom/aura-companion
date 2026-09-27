@@ -161,6 +161,7 @@ async function handleCommand(msg) {
         case "max_list_chats":
 	case "max_deep_dump":
         case "max_send_finalize":
+        case "max_dump_send_ui":
         case "max_clear_input":
         case "max_send_message":
         case "max_read_last":

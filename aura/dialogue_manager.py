@@ -17,6 +17,35 @@ from typing import Callable
 
 TIMEOUT_SEC = 120.0   # 2 минуты на весь сценарий
 
+# Bug 8: слова, которые означают начало ТЕКСТА, не имени чата.
+# «петруха чип тест финал» → chat=«петруха чип», text=«тест финал».
+_TEXT_MARKERS = {
+    "привет", "приветствую", "здравствуй", "здравствуйте",
+    "как", "что", "где", "когда", "кто", "зачем", "почему", "куда",
+    "тест", "финал", "проверка", "дела", "новости", "спасибо",
+    "покажи", "скажи", "давай", "мне", "нам", "ему", "ей", "им",
+    "хочу", "буду", "надо", "нужно", "можно", "не", "да",
+}
+
+_MAX_CHAT_WORDS = 3
+
+
+def _split_chat_text(words: list) -> tuple:
+    """Разделить на (chat, text). chat — до 3 слов без маркеров текста."""
+    chat_words = []
+    for i, w in enumerate(words):
+        clean = w.strip(".,!? ").lower()
+        if clean in _TEXT_MARKERS:
+            break
+        chat_words.append(w)
+        if len(chat_words) >= _MAX_CHAT_WORDS:
+            break
+    if not chat_words:
+        chat_words = [words[0]]
+    chat = " ".join(chat_words)
+    text = " ".join(words[len(chat_words):]).strip()
+    return chat, text
+
 
 @dataclass
 class Scenario:
@@ -142,10 +171,10 @@ class DialogueManager:
             if chat:
                 parts = chat.split()
                 if parts:
-                    self.state.slots["chat"] = parts[0].strip(".,!?")
-                    rest = " ".join(parts[1:]).strip()
-                    if rest and "text" in sc.required_slots:
-                        self.state.slots["text"] = rest
+                    chat_part, text_part = _split_chat_text(parts)
+                    self.state.slots["chat"] = chat_part.strip(".,!?")
+                    if text_part and "text" in sc.required_slots:
+                        self.state.slots["text"] = text_part
 
         # text: если chat уже есть и есть остаток
         if "text" in sc.required_slots and "text" not in self.state.slots:

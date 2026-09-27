@@ -49,6 +49,13 @@ class TestTokenLoading:
 
 
 class TestCanHandle:
+    @pytest.fixture(autouse=True)
+    def _vk_active(self):
+        """Bug 14 ph.2: VK ловит ambiguous только при last_active=vk."""
+        from aura.agents import media_state
+        media_state.set_active("vk")
+        yield
+
     @pytest.mark.parametrize("text", [
         "включи музыку",
         "включи вк",
@@ -214,7 +221,9 @@ class TestUnknown:
 # --- регрессия: vk_music не перехватывает «вкладки» (Фаза 8.2) ---
 
 def test_can_handle_vk_play(agent):
-    """«включи музыку» — наша команда."""
+    """Bug 14 ph.2: «включи музыку» — наша, если last_active=vk."""
+    from aura.agents import media_state
+    media_state.set_active("vk")
     assert agent.can_handle(AgentRequest(text="включи музыку"))
 
 

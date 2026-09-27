@@ -108,7 +108,19 @@ class AgentVKMusic(BaseAgent):
             + self.LIKE_KEYWORDS
             + self.OPEN_KEYWORDS
         )
-        return any(kw in text for kw in keywords)
+        if not any(kw in text for kw in keywords):
+            return False
+        # Bug 14 ph.2: «включи музыку» — только если last_active=vk.
+        # Явные VK-команды («включи вк», «вк музыка») проходят всегда.
+        # ВАЖНО: проверка «вк» по токенам, иначе «включи» ложно матчится.
+        ambiguous = ("включи музыку", "запусти музыку", "поставь музыку", "включи песню")
+        padded = f" {text.replace(',', ' ')} "
+        explicit_vk = (" вк ", " вконтакте ", " vk ")
+        is_explicit = any(kw in padded for kw in explicit_vk)
+        if any(kw in text for kw in ambiguous) and not is_explicit:
+            from aura.agents import media_state
+            return media_state.get_active() == "vk"
+        return True
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         text = request.text.lower()

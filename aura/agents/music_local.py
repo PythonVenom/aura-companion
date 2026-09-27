@@ -87,7 +87,18 @@ class AgentMusicLocal(BaseAgent):
         all_kw = (
             self.PLAY_KEYWORDS + self.LIST_KEYWORDS
         )
-        return any(kw in text for kw in all_kw)
+        if not any(kw in text for kw in all_kw):
+            return False
+        # Bug 14 ph.2: уступаем vk_music, если last_active=vk.
+        from aura.agents import media_state
+        if media_state.get_active() == "vk":
+            ambiguous = ("включи музыку", "запусти музыку", "поставь музыку", "включи песню")
+            # Явные VK-команды («включи вк») не наша тема — тоже уступаем.
+            padded = f" {text.replace(',', ' ')} "
+            is_explicit_vk = any(kw in padded for kw in (" вк ", " вконтакте ", " vk "))
+            if any(kw in text for kw in ambiguous) or is_explicit_vk:
+                return False
+        return True
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         text = request.text.lower()

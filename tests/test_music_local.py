@@ -55,6 +55,9 @@ def test_scan_filters_extensions(tmp_path):
 # --- can_handle ---
 
 def test_can_handle_play(tmp_path):
+    """Bug 14 ph.2: local ловит «включи музыку» только при last_active != vk."""
+    from aura.agents import media_state
+    media_state.set_active("local")
     a = _make(tmp_path)
     assert a.can_handle(AgentRequest(text="включи музыку"))
 

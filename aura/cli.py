@@ -113,6 +113,22 @@ def cmd_watch(args):
         print("\nСтоп.")
 
 
+
+
+def cmd_settings(args):
+    """Показать/изменить настройки."""
+    from aura import settings
+    if args.action == 'show' or args.action is None:
+        print(json.dumps(settings.load(), indent=2, ensure_ascii=False))
+    elif args.action == 'get' and args.key:
+        print(settings.get(args.key))
+    elif args.action == 'set' and args.key and args.value:
+        settings.set_value(args.key, args.value)
+        print(f'OK: {args.key} = {args.value}')
+    else:
+        print('Использование: settings [show|get KEY|set KEY VALUE]')
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -130,6 +146,12 @@ def main():
     p_watch = sub.add_parser("watch", help="health в реальном времени")
     p_watch.add_argument("-i", "--interval", type=int, default=5)
     p_watch.set_defaults(func=cmd_watch)
+
+    p_set = sub.add_parser("settings", help="настройки")
+    p_set.add_argument("action", nargs="?", choices=["show", "get", "set"], default="show")
+    p_set.add_argument("key", nargs="?", default=None)
+    p_set.add_argument("value", nargs="?", default=None)
+    p_set.set_defaults(func=cmd_settings)
     sub.add_parser("reload-extension", help="Firefox extension").set_defaults(func=cmd_reload_extension)
 
     args = parser.parse_args()

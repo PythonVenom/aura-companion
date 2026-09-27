@@ -71,3 +71,6 @@ voices/
 aura.tar.gz
 vm_script.sh
 nohup.out
+
+# Разрешаем скриншоты для README
+!docs/screenshots/*.png

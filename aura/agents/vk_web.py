@@ -88,7 +88,21 @@ class AgentVKWeb(MicroAgent):
                 lines.append(f"{i}. {name} — {preview}")
             return AgentResponse.ok("\n".join(lines), self.name)
 
-        # 4. Просто «открой вк» — фокус на вкладку
+        # 4. Ответить в VK
+        if "ответь" in text or "напиши" in text:
+            # «ответь: привет» или «напиши Васе: привет»
+            reply = ""
+            for kw in ("ответь:", "ответь ", "напиши:", "напиши "):
+                if kw in text:
+                    reply = text.split(kw, 1)[1].strip(" .,!?:;")
+                    break
+            if reply:
+                result = send_command({"action": "vk_send_message", "text": reply})
+                if result is None or "error" in result:
+                    return AgentResponse.ok(_err(result), self.name)
+                return AgentResponse.ok(f"🌐 VK: написала «{reply[:50]}»", self.name)
+
+        # 5. Просто «открой вк» — фокус на вкладку
         if "открой вк" in text or "открой вконтакте" in text:
             result = send_command({"action": "vk_current"})
             if result and "data" in result:

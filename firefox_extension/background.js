@@ -195,11 +195,15 @@ async function handleCommand(msg) {
         case "vk_list_shortcuts":
         case "vk_navigate":
         case "vk_list_chats":
+        case "vk_send_message":
+        case "vk_finalize":
         case "vk_current": {
             const vkTab = await findVKTab();
             if (!vkTab) return { error: "vk tab not found" };
             const payload = { action: action };
             if (msg.section) payload.section = msg.section;
+            if (msg.text) payload.text = msg.text;
+            if (msg.query) payload.query = msg.query;
             try {
                 return await browser.tabs.sendMessage(vkTab.id, payload);
             } catch (e) {

@@ -95,6 +95,19 @@ class AgentSpeaker(MicroAgent):
         text = text.replace("аура", "Аура").replace("создатель", "Создатель")
         return text
 
+    def shutdown(self) -> None:
+        """Graceful shutdown: остановить воркер и процессы."""
+        self.speech_queue.put(None)   # сигнал воркеру выйти
+        if hasattr(self, '_worker') and self._worker:
+            self._worker.join(timeout=2.0)
+        if self.aplay_process:
+            try:
+                self.aplay_process.terminate()
+                self.aplay_process.wait(timeout=1.0)
+            except Exception:
+                pass
+            self.aplay_process = None
+
     def stop_speaking(self):
         if self.aplay_process:
             self.aplay_process.terminate()

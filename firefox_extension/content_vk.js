@@ -72,6 +72,38 @@ function listVKChats() {
     return chats;
 }
 
+
+
+function findVKInput() {
+    return document.querySelector('[contenteditable="true"][role="textbox"], .im-editable-input');
+}
+
+
+function sendVKMessage(text) {
+    const input = findVKInput();
+    if (!input) return { sent: false, error: "input not found" };
+    input.focus();
+    document.execCommand("selectAll", false, null);
+    document.execCommand("delete", false, null);
+    document.execCommand("insertText", false, text);
+    return { sent: false, typed: true, text: text.substring(0, 100) };
+}
+
+
+function finalizeVKMessage() {
+    const input = findVKInput();
+    if (!input) return { sent: false, error: "input not found" };
+    input.focus();
+    for (const type of ["keydown", "keypress", "keyup"]) {
+        const ev = new KeyboardEvent(type, {
+            key: "Enter", code: "Enter", keyCode: 13, which: 13,
+            bubbles: true, cancelable: true, composed: true,
+        });
+        input.dispatchEvent(ev);
+    }
+    return { sent: true };
+}
+
 // Слушаем команды от background.js
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     try {
@@ -82,6 +114,12 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
                 break;
             case "vk_navigate":
                 sendResponse({ ok: true, data: navigateVK(msg.section || "") });
+                break;
+            case "vk_send_message":
+                sendResponse({ ok: true, data: sendVKMessage(msg.text || "") });
+                break;
+            case "vk_finalize":
+                sendResponse({ ok: true, data: finalizeVKMessage() });
                 break;
             case "vk_list_chats":
                 sendResponse({ ok: true, data: listVKChats() });

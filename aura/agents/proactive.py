@@ -18,6 +18,12 @@ import time
 from datetime import datetime
 from dataclasses import dataclass
 import re
+from aura.agents import checklist
+
+
+def _now_hour() -> int:
+    import datetime as _dt
+    return _dt.datetime.now().hour
 from aura.agents import chat_sense
 from aura.agents.messenger import is_own_message
 from pathlib import Path
@@ -375,11 +381,45 @@ def calendar_reminder_trigger(get_agent) -> Trigger:
     )
 
 
+def morning_checklist_trigger(get_agent) -> Trigger:
+    """Утром (8:00–12:00) напоминает о незакрытых пунктах чек-листа.
+
+    Cooldown 6 часов — не спамит. Работает раз в день утром.
+    """
+    def condition(state: dict) -> bool:
+        h = _now_hour()
+        if h < 8 or h >= 12:
+            return False
+        try:
+            items = checklist.read_today()
+            if not items:
+                return False
+            state["morning_checklist_count"] = len(items)
+            return True
+        except Exception:
+            return False
+
+    def action() -> str:
+        try:
+            return checklist.summary() or ""
+        except Exception:
+            return ""
+
+    return Trigger(
+        name="morning_checklist",
+        priority=8,
+        cooldown_sec=21600,   # 6 часов
+        condition=condition,
+        action=action,
+    )
+
+
 def default_engine(get_agent=None) -> ProactiveEngine:
     """Стандартный набор триггеров."""
     engine = ProactiveEngine()
     engine.register(morning_briefing_trigger(get_agent))
     engine.register(max_new_message_trigger(get_agent))
+    engine.register(morning_checklist_trigger(get_agent))
     engine.register(calendar_reminder_trigger(get_agent))
     engine.register(unanswered_messages_trigger(get_agent))
     return engine

@@ -129,6 +129,16 @@ def cmd_settings(args):
         print('Использование: settings [show|get KEY|set KEY VALUE]')
 
 
+
+
+def cmd_settings_reset(args):
+    """Сбросить настройки к defaults."""
+    from aura import settings
+    settings.save(dict(settings.DEFAULTS))
+    print("OK: настройки сброшены к defaults")
+    print(json.dumps(settings.load(), indent=2, ensure_ascii=False))
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -152,6 +162,9 @@ def main():
     p_set.add_argument("key", nargs="?", default=None)
     p_set.add_argument("value", nargs="?", default=None)
     p_set.set_defaults(func=cmd_settings)
+
+    p_reset = sub.add_parser("settings-reset", help="сбросить настройки")
+    p_reset.set_defaults(func=cmd_settings_reset)
     sub.add_parser("reload-extension", help="Firefox extension").set_defaults(func=cmd_reload_extension)
 
     args = parser.parse_args()

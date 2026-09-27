@@ -146,6 +146,7 @@ else
 fi
 
 # === 8. Итог ===
+
 cat << FINAL
 
 ╔═══════════════════════════════════════════════════════════╗
@@ -176,3 +177,10 @@ cat << FINAL
   Проверка готовности: $PROJECT_DIR/docs/adr/010-definition-of-done-beta.md
 
 FINAL
+
+
+if [ "$DRY_RUN" = "false" ]; then
+    echo ""
+    echo "Запускаю первичную настройку..."
+    "$VENV_DIR/bin/python" -m aura.config_wizard || true
+fi

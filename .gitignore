@@ -75,3 +75,7 @@ nohup.out
 # Разрешаем скриншоты для README
 !docs/screenshots/*.png
 firefox_extension_mv3/
+
+# Aura runtime config
+settings.json
+.config/aura/

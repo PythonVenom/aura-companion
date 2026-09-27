@@ -67,9 +67,12 @@ class AgentSpeaker(MicroAgent):
                         f.write(text)
                         text_file = f.name
                     wav_file = f"/tmp/aura_speech_{int(time.time())}_{threading.get_ident()}.wav"
-                    subprocess.run(
-                        [self.piper_cmd, '-m', self.voice_path, '-i', text_file, '-f', wav_file],
-                        capture_output=True)
+                    _vs = self._get_voice_settings()
+                    _speed = _vs["speed"]
+                    _cmd = [self.piper_cmd, '-m', self.voice_path, '-i', text_file, '-f', wav_file]
+                    if _speed != 1.0:
+                        _cmd.extend(["--length_scale", str(1.0 / _speed)])
+                    subprocess.run(_cmd, capture_output=True)
                     self.aplay_process = subprocess.Popen(
                         ['paplay', wav_file],
                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

@@ -101,6 +101,13 @@ class AgentVKMusic(BaseAgent):
         # Защита: «чат» — это messenger, не мы.
         if "чат" in text:
             return False
+        # Bug 14 ph.4: пульт. Если vk активен — «продолжи/пауза/возобнови/next»
+        # тоже наши (VK играет через MPRIS).
+        _pult = ("продолжи", "возобнови", "играй ", "следующий", "предыдущий", "пауза")
+        if any(kw in text for kw in _pult):
+            from aura.agents import media_state
+            if media_state.get_active() == "vk":
+                return True
         keywords = (
             self.PLAY_KEYWORDS
             + self.SEARCH_KEYWORDS

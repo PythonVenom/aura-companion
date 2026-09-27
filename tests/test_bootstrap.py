@@ -51,6 +51,7 @@ class TestBootstrapAssembly:
             "window_manager",
             "context_memory",
             "text_editor",
+            "checklist",
             "vk_music",
             "browser_tabs",
             "app_launcher",
@@ -64,7 +65,7 @@ class TestBootstrapAssembly:
         assert names == expected
 
     def test_agent_count(self, orch) -> None:
-        assert len(orch) == 27
+        assert len(orch) == 28  # test env: все модули включены (fake_cfg)
 
 
 class TestRouting:

@@ -74,3 +74,4 @@ nohup.out
 
 # Разрешаем скриншоты для README
 !docs/screenshots/*.png
+firefox_extension_mv3/

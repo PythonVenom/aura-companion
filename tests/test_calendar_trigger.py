@@ -5,20 +5,16 @@ from unittest.mock import MagicMock
 from aura.agents import chat_sense
 
 
-def test_calendar_reminder_trigger_runs(tmp_path, monkeypatch):
+def test_calendar_reminder_trigger_past_event(tmp_path, monkeypatch):
+    """Событие в прошлом → триггер не срабатывает (get_today не находит)."""
     from aura.agents.proactive import calendar_reminder_trigger
     monkeypatch.setattr(chat_sense, "CALENDAR_PATH", tmp_path / "cal.json")
     chat_sense.save_event({
-        "when": "2026-09-28T14:00", "chat": "Аня",
-        "text": "завтра в 14:00 массаж у Ивана", "trigger": "массаж",
+        "when": "2020-01-01T14:00", "chat": "Аня",
+        "text": "старое событие", "trigger": "массаж",
     })
-    from datetime import datetime as dt
     t = calendar_reminder_trigger(get_agent=None)
     state = {}
-    # Мокнуть now не получится — проверяем через патч datetime
-    import aura.agents.proactive as pr
-    # Триггер вызовет chat_sense.summary_today(now=None) — сегодня реальный
-    # Ожидаем False (событие в будущем)
     assert t.condition(state) is False
 
 

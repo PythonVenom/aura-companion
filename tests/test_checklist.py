@@ -51,3 +51,50 @@ def test_summary_empty(tmp_path, monkeypatch):
     p.write_text("# Чек-лист\n\n## 🔴 Критично\n", encoding="utf-8")
     monkeypatch.setattr(checklist, "CHECKLIST_PATH", p)
     assert checklist.summary() == "" or "нет" in checklist.summary().lower()
+
+
+# === AgentChecklist (BaseAgent) ===
+
+def test_agent_can_handle_checklist(tmp_paths):
+    from aura.agents.checklist import AgentChecklist
+    from aura.core.protocol import AgentRequest
+    a = AgentChecklist()
+    assert a.can_handle(AgentRequest(text="аура чек-лист")) is True
+    assert a.can_handle(AgentRequest(text="что осталось")) is True
+
+
+def test_agent_cannot_handle_other():
+    from aura.agents.checklist import AgentChecklist
+    from aura.core.protocol import AgentRequest
+    a = AgentChecklist()
+    assert a.can_handle(AgentRequest(text="привет как дела")) is False
+
+
+@pytest.mark.asyncio
+async def test_agent_handle_summary(tmp_paths):
+    from aura.agents.checklist import AgentChecklist
+    from aura.core.protocol import AgentRequest, AgentStatus
+    a = AgentChecklist()
+    resp = await a.handle(AgentRequest(text="что в чек-листе"))
+    assert resp.status == AgentStatus.OK
+    assert "fix bug 12" in resp.text
+
+
+@pytest.mark.asyncio
+async def test_agent_handle_add(tmp_paths):
+    from aura.agents.checklist import AgentChecklist
+    from aura.core.protocol import AgentRequest, AgentStatus
+    a = AgentChecklist()
+    resp = await a.handle(AgentRequest(text="добавь в чек-лист: тест голосом"))
+    assert resp.status == AgentStatus.OK
+    assert "тест голосом" in tmp_paths.read_text(encoding="utf-8")
+
+
+@pytest.mark.asyncio
+async def test_agent_handle_complete(tmp_paths):
+    from aura.agents.checklist import AgentChecklist
+    from aura.core.protocol import AgentRequest, AgentStatus
+    a = AgentChecklist()
+    resp = await a.handle(AgentRequest(text="выполнил fix bug 12"))
+    assert resp.status == AgentStatus.OK
+    assert "- [x] fix bug 12" in tmp_paths.read_text(encoding="utf-8")

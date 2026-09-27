@@ -35,3 +35,14 @@ def test_cannot_handle_other(agent, text):
 async def test_handle_returns_ok(agent):
     resp = await agent.handle(AgentRequest(text="открой вк"))
     assert resp.status == AgentStatus.OK
+
+
+@pytest.mark.asyncio
+async def test_handle_list_chats_no_bridge(agent):
+    """Без bridge — сообщение об ошибке, не падение."""
+    from unittest.mock import patch
+    with patch("aura.agents.vk_web.send_command", return_value=None):
+        resp = await agent.handle(AgentRequest(text="вк сообщения"))
+    assert resp.status == AgentStatus.OK
+    # Текст начинается с 🌐 VK или 🌐 Ошибка
+    assert "🌐" in resp.text

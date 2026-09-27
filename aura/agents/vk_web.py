@@ -72,7 +72,23 @@ class AgentVKWeb(MicroAgent):
                 self.name,
             )
 
-        # 3. Просто «открой вк» — фокус на вкладку
+        # 3. Список сообщений
+        if "сообщения" in text or "переписки" in text or "чаты" in text:
+            result = send_command({"action": "vk_list_chats"})
+            if result is None or "error" in result:
+                return AgentResponse.ok(_err(result), self.name)
+            data = result.get("data", {})
+            chats = data.get("chats", [])
+            if not chats:
+                return AgentResponse.ok("🌐 VK: нет чатов", self.name)
+            lines = ["🌐 VK чаты:"]
+            for i, c in enumerate(chats[:10], 1):
+                name = c.get("name", "?")[:40]
+                preview = c.get("preview", "")[:40]
+                lines.append(f"{i}. {name} — {preview}")
+            return AgentResponse.ok("\n".join(lines), self.name)
+
+        # 4. Просто «открой вк» — фокус на вкладку
         if "открой вк" in text or "открой вконтакте" in text:
             result = send_command({"action": "vk_current"})
             if result and "data" in result:

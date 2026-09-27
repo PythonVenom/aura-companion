@@ -30,6 +30,11 @@ function connectNative() {
     }
 }
 
+async function findTelegramTab() {
+    const tabs = await browser.tabs.query({ url: "*://web.telegram.org/*" });
+    return tabs[0] || null;
+}
+
 async function findVKTab() {
     const tabs = await browser.tabs.query({ url: "*://vk.com/*" });
     return tabs[0] || null;
@@ -171,8 +176,25 @@ async function handleCommand(msg) {
         case "max_send_message":
         case "max_read_last":
         case "max_title":
+        case "tg_list_chats":
+        case "tg_find_chat":
+        case "tg_send_message":
+        case "tg_finalize":
+        case "tg_current": {
+            const tgTab = await findTelegramTab();
+            if (!tgTab) return { error: "telegram tab not found" };
+            const payload = { action: action };
+            if (msg.query) payload.query = msg.query;
+            if (msg.text) payload.text = msg.text;
+            try {
+                return await browser.tabs.sendMessage(tgTab.id, payload);
+            } catch (e) {
+                return { error: "content script: " + e.toString() };
+            }
+        }
         case "vk_list_shortcuts":
         case "vk_navigate":
+        case "vk_list_chats":
         case "vk_current": {
             const vkTab = await findVKTab();
             if (!vkTab) return { error: "vk tab not found" };

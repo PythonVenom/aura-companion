@@ -57,6 +57,21 @@ function getVKCurrentSection() {
 }
 
 
+
+
+function listVKChats() {
+    // Парсим список диалогов в /im
+    const items = document.querySelectorAll('[data-testid="dialogs-item"], .dialogs_item, [role="listitem"]');
+    const chats = [];
+    items.forEach((el, i) => {
+        if (i >= 20) return;
+        const name = (el.querySelector('[data-testid="dialogs-item-name"], .dialogs_item_name, .peer-title')?.innerText || "").trim();
+        const preview = (el.innerText || "").substring(0, 120).replace(name, "").trim();
+        if (name) chats.push({ name, preview, index: i });
+    });
+    return chats;
+}
+
 // Слушаем команды от background.js
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     try {
@@ -67,6 +82,9 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
                 break;
             case "vk_navigate":
                 sendResponse({ ok: true, data: navigateVK(msg.section || "") });
+                break;
+            case "vk_list_chats":
+                sendResponse({ ok: true, data: listVKChats() });
                 break;
             case "vk_current":
                 sendResponse({ ok: true, data: getVKCurrentSection() });

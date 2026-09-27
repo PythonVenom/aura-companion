@@ -45,31 +45,26 @@ class AgentSpeaker(MicroAgent):
         return f"🗣️ Сказала: {text[:50]}..."
 
     def _speak_worker(self):
-        """Вечный воркер: блокирующий get(timeout). НЕ выходит сам.
+        self.is_speaking = True
+        try:
+            self._speak_loop()
+        finally:
+            self.is_speaking = False
 
-        Bug 10 fix v2: раньше while-not-empty завершался, а say()
-        создавал второй worker → два paplay параллельно = троение.
-        """
-        while True:
-            try:
-                text = self.speech_queue.get(timeout=0.5)
-            except queue.Empty:
-                self.is_speaking = False
-                continue
-            if text is None:
-                break
-            self.is_speaking = True
+    def _speak_loop(self):
+        while not self.speech_queue.empty():
+            text = self.speech_queue.get()
             try:
                 text = self._make_text_smart(text)
+
                 if os.path.exists(self.piper_cmd) and os.path.exists(self.voice_path):
                     import tempfile
                     with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as f:
                         f.write(text)
                         text_file = f.name
+
                     wav_file = f"/tmp/aura_speech_{int(time.time())}_{threading.get_ident()}.wav"
-                    subprocess.run(
-                        [self.piper_cmd, '-m', self.voice_path, '-i', text_file, '-f', wav_file],
-                        capture_output=True)
+                    subprocess.run([self.piper_cmd, '-m', self.voice_path, '-i', text_file, '-f', wav_file], capture_output=True)
                     self.aplay_process = subprocess.Popen(
                         ['paplay', wav_file],
                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -77,19 +72,10 @@ class AgentSpeaker(MicroAgent):
                     os.unlink(text_file)
                     try:
                         os.unlink(wav_file)
-                    except Exception:
+                    except:
                         pass
                 else:
-                    subprocess.Popen(
-                        ['espeak-ng', '-v', 'ru', '-p', '60', '-s', '160', text],
-                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            except Exception as e:
-                print(f"❌ Ошибка озвучивания: {e}")
-
-                else:
-                    subprocess.Popen(
-                        ['espeak-ng', '-v', 'ru', '-p', '60', '-s', '160', text],
-                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    subprocess.Popen(['espeak-ng', '-v', 'ru', '-p', '60', '-s', '160', text], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             except Exception as e:
                 print(f"❌ Ошибка озвучивания: {e}")
 

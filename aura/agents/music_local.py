@@ -75,6 +75,14 @@ class AgentMusicLocal(BaseAgent):
 
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
+        # Bug 14 ph.3: если last_active=vk — уступаем media_pause / vk_music.
+        from aura.agents import media_state
+        _yield_kw = (
+            self.PAUSE_KEYWORDS + self.RESUME_KEYWORDS
+            + self.NEXT_KEYWORDS + self.PREV_KEYWORDS + self.STOP_KEYWORDS
+        )
+        if media_state.get_active() == "vk" and any(kw in text for kw in _yield_kw):
+            return False
         # Pause — только если VLC играет.
         if any(kw in text for kw in self.PAUSE_KEYWORDS):
             return self._vlc_playing()

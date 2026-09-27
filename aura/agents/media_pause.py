@@ -44,6 +44,11 @@ class AgentMediaPause(BaseAgent):
         "возобнови музыку",
         "продолжи музыку",
         "сними с паузы",
+        "пауза",
+        "продолжи",
+        "возобнови",
+        "стоп музыка",
+        "останови музыку",
     )
 
     def __init__(self, player: str | None = None) -> None:
@@ -54,7 +59,12 @@ class AgentMediaPause(BaseAgent):
 
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
-        return any(kw in text for kw in self.KEYWORDS)
+        if not any(kw in text for kw in self.KEYWORDS):
+            return False
+        # Bug 14 ph.3: только если last_active=vk или mpris.
+        # Если local — music_local обработает первым.
+        from aura.agents import media_state
+        return media_state.get_active() in ("vk", "mpris")
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         text = request.text.lower()

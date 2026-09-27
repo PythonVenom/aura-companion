@@ -27,10 +27,11 @@ from pathlib import Path
 
 
 FSM_PATH = Path(os.environ.get("AURA_FSM_PATH", "/tmp/aura_fsm.json"))
-VALID_STATES = frozenset({"idle", "awaiting_command", "pending_read", "ask_text", "ask_confirm"})
+VALID_STATES = frozenset({"idle", "awaiting_command", "pending_read", "awaiting_reply", "ask_text", "ask_confirm"})
 TIMEOUT_SEC = 30.0
 TIMEOUT_AWAITING = 10.0
 TIMEOUT_PENDING_READ = 180.0  # Bug 11: пожилым нужно 3 мин на ответ
+TIMEOUT_AWAITING_REPLY = 180.0  # Bug 15: время на ответ в чат
 
 
 def set_state(state: str, chat: str = "", text: str = "") -> None:
@@ -66,6 +67,9 @@ def get_state() -> dict:
             clear_state()
             return {"state": "idle", "chat": "", "text": ""}
         if state == "pending_read" and time.time() - ts > TIMEOUT_PENDING_READ:
+            clear_state()
+            return {"state": "idle", "chat": "", "text": ""}
+        if state == "awaiting_reply" and time.time() - ts > TIMEOUT_AWAITING_REPLY:
             clear_state()
             return {"state": "idle", "chat": "", "text": ""}
         if state in ("ask_text", "ask_confirm") and time.time() - ts > TIMEOUT_SEC:

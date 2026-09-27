@@ -30,10 +30,11 @@ def _run(orch, monkeypatch, state, text_input, fsm_text="привет из ма�
 
 
 def test_pending_read_yes_with_aura(orch, monkeypatch):
-    """«да аура зачитай» — не сбрасываем по «аура» раньше времени."""
+    """«да аура зачитай» — зачитывает, FSM → awaiting_reply (Bug 15)."""
     result, cleared = _run(orch, monkeypatch, "pending_read", "да аура зачитай")
     assert result is True
-    assert cleared == [True]
+    # Bug 15: не clear, а переход в awaiting_reply (сохранение chat)
+    assert cleared == []
     orch._say_with_duck.assert_called_once_with("Сообщение: привет из макса")
 
 
@@ -69,10 +70,10 @@ def test_pending_read_garbage_repeats(orch, monkeypatch):
 
 def test_pending_read_da_ty_pro(orch, monkeypatch):
     """Bug 11: ASR коверкает «да аура зачитай» в «да ты про».
-    Первое слово «да» — подтверждение, даже если остальное мусор."""
+    Bug 15: FSM → awaiting_reply, не clear."""
     result, cleared = _run(orch, monkeypatch, "pending_read", "да ты про")
     assert result is True
-    assert cleared == [True]
+    assert cleared == []
     orch._say_with_duck.assert_called_once_with("Сообщение: привет из макса")
 
 

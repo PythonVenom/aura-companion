@@ -253,12 +253,17 @@ class AuraOrchestrator:
         # T-one часто добавляет «аура» рефлекторно — не считаем это сбросом.
         if state == "pending_read":
             if any(w in text for w in ("да", "зачитай", "читай", "конечно", "давай")):
-                fsm_clear()
                 msg_text = fsm.get("text", "")
+                chat_from_fsm = fsm.get("chat", "")
                 if msg_text:
                     self._say_with_duck(f"Сообщение: {msg_text}")
                 else:
                     self._say_with_duck("Сообщение пустое")
+                # Bug 15: сохраняем chat → awaiting_reply для голосового ответа
+                if chat_from_fsm:
+                    fsm_set("awaiting_reply", chat=chat_from_fsm)
+                else:
+                    fsm_clear()
                 return True
             if any(w in text for w in ("нет", "не надо", "потом", "позже", "отмена", "стоп", "отменить")):
                 fsm_clear()
@@ -271,6 +276,39 @@ class AuraOrchestrator:
                 return False
             # Другое — напомнить.
             self._say_with_duck("Зачитать?")
+            return True
+
+        # Bug 15: awaiting_reply — контекст ответа в чат
+        if state == "awaiting_reply":
+            # «ответь», «напиши», «скажи» + текст
+            for kw in ("ответь ей", "ответь ему", "ответь", "напиши ей", "напиши ему", "напиши", "скажи ей", "скажи ему", "скажи"):
+                if kw in text:
+                    idx = text.index(kw) + len(kw)
+                    reply_text = heard[idx:].strip(":.,!? ")
+                    if not reply_text:
+                        self._say_with_duck("Что ответить?")
+                        return True
+                    messenger = _get_agent(self.orch, "messenger")
+                    if messenger and chat:
+                        resp = messenger.send_message(chat, reply_text)
+                        self._say_with_duck(resp)
+                        fsm_set("ask_confirm", chat=chat)
+                    else:
+                        self._say_with_duck("Не могу отправить")
+                        fsm_clear()
+                    return True
+            # Отказ
+            if any(w in text for w in ("нет", "не надо", "отмена", "отменить", "стоп", "пока")):
+                fsm_clear()
+                self._say_with_duck("Хорошо")
+                return True
+            # Новая активация
+            if "аура" in text or "aura" in text:
+                print("🔔 Активация — сброс FSM")
+                fsm_clear()
+                return False
+            # Не распознали
+            self._say_with_duck("Ответить или нет?")
             return True
 
         # Новая «Аура ...» — сброс.
@@ -315,7 +353,6 @@ class AuraOrchestrator:
                 fsm_clear()
                 return True
             resp = messenger.send_message(chat, heard)
-            from aura.dialog_fsm import set_state as fsm_set
             fsm_set("ask_confirm", chat=chat)
             self._say_with_duck(resp)
             return True

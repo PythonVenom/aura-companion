@@ -337,11 +337,43 @@ def unanswered_messages_trigger(get_agent) -> Trigger:
     )
 
 
+def calendar_reminder_trigger(get_agent) -> Trigger:
+    """ChatSense ph.5: напоминает о событиях сегодня из чатов.
+
+    Cooldown 4 часа — не спамит. Источник — chat_sense.get_today().
+    """
+    def condition(state: dict) -> bool:
+        try:
+            chat_sense.purge_old()
+            today = chat_sense.get_today()
+            if not today:
+                return False
+            state["cal_today_count"] = len(today)
+            return True
+        except Exception:
+            return False
+
+    def action() -> str:
+        try:
+            return chat_sense.summary_today() or ""
+        except Exception:
+            return ""
+
+    return Trigger(
+        name="calendar_reminder",
+        priority=9,
+        cooldown_sec=14400,   # 4 часа
+        condition=condition,
+        action=action,
+    )
+
+
 def default_engine(get_agent=None) -> ProactiveEngine:
     """Стандартный набор триггеров."""
     engine = ProactiveEngine()
     engine.register(morning_briefing_trigger(get_agent))
     engine.register(max_new_message_trigger(get_agent))
+    engine.register(calendar_reminder_trigger(get_agent))
     engine.register(unanswered_messages_trigger(get_agent))
     return engine
 

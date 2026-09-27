@@ -21,6 +21,77 @@ STATE_PATH = Path("/tmp/aura_chat_sense.json")
 RE_MIND_TTL = 4 * 3600   # не напоминать чаще 4 часов про один чат
 
 
+# === ph.4: календарь ===
+CALENDAR_PATH = Path("/tmp/aura_calendar.json")
+PURGE_DAYS = 3   # удаляем события старше 3 дней
+
+
+def load_calendar() -> list:
+    if not CALENDAR_PATH.exists():
+        return []
+    try:
+        return json.loads(CALENDAR_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+
+
+def _save_calendar(items: list) -> None:
+    try:
+        CALENDAR_PATH.write_text(
+            json.dumps(items, ensure_ascii=False, indent=2),
+            encoding="utf-8")
+    except Exception:
+        pass
+
+
+def save_event(event: dict) -> None:
+    """Сохранить событие. Дубликаты (when+chat+text) — пропускаем."""
+    if not event or not event.get("when"):
+        return
+    items = load_calendar()
+    key = (event.get("when"), event.get("chat"), event.get("text"))
+    for e in items:
+        if (e.get("when"), e.get("chat"), e.get("text")) == key:
+            return
+    items.append(event)
+    _save_calendar(items)
+
+
+def get_today(now: datetime | None = None) -> list:
+    if now is None:
+        now = datetime.now()
+    today_str = now.strftime("%Y-%m-%d")
+    items = load_calendar()
+    out = [e for e in items if e.get("when", "").startswith(today_str)]
+    out.sort(key=lambda e: e.get("when", ""))
+    return out
+
+
+def purge_old(now: datetime | None = None) -> None:
+    if now is None:
+        now = datetime.now()
+    cutoff = now - timedelta(days=PURGE_DAYS)
+    cutoff_str = cutoff.strftime("%Y-%m-%dT%H:%M")
+    items = load_calendar()
+    fresh = [e for e in items if e.get("when", "") >= cutoff_str]
+    if len(fresh) != len(items):
+        _save_calendar(fresh)
+
+
+def summary_today(now: datetime | None = None) -> str:
+    """Голосовая сводка: «14:00 — Аня: массаж у Ивана. 18:00 — Борис: встреча.»"""
+    today = get_today(now=now)
+    if not today:
+        return ""
+    parts = []
+    for e in today:
+        t = e.get("when", "")[11:16]
+        chat = e.get("chat", "").split()[0]
+        text = e.get("text", "")[:60]
+        parts.append(f"{t} — {chat}: {text}")
+    return "Сегодня: " + ". ".join(parts)
+
+
 def _load_state() -> dict:
     if not STATE_PATH.exists():
         return {"reminded": {}}
@@ -226,5 +297,5 @@ def summary(items: list) -> str:
 
 __all__ = [
     "find_unanswered", "filter_by_reminder_ttl", "mark_reminded",
-    "summary", "parse_date_ru", "extract_events", "STATE_PATH", "RE_MIND_TTL",
+    "summary", "parse_date_ru", "extract_events", "save_event", "load_calendar", "get_today", "summary_today", "purge_old", "CALENDAR_PATH", "STATE_PATH", "RE_MIND_TTL",
 ]

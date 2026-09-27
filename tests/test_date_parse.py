@@ -79,3 +79,73 @@ def test_extract_my_message_skipped():
         {"chat": "Аня", "preview": "Вы: завтра в 14:00 встреча"}
     ])
     assert events == []
+
+
+# === ph.4: календарь (JSON storage) ===
+
+def test_save_event(tmp_path, monkeypatch):
+    from aura.agents import chat_sense
+    monkeypatch.setattr(chat_sense, "CALENDAR_PATH", tmp_path / "cal.json")
+    chat_sense.save_event({
+        "when": "2026-09-28T14:00",
+        "chat": "Аня",
+        "text": "завтра в 14:00 массаж",
+        "trigger": "массаж",
+    })
+    assert (tmp_path / "cal.json").exists()
+
+
+def test_save_event_dedup(tmp_path, monkeypatch):
+    """Одно и то же событие не дублируется."""
+    from aura.agents import chat_sense
+    monkeypatch.setattr(chat_sense, "CALENDAR_PATH", tmp_path / "cal.json")
+    e = {"when": "2026-09-28T14:00", "chat": "Аня",
+         "text": "завтра в 14:00 массаж", "trigger": "массаж"}
+    chat_sense.save_event(e)
+    chat_sense.save_event(e)
+    assert len(chat_sense.load_calendar()) == 1
+
+
+def test_get_today(tmp_path, monkeypatch):
+    from aura.agents import chat_sense
+    from datetime import datetime as dt
+    monkeypatch.setattr(chat_sense, "CALENDAR_PATH", tmp_path / "cal.json")
+    chat_sense.save_event({"when": "2026-09-28T14:00", "chat": "Аня",
+                           "text": "массаж", "trigger": "массаж"})
+    chat_sense.save_event({"when": "2026-09-28T18:00", "chat": "Борис",
+                           "text": "встреча", "trigger": "встреча"})
+    chat_sense.save_event({"when": "2026-09-29T10:00", "chat": "Вера",
+                           "text": "приём", "trigger": "приём"})
+    today = chat_sense.get_today(now=dt(2026, 9, 28, 8, 0))
+    assert len(today) == 2
+
+
+def test_summary_today(tmp_path, monkeypatch):
+    from aura.agents import chat_sense
+    from datetime import datetime as dt
+    monkeypatch.setattr(chat_sense, "CALENDAR_PATH", tmp_path / "cal.json")
+    chat_sense.save_event({"when": "2026-09-28T14:00", "chat": "Аня",
+                           "text": "массаж у Ивана", "trigger": "массаж"})
+    s = chat_sense.summary_today(now=dt(2026, 9, 28, 8, 0))
+    assert "14:00" in s
+    assert "Аня" in s
+
+
+def test_summary_today_empty(tmp_path, monkeypatch):
+    from aura.agents import chat_sense
+    from datetime import datetime as dt
+    monkeypatch.setattr(chat_sense, "CALENDAR_PATH", tmp_path / "cal.json")
+    assert chat_sense.summary_today(now=dt(2026, 9, 28, 8, 0)) == ""
+
+
+def test_purge_old(tmp_path, monkeypatch):
+    """Старые события (3+ дня) удаляются."""
+    from aura.agents import chat_sense
+    from datetime import datetime as dt
+    monkeypatch.setattr(chat_sense, "CALENDAR_PATH", tmp_path / "cal.json")
+    chat_sense.save_event({"when": "2026-09-20T14:00", "chat": "Аня",
+                           "text": "старое", "trigger": "массаж"})
+    chat_sense.save_event({"when": "2026-09-28T14:00", "chat": "Аня",
+                           "text": "новое", "trigger": "массаж"})
+    chat_sense.purge_old(now=dt(2026, 9, 28, 8, 0))
+    assert len(chat_sense.load_calendar()) == 1

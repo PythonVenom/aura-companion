@@ -57,6 +57,7 @@ jobs:
       - name: Test PAL imports
         run: |
           python -c "from aura.platform import get_audio, get_service, get_media; print('PAL ok')"
+          python -c "from aura.platform import _distro, _is_ubuntu_like; print('detect ok:', _distro())"
           python -c "from aura.platform.windows import WindowsAudio; print('Win ok')"
           python -c "from aura.platform.macos import MacOSAudio; print('Mac ok')"
           python -c "from aura.platform.linux import LinuxAudio; print('Linux ok')"

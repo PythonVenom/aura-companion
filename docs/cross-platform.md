@@ -57,3 +57,38 @@
 ### Фаза 23 — macOS (Q4 2027)
 - CoreAudio через sounddevice
 - AppleScript уведомления
+
+## Fedora / RHEL / CentOS
+
+Установщик: `./install_fedora.sh`
+
+Пакеты: python3.12, pipewire, wireplumber, vlc, portaudio-devel.
+Дистрибутив определяется через `/etc/os-release` (ID=fedora, rhel, centos).
+
+## Alpine Linux
+
+Установщик: `./install_alpine.sh`
+
+Пакеты: py3-pip, py3-virtualenv, pipewire, vlc.
+Особенность: musl libc — некоторые пакеты (например chromadb) могут требовать дополнительной сборки.
+
+## ARM64 (Raspberry Pi 4/5)
+
+Установщик: `./install_arm.sh` — автоопределяет дистрибутив.
+
+Ограничения:
+- LLM работает на CPU без GPU ускорения
+- 7B модель влезает в 8 ГБ RAM
+- Piper/T-one работают нормально
+
+## WSL2 (Windows Subsystem for Linux)
+
+Установщик: `./install_wsl.sh`
+
+Требования:
+- Windows 11 (для WSLg — GUI + микрофон)
+- WSL 2.0+ с systemd (в `/etc/wsl.conf`: `systemd=true`)
+
+Ограничения:
+- Firefox bridge — только в Windows-браузере (не в Linux-браузере WSL)
+- Уведомления через Windows (не Linux)

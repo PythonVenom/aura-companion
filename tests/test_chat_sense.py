@@ -62,3 +62,15 @@ def test_summary_many():
 
 def test_summary_empty():
     assert cs.summary([]) == ""
+
+
+def test_vip_chats_higher_priority():
+    """VIP-чаты в начале списка."""
+    from aura.agents import chat_sense
+    items = [
+        {"chat": "Спам", "preview": "реклама"},
+        {"chat": "Мама", "preview": "как дела"},
+        {"chat": "Бот", "preview": "новости"},
+    ]
+    sorted_items = chat_sense.prioritize(items, vip=["Мама"])
+    assert sorted_items[0]["chat"] == "Мама"

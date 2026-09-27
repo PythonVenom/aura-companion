@@ -78,6 +78,59 @@ def purge_old(now: datetime | None = None) -> None:
         _save_calendar(fresh)
 
 
+def summary_tomorrow(now: datetime | None = None) -> str:
+    """Голосовая сводка событий на завтра."""
+    if now is None:
+        now = datetime.now()
+    tomorrow = (now + timedelta(days=1)).strftime("%Y-%m-%d")
+    items = load_calendar()
+    tomorrow_items = [e for e in items if e.get("when", "").startswith(tomorrow)]
+    tomorrow_items.sort(key=lambda e: e.get("when", ""))
+    if not tomorrow_items:
+        return ""
+    parts = []
+    for e in tomorrow_items:
+        t = e.get("when", "")[11:16]
+        chat = e.get("chat", "").split()[0]
+        text = e.get("text", "")[:60]
+        parts.append(f"{t} — {chat}: {text}")
+    return "Завтра: " + ". ".join(parts)
+
+
+def export_ics(now: datetime | None = None) -> str:
+    """Экспорт календаря в формат iCalendar (.ics)."""
+    if now is None:
+        now = datetime.now()
+    items = load_calendar()
+    lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Aura//Aura Calendar//RU",
+    ]
+    for e in items:
+        when = e.get("when", "")
+        if not when:
+            continue
+        # 2026-09-28T14:00 → 20260928T140000
+        try:
+            dt = datetime.strptime(when, "%Y-%m-%dT%H:%M")
+            start = dt.strftime("%Y%m%dT%H%M%S")
+            end = (dt + timedelta(hours=1)).strftime("%Y%m%dT%H%M%S")
+        except Exception:
+            continue
+        summary = f"{e.get('chat', '')}: {e.get('text', '')}"[:80]
+        lines.extend([
+            "BEGIN:VEVENT",
+            f"UID:{when.replace(':', '').replace('-', '')}@aura",
+            f"DTSTART:{start}",
+            f"DTEND:{end}",
+            f"SUMMARY:{summary}",
+            "END:VEVENT",
+        ])
+    lines.append("END:VCALENDAR")
+    return "\n".join(lines)
+
+
 def summary_today(now: datetime | None = None) -> str:
     """Голосовая сводка: «14:00 — Аня: массаж у Ивана. 18:00 — Борис: встреча.»"""
     today = get_today(now=now)
@@ -237,6 +290,22 @@ def extract_events(previews: list, now: datetime | None = None) -> list:
             "trigger": trigger,
         })
     return out
+
+
+def prioritize(items: list, vip: list | None = None) -> list:
+    """Сортировка: VIP-чаты в начале, остальные по порядку."""
+    if not vip:
+        return list(items)
+    vip_lower = [v.lower() for v in vip]
+    vip_items = []
+    other_items = []
+    for it in items:
+        chat = (it.get("chat") or "").lower()
+        if any(v in chat for v in vip_lower):
+            vip_items.append(it)
+        else:
+            other_items.append(it)
+    return vip_items + other_items
 
 
 def find_unanswered(previews: list) -> list:

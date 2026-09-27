@@ -149,3 +149,70 @@ def test_purge_old(tmp_path, monkeypatch):
                            "text": "новое", "trigger": "массаж"})
     chat_sense.purge_old(now=dt(2026, 9, 28, 8, 0))
     assert len(chat_sense.load_calendar()) == 1
+
+
+# === ph.7: новые триггеры ===
+
+def test_extract_phone_call():
+    from aura.agents.chat_sense import extract_events
+    from datetime import datetime as dt
+    now = dt(2026, 9, 27, 12, 0)
+    events = extract_events([
+        {"chat": "Мама", "preview": "позвони мне в 18:00"}
+    ], now=now)
+    assert len(events) == 1
+    assert events[0]["trigger"] == "позвони"
+    assert "18:00" in events[0]["when"]
+
+
+def test_extract_meeting_tomorrow():
+    from aura.agents.chat_sense import extract_events
+    from datetime import datetime as dt
+    now = dt(2026, 9, 27, 12, 0)
+    events = extract_events([
+        {"chat": "Борис", "preview": "завтра встреча в 10:00"}
+    ], now=now)
+    assert len(events) == 1
+    assert events[0]["when"].startswith("2026-09-28T10:00")
+
+
+def test_extract_no_date_no_event():
+    """Триггер есть, даты нет — событие не создаём."""
+    from aura.agents.chat_sense import extract_events
+    events = extract_events([
+        {"chat": "Мама", "preview": "позвони когда сможешь"}
+    ])
+    assert events == []
+
+
+def test_summary_tomorrow(tmp_path, monkeypatch):
+    """Сводка событий на завтра."""
+    from aura.agents import chat_sense
+    from datetime import datetime as dt, timedelta
+    monkeypatch.setattr(chat_sense, "CALENDAR_PATH", tmp_path / "cal.json")
+    tomorrow = dt.now() + timedelta(days=1)
+    chat_sense.save_event({
+        "when": tomorrow.strftime("%Y-%m-%dT14:00"),
+        "chat": "Аня",
+        "text": "массаж",
+        "trigger": "массаж",
+    })
+    s = chat_sense.summary_tomorrow()
+    assert "Аня" in s or "14:00" in s
+
+
+def test_ics_export(tmp_path, monkeypatch):
+    """Экспорт календаря в .ics."""
+    from aura.agents import chat_sense
+    from datetime import datetime as dt
+    monkeypatch.setattr(chat_sense, "CALENDAR_PATH", tmp_path / "cal.json")
+    chat_sense.save_event({
+        "when": "2026-09-28T14:00",
+        "chat": "Аня",
+        "text": "массаж у Ивана",
+        "trigger": "массаж",
+    })
+    ics = chat_sense.export_ics()
+    assert "BEGIN:VCALENDAR" in ics
+    assert "BEGIN:VEVENT" in ics
+    assert "2026-09-28" in ics or "20260928" in ics

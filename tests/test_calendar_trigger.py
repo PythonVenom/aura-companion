@@ -33,3 +33,24 @@ def test_calendar_reminder_with_today_event(tmp_path, monkeypatch):
     result = t.action()
     assert "Сегодня" in result
     assert "14:00" in result
+
+
+def test_upcoming_reminder(tmp_path, monkeypatch):
+    """Событие через 30 мин — напоминание."""
+    from aura.agents import chat_sense
+    from aura.agents.proactive import upcoming_calendar_trigger
+    from datetime import datetime as dt, timedelta
+
+    monkeypatch.setattr(chat_sense, "CALENDAR_PATH", tmp_path / "cal.json")
+    future = dt.now() + timedelta(minutes=20)
+    chat_sense.save_event({
+        "when": future.strftime("%Y-%m-%dT%H:%M"),
+        "chat": "Аня",
+        "text": "встреча",
+        "trigger": "встреча",
+    })
+    t = upcoming_calendar_trigger(get_agent=None)
+    state = {}
+    assert t.condition(state) is True
+    result = t.action()
+    assert "20" in result or "через" in result.lower()

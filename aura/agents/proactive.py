@@ -381,6 +381,69 @@ def calendar_reminder_trigger(get_agent) -> Trigger:
     )
 
 
+def upcoming_calendar_trigger(get_agent) -> Trigger:
+    """Напоминание о событии за 15–30 мин до начала.
+
+    Читает /tmp/aura_calendar.json, фильтрует today, время в окне [now, now+30min].
+    """
+    def condition(state: dict) -> bool:
+        try:
+            from datetime import datetime, timedelta
+            chat_sense.purge_old()
+            items = chat_sense.get_today()
+            if not items:
+                return False
+            now = datetime.now()
+            window_end = now + timedelta(minutes=30)
+            upcoming = []
+            for e in items:
+                when_str = e.get("when", "")
+                try:
+                    when = datetime.strptime(when_str, "%Y-%m-%dT%H:%M")
+                except Exception:
+                    continue
+                if now <= when <= window_end:
+                    minutes_left = int((when - now).total_seconds() / 60)
+                    e["minutes_left"] = minutes_left
+                    upcoming.append(e)
+            if not upcoming:
+                return False
+            upcoming.sort(key=lambda e: e["when"])
+            state["upcoming_cal"] = upcoming
+            return True
+        except Exception:
+            return False
+
+    def action() -> str:
+        items = _cache.pop("items", [])
+        if not items:
+            return ""
+        parts = []
+        for e in items[:3]:
+            m = e.get("minutes_left", 0)
+            chat = e.get("chat", "").split()[0]
+            text = e.get("text", "")[:50]
+            parts.append(f"через {m} мин — {chat}: {text}")
+        return "Напоминание: " + ". ".join(parts)
+
+    _cache: dict = {}   # noqa: F841 — используется внутри condition/action
+
+    # Передаём _cache в condition через closure
+    def condition_with_cache(state: dict) -> bool:
+        result = condition(state)
+        if result:
+            _cache["items"] = state.get("upcoming_cal", [])
+        return result
+
+    return Trigger(
+        name="upcoming_calendar",
+        priority=10,
+        cooldown_sec=900,
+        condition=condition_with_cache,
+        action=action,
+    )
+
+
 def morning_checklist_trigger(get_agent) -> Trigger:
     """Утром (8:00–12:00) напоминает о незакрытых пунктах чек-листа.
 
@@ -420,6 +483,7 @@ def default_engine(get_agent=None) -> ProactiveEngine:
     engine.register(morning_briefing_trigger(get_agent))
     engine.register(max_new_message_trigger(get_agent))
     engine.register(morning_checklist_trigger(get_agent))
+    engine.register(upcoming_calendar_trigger(get_agent))
     engine.register(calendar_reminder_trigger(get_agent))
     engine.register(unanswered_messages_trigger(get_agent))
     return engine

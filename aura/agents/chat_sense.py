@@ -125,6 +125,49 @@ def parse_date_ru(text: str, now: datetime | None = None):
     return datetime(base_date.year, base_date.month, base_date.day, hour, minute or 0)
 
 
+_TRIGGERS = (
+    "встреча", "встречу", "встретиться",
+    "массаж", "массажа",
+    "позвони", "позвонить", "созвон", "созвонимся",
+    "напомни", "напомнить",
+    "приём", "прием", "приёма",
+    "запиши", "записать",
+    "приходи", "заходи", "подъезжай",
+)
+
+
+def extract_events(previews: list, now: datetime | None = None) -> list:
+    """Найти события в чатах (встреча/массаж/позвони + дата).
+
+    Возвращает [{'when': 'YYYY-MM-DDTHH:MM', 'chat', 'text', 'trigger'}].
+    Пропускает «Вы:» и сообщения без триггера.
+    """
+    if now is None:
+        now = datetime.now()
+    out = []
+    for p in previews:
+        chat = p.get("chat", "").strip()
+        prev = p.get("preview", "").strip()
+        if not chat or not prev:
+            continue
+        if prev.startswith("Вы:"):
+            continue
+        low = prev.lower()
+        trigger = next((t for t in _TRIGGERS if t in low), "")
+        if not trigger:
+            continue
+        when = parse_date_ru(prev, now=now)
+        if when is None:
+            continue
+        out.append({
+            "when": when.strftime("%Y-%m-%dT%H:%M"),
+            "chat": chat,
+            "text": prev,
+            "trigger": trigger,
+        })
+    return out
+
+
 def find_unanswered(previews: list) -> list:
     """previews: [{'chat':..., 'preview':...}].
 
@@ -183,5 +226,5 @@ def summary(items: list) -> str:
 
 __all__ = [
     "find_unanswered", "filter_by_reminder_ttl", "mark_reminded",
-    "summary", "parse_date_ru", "STATE_PATH", "RE_MIND_TTL",
+    "summary", "parse_date_ru", "extract_events", "STATE_PATH", "RE_MIND_TTL",
 ]

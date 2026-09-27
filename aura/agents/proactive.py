@@ -18,6 +18,7 @@ import time
 from datetime import datetime
 from dataclasses import dataclass
 import re
+from aura.agents import chat_sense
 from aura.agents.messenger import is_own_message
 from pathlib import Path
 from typing import Callable
@@ -296,11 +297,52 @@ def max_new_message_trigger(get_agent) -> Trigger:
     )
 
 
+def unanswered_messages_trigger(get_agent) -> Trigger:
+    """Bug 16: раз в 30 мин — неотвеченные в Максе.
+
+    Замыкание _cache: condition сохраняет items, action читает.
+    """
+    _cache: dict = {}
+
+    def condition(state: dict) -> bool:
+        if get_agent is None:
+            return False
+        messenger = get_agent("messenger")
+        if messenger is None or not hasattr(messenger, "get_all_previews"):
+            return False
+        try:
+            previews = messenger.get_all_previews() or []
+            items = chat_sense.find_unanswered(previews)
+            items = chat_sense.filter_by_reminder_ttl(items)
+            if not items:
+                return False
+            _cache["items"] = items
+            return True
+        except Exception:
+            return False
+
+    def action() -> str:
+        items = _cache.pop("items", [])
+        if not items:
+            return "Неотвеченные: (пусто)"
+        chat_sense.mark_reminded(items)
+        return chat_sense.summary(items)
+
+    return Trigger(
+        name="unanswered_messages",
+        priority=7,
+        cooldown_sec=1800,
+        condition=condition,
+        action=action,
+    )
+
+
 def default_engine(get_agent=None) -> ProactiveEngine:
     """Стандартный набор триггеров."""
     engine = ProactiveEngine()
     engine.register(morning_briefing_trigger(get_agent))
     engine.register(max_new_message_trigger(get_agent))
+    engine.register(unanswered_messages_trigger(get_agent))
     return engine
 
 

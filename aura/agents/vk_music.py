@@ -16,6 +16,7 @@ from __future__ import annotations
 import os
 import subprocess
 
+from aura.agents import media_state
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 
@@ -139,6 +140,8 @@ class AgentVKMusic(BaseAgent):
     def play(self) -> str:
         if not self.token:
             return "❌ VK токен не найден"
+        from aura.agents import media_state
+        media_state.set_active("vk")
 
         try:
             result = self._vk_request("audio.getRecommendations", {"count": 5})

@@ -23,6 +23,7 @@ from __future__ import annotations
 import shutil
 import subprocess
 
+from aura.agents import media_state
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 
@@ -79,11 +80,13 @@ class AgentMediaPause(BaseAgent):
                     paused.append(p)
         if paused:
             self._paused_players = paused
+            from aura.agents import media_state
+            media_state.set_active("mpris")
             return True
         return False
 
     def resume(self) -> bool:
-        """Возобновление только тех, кого паузили. True, если хоть кого-то."""
+        """Возобновление только тех, кого паузили."""
         if not self.ready or not self._paused_players:
             return False
         ok = False

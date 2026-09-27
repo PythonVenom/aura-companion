@@ -173,6 +173,8 @@ class AgentMusicLocal(BaseAgent):
     # --- Внутренние ---
 
     def _launch(self, track: Path) -> str:
+        from aura.agents import media_state
+        media_state.set_active("local")
         try:
             subprocess.Popen(
                 ["vlc", "--one-instance", str(track)],

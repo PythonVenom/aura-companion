@@ -365,6 +365,84 @@ def parse_action_ru(text: str, now: datetime | None = None) -> dict | None:
     }
 
 
+def suggest_reply(text: str) -> str:
+    """Предложить ответ на сообщение (шаблон).
+
+    Не отправляет — предлагает текст, который пользователь скажет
+    «да отправь» / «нет, скажи иначе».
+    """
+    if not text:
+        return ""
+    low = text.lower()
+
+    # Вопросы
+    if "?" in text or "как" in low or "что" in low or "где" in low:
+        if "как дела" in low:
+            return "Всё хорошо, спасибо! А у тебя?"
+        if "когда" in low:
+            return "Дай подумать, отвечу чуть позже"
+        if "где" in low:
+            return "Сейчас посмотрю, напишу"
+
+    # Приглашения
+    if "пойдём" in low or "пойдем" in low or "пошли" in low:
+        return "Спасибо за приглашение! Я подумаю"
+    if "встретимся" in low or "встреча" in low:
+        return "Хорошо, давай. Во сколько?"
+    if "позвони" in low:
+        return "Перезвоню в ближайшее время"
+
+    # Приветствия
+    if "привет" in low or "здравствуй" in low:
+        return "Привет!"
+    if "спасибо" in low or "благодарю" in low:
+        return "Пожалуйста!"
+
+    # По умолчанию
+    return "Хорошо, понял"
+
+
+_SPAM_WORDS = (
+    "скидк", "акци", "распродаж", "промокод",
+    "выиграл", "выиграли", "приз", "лотере",
+    "подпишись", "подпишись на канал",
+    "казино", "ставк", "букмекер",
+)
+
+
+def is_spam(chat: str, preview: str) -> bool:
+    """Эвристика: спам-чат?
+
+    Признаки:
+    - системные ключевые слова
+    - нет букв (только эмодзи/цифры)
+    - 100% uppercase
+    """
+    if not preview:
+        return True
+    low = preview.lower()
+    if any(w in low for w in _SPAM_WORDS):
+        return True
+    # Нет кириллических букв — вряд ли человек
+    if not any(c.isalpha() for c in preview):
+        return True
+    return False
+
+
+def search_chats(previews: list, query: str) -> list:
+    """Поиск по имени чата и preview. Case-insensitive подстрока."""
+    if not query:
+        return []
+    q = query.lower().strip()
+    out = []
+    for p in previews:
+        chat = (p.get("chat") or p.get("name") or "").lower()
+        prev = (p.get("preview") or "").lower()
+        if q in chat or q in prev:
+            out.append(p)
+    return out
+
+
 def prioritize(items: list, vip: list | None = None) -> list:
     """Сортировка: VIP-чаты в начале, остальные по порядку."""
     if not vip:

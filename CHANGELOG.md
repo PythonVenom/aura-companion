@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+### Phases
+- Фаза 13.4.1: детект всех чатов (Bug 2+3+4)
+- Фаза 13.5: pending_read + awaiting_reply (Bug 1, 15)
+- Фаза 13.6: ChatSense (неотвеченные, события, календарь)
+- Фаза 13.7: AgentChecklist (голосовой чек-лист)
+- Фаза 17: Platform Abstraction Layer (ADR-017)
+- Фаза 17.1: VK Web + Telegram Web адаптеры (ADR-018)
+- Фаза 17.2: Installation Experience (ADR-019)
+- Фаза 18: media_state (единый пульт VLC/VK/MPRIS)
+
 ### Added
 - VK Web адаптер (навигация: лента, сообщения, друзья, группы, музыка, видео)
 - Telegram Web адаптер (list_chats, find_chat, open)

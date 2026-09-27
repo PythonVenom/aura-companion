@@ -98,6 +98,21 @@ def cmd_reload_extension(args):
     print("Aura Bridge → Remove → Load Temporary Add-on → manifest.json")
 
 
+
+
+def cmd_watch(args):
+    """Мониторинг health в реальном времени (каждые N сек)."""
+    import time
+    try:
+        while True:
+            print("\033[2J\033[H", end="")  # clear screen
+            print(f"=== Aura health — {time.strftime('%H:%M:%S')} ===")
+            cmd_health(args)
+            time.sleep(args.interval)
+    except KeyboardInterrupt:
+        print("\nСтоп.")
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -111,6 +126,10 @@ def main():
 
     sub.add_parser("calendar", help="календарь на сегодня").set_defaults(func=cmd_calendar)
     sub.add_parser("status", help="systemd status").set_defaults(func=cmd_status)
+
+    p_watch = sub.add_parser("watch", help="health в реальном времени")
+    p_watch.add_argument("-i", "--interval", type=int, default=5)
+    p_watch.set_defaults(func=cmd_watch)
     sub.add_parser("reload-extension", help="Firefox extension").set_defaults(func=cmd_reload_extension)
 
     args = parser.parse_args()

@@ -42,6 +42,10 @@ class AgentPower(BaseAgent):
 
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
+        # Bug D: "включи" без "вы" — не power
+        import re as _re
+        if _re.search(r"\bвключи", text) and not _re.search(r"\bвыключи", text):
+            return False
         keywords = (
             self.SHUTDOWN_KEYWORDS
             + self.REBOOT_KEYWORDS
@@ -71,6 +75,12 @@ class AgentPower(BaseAgent):
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         text = request.text.lower()
+
+        # Bug D: "включи музыку" ≠ "выключи" (fuzzy max_dist=1 ловит лишнее)
+        # Если есть "включи" без "вы" в начале — точно не power
+        import re as _re
+        if _re.search(r"\bвключи", text) and not _re.search(r"\bвыключи", text):
+            return AgentResponse.not_handled(self.name)
 
         # Ждём подтверждения
         if AgentPower._pending:

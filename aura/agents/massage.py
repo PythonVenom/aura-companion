@@ -12,6 +12,29 @@ from pathlib import Path
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 
+CLIENTS_DIR = Path.home() / ".config" / "aura" / "massage_clients"
+
+
+def _client_file(client: str) -> Path:
+    CLIENTS_DIR.mkdir(parents=True, exist_ok=True)
+    safe = "".join(c for c in client if c.isalnum() or c in "_-").lower()
+    return CLIENTS_DIR / f"{safe}.md"
+
+
+def _client_append(client: str, line: str) -> None:
+    f = _client_file(client)
+    with open(f, "a", encoding="utf-8") as fp:
+        fp.write(line + chr(10))
+
+
+def _client_read(client: str, tail: int = 10) -> str:
+    f = _client_file(client)
+    if not f.exists():
+        return ""
+    lines = f.read_text(encoding="utf-8").splitlines()
+    return chr(10).join(lines[-tail:])
+
+
 @dataclass
 class Session:
     """Одна сессия массажа."""
@@ -63,25 +86,22 @@ class AgentMassage(BaseAgent):
         return self._rag or None
 
     def _rag_save(self, client: str, text: str) -> bool:
-        """Сохранить заметку в RAG. Возвращает True если ок."""
-        rag = self._get_rag()
-        if not rag:
-            return False
+        """Сохранить заметку в файл клиента (Bug C: не в RAG)."""
         try:
-            rag.remember(f"массаж {client}: {text}", "")
+            from datetime import datetime
+            ts = datetime.now().strftime("%Y-%m-%d %H:%M")
+            _client_append(client, f"- [{ts}] {text}")
             return True
         except Exception:
             return False
 
     def _rag_read(self, client: str) -> str:
-        """Прочитать историю из RAG."""
-        rag = self._get_rag()
-        if not rag:
-            return "RAG недоступен"
+        """Прочитать последние записи клиента (Bug C)."""
         try:
-            return rag.search(f"массаж {client}", n_results=3)
+            content = _client_read(client, tail=5)
+            return content
         except Exception as e:
-            return f"Ошибка RAG: {e}"
+            return f"Ошибка: {e}"
 
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()

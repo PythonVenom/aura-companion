@@ -1,11 +1,9 @@
-"""Анализ metrics.csv после 24-часового прогона.
-
-Использование:
-    python scripts/stability_report.py /tmp/aura_stability/metrics.csv
-"""
+"""Анализ metrics.csv после 24-часового прогона."""
 import csv
 import sys
 from pathlib import Path
+
+NL = chr(10)
 
 
 def analyze(csv_path: str) -> dict:
@@ -42,18 +40,21 @@ def analyze(csv_path: str) -> dict:
 
 def format_report(stats: dict) -> str:
     lines = ["📊 Stability Report", "=" * 40]
-    lines.append(f"Итераций: {stats['iterations']}")
-    lines.append(f"Service active: {stats['service_active_pct']:.1f}%")
-    lines.append(f"RSS (MB): min={stats['rss_mb']['min']:.0f} "
-                 f"max={stats['rss_mb']['max']:.0f} "
-                 f"avg={stats['rss_mb']['avg']:.0f}")
-    lines.append(f"CPU (%): min={stats['cpu_pct']['min']:.1f} "
-                 f"max={stats['cpu_pct']['max']:.1f} "
-                 f"avg={stats['cpu_pct']['avg']:.1f}")
-    lines.append(f"Ошибок (сумма): {stats['errors_total']}")
-    lines.append(f"Рестартов: {stats['restarts_max']}")
+    lines.append("Итераций: " + str(stats["iterations"]))
+    lines.append("Service active: " + format(stats["service_active_pct"], ".1f") + "%")
+    lines.append(
+        "RSS (MB): min=" + format(stats["rss_mb"]["min"], ".0f")
+        + " max=" + format(stats["rss_mb"]["max"], ".0f")
+        + " avg=" + format(stats["rss_mb"]["avg"], ".0f")
+    )
+    lines.append(
+        "CPU (%): min=" + format(stats["cpu_pct"]["min"], ".1f")
+        + " max=" + format(stats["cpu_pct"]["max"], ".1f")
+        + " avg=" + format(stats["cpu_pct"]["avg"], ".1f")
+    )
+    lines.append("Ошибок (сумма): " + str(stats["errors_total"]))
+    lines.append("Рестартов: " + str(stats["restarts_max"]))
 
-    # Оценка
     ok = (
         stats["service_active_pct"] >= 99.0
         and stats["restarts_max"] == 0
@@ -61,8 +62,7 @@ def format_report(stats: dict) -> str:
     )
     lines.append("=" * 40)
     lines.append("✅ PASS" if ok else "⚠️  ATTENTION")
-    return "
-".join(lines)
+    return NL.join(lines)
 
 
 if __name__ == "__main__":
@@ -71,7 +71,7 @@ if __name__ == "__main__":
         sys.exit(1)
     path = Path(sys.argv[1])
     if not path.exists():
-        print(f"❌ Не найден: {path}")
+        print("❌ Не найден: " + str(path))
         sys.exit(1)
     stats = analyze(str(path))
     print(format_report(stats))

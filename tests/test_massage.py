@@ -115,3 +115,73 @@ async def test_finish_with_session(agent):
 async def test_not_handled(agent):
     r = await agent.handle(_req("погода"))
     assert r.status == AgentStatus.NOT_HANDLED
+
+
+# --- RAG integration (mock) ---
+
+class _FakeRAG:
+    """Fake RAG для тестов без ChromaDB."""
+    def __init__(self):
+        self.saved = []
+        self.search_result = "прошлый раз: спина L4-L5"
+
+    def remember(self, user_text, aura_response):
+        self.saved.append((user_text, aura_response))
+        return "ok"
+
+    def search(self, query, n_results=3):
+        return self.search_result
+
+
+@pytest.fixture
+def agent_with_rag():
+    a = AgentMassage()
+    a._rag = _FakeRAG()
+    return a
+
+
+@pytest.mark.asyncio
+async def test_note_saves_to_rag(agent_with_rag):
+    await agent_with_rag.handle(_req("сессия Иванов 50"))
+    await agent_with_rag.handle(_req("запиши спина L4-L5"))
+    fake = agent_with_rag._rag
+    assert len(fake.saved) == 1
+    assert "Иванов" in fake.saved[0][0]
+    assert "спина" in fake.saved[0][0]
+
+
+@pytest.mark.asyncio
+async def test_history_reads_from_rag(agent_with_rag):
+    r = await agent_with_rag.handle(_req("что было с Ивановым"))
+    assert "Иванов" in r.text
+    assert "L4-L5" in r.text
+
+
+@pytest.mark.asyncio
+async def test_finish_saves_summary(agent_with_rag):
+    await agent_with_rag.handle(_req("сессия Петров 45"))
+    await agent_with_rag.handle(_req("запиши шея напряжение"))
+    r = await agent_with_rag.handle(_req("закончить"))
+    assert "завершена" in r.text
+    fake = agent_with_rag._rag
+    # 2 записи: заметка + финальная сводка
+    assert len(fake.saved) == 2
+    assert "45мин" in fake.saved[1][0]
+
+
+@pytest.mark.asyncio
+async def test_rag_unavailable(agent):
+    """Если RAG не инициализируется — не падаем, деградируем."""
+    agent._rag = False  # marker: не удалось
+    r = await agent.handle(_req("что было с Ивановым"))
+    assert r.status == AgentStatus.OK
+    assert "RAG недоступен" in r.text
+
+
+@pytest.mark.asyncio
+async def test_note_without_rag_still_saves_locally(agent):
+    """Без RAG — заметка всё равно в self._current.notes."""
+    agent._rag = False
+    await agent.handle(_req("сессия Сидоров 30"))
+    await agent.handle(_req("запиши колено"))
+    assert "колено" in agent._current.notes

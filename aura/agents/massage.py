@@ -50,6 +50,38 @@ class AgentMassage(BaseAgent):
     def __init__(self) -> None:
         super().__init__()
         self._current: Session | None = None
+        self._rag = None
+
+    def _get_rag(self):
+        """Lazy-init RAG (не создаём ChromaDB если не нужно)."""
+        if self._rag is None:
+            try:
+                from aura.agents.rag_memory import AgentRAGMemory
+                self._rag = AgentRAGMemory()
+            except Exception:
+                self._rag = False  # marker: не удалось
+        return self._rag or None
+
+    def _rag_save(self, client: str, text: str) -> bool:
+        """Сохранить заметку в RAG. Возвращает True если ок."""
+        rag = self._get_rag()
+        if not rag:
+            return False
+        try:
+            rag.remember(f"массаж {client}: {text}", "")
+            return True
+        except Exception:
+            return False
+
+    def _rag_read(self, client: str) -> str:
+        """Прочитать историю из RAG."""
+        rag = self._get_rag()
+        if not rag:
+            return "RAG недоступен"
+        try:
+            return rag.search(f"массаж {client}", n_results=3)
+        except Exception as e:
+            return f"Ошибка RAG: {e}"
 
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
@@ -92,32 +124,36 @@ class AgentMassage(BaseAgent):
         )
 
     def _history(self, text: str) -> AgentResponse:
-        # TODO шаг 3: RAG
         import re
         m = re.search(r"что было с\s+(\w+)", text)
         if not m:
             return AgentResponse.ok("Скажи: «что было с Ивановым?»", self.name)
         client = m.group(1).capitalize()
-        return AgentResponse.ok(
-            f"📋 История {client}: RAG пока не подключён (шаг 3).", self.name
-        )
+        hist = self._rag_read(client)
+        return AgentResponse.ok(f"📋 История {client}: {hist[:200]}", self.name)
 
     def _note(self, text: str) -> AgentResponse:
         if not self._current:
             return AgentResponse.ok("Сначала начни сессию.", self.name)
         note = text.replace("запиши", "").strip(" :,")
         self._current.notes += (" " if self._current.notes else "") + note
-        return AgentResponse.ok(f"📝 Записал: {note[:60]}", self.name)
+        saved = self._rag_save(self._current.client, note)
+        mark = "💾" if saved else "📝"
+        return AgentResponse.ok(f"{mark} Записал: {note[:60]}", self.name)
 
     def _finish(self) -> AgentResponse:
         if not self._current:
             return AgentResponse.ok("Нет активной сессии.", self.name)
-        s = self._current
-        s.active = False
-        # TODO шаг 3: сохранить в RAG
+        sess = self._current
+        sess.active = False
+        if sess.notes:
+            self._rag_save(
+                sess.client,
+                f"сессия {sess.duration_min}мин. {sess.notes}"
+            )
         self._current = None
         return AgentResponse.ok(
-            f"✅ Сессия {s.client} завершена. Заметок: {len(s.notes.split())}.",
+            f"✅ Сессия {sess.client} завершена. Заметок: {len(sess.notes.split())}.",
             self.name,
         )
 

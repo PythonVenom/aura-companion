@@ -1,7 +1,5 @@
-"""Persona + config_wizard 5 вопросов."""
+"""Persona + config_wizard (5 вопросов)."""
 from unittest.mock import patch
-from pathlib import Path
-
 from aura import config_wizard, settings
 
 
@@ -19,7 +17,6 @@ def test_persona_defaults(tmp_path, monkeypatch):
 
 def test_wizard_sets_persona(tmp_path, monkeypatch):
     _patch(tmp_path, monkeypatch)
-    # Имя, обращение(1=ты), характер(1=тёплая), юмор(1=да), голос(1=женский)
     with patch("builtins.input", side_effect=["Катя", "1", "1", "1", "1"]):
         result = config_wizard.run()
     assert result["persona"]["name"] == "Катя"

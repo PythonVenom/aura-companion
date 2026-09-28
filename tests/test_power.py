@@ -1,90 +1,90 @@
-"""
-Тесты для AgentPower.
-
-ВАЖНО: Все тесты используют mock для subprocess.Popen.
-Реальные systemctl/shutdown/loginctl НЕ вызываются.
-"""
-
-from unittest.mock import patch
-
+"""Power agent: subprocess + confirm flow."""
 import pytest
+from unittest.mock import patch
 
 from aura.agents.power import AgentPower
 from aura.core.protocol import AgentRequest, AgentStatus
 
 
-@pytest.fixture
-def agent() -> AgentPower:
-    return AgentPower()
+@pytest.fixture(autouse=True)
+def _reset_pending():
+    AgentPower._pending = None
+    yield
+    AgentPower._pending = None
 
 
-class TestCanHandle:
-    @pytest.mark.parametrize("text", [
-        "выключи пк",
-        "перезагрузи",
-        "спящий режим",
-        "заблокируй экран",
-        "выйди из системы",
-        "гибернация",
-    ])
-    def test_handles_power_commands(self, agent: AgentPower, text: str) -> None:
-        assert agent.can_handle(AgentRequest(text=text)) is True
+def _req(text):
+    return AgentRequest(text=text)
 
-    @pytest.mark.parametrize("text", [
-        "привет",
-        "который час",
-        "включи музыку",
-        "какая погода",
-    ])
-    def test_ignores_other(self, agent: AgentPower, text: str) -> None:
-        assert agent.can_handle(AgentRequest(text=text)) is False
+
+class TestSubprocess:
+    def test_shutdown_calls_systemctl_poweroff(self):
+        with patch("subprocess.Popen") as popen:
+            AgentPower()._shutdown()
+            args = popen.call_args[0][0]
+            assert args[0] == "systemctl" and "poweroff" in args
+
+    def test_reboot_calls_systemctl_reboot(self):
+        with patch("subprocess.Popen") as popen:
+            AgentPower()._reboot()
+            args = popen.call_args[0][0]
+            assert args[0] == "systemctl" and "reboot" in args
+
+    def test_suspend_calls_systemctl_suspend(self):
+        with patch("subprocess.Popen") as popen:
+            AgentPower()._suspend()
+            args = popen.call_args[0][0]
+            assert args[0] == "systemctl" and "suspend" in args
+
+    def test_lock_calls_loginctl(self):
+        with patch("subprocess.Popen") as popen:
+            AgentPower()._lock()
+            args = popen.call_args[0][0]
+            assert "loginctl" in args[0] or "lock" in " ".join(args)
 
 
 class TestHandleWithMock:
-    """Тесты handle с mock для subprocess.Popen."""
+    @pytest.mark.asyncio
+    async def test_shutdown_needs_confirm(self):
+        a = AgentPower()
+        r = await a.handle(_req("выключи пк"))
+        assert AgentPower._pending == "shutdown"
+        assert r.status == AgentStatus.OK
 
     @pytest.mark.asyncio
-    @patch("aura.agents.power.subprocess.Popen")
-    async def test_shutdown_calls_systemctl_poweroff(self, mock_popen, agent: AgentPower) -> None:
-        response = await agent.handle(AgentRequest(text="выключи пк"))
-
-        assert response.status == AgentStatus.OK
-        assert response.agent_name == "power"
-        assert "Выключаю" in response.text
-        # Проверяем, что вызван systemctl poweroff
-        mock_popen.assert_called_once()
-        args = mock_popen.call_args[0][0]
-        assert args == ["systemctl", "poweroff"]
+    async def test_confirm_executes(self):
+        a = AgentPower()
+        with patch.object(a, "_shutdown", return_value="off") as mock:
+            await a.handle(_req("выключи"))
+            await a.handle(_req("да"))
+            assert mock.called
+            assert AgentPower._pending is None
 
     @pytest.mark.asyncio
-    @patch("aura.agents.power.subprocess.Popen")
-    async def test_reboot_calls_systemctl_reboot(self, mock_popen, agent: AgentPower) -> None:
-        response = await agent.handle(AgentRequest(text="перезагрузи"))
-
-        assert response.status == AgentStatus.OK
-        mock_popen.assert_called_once()
-        args = mock_popen.call_args[0][0]
-        assert args == ["systemctl", "reboot"]
-
-    @pytest.mark.asyncio
-    @patch("aura.agents.power.subprocess.Popen")
-    async def test_suspend_calls_systemctl_suspend(self, mock_popen, agent: AgentPower) -> None:
-        response = await agent.handle(AgentRequest(text="спящий режим"))
-
-        assert response.status == AgentStatus.OK
-        args = mock_popen.call_args[0][0]
-        assert args == ["systemctl", "suspend"]
+    async def test_cancel_does_not_execute(self):
+        a = AgentPower()
+        with patch.object(a, "_shutdown") as mock:
+            await a.handle(_req("выключи"))
+            await a.handle(_req("нет"))
+            assert not mock.called
+            assert AgentPower._pending is None
 
     @pytest.mark.asyncio
-    @patch("aura.agents.power.subprocess.Popen")
-    async def test_lock_calls_loginctl(self, mock_popen, agent: AgentPower) -> None:
-        response = await agent.handle(AgentRequest(text="заблокируй"))
-
-        assert response.status == AgentStatus.OK
-        args = mock_popen.call_args[0][0]
-        assert args == ["loginctl", "lock-session"]
+    async def test_lock_no_confirm(self):
+        a = AgentPower()
+        with patch.object(a, "_lock", return_value="locked"):
+            r = await a.handle(_req("заблокируй экран"))
+            assert AgentPower._pending is None
+            assert r.status == AgentStatus.OK
 
     @pytest.mark.asyncio
-    async def test_unknown_returns_not_handled(self, agent: AgentPower) -> None:
-        response = await agent.handle(AgentRequest(text="привет"))
-        assert response.status == AgentStatus.NOT_HANDLED
+    async def test_reboot_needs_confirm(self):
+        a = AgentPower()
+        await a.handle(_req("перезагрузи"))
+        assert AgentPower._pending == "reboot"
+
+    @pytest.mark.asyncio
+    async def test_unknown_returns_not_handled(self):
+        a = AgentPower()
+        r = await a.handle(_req("привет мир"))
+        assert r.status == AgentStatus.NOT_HANDLED

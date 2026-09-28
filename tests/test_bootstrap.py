@@ -34,6 +34,8 @@ class TestBootstrapAssembly:
         names = set(orch.registry.list_names())
         expected = {
             "time",
+            "time_agent",
+            "health",
             "power",
             "vault",
             "music_ducker",
@@ -69,7 +71,7 @@ class TestBootstrapAssembly:
         assert names == expected
 
     def test_agent_count(self, orch) -> None:
-        assert len(orch) == 32  # test env: все модули включены (fake_cfg)
+        assert len(orch) == 34  # test env: все модули включены (fake_cfg)
 
 
 class TestRouting:

@@ -1,6 +1,7 @@
 """Настройки Ауры — JSON-конфиг в ~/.config/aura/settings.json."""
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 
@@ -28,7 +29,7 @@ DEFAULTS = {
 
 def load() -> dict:
     """Загрузить настройки. Недостающие — из DEFAULTS."""
-    result = dict(DEFAULTS)
+    result = copy.deepcopy(DEFAULTS)
     try:
         if SETTINGS_PATH.exists():
             data = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))

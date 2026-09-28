@@ -88,8 +88,15 @@ class AgentAppLauncher(BaseAgent):
                 except Exception:
                     pass
 
+    # Bug 53: веб-мессенджеры — не приложения
+    WEB_BLOCKLIST = ("ватсап", "вотсап", "whatsapp", "вацап", "вотцап",
+                     "макс веб", "макс.ру", "max.ru", "web.max",
+                     "телеграм веб", "тг веб", "telegram web")
+
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
+        if any(b in text for b in self.WEB_BLOCKLIST):
+            return False
         keywords = self.OPEN_KEYWORDS + self.CLOSE_KEYWORDS + self.LIST_KEYWORDS
         return any(kw in text for kw in keywords)
 

@@ -73,11 +73,12 @@ class AgentMessenger(BaseAgent):
 
     name = "messenger"
     platform = "max"  # Bug 51: "max" или "wa"
+    _last_platform = "max"  # Bug 52: sticky (запоминаем последнюю)
 
     OPEN_KEYWORDS = (
-        "открой макс",
-        "открыть макс",
-        "макс веб",
+        "открой макс", "открыть макс", "макс веб",
+        "открой вотсап", "открыть вотсап", "открой ватсап",
+        "открыть ватсап", "открой whatsapp", "вотсап веб",
     )
     LIST_KEYWORDS = (
         "какие чаты в максе",
@@ -99,11 +100,12 @@ class AgentMessenger(BaseAgent):
         "новые сообщения",
     )
     SEND_KEYWORDS = (
-        "напиши в макс",
-        "напиши макс",
-        "напиши сообщение",
-        "напиши сообщ",   # T-one обрезает окончание
+        "напиши в макс", "напиши макс",
+        "напиши сообщение", "напиши сообщ",
         "напиши смс",
+        # Bug 53: WhatsApp-варианты
+        "напиши в вотсап", "напиши вотсап", "напиши ватсап",
+        "напиши в ватсап", "напиши whatsapp",
     )
     FINALIZE_KEYWORDS = ("отправь", "отправить", "давай отправим", "отправляй")
     CLEAR_KEYWORDS = ("отмени", "отмена", "очисти", "удали текст")
@@ -113,17 +115,20 @@ class AgentMessenger(BaseAgent):
                   "вацап", "вотс", "вотцап", "вотсаппе")
 
     def _detect_platform(self, text: str) -> None:
-        """Bug 51: определить платформу по тексту. Меняет self.platform."""
+        """Bug 51+52: платформа по тексту ИЛИ sticky (последняя)."""
         t = text.lower()
-        # WhatsApp-слова
         wa_kw = ("вотсап", "ватсап", "whatsapp", "вацап", "вотцап",
                  "вотсапп", "вотс")
         if any(kw in t for kw in wa_kw):
             self.platform = "wa"
+            AgentMessenger._last_platform = "wa"
             return
-        # MAX-слова (по умолчанию max)
         if "макс" in t or "max" in t:
             self.platform = "max"
+            AgentMessenger._last_platform = "max"
+            return
+        # Bug 52: sticky — если в тексте нет указателя, берём последнюю
+        self.platform = AgentMessenger._last_platform
 
     def _normalize(self, text: str) -> str:
         for alias in self.MAX_ALIASES:
@@ -138,12 +143,24 @@ class AgentMessenger(BaseAgent):
             + self.READ_KEYWORDS + self.SEND_KEYWORDS
             + self.FINALIZE_KEYWORDS + self.CLEAR_KEYWORDS
         )
+        # Bug 53: WA-слова (вотсап/ватсап/whatsapp/вацап)
+        wa_kw = ("вотсап", "ватсап", "whatsapp", "вацап", "вотцап",
+                 "вотсапп", "вотс")
+        has_wa = any(kw in text for kw in wa_kw)
         if "макс" in text and any(kw in text for kw in all_kw):
+            return True
+        if has_wa and any(kw in text for kw in all_kw):
             return True
         if "чат" in text and any(kw in text for kw in self.FIND_KEYWORDS + self.READ_KEYWORDS):
             return True
         # «Напиши X: Y» или «Напиши сообщение X Y» — без «макс».
         if "напиши" in text and ("сообщение" in text or ":" in text):
+            return True
+        # Bug 54: «отправь/отмени» — ловим без указателя платформы
+        # (sticky platform работает из предыдущего шага)
+        if any(kw in text for kw in self.FINALIZE_KEYWORDS):
+            return True
+        if any(kw in text for kw in self.CLEAR_KEYWORDS):
             return True
         # «Напиши X Y» — без «макс», без «сообщение», но с двумя словами.
         # НЕ перехватываем: «напиши код», «напиши стих», «напиши письмо».
@@ -208,13 +225,27 @@ class AgentMessenger(BaseAgent):
     # --- Команды ---
 
     def open_max(self) -> str:
-        """Открыть/сфокусировать вкладку Макса."""
+        """Bug 54: сначала искать открытую вкладку → фокус, потом открывать."""
+        # 1. Искать существующую вкладку
+        needle = "whatsapp" if self.platform == "wa" else "max.ru"
+        tabs = send_command({"action": "list_tabs"})
+        if tabs and "tabs" in tabs:
+            for t in tabs["tabs"]:
+                url = (t.get("url") or "").lower()
+                if needle in url:
+                    r = send_command({"action": "activate_tab", "tab_id": t["id"]})
+                    if r and r.get("success"):
+                        name = "WhatsApp" if self.platform == "wa" else "Макс"
+                        return f"🌐 Фокус на {name}"
+
+        # 2. Не нашли — открыть новую
         url = ("https://web.whatsapp.com" if self.platform == "wa"
                else "https://web.max.ru")
         result = send_command({"action": "open_tab", "url": url, "active": True})
         if result is None or "error" in result:
             return error_text(result)
-        return "🌐 Открыла Макс"
+        name = "WhatsApp" if self.platform == "wa" else "Макс"
+        return f"🌐 Открыла {name}"
 
     def list_chats(self) -> str:
         result = send_command({"action": f"{self.platform}_list_chats"})
@@ -349,7 +380,9 @@ class AgentMessenger(BaseAgent):
     def _extract_send(text: str) -> tuple[str, str]:
         """Извлечь (кому, что) из «напиши маме: сегодня...»."""
         # Формат: «напиши X: Y» или «напиши X сообщение Y»
-        for kw in ("напиши в макс", "напиши макс", "напиши сообщение", "отправь в макс"):
+        for kw in ("напиши в макс", "напиши макс", "напиши сообщение", "отправь в макс",
+                   "напиши в вотсап", "напиши вотсап", "напиши ватсап",
+                   "напиши в ватсап", "напиши whatsapp"):
             if kw in text:
                 rest = text[text.index(kw) + len(kw):].strip()
                 break

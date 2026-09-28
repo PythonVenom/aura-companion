@@ -36,6 +36,7 @@
 | 028 | Licensing Strategy | Принято |
 | 029 | Multi-client architecture | Принято |
 | 030 | Developer Mode | Проект |
+| 031 | Ethics Policy | Принято |
 
 ## Как читать
 

@@ -43,6 +43,25 @@
 ### Tests
 - 700 → 815+ passed
 
+## [0.9.2] — 2026-09-28
+
+### Добавлено
+- docs/strategy-2026.md: 11 вертикалов, roadmap, Pareto
+- ADR-031 Ethics Policy (Reject List: слежка, биржа, диагнозы)
+- MANIFESTO.md: раздел «Что Aura не делает»
+- aura/nlp.py: adaptive max_dist (0/1/2 по длине)
+- power.py: ASR-устойчивость (Bug 17)
+- proactive.py: time_fired + health_due (Bug 19)
+- cli.py: aura timer / reminder / timers / reminders
+
+### Исправлено
+- **Bug 18**: tests/conftest.py guard от опасных subprocess
+  (systemctl/loginctl/poweroff/reboot — RuntimeError без мока)
+- **Bug 17**: "выключит" / "перезагружу" распознаются (fuzzy)
+
+### Изменено
+- bootstrap: 34 агента (time_agent, health)
+
 ## [0.9.1] — 2026-09-28
 
 ### Добавлено

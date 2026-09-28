@@ -51,6 +51,17 @@ async function findMaxTab() {
     return null;
 }
 
+async function findWhatsAppTab() {
+    // Ищем открытую вкладку web.whatsapp.com. Если нет — null.
+    const tabs = await browser.tabs.query({});
+    for (const t of tabs) {
+        if (t.url && t.url.includes("web.whatsapp.com")) {
+            return t;
+        }
+    }
+    return null;
+}
+
 async function handleCommand(msg) {
     const action = msg.action;
 
@@ -218,6 +229,25 @@ async function handleCommand(msg) {
                 return { error: "content script: " + e.toString() };
             }
         }
+        case "wa_dump":
+        case "wa_list_chats":
+        case "wa_send_message":
+        case "wa_send_finalize":
+        case "wa_dump_send_ui":
+        case "wa_clear_input":
+        case "wa_read_last":
+        case "wa_title":
+        case "wa_find_chat": {
+            const waTab = await findWhatsAppTab();
+            if (!waTab) return { error: "whatsapp tab not found" };
+            try {
+                const response = await browser.tabs.sendMessage(waTab.id, msg);
+                return response || { error: "no response" };
+            } catch (e) {
+                return { error: "wa_send_failed: " + e.message };
+            }
+        }
+
         case "max_find_chat": {
             const maxTab = await findMaxTab();
             if (!maxTab) return { error: "max tab not found" };

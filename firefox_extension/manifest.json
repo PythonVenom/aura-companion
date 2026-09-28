@@ -30,6 +30,15 @@
         "content_max.js"
       ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://web.whatsapp.com/*"
+      ],
+      "js": [
+        "content_whatsapp.js"
+      ],
+      "run_at": "document_idle"
     }
   ]
 }

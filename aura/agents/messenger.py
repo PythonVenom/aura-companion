@@ -108,6 +108,8 @@ class AgentMessenger(BaseAgent):
     CLEAR_KEYWORDS = ("отмени", "отмена", "очисти", "удали текст")
     # Только ошибочные формы T-one. «макс», «максе» — правильные.
     MAX_ALIASES = ("макте", "макт", "мактэ", "макст", "максу", "макса", "максы", "максэ", "максом")
+    WA_ALIASES = ("вотсап", "ватсап", "вотсапе", "ватсапе", "whatsapp",
+                  "вацап", "вотс", "вотцап", "вотсаппе")
 
     def _normalize(self, text: str) -> str:
         for alias in self.MAX_ALIASES:

@@ -269,7 +269,7 @@ def build_orchestrator() -> Orchestrator:
     modules_config = load_modules_config()
     _try_register(orch, AgentTime, modules_config)
     _try_register(orch, AgentPower, modules_config)
-    # ... 26 агентов
+    # ... 33 агента
     return orch
 ```
 

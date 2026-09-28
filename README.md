@@ -5,7 +5,7 @@
 [![CI](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml/badge.svg)](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-991-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-1005-brightgreen.svg)](#)
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)](#)
 
 **Проводник в цифровой мир** — локальный голосовой ИИ-компаньон для Linux.
@@ -25,7 +25,7 @@
 
 ---
 
-**Статус:** v0.9 alpha · **746 тестов** · **26 агентов** · **16 ADR**
+**Статус:** v0.9.6-alpha · **1005 тестов** · **33 агента** · **39 ADR**
 Стек: Python 3.12 · asyncio · Ollama qwen2.5:7b · T-one (ASR) · Piper (TTS) ·
 ChromaDB (RAG) · PipeWire · MPRIS · Firefox WebExtension
 
@@ -118,7 +118,7 @@ KDE виджет — кружок в трее со статусом (ждёт / 
 
 ## Архитектура
 
-Модульная: 26 агентов, три уровня роутинга (реестр → tool_router → brain).
+Модульная: 33 агента, три уровня роутинга (реестр → tool_router → brain).
 Диалог — через FSM (`idle` / `awaiting_command` / `pending_read`).
 Proactive — через `ProactiveEngine` с триггерами и cooldown.
 

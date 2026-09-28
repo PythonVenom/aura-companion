@@ -3,7 +3,7 @@
 [![CI](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml/badge.svg)](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-991-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-1005-brightgreen.svg)](#)
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)](#)
 
 **A guide into the digital world** — a local voice AI companion for Linux.
@@ -24,7 +24,7 @@ Read more — [MANIFESTO.md](MANIFESTO.md).
 
 ---
 
-**Status:** v0.9.0-alpha · **991 tests** · **26 agents** · **16 ADRs**
+**Status:** v0.9.6-alpha · **1005 tests** · **33 agents** · **39 ADR**
 Stack: Python 3.12 · asyncio · Ollama qwen2.5:7b · T-one (ASR) · Piper (TTS)
 · ChromaDB (RAG) · PipeWire · MPRIS · Firefox WebExtension
 
@@ -117,7 +117,7 @@ speaking / paused).
 
 ## Architecture
 
-Modular: 26 agents, three routing levels (registry → tool_router → brain).
+Modular: 33 agents, three routing levels (registry → tool_router → brain).
 Dialogue via FSM (`idle` / `awaiting_command` / `pending_read` /
 `awaiting_reply`). Proactive via `ProactiveEngine` with triggers and cooldown.
 

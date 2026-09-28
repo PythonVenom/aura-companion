@@ -113,8 +113,8 @@ class AgentListener(MicroAgent):
             silence_after_voice = 0.0     # сколько секунд тишины после речи
             last_text = ""                # последний текст модели
             last_text_change_ts = None    # когда текст менялся последний раз
-            TEXT_STABLE_SECONDS = 0.6     # сколько держится стабильно
-            SILENCE_FALLBACK = 1.2        # fallback по тишине
+            TEXT_STABLE_SECONDS = 1.5     # Bug 34: было 0.6 — обрезал длинные фразы
+            SILENCE_FALLBACK = 2.0        # Bug 34: было 1.2
 
             while time.time() - start < timeout:
                 try:

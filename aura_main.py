@@ -119,7 +119,12 @@ class AuraOrchestrator:
             print(f"⚠️ BargeIn set_speaking: {e}")
 
     def _on_barge_in(self) -> None:
-        """Callback при перебивании: остановить речь Ауры + пометить halt."""
+        """Callback при перебивании: остановить речь Ауры + пометить halt.
+
+        Bug 33: если уже halted (Аура остановлена) — не логировать и не звать stop.
+        """
+        if self._halted:
+            return  # уже остановлена — игнор повторных срабатываний
         print("🛑 Перебиваю Ауру (barge-in)...")
         self._halted = True  # Bug 29: следующая реплика — halt
         try:
@@ -232,7 +237,7 @@ class AuraOrchestrator:
         if not self.dm.is_active():
             return False
         set_status("listening")
-        heard = self.listener.listen(timeout=5)
+        heard = self.listener.listen(timeout=8)  # Bug 34
         if not heard:
             return True
         print(f"💬 DM: {heard}")
@@ -269,7 +274,7 @@ class AuraOrchestrator:
         chat = fsm.get("chat", "")
         # Слушаем БЕЗ активации «Аура».
         try:
-            heard = self.listener.listen(timeout=5)
+            heard = self.listener.listen(timeout=8)  # Bug 34
         except Exception as e:
             print(f"⚠️ FSM listen error: {e}")
             return True
@@ -473,7 +478,7 @@ class AuraOrchestrator:
 
                 # Слушаем (timeout 5 секунд)
                 set_status("listening")
-                heard = self.listener.listen(timeout=5)
+                heard = self.listener.listen(timeout=8)  # Bug 34
 
                 if not heard:
                     time.sleep(0.1)

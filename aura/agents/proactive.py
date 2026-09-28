@@ -477,6 +477,9 @@ def morning_checklist_trigger(get_agent) -> Trigger:
     )
 
 
+FRESH_FIRE_SECONDS = 60.0  # Bug 33: не спамить старыми таймерами
+
+
 def time_fired_trigger() -> Trigger:
     """Сработавшие таймеры (Bug 19: TimeAgent → Proactive).
 
@@ -491,6 +494,11 @@ def time_fired_trigger() -> Trigger:
         except Exception:
             return False
         if fired:
+            # Bug 33: только свежие (не старше FRESH_FIRE_SECONDS)
+            import time as _t
+            now = _t.time()
+            fired = [f for f in fired
+                     if now - float(f.get("fire_at", now)) < FRESH_FIRE_SECONDS]
             cache["fired"] = fired
             return True
         return False

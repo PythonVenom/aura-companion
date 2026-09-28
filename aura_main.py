@@ -74,6 +74,8 @@ class AuraOrchestrator:
         self.speaker = AgentSpeaker()
         self.barge_in = AgentBargeIn()
         self._halted = False  # Bug 29: halt после barge-in
+        # Bug 40: force AEC при старте
+        self._ensure_aec()
         # ADR-050: push-to-stop watcher (thread)
         import threading
         from scripts.aura_stop_watcher import watch as _watch_stop
@@ -511,6 +513,8 @@ class AuraOrchestrator:
 
                 # Слушаем (timeout 8 секунд)
                 set_status("listening")
+                # Bug 40: AEC force перед слушанием (микрофон = echo-cancel-source)
+                self._ensure_aec()
                 # Bug 38: приглушаем музыку ПОКА слушаем (интеллектуальный duck)
                 self._duck_on()
                 heard = self.listener.listen(timeout=8)  # Bug 34

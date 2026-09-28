@@ -85,10 +85,21 @@ class AgentConstruction(BaseAgent):
             )
         area = float(m.group(1).replace(",", "."))
 
-        # Определяем материал
-        for key in NORMS:
-            kw_variants = (key, key.replace("_", " "))
-            if any(v in text for v in kw_variants):
+        # Определяем материал по стему (Bug: падежи — "плитка"/"плитки")
+        STEMS = {
+            "плитк": "плитка",
+            "штукатурк": "штукатурка",
+            "шпаклевк": "шпаклевка",
+            "краск": "краска",
+            "обоев": "обои",
+            "ламинат": "ламинат",
+            "линолеум": "линолеум",
+            "грунтовк": "грунтовка",
+            "клей_плитка": "клей_плитка",
+            "гипсокартон": "гипсокартон",
+        }
+        for stem, key in STEMS.items():
+            if stem in text:
                 result = calc_material(key, area)
                 if result:
                     return AgentResponse.ok(

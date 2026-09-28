@@ -92,10 +92,13 @@ class AgentAudioPult(BaseAgent):
     # --- Внутренние методы ---
 
     def _extract_volume(self, text: str) -> int | None:
-        """Извлечь громкость из текста. 'громкость 5' → 50"""
-        nums = re.findall(r"\b(10|[1-9])\b", text)
+        """Извлечь громкость. 'громкость 5' -> 50, 'громкость 50' -> 50"""
+        nums = re.findall(r"\b(\d{1,3})\b", text)
         if nums:
-            return int(nums[0]) * 10
+            v = int(nums[0])
+            if v >= 100:
+                return 100
+            return v if v > 10 else v * 10
 
         for word, num in self.DIGIT_WORDS.items():
             if word in text:
@@ -103,10 +106,11 @@ class AgentAudioPult(BaseAgent):
         return None
 
     def _extract_delta(self, text: str, default: int = 10) -> int:
-        """Извлечь дельту. 'громче на 3' → 30"""
-        nums = re.findall(r"\b(10|[1-9])\b", text)
+        """Извлечь дельту. 'громче на 3' -> 30, 'громче на 30' -> 30"""
+        nums = re.findall(r"\b(\d{1,3})\b", text)
         if nums:
-            return int(nums[0]) * 10
+            v = int(nums[0])
+            return v if v > 10 else v * 10
 
         for word, num in self.DIGIT_WORDS.items():
             if word in text:

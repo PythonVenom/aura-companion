@@ -66,6 +66,12 @@ class AgentWindowManager(BaseAgent):
         "создай рабочий стол",
         "раздели экран",
         "половина экрана",
+        # Bug 26: обзор / окна
+        "обзор",
+        "покажи окна",
+        "покажи все окна",
+        "закрой обзор",
+        "выйди из обзора",
     )
 
     QDBUS_BIN = "qdbus6"  # Plasma 6
@@ -77,13 +83,26 @@ class AgentWindowManager(BaseAgent):
 
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
-        return any(kw in text for kw in self.KEYWORDS)
+        if any(kw in text for kw in self.KEYWORDS):
+            return True
+        # Bug 23: "стол 2", "стол два"
+        import re as _re
+        if _re.search(
+            r"\bстол\s+(\d|один|два|три|четыре|пять|шесть|семь|восемь|девять|десять)",
+            text,
+        ):
+            return True
+        return False
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         if not self.can_handle(request):
             return AgentResponse.not_handled(agent_name=self.name)
 
         cmd = request.text.lower()
+
+        # Bug 26: обзор (toggle)
+        if "обзор" in cmd or "покажи окна" in cmd or "покажи все окна" in cmd:
+            return AgentResponse.ok(text=self._overview(), agent_name=self.name)
 
         if "рабочий стол" in cmd or "раб стол" in cmd or "стол" in cmd:
             return AgentResponse.ok(text=self._desktop(cmd), agent_name=self.name)
@@ -92,6 +111,23 @@ class AgentWindowManager(BaseAgent):
             return AgentResponse.ok(text=self._split_screen(), agent_name=self.name)
 
         return AgentResponse.not_handled(agent_name=self.name)
+
+    def _overview(self) -> str:
+        """Показать/скрыть обзор Plasma 6 (toggle через kglobalaccel)."""
+        if not self.is_kde:
+            return "Обзор поддерживается в KDE."
+        for name in ("Overview", "Expose", "Toggle Overview", "ToggleOverview"):
+            try:
+                r = subprocess.run(
+                    [self.QDBUS_BIN, "org.kde.kglobalaccel", "/component/kwin",
+                     "org.kde.kglobalaccel.Component.invokeShortcut", name],
+                    capture_output=True, text=True, timeout=3,
+                )
+                if r.returncode == 0 and "error" not in r.stderr.lower():
+                    return "Обзор переключён."
+            except Exception:
+                continue
+        return "Не удалось вызвать обзор."
 
     def _kde_call(self, method: str, *args: str) -> str:
         """Вызвать qdbus6. Вернуть stdout (строку). Пусто — ошибка."""
@@ -179,8 +215,10 @@ class AgentWindowManager(BaseAgent):
             if target is None:
                 return "Какой номер стола?"
             if self.is_kde:
+                # Bug 23: setCurrentDesktop возвращает void (пусто) при успехе,
+                # "false" — при несуществующем столе. target — 1-based.
                 result = self._kde_call("setCurrentDesktop", str(target))
-                if result.lower() != "true":
+                if result.lower() == "false":
                     return f"Стол {target} не существует."
                 return f"Переместила на рабочий стол {target}."
             elif not self.is_wayland:

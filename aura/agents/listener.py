@@ -31,7 +31,9 @@ class AgentListener(MicroAgent):
         self.recognizer = None
         self.stream = None
         self.audio_queue = None
-        self.sample_rate = 8000
+        # Bug 48: T-one обучен на 16kHz. 8kHz → сдвиг частот ×2 → ошибки ASR.
+        # Env override: AURA_ASR_SR=8000 для проверки.
+        self.sample_rate = int(os.environ.get("AURA_ASR_SR", "16000"))
 
         try:
             import sherpa_onnx
@@ -74,7 +76,7 @@ class AgentListener(MicroAgent):
                 samplerate=self.sample_rate,
                 channels=1,
                 dtype="int16",
-                blocksize=1600,
+                blocksize=480,  # Bug 48: 30ms при 16kHz (было 1600=200ms)
                 callback=self._audio_callback,
             )
             self.stream.start()
@@ -105,7 +107,7 @@ class AgentListener(MicroAgent):
 
             # Один streaming-объект на весь вызов
             s = self.recognizer.create_stream()
-            left_padding = self.np.zeros(2400, dtype=self.np.float32)
+            left_padding = self.np.zeros(4800, dtype=self.np.float32)  # Bug 48: 300ms при 16kHz
             s.accept_waveform(self.sample_rate, left_padding)
 
             start = time.time()
@@ -177,7 +179,7 @@ class AgentListener(MicroAgent):
                     last_text_change_ts = None
 
             # Таймаут: отдаём то, что успели распознать
-            tail_padding = self.np.zeros(4800, dtype=self.np.float32)
+            tail_padding = self.np.zeros(9600, dtype=self.np.float32)  # Bug 48: 600ms при 16kHz
             s.accept_waveform(self.sample_rate, tail_padding)
             while self.recognizer.is_ready(s):
                 self.recognizer.decode_stream(s)

@@ -121,7 +121,13 @@ def build_orchestrator() -> Orchestrator:
         Orchestrator с зарегистрированными агентами.
     """
     tool_router = AgentToolRouter()
-    brain = AgentBrain()
+    # Bug 47: AURA_BRAIN=0 в env → brain отключён (fast path для видео)
+    import os as _os
+    if _os.environ.get("AURA_BRAIN", "1") == "0":
+        brain = None
+        print("⚡ Brain ОТКЛЮЧЁН (AURA_BRAIN=0) — только агенты")
+    else:
+        brain = AgentBrain()
     orch = Orchestrator(tool_router=tool_router, brain=brain)
     modules_config = load_modules_config()
 

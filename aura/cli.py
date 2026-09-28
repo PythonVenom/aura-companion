@@ -139,6 +139,66 @@ def cmd_settings_reset(args):
     print(json.dumps(settings.load(), indent=2, ensure_ascii=False))
 
 
+
+
+def _parse_duration(s: str) -> int:
+    """'30s'/'5m'/'2h' → секунды. Одна единица (YAGNI)."""
+    import re
+    m = re.fullmatch(r"(\d+)([smh])", s.strip().lower())
+    if not m:
+        raise ValueError(f"Формат: 30s, 5m, 2h (получено: {s!r})")
+    n, unit = int(m.group(1)), m.group(2)
+    return n * {"s": 1, "m": 60, "h": 3600}[unit]
+
+
+def cmd_timer(args):
+    from aura.agents import time_agent
+    try:
+        seconds = _parse_duration(args.duration)
+    except ValueError as e:
+        print(f"❌ {e}")
+        return 1
+    label = args.label or args.duration
+    t = time_agent.add_timer(seconds, label)
+    print(f"⏱ Таймер: {t['label']} (id={t['id']})")
+    return 0
+
+
+def cmd_reminder(args):
+    from aura.agents import health
+    item = health.add_reminder(args.text, args.every_minutes)
+    print(f"💊 Напоминание каждые {args.every_minutes} мин: {item['text']}")
+    return 0
+
+
+def cmd_timers(args):
+    from aura.agents import time_agent
+    items = time_agent.list_pending()
+    if not items:
+        print("⏱ Активных таймеров нет")
+        return 0
+    import time
+    now = time.time()
+    for it in items:
+        left = int(it["fire_at"] - now)
+        print(f"  {it['label']:20s} через {left}s")
+    return 0
+
+
+def cmd_reminders(args):
+    from aura.agents import health
+    items = health.list_reminders()
+    if not items:
+        print("💊 Напоминаний нет")
+        return 0
+    import time
+    now = time.time()
+    for it in items:
+        left = int(it.get("next_at", 0) - now)
+        print(f"  {it['text'][:40]:40s} через {left}s (каждые {it['every_sec']//60}m)")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -166,6 +226,19 @@ def main():
     p_reset = sub.add_parser("settings-reset", help="сбросить настройки")
     p_reset.set_defaults(func=cmd_settings_reset)
     sub.add_parser("reload-extension", help="Firefox extension").set_defaults(func=cmd_reload_extension)
+
+    p_timer = sub.add_parser("timer", help="таймер: 30s / 5m / 2h")
+    p_timer.add_argument("duration")
+    p_timer.add_argument("label", nargs="?", default="")
+    p_timer.set_defaults(func=cmd_timer)
+
+    p_rem = sub.add_parser("reminder", help="напоминание каждые N мин")
+    p_rem.add_argument("text")
+    p_rem.add_argument("every_minutes", nargs="?", type=int, default=60)
+    p_rem.set_defaults(func=cmd_reminder)
+
+    sub.add_parser("timers", help="список активных таймеров").set_defaults(func=cmd_timers)
+    sub.add_parser("reminders", help="список напоминаний").set_defaults(func=cmd_reminders)
 
     args = parser.parse_args()
     return args.func(args) or 0

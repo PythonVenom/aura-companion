@@ -477,6 +477,76 @@ def morning_checklist_trigger(get_agent) -> Trigger:
     )
 
 
+def time_fired_trigger() -> Trigger:
+    """Сработавшие таймеры (Bug 19: TimeAgent → Proactive).
+
+    get_fired() мутирует state → кэшируем в замыкании.
+    """
+    cache: dict = {"fired": []}
+
+    def condition(state: dict) -> bool:
+        try:
+            from aura.agents import time_agent
+            fired = time_agent.get_fired()
+        except Exception:
+            return False
+        if fired:
+            cache["fired"] = fired
+            return True
+        return False
+
+    def action() -> str:
+        fired = cache.get("fired", [])
+        cache["fired"] = []
+        if not fired:
+            return ""
+        labels = [f.get("label", "?") for f in fired]
+        return "⏰ " + ", ".join(labels)
+
+    return Trigger(
+        name="time_fired",
+        priority=95,
+        cooldown_sec=0,
+        condition=condition,
+        action=action,
+    )
+
+
+def health_due_trigger() -> Trigger:
+    """Сработавшие напоминания о здоровье (Bug 19).
+
+    check_due() мутирует state → кэш в замыкании.
+    """
+    cache: dict = {"due": []}
+
+    def condition(state: dict) -> bool:
+        try:
+            from aura.agents import health
+            due = health.check_due()
+        except Exception:
+            return False
+        if due:
+            cache["due"] = due
+            return True
+        return False
+
+    def action() -> str:
+        due = cache.get("due", [])
+        cache["due"] = []
+        if not due:
+            return ""
+        texts = [d.get("text", "")[:40] for d in due]
+        return "💊 " + "; ".join(texts)
+
+    return Trigger(
+        name="health_due",
+        priority=80,
+        cooldown_sec=60,
+        condition=condition,
+        action=action,
+    )
+
+
 def default_engine(get_agent=None) -> ProactiveEngine:
     """Стандартный набор триггеров."""
     engine = ProactiveEngine()
@@ -486,6 +556,8 @@ def default_engine(get_agent=None) -> ProactiveEngine:
     engine.register(upcoming_calendar_trigger(get_agent))
     engine.register(calendar_reminder_trigger(get_agent))
     engine.register(unanswered_messages_trigger(get_agent))
+    engine.register(time_fired_trigger())
+    engine.register(health_due_trigger())
     return engine
 
 

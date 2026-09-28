@@ -43,6 +43,18 @@
 ### Tests
 - 700 → 815+ passed
 
+## [1.0.1] — 2026-09-28
+
+### Добавлено
+- voice_autoswitch.apply_if_changed (runtime hook)
+- massage._export_md (отчёты клиентов)
+- CLI: aura dictation text/show/list
+- aura/bot/telegram_bot.py (ADR-041 skeleton)
+- aura/web/app.py (ADR-042 skeleton, htmx+FastAPI)
+- scripts/demo_obs.sh (демо для OBS)
+- README: раздел Поддержка (CloudTips)
+- tests: bot + web (8 новых)
+
 ## [1.0.0] — 2026-09-28
 
 **Первый стабильный релиз.**

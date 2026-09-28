@@ -164,6 +164,20 @@ class AgentMassage(BaseAgent):
         mark = "💾" if saved else "📝"
         return AgentResponse.ok(f"{mark} Записал: {note[:60]}", self.name)
 
+    def _export_md(self, client: str) -> Path:
+        """Экспорт истории клиента в отдельный MD."""
+        from aura.agents.massage import _client_file
+        src = _client_file(client)
+        if not src.exists():
+            return src
+        out_dir = Path.home() / "aura_private" / "massage_reports"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now().strftime("%Y%m%d-%H%M")
+        out = out_dir / f"{client}_{ts}.md"
+        header = "# Сессии: " + client + chr(10) + chr(10)
+        out.write_text(header + src.read_text(encoding="utf-8"), encoding="utf-8")
+        return out
+
     def _finish(self) -> AgentResponse:
         if not self._current:
             return AgentResponse.ok("Нет активной сессии.", self.name)

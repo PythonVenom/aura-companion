@@ -382,6 +382,39 @@ def cmd_bpm(args):
     return 0
 
 
+def cmd_dictation(args):
+    """DictationAgent CLI: text / show / list."""
+    from aura.agents.dictation import AgentDictation, DICTATION_DIR
+    from aura.core.protocol import AgentRequest
+    import asyncio
+    from datetime import datetime
+
+    action = getattr(args, "action", "show")
+    if action == "text":
+        text = getattr(args, "text", "")
+        if not text:
+            print("❌ Укажи текст: aura dictation text 'спина L4-L5'")
+            return 1
+        a = AgentDictation()
+        r = asyncio.run(a.handle(AgentRequest(text=f"диктовка {text}")))
+        print(r.text)
+        return 0
+    if action == "show":
+        f = DICTATION_DIR / (datetime.now().strftime("%Y-%m-%d") + ".md")
+        if not f.exists():
+            print(f"📄 Нет файла за сегодня. Будет создан при первой диктовке.")
+            return 0
+        print(f.read_text(encoding="utf-8"))
+        return 0
+    if action == "list":
+        DICTATION_DIR.mkdir(parents=True, exist_ok=True)
+        files = sorted(DICTATION_DIR.glob("*.md"), reverse=True)
+        for f in files[:20]:
+            print(f"  {f.name} ({f.stat().st_size}b)")
+        return 0
+    return 1
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -436,6 +469,10 @@ def main():
     p_bpm = sub.add_parser("bpm", help="метроном")
     p_bpm.add_argument("bpm", type=int)
     p_bpm.set_defaults(func=cmd_bpm)
+    p_dic = sub.add_parser("dictation", help="диктовка в файл")
+    p_dic.add_argument("action", nargs="?", choices=["text","show","list"], default="show")
+    p_dic.add_argument("text", nargs="*", default="")
+    p_dic.set_defaults(func=cmd_dictation)
 
 
     p_timer = sub.add_parser("timer", help="таймер: 30s / 5m / 2h")

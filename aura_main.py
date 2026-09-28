@@ -156,6 +156,28 @@ class AuraOrchestrator:
         else:
             print("⚠️ VK Music: токен не найден, проверьте vk_token.txt")
 
+    def _ensure_aec(self) -> None:
+        """Bug 40: принудительно переключить sink на echo-cancel перед речью.
+
+        Aura говорила в alsa_output → эхо попадало в микрофон → barge-in ловил
+        саму Ауру. WirePlumber периодически откатывает sink обратно.
+        """
+        try:
+            import subprocess
+            r = subprocess.run(
+                ["pactl", "get-default-sink"],
+                capture_output=True, text=True, timeout=2,
+            )
+            if "echo-cancel" not in r.stdout:
+                subprocess.run(
+                    ["pactl", "set-default-sink", "echo-cancel-sink"],
+                    check=False, timeout=2,
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                )
+                print("🎙️ AEC: переключён на echo-cancel-sink")
+        except Exception as e:
+            print(f"⚠️ AEC force: {e}")
+
     def _duck_on(self) -> None:
         """Приглушить музыку перед речью (не пауза, -20dB). Bug 38.
 
@@ -197,6 +219,7 @@ class AuraOrchestrator:
         (после синтеза piper). Иначе resume срабатывает мгновенно.
         """
         print(f"🔊 Скажу: {text[:80]}")
+        self._ensure_aec()
         self._duck_on()
         self._set_barge_speaking(True)
         self.speaker.say(text)
@@ -553,6 +576,7 @@ class AuraOrchestrator:
                     pass
                 print(f"🤖 {response}")
                 set_status("speaking", response)
+                self._ensure_aec()
                 self._duck_on()
                 self._set_barge_speaking(True)
                 # ADR-048: silent=True — не озвучивать

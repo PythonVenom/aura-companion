@@ -43,6 +43,17 @@
 ### Tests
 - 700 → 815+ passed
 
+## [0.9.7] — 2026-09-28
+
+### Добавлено
+- **aura/wrappers/blender.py**: Blender 4.2+ (TCP + headless fallback)
+- **aura/wrappers/figma.py**: Figma REST API (token auth)
+- CLI: `aura wrappers-hint [name]`
+- **docs/demo.md**: сценарий для OBS (2 мин)
+- **ADR-040** Voice Profiles (7 профилей под профессии)
+- **ADR-041** Telegram Bot Client (первый мобильный UX)
+- tests/test_wrappers_expanded.py: 10 регрессионных
+
 ## [0.9.6] — 2026-09-28
 
 ### Добавлено

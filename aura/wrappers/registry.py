@@ -21,6 +21,8 @@ def _autoload() -> None:
     """Импортирует доступные wrappers (graceful degradation)."""
     for modname, clsname in [
         ("aura.wrappers.grbl", "GRBLWrapper"),
+        ("aura.wrappers.blender", "BlenderWrapper"),
+        ("aura.wrappers.figma", "FigmaWrapper"),
     ]:
         try:
             mod = __import__(modname, fromlist=[clsname])

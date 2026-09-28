@@ -275,6 +275,22 @@ def cmd_wrappers(args):
     return 1
 
 
+def cmd_wrappers_hint(args):
+    """Подсказка по установке wrapper'а."""
+    hints = {
+        "grbl": "pyserial + GRBL 1.1 прошивка. Порт: /dev/ttyUSB0 или /dev/ttyACM0",
+        "blender": "Blender 4.2+. Запусти TCP-сервер: blender --python scripts/aura_server.py",
+        "figma": "Figma token: export FIGMA_TOKEN=... или ~/.config/aura/figma_token",
+    }
+    name = getattr(args, "name", None)
+    if name and name in hints:
+        print(f"💡 {name}: {hints[name]}")
+        return 0
+    for k, v in hints.items():
+        print(f"  {k}: {v}")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -310,6 +326,9 @@ def main():
     p_wrap = sub.add_parser("wrappers", help="сторонние приложения")
     p_wrap.add_argument("action", nargs="?", choices=["list", "status"], default="list")
     p_wrap.set_defaults(func=cmd_wrappers)
+    p_hint = sub.add_parser("wrappers-hint", help="подсказка по wrapper")
+    p_hint.add_argument("name", nargs="?", default=None)
+    p_hint.set_defaults(func=cmd_wrappers_hint)
 
 
     p_timer = sub.add_parser("timer", help="таймер: 30s / 5m / 2h")

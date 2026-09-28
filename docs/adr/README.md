@@ -45,6 +45,8 @@
 | 037 | Third-party API Wrappers | Проект |
 | 038 | Hardware Roadmap | Проект |
 | 039 | Distributed Aura | Проект |
+| 040 | Voice Profiles | Проект |
+| 041 | Telegram Bot Client | Проект |
 
 ## Как читать
 

@@ -211,7 +211,8 @@ def test_detect_and_route_first_call_sets_profile(router):
         profile, msg = router.detect_and_route()
 
     assert profile == "internal"
-    assert msg is not None
+    # Bug 42: при первом вызове для internal — silent (msg=None)
+    assert msg is None
     assert router.current_profile == "internal"
     assert router.current_source == AgentAudioRouter.DEFAULT_SOURCE
     assert router.current_sink == AgentAudioRouter.DEFAULT_SINK

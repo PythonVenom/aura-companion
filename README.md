@@ -8,6 +8,8 @@
 [![Tests](https://img.shields.io/badge/tests-1107-brightgreen.svg)](#)
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)](#)
 
+▶️ [Demo (90 sec, test run)](https://github.com/PythonVenom/aura-companion/releases/tag/demo-test-run)
+
 **Проводник в цифровой мир** — локальный голосовой ИИ-компаньон для Linux.
 
 Не «Алиса в терминале», а личный агент: слушает микрофон, отвечает голосом,

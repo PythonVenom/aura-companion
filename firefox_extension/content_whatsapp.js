@@ -16,22 +16,25 @@
     }
 
     function findChatItems() {
-        // Чаты — role=listitem внутри боковой панели.
+        // Bug 51: WhatsApp использует role=row (не listitem).
         const pane = document.querySelector("#pane-side");
         if (pane) {
-            return pane.querySelectorAll('[role="listitem"]');
+            const rows = pane.querySelectorAll('[role="row"]');
+            if (rows.length > 0) return rows;
         }
-        const sidebar = findSidebar();
-        if (sidebar) return sidebar.querySelectorAll('[role="listitem"]');
-        return document.querySelectorAll('[role="listitem"]');
+        // fallback
+        return document.querySelectorAll('[role="row"], [role="listitem"]');
     }
 
     function findMessageInput() {
-        // Поле ввода. В WA — contenteditable с data-tab="10" или aria-label.
-        return document.querySelector('div[contenteditable="true"][data-tab="10"]')
+        // Bug 51: WhatsApp в 2026 использует data-testid или role=textbox.
+        return document.querySelector('[data-testid="conversation-compose-box-input"]')
+            || document.querySelector('footer [contenteditable="true"]')
+            || document.querySelector('div[contenteditable="true"][data-tab="10"]')
             || document.querySelector('div[contenteditable="true"][data-tab="6"]')
-            || document.querySelector('footer div[contenteditable="true"]')
+            || document.querySelector('[role="textbox"][contenteditable="true"]')
             || document.querySelector('div[title="Type a message"]')
+            || document.querySelector('div[aria-label*="Сообщение" i]')
             || document.querySelector('div[aria-label*="message" i][contenteditable="true"]');
     }
 
@@ -50,7 +53,21 @@
             buttons: [],
             inputs: [],
             roles: {},
-            sidebars: []
+            sidebars: [],
+            // Расширенная диагностика
+            counts: {
+                all: document.querySelectorAll("*").length,
+                div: document.querySelectorAll("div").length,
+                role_any: document.querySelectorAll("[role]").length,
+                contenteditable: document.querySelectorAll("[contenteditable]").length,
+                aria_label: document.querySelectorAll("[aria-label]").length,
+                data_tab: document.querySelectorAll("[data-tab]").length,
+                data_testid: document.querySelectorAll("[data-testid]").length,
+                pane_side: !!document.querySelector("#pane-side"),
+                main: !!document.querySelector("main, #main, [role=main]"),
+            },
+            body_ready: document.readyState,
+            body_len: document.body ? document.body.innerHTML.length : 0
         };
 
         document.querySelectorAll("button, [role=button]").forEach((el, i) => {
@@ -132,15 +149,17 @@
         if (q.length > 4) stems.push(q.substring(0, q.length - 1));
         if (q.length > 5) stems.push(q.substring(0, q.length - 2));
 
-        // 1. Поиск по видимым чатам.
+        // 1. Поиск по видимым чатам (role=row).
         const items = findChatItems();
         for (const el of items) {
-            const text = (el.innerText || "").toLowerCase();
+            // В WA title чата в span[title]
+            const titleEl = el.querySelector('[title]');
+            const text = ((titleEl?.getAttribute("title") || el.innerText) || "").toLowerCase();
             for (const stem of stems) {
                 if (text.includes(stem)) {
                     el.click();
-                    const lines = text.split("\n").filter(l => l.trim());
-                    return { found: true, name: lines[0] || "", matched: stem };
+                    const name = titleEl?.getAttribute("title") || text.split("\n")[0] || "";
+                    return { found: true, name: name.substring(0, 60), matched: stem };
                 }
             }
         }
@@ -243,18 +262,24 @@
     // --- Чтение ---
 
     function readLastMessage() {
-        // Сообщения: div[data-id] внутри main или .message-in/.message-out.
-        const main = document.querySelector('div[data-testid="conversation-panel-messages"]')
+        // Bug 51: WhatsApp data-id на div сообщения.
+        const main = document.querySelector('[data-testid="conversation-panel-messages"]')
             || document.querySelector("#main");
         if (!main) return { error: "no main" };
 
-        const bubbles = main.querySelectorAll('div.message-in, div.message-out, div[data-id^="true"], div[data-id^="false"]');
+        // Строки с сообщениями: .message-in или .message-out
+        const bubbles = main.querySelectorAll(
+            'div.message-in, div.message-out, [data-id^="true"], [data-id^="false"]'
+        );
         if (bubbles.length === 0) {
-            // fallback — общий текст.
             return { last: (main.innerText || "").slice(-500) };
         }
         const last = bubbles[bubbles.length - 1];
-        const text = (last.querySelector("span.selectable-text")?.innerText || last.innerText || "").trim();
+        // Текст внутри: span.selectable-text или .copyable-text
+        const textEl = last.querySelector("span.selectable-text") 
+            || last.querySelector(".copyable-text")
+            || last;
+        const text = (textEl.innerText || "").trim();
         return {
             last: text.substring(0, 300),
             direction: last.classList.contains("message-in") ? "in" : "out"
@@ -262,60 +287,63 @@
     }
 
     function getTitle() {
-        // Название активного чата.
+        // Bug 51: точный селектор WhatsApp.
+        const el = document.querySelector('[data-testid="conversation-info-header-chat-title"]')
+            || document.querySelector('header [title]')
+            || document.querySelector('header span[dir="auto"]');
+        if (el) {
+            const title = (el.getAttribute("title") || el.innerText || "").trim();
+            return { title: title.substring(0, 100) };
+        }
         const header = document.querySelector('header');
-        if (!header) return { title: document.title };
-        const title = (header.innerText || "").split("\n")[0].trim();
-        return { title: title.substring(0, 100) };
+        if (header) {
+            const title = (header.innerText || "").split("\n")[0].trim();
+            return { title: title.substring(0, 100) };
+        }
+        return { title: document.title };
     }
 
-    // --- Message router от background ---
-
-    window.addEventListener("message", async (event) => {
-        if (event.source !== window) return;
-        const msg = event.data;
-        if (!msg || !msg.action) return;
-        console.log("[Aura WhatsApp] got action:", msg.action);
-
-        let result = null;
-        try {
-            switch (msg.action) {
-                case "wa_dump":
-                    result = deepDump();
-                    break;
-                case "wa_list_chats":
-                    result = listChats();
-                    break;
-                case "wa_find_chat":
-                    result = findChat(msg.query || "");
-                    break;
-                case "wa_send_message":
-                    result = sendMessageReal(msg.text || "");
-                    break;
-                case "wa_send_finalize":
-                    result = sendMessageFinalize();
-                    break;
-                case "wa_dump_send_ui":
-                    result = dumpSendUI();
-                    break;
-                case "wa_clear_input":
-                    result = clearMessageInput();
-                    break;
-                case "wa_title":
-                    result = getTitle();
-                    break;
-                case "wa_read_last":
-                    result = readLastMessage();
-                    break;
-                default:
-                    result = { ok: false, error: "unknown action: " + msg.action };
-            }
-        } catch (e) {
-            result = { ok: false, error: e.message };
+    // --- Слушаем команды от background.js (browser.runtime.onMessage) ---
+browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    console.log("[Aura WhatsApp] got action:", msg.action);
+    try {
+        switch (msg.action) {
+            case "wa_dump":
+                sendResponse({ ok: true, data: deepDump() });
+                break;
+            case "wa_list_chats":
+                sendResponse({ ok: true, data: listChats() });
+                break;
+            case "wa_find_chat":
+                sendResponse({ ok: true, data: findChat(msg.query || "") });
+                break;
+            case "wa_send_message":
+                sendResponse({ ok: true, data: sendMessageReal(msg.text || "") });
+                break;
+            case "wa_send_finalize":
+                sendResponse({ ok: true, data: sendMessageFinalize() });
+                break;
+            case "wa_dump_send_ui":
+                sendResponse({ ok: true, data: dumpSendUI() });
+                break;
+            case "wa_clear_input":
+                sendResponse({ ok: true, data: clearMessageInput() });
+                break;
+            case "wa_title":
+                sendResponse({ ok: true, data: getTitle() });
+                break;
+            case "wa_read_last":
+                sendResponse({ ok: true, data: readLastMessage() });
+                break;
+            default:
+                sendResponse({ ok: false, error: "unknown action: " + msg.action });
         }
+    } catch (e) {
+        sendResponse({ ok: false, error: e.message });
+    }
+    return true;  // async
+});
 
-        window.postMessage({ __aura_response: true, requestId: msg.requestId, result: result }, "*");
-    });
+console.log("[Aura WhatsApp] content_whatsapp.js loaded");
 
-    console.log("[Aura WhatsApp] content_whatsapp.js loaded");
 })();

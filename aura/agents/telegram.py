@@ -27,14 +27,27 @@ class AgentTelegram(MicroAgent):
     def __init__(self):
         super().__init__("telegram", "Telegram Web адаптер")
 
+    # Bug 49: app-команды без telegram-контекста → app_launcher
+    APP_KEYWORDS = ("открой", "открыть", "закрой", "закрыть",
+                    "запусти", "запустить", "сверни", "разверни")
+    # Bug 49: если есть эти слова — telegram-интент (не app-открытие)
+    TELEGRAM_CONTEXT = ("канал", "чат", "сообщени", "переписк",
+                        "прочитай", "найди", "список", "отправь")
+
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
         padded = f" {text} "
-        if " тг " in padded or "телеграм" in text or "телега" in text:
-            return True
-        if "telegram" in text or " tg " in padded:
-            return True
-        return any(kw in text for kw in self.KEYWORDS)
+        # 1. Telegram-слова есть?
+        has_tg = (" тг " in padded or "телеграм" in text or "телега" in text
+                  or "telegram" in text or " tg " in padded
+                  or any(kw in text for kw in self.KEYWORDS))
+        if not has_tg:
+            return False
+        # 2. App-команда БЕЗ telegram-контекста → app_launcher
+        if any(kw in text for kw in self.APP_KEYWORDS):
+            if not any(kw in text for kw in self.TELEGRAM_CONTEXT):
+                return False
+        return True
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         if not self.can_handle(request):

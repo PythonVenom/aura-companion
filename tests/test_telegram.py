@@ -10,7 +10,7 @@ def agent():
 
 
 @pytest.mark.parametrize("text", [
-    "открой телеграм",
+
     "телега чаты",
     "тг сообщения",
     "напиши в телеграм",
@@ -32,8 +32,9 @@ def test_cannot_handle_other(agent, text):
 
 @pytest.mark.asyncio
 async def test_handle_open_tg(agent):
+    # Bug 49: telegram НЕ обрабатывает «открой телеграм» (app_launcher)
     resp = await agent.handle(AgentRequest(text="открой телеграм"))
-    assert resp.status == AgentStatus.OK
+    assert resp.status == AgentStatus.NOT_HANDLED
 
 
 @pytest.mark.asyncio

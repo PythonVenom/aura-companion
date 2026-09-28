@@ -125,8 +125,10 @@ class AgentAppLauncher(BaseAgent):
     # Bug 35: алиасы для ASR-ошибок и русских названий
     ALIASES = {
         "фаерфокс": "firefox", "файрфакс": "firefox",
-        "фаерфокс": "firefox", "файрфокс": "firefox",
-        "фаерфокс": "firefox", "браузер": "firefox",
+        "файрфокс": "firefox", "эрфокс": "firefox",
+        "фэйфокс": "firefox", "файфокс": "firefox",
+        "файэфокс": "firefox", "браузер": "firefox",
+        "фокс": "firefox",
         "телеграм": "telegram", "тг": "telegram",
         "телега": "telegram",
         "хром": "chromium", "хромиум": "chromium",

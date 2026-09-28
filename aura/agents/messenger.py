@@ -244,7 +244,7 @@ class AgentMessenger(BaseAgent):
         return result.get("data", {})
 
     def find_chat(self, query: str) -> str:
-        self._focus_firefox()
+        # Bug 37: НЕ поднимаем окно Firefox принудительно (мешало пользователю)
         result = send_command({"action": "max_find_chat", "query": query})
         if result is None or "error" in result:
             return error_text(result)

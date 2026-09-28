@@ -158,26 +158,37 @@ class AuraOrchestrator:
             print("⚠️ VK Music: токен не найден, проверьте vk_token.txt")
 
     def _duck_on(self) -> None:
-        """Пауза музыки перед речью. Best-effort.
+        """Приглушить музыку перед речью (не пауза, -20dB). Bug 38.
 
-        Ducking (pactl set-sink-input-volume) не работает на Firefox/PipeWire —
-        stream пересоздаётся. Пауза через MPRIS работает везде.
+        Ducking через pactl set-sink-input-volume. Media_pause fallback
+        если ducker не готов.
         """
-        if not self.media_pause:
-            return
-        try:
-            self.media_pause.pause()
-        except Exception as e:
-            print(f"⚠️ Pause: {e}")
+        if self.ducker is not None:
+            try:
+                self.ducker.duck()
+                return
+            except Exception as e:
+                print(f"⚠️ Duck: {e}")
+        # Fallback — полная пауза
+        if self.media_pause:
+            try:
+                self.media_pause.pause()
+            except Exception as e:
+                print(f"⚠️ Pause: {e}")
 
     def _duck_off(self) -> None:
-        """Возобновить музыку после речи. Best-effort."""
-        if not self.media_pause:
-            return
-        try:
-            self.media_pause.resume()
-        except Exception as e:
-            print(f"⚠️ Resume: {e}")
+        """Восстановить громкость после речи. Bug 38."""
+        if self.ducker is not None:
+            try:
+                self.ducker.un_duck()
+                return
+            except Exception as e:
+                print(f"⚠️ UnDuck: {e}")
+        if self.media_pause:
+            try:
+                self.media_pause.resume()
+            except Exception as e:
+                print(f"⚠️ Resume: {e}")
 
     def _say_with_duck(self, text: str) -> None:
         """Сказать короткое сообщение с паузой музыки (блокирующе).
@@ -476,9 +487,14 @@ class AuraOrchestrator:
                 if self._handle_dialog():
                     continue
 
-                # Слушаем (timeout 5 секунд)
+                # Слушаем (timeout 8 секунд)
                 set_status("listening")
+                # Bug 38: приглушаем музыку ПОКА слушаем (интеллектуальный duck)
+                self._duck_on()
                 heard = self.listener.listen(timeout=8)  # Bug 34
+                if not heard:
+                    # Ничего не услышали — вернуть звук
+                    self._duck_off()
 
                 if not heard:
                     time.sleep(0.1)

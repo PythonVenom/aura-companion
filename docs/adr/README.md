@@ -52,6 +52,7 @@
 | 044 | Founder-First Beachhead | Принято |
 | 045 | Least-Privilege Deployment | Принято |
 | 046 | Onboarding Questionnaire (RPG) | Принято |
+| 047 | Public Distribution | Принято |
 
 ## Как читать
 

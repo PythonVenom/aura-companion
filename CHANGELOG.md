@@ -43,6 +43,19 @@
 ### Tests
 - 700 → 815+ passed
 
+## [1.0.0] — 2026-09-28
+
+**Первый стабильный релиз.**
+
+### Метрики
+- Тесты: 700 -> 1079
+- ADR: 16 -> 44
+- Агентов: 31 -> 37
+- Wrappers: 0 -> 3
+
+### ADR-044 Beachhead MVP
+- MassageSession + Dictation + ConstructionCalc + BPM + autoswitch
+
 ## [0.10.0] — 2026-09-28
 
 ### Добавлено — ADR-044 Beachhead MVP

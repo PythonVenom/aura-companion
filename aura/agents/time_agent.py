@@ -25,9 +25,9 @@ def _parse_int(text: str):
     if m:
         return int(m.group(1))
     # Потом слова
-    for w, n in NUM_WORDS.items():
+    for w in sorted(NUM_WORDS.keys(), key=len, reverse=True):
         if w in text.lower():
-            return n
+            return NUM_WORDS[w]
     return None
 
 

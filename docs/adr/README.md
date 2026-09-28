@@ -54,6 +54,7 @@
 | 046 | Onboarding Questionnaire (RPG) | Принято |
 | 047 | Public Distribution | Принято |
 | 048 | Response Verbosity Policy | Принято |
+| 052 | ASR Sample Rate Matching | Принято |
 
 ## Как читать
 

@@ -140,6 +140,32 @@
 
     // --- Поиск чата ---
 
+    function _clickRow(el) {
+        // Bug 58: React/Preact в WhatsApp. Стратегия:
+        // 1. inner [role=button] или [role=link] — click
+        // 2. MouseEvent (pointerdown → pointerup → click) на сам row
+        // 3. Native .click() fallback
+        try {
+            const inner = el.querySelector('[role="button"], [role="link"]');
+            if (inner) {
+                inner.click();
+                return;
+            }
+            const rect = el.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup", "click"]) {
+                const ev = new MouseEvent(type, {
+                    bubbles: true, cancelable: true, composed: true,
+                    view: window, clientX: cx, clientY: cy,
+                });
+                el.dispatchEvent(ev);
+            }
+        } catch (e) {
+            _clickRow(el);
+        }
+    }
+
     function findChat(query) {
         const q = (query || "").toLowerCase().trim();
         if (!q) return { found: false, error: "empty query" };
@@ -152,12 +178,13 @@
         // 1. Поиск по видимым чатам (role=row).
         const items = findChatItems();
         for (const el of items) {
-            // В WA title чата в span[title]
             const titleEl = el.querySelector('[title]');
             const text = ((titleEl?.getAttribute("title") || el.innerText) || "").toLowerCase();
             for (const stem of stems) {
                 if (text.includes(stem)) {
-                    el.click();
+                    // Bug 58: WhatsApp = React. Простой .click() не триггерит.
+                    // Используем комбинацию: click на inner button + MouseEvent на row.
+                    _clickRow(el);
                     const name = titleEl?.getAttribute("title") || text.split("\n")[0] || "";
                     return { found: true, name: name.substring(0, 60), matched: stem };
                 }

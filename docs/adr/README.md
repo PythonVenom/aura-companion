@@ -51,6 +51,7 @@
 | 043 | Release Checklist v1.0 | Принято |
 | 044 | Founder-First Beachhead | Принято |
 | 045 | Least-Privilege Deployment | Принято |
+| 046 | Onboarding Questionnaire (RPG) | Принято |
 
 ## Как читать
 

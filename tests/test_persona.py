@@ -1,40 +1,88 @@
-"""Persona + config_wizard (5 вопросов)."""
-from unittest.mock import patch
-from aura import config_wizard, settings
+"""Тесты persona.py — сборка системного промпта (ADR-046)."""
+import pytest
+from aura import persona
 
 
-def _patch(tmp_path, monkeypatch):
-    monkeypatch.setattr(settings, "SETTINGS_PATH", tmp_path / "s.json")
+def test_defaults_empty_persona():
+    p = persona.build_system_prompt({})
+    assert "Аура" in p
+    assert "друг" in p
+    assert "тёпл" in p.lower()
 
 
-def test_persona_defaults(tmp_path, monkeypatch):
-    _patch(tmp_path, monkeypatch)
-    s = settings.load()
-    assert "persona" in s
-    assert s["persona"]["name"] == "Аура"
-    assert s["persona"]["address"] == "ты"
+def test_defaults_none():
+    p = persona.build_system_prompt(None)
+    assert "Аура" in p
 
 
-def test_wizard_sets_persona(tmp_path, monkeypatch):
-    _patch(tmp_path, monkeypatch)
-    with patch("builtins.input", side_effect=["Катя", "1", "1", "1", "1"]):
-        result = config_wizard.run()
-    assert result["persona"]["name"] == "Катя"
-    assert result["wake_word"] == "катя"
+def test_name_in_prompt():
+    p = persona.build_system_prompt({"name": "Катя"})
+    assert "Катя" in p
+    assert "Аура" not in p
 
 
-def test_wizard_vy(tmp_path, monkeypatch):
-    _patch(tmp_path, monkeypatch)
-    with patch("builtins.input", side_effect=["Аура", "2", "2", "2", "2"]):
-        result = config_wizard.run()
-    assert result["persona"]["address"] == "вы"
-    assert result["persona"]["style"] == "нейтральная"
+def test_user_name_and_gender():
+    p = persona.build_system_prompt({"user_name": "Иван", "user_gender": "м"})
+    assert "Иван" in p
+    assert "мужчина" in p
 
 
-def test_persona_persist(tmp_path, monkeypatch):
-    _patch(tmp_path, monkeypatch)
-    s = settings.load()
-    s["persona"]["humor"] = False
-    settings.save(s)
-    s2 = settings.load()
-    assert s2["persona"]["humor"] is False
+def test_gender_he():
+    p = persona.build_system_prompt({"gender": "он"})
+    assert "мужского" in p
+
+
+def test_gender_neutral():
+    p = persona.build_system_prompt({"gender": "нейтр"})
+    assert "вне рода" in p
+
+
+def test_role_drug():
+    p = persona.build_system_prompt({"role": "друг"})
+    assert "друг" in p.lower()
+
+
+def test_role_nastavnik():
+    p = persona.build_system_prompt({"role": "наставник"})
+    assert "наставник" in p.lower()
+
+
+def test_style_sarcastic():
+    p = persona.build_system_prompt({"style": "саркастичная"})
+    assert "сарказ" in p.lower()
+
+
+def test_humor_true():
+    p = persona.build_system_prompt({"humor": True})
+    assert "Шути" in p
+
+
+def test_humor_false():
+    p = persona.build_system_prompt({"humor": False})
+    assert "Без шуток" in p
+
+
+def test_address_vy():
+    p = persona.build_system_prompt({"address": "вы"})
+    assert "«вы»" in p
+
+
+def test_tone_brief():
+    p = persona.build_system_prompt({"tone": "кратко"})
+    assert "кратко" in p
+
+
+def test_describe_basic():
+    d = persona.describe({"name": "Аура", "role": "друг", "user_name": "Макс"})
+    assert "Аура" in d
+    assert "Макс" in d
+
+
+def test_describe_defaults():
+    d = persona.describe({})
+    assert "Аура" in d
+
+
+def test_empty_string_uses_default():
+    p = persona.build_system_prompt({"name": ""})
+    assert "Аура" in p

@@ -16,6 +16,13 @@ DEFAULTS = {
     "notifications": True,
     "proactive_enabled": True,
     "language": "ru",
+    "persona": {
+        "name": "Аура",
+        "address": "ты",
+        "style": "warm",
+        "humor": True,
+        "voice_gender": "female",
+    },
 }
 
 

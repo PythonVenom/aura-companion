@@ -51,23 +51,69 @@ class AgentPower(BaseAgent):
         )
         return any(kw in text for kw in keywords)
 
+    # Bug: необратимые действия без confirm
+    NEEDS_CONFIRM = frozenset({"shutdown", "reboot", "logout", "hibernate"})
+    CONFIRM_KEYWORDS = ("да", "подтверждаю", "точно", "yes", "конечно", "выполняй")
+    CANCEL_KEYWORDS = ("нет", "отмена", "отменить", "не надо", "стоп", "cancel")
+
+    _pending = None  # class-level: что ждёт подтверждения
+
+    def _act(self, kind: str) -> str:
+        return {
+            "shutdown": self._shutdown,
+            "reboot": self._reboot,
+            "suspend": self._suspend,
+            "lock": self._lock,
+            "logout": self._logout,
+            "hibernate": self._hibernate,
+        }[kind]()
+
     async def handle(self, request: AgentRequest) -> AgentResponse:
         text = request.text.lower()
 
-        if any(kw in text for kw in self.SHUTDOWN_KEYWORDS):
-            return AgentResponse.ok(self._shutdown(), self.name)
-        if any(kw in text for kw in self.REBOOT_KEYWORDS):
-            return AgentResponse.ok(self._reboot(), self.name)
-        if any(kw in text for kw in self.SUSPEND_KEYWORDS):
-            return AgentResponse.ok(self._suspend(), self.name)
-        if any(kw in text for kw in self.LOCK_KEYWORDS):
-            return AgentResponse.ok(self._lock(), self.name)
-        if any(kw in text for kw in self.LOGOUT_KEYWORDS):
-            return AgentResponse.ok(self._logout(), self.name)
-        if any(kw in text for kw in self.HIBERNATE_KEYWORDS):
-            return AgentResponse.ok(self._hibernate(), self.name)
+        # Ждём подтверждения
+        if AgentPower._pending:
+            pending = AgentPower._pending
+            if any(kw in text for kw in self.CONFIRM_KEYWORDS):
+                AgentPower._pending = None
+                return AgentResponse.ok(self._act(pending), self.name)
+            if any(kw in text for kw in self.CANCEL_KEYWORDS):
+                AgentPower._pending = None
+                return AgentResponse.ok("❌ Отменено", self.name)
+            return AgentResponse.ok(
+                f"Жду подтверждения: «{pending}». Скажи «да» или «нет»",
+                self.name,
+            )
 
-        return AgentResponse.not_handled(self.name)
+        # Определяем действие
+        kind = None
+        if any(kw in text for kw in self.SHUTDOWN_KEYWORDS):
+            kind = "shutdown"
+        elif any(kw in text for kw in self.REBOOT_KEYWORDS):
+            kind = "reboot"
+        elif any(kw in text for kw in self.HIBERNATE_KEYWORDS):
+            kind = "hibernate"
+        elif any(kw in text for kw in self.LOGOUT_KEYWORDS):
+            kind = "logout"
+        elif any(kw in text for kw in self.SUSPEND_KEYWORDS):
+            kind = "suspend"
+        elif any(kw in text for kw in self.LOCK_KEYWORDS):
+            kind = "lock"
+
+        if kind is None:
+            return AgentResponse.not_handled(self.name)
+
+        if kind in self.NEEDS_CONFIRM:
+            AgentPower._pending = kind
+            labels = {"shutdown": "Выключить ПК",
+                      "reboot": "Перезагрузить ПК",
+                      "logout": "Выйти из системы",
+                      "hibernate": "Гибернация"}
+            return AgentResponse.ok(
+                f"⚠️ {labels[kind]}? Скажи «да» или «нет»", self.name
+            )
+
+        return AgentResponse.ok(self._act(kind), self.name)
 
     # --- Реализация ---
 

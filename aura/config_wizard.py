@@ -1,7 +1,6 @@
 """Config wizard — настройка при первом запуске.
 
-Запуск:
-    python -m aura.config_wizard
+5 вопросов: имя, обращение, характер, юмор, голос.
 """
 from __future__ import annotations
 
@@ -9,68 +8,92 @@ from aura import settings
 
 
 def _ask(prompt: str, default: str = "") -> str:
-    """Спросить значение с default."""
     if default:
         prompt = f"{prompt} [{default}]: "
     else:
         prompt = f"{prompt}: "
     try:
-        answer = input(prompt).strip()
-        return answer or default
+        return input(prompt).strip() or default
     except (EOFError, KeyboardInterrupt):
         return default
 
 
+def _choose(prompt: str, options: list, default_idx: int = 0) -> str:
+    print(f"\n{prompt}")
+    for i, o in enumerate(options, 1):
+        mark = "*" if i - 1 == default_idx else " "
+        print(f"  {mark} {i}. {o}")
+    try:
+        ans = input(f"Выбор [{default_idx + 1}]: ").strip()
+        idx = int(ans) - 1 if ans else default_idx
+        return options[idx]
+    except (EOFError, KeyboardInterrupt, ValueError, IndexError):
+        return options[default_idx]
+
+
 def run(first_run: bool = True) -> dict:
-    """Интерактивная настройка. Возвращает финальные настройки."""
     print()
-    print("=" * 50)
-    print("  Aura — первая настройка")
-    print("=" * 50)
-    print()
-    print("3 вопроса — 30 секунд.")
-    print()
+    print("=" * 55)
+    print("  Aura — первая настройка (5 вопросов)")
+    print("=" * 55)
 
     s = settings.load()
+    persona = s.get("persona", {})
 
-    # 1. Имя ассистента
-    print("1. Как называть ассистента?")
-    print("   (по умолчанию: Аура. Можно: Катя, Маруся, Света, Дед...)")
-    new_wake = _ask("Имя", s.get("wake_word", "аура"))
-    s["wake_word"] = new_wake.lower()
-    print()
+    # 1. Имя
+    print("\n1. Как называть ассистента?")
+    print("   (Аура, Катя, Маруся, Света, Дед, Бабушка...)")
+    name = _ask("Имя", persona.get("name", "Аура"))
+    persona["name"] = name
 
-    # 2. Скорость речи
-    print("2. Скорость речи (0.5=медленно, 2.0=быстро)")
-    new_speed = _ask("Скорость", str(s.get("tts_speed", 1.0)))
-    try:
-        s["tts_speed"] = float(new_speed)
-    except ValueError:
-        pass
-    print()
+    # 2. Обращение
+    address = _choose(
+        "2. Как обращаться?",
+        ["на ты", "на вы"],
+        default_idx=0,
+    )
+    persona["address"] = address.split()[-1]
 
-    # 3. Громкость
-    print("3. Громкость голоса (0–100)")
-    new_vol = _ask("Громкость", str(s.get("volume", 100)))
-    try:
-        s["volume"] = int(new_vol)
-    except ValueError:
-        pass
-    print()
+    # 3. Характер
+    style = _choose(
+        "3. Характер?",
+        ["тёплая", "нейтральная", "строгая"],
+        default_idx=0,
+    )
+    persona["style"] = style
 
+    # 4. Юмор
+    humor = _choose(
+        "4. Шутить?",
+        ["да", "нет"],
+        default_idx=0,
+    )
+    persona["humor"] = humor == "да"
+
+    # 5. Голос
+    voice = _choose(
+        "5. Голос?",
+        ["женский", "мужской", "детский"],
+        default_idx=0,
+    )
+    persona["voice_gender"] = voice
+
+    s["persona"] = persona
+    s["wake_word"] = name.lower()
     settings.save(s)
 
-    print("=" * 50)
-    print("  Готово!")
-    print("=" * 50)
-    print(f"  Имя: {s['wake_word']}")
-    print(f"  Скорость: {s['tts_speed']}")
-    print(f"  Громкость: {s['volume']}")
+    print()
+    print("=" * 55)
+    print(f"  Готово!")
+    print("=" * 55)
+    print(f"  Имя: {persona['name']}")
+    print(f"  Обращение: {persona['address']}")
+    print(f"  Характер: {persona['style']}")
+    print(f"  Юмор: {'да' if persona['humor'] else 'нет'}")
+    print(f"  Голос: {persona['voice_gender']}")
     print()
     print(f"  Файл: {settings.SETTINGS_PATH}")
-    print("  Изменить: aura settings set KEY VALUE")
     print()
-
     return s
 
 

@@ -102,9 +102,25 @@ class AgentSpeaker(MicroAgent):
             return {"voice": "ru_RU-irina-medium", "speed": 1.0, "volume": 100}
 
     def _make_text_smart(self, text):
-        if 'создатель' not in text.lower():
+        try:
+            from aura import settings as _s
+            persona = _s.load().get("persona", {})
+            address = persona.get("address", "ты")
+            style = persona.get("style", "warm")
+        except Exception:
+            address, style = "ты", "warm"
+
+        # Обращение
+        if address == "вы":
+            suffix = "Создатель"
+        elif style == "warm":
+            suffix = "Создатель"
+        else:
+            suffix = ""
+
+        if suffix and suffix.lower() not in text.lower():
             if len(text) < 50:
-                text = f"{text}, Создатель"
+                text = f"{text}, {suffix}"
         if text.endswith('.'):
             text = text[:-1] + '...'
         text = text.replace("аура", "Аура").replace("создатель", "Создатель")

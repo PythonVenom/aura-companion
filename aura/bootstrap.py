@@ -16,6 +16,9 @@ from __future__ import annotations
 import tomllib
 from pathlib import Path
 
+from aura.agents.time_agent import AgentTimeAgent
+from aura.agents.health import AgentHealth
+
 from aura.agents import (
     AgentAppLauncher,
     AgentAudioPult,
@@ -120,6 +123,8 @@ def build_orchestrator() -> Orchestrator:
     # --- Уровень 1: простые и точные ---
     _try_register(orch, AgentTime, modules_config)
     _try_register(orch, AgentPower, modules_config)
+    _try_register(orch, AgentTimeAgent, modules_config)
+    _try_register(orch, AgentHealth, modules_config)
     _try_register(orch, AgentVault, modules_config)
 
     # --- Уровень 2: узкий ducking — ДО audio_pult ---

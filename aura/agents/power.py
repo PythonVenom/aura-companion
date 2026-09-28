@@ -40,8 +40,23 @@ class AgentPower(BaseAgent):
     LOGOUT_KEYWORDS = ("выйди из системы", "logout", "log out")
     HIBERNATE_KEYWORDS = ("гибернация", "hibernate")
 
+    # Bug 22: "выключи музыку" ≠ "выключи ПК"
+    BLOCK_KEYWORDS = (
+        "музык", "звук", "свет", "трек", "песн", "видео", "экран", "монитор",
+        "wifi", "wi-fi", "bluetooth", "блютус", "микрофон", "камер",
+        "уведомлен", "подсветк", "яркост", "режим полёта",
+        "наушник", "колонк",
+    )
+    # Bug 22: слова, при которых BLOCK не применяется (lock/suspend — норм)
+    UNBLOCK_KEYWORDS = ("заблокируй", "заблокировать", "блок", "lock",
+                        "спящий", "сон", "suspend", "sleep")
+
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
+        # Bug 22: объект не-ПК → не наше (кроме lock/suspend)
+        if any(b in text for b in self.BLOCK_KEYWORDS) and \
+           not any(u in text for u in self.UNBLOCK_KEYWORDS):
+            return False
         # Bug D: "включи" без "вы" — не power
         import re as _re
         if _re.search(r"\bвключи", text) and not _re.search(r"\bвыключи", text):
@@ -80,6 +95,10 @@ class AgentPower(BaseAgent):
         # Если есть "включи" без "вы" в начале — точно не power
         import re as _re
         if _re.search(r"\bвключи", text) and not _re.search(r"\bвыключи", text):
+            return AgentResponse.not_handled(self.name)
+        # Bug 22: объект не-ПК → не наше (кроме lock/suspend)
+        if any(b in text for b in self.BLOCK_KEYWORDS) and \
+           not any(u in text for u in self.UNBLOCK_KEYWORDS):
             return AgentResponse.not_handled(self.name)
 
         # Ждём подтверждения

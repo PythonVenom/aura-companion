@@ -48,6 +48,7 @@
 | 040 | Voice Profiles | Проект |
 | 041 | Telegram Bot Client | Проект |
 | 042 | Web UI (htmx) | Проект |
+| 043 | Release Checklist v1.0 | Принято |
 
 ## Как читать
 

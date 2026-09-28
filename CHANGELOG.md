@@ -43,6 +43,18 @@
 ### Tests
 - 700 → 815+ passed
 
+## [0.9.9] — 2026-09-28
+
+### Добавлено
+- **scripts/stability_run.sh**: 24ч мониторинг (CSV + log)
+- **scripts/stability_report.py**: анализ + PASS/ATTENTION
+- **docs/release-checklist.md**: чек-лист v1.0
+- **docs/habr-guide.md**: структура статьи (AIDA)
+- README: секция «Быстрый старт»
+- **ADR-043** Release Checklist v1.0
+- tests/test_stability_report.py (5)
+- README badges 1031 / 43 ADR
+
 ## [0.9.8] — 2026-09-28
 
 ### Добавлено

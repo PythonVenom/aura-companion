@@ -5,7 +5,7 @@
 [![CI](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml/badge.svg)](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-1005-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-1031-brightgreen.svg)](#)
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)](#)
 
 **Проводник в цифровой мир** — локальный голосовой ИИ-компаньон для Linux.
@@ -25,9 +25,21 @@
 
 ---
 
-**Статус:** v0.9.6-alpha · **1005 тестов** · **33 агента** · **39 ADR**
+**Статус:** v0.9.6-alpha · **1031 тестов** · **33 агента** · **43 ADR**
 Стек: Python 3.12 · asyncio · Ollama qwen2.5:7b · T-one (ASR) · Piper (TTS) ·
 ChromaDB (RAG) · PipeWire · MPRIS · Firefox WebExtension
+
+## Быстрый старт
+
+    git clone https://github.com/PythonVenom/aura-companion ~/aura_project
+    cd ~/aura_project
+    ./install.sh
+    aura doctor    # проверка готовности
+
+Подробно:
+- [docs/manual.md](docs/manual.md) — полный справочник
+- [docs/manual-simple.md](docs/manual-simple.md) — для начинающих
+- [docs/craft-onboarding.md](docs/craft-onboarding.md) — для мастеров (ЧПУ, 3D, дизайн)
 
 ## Требования
 
@@ -134,7 +146,7 @@ Proactive — через `ProactiveEngine` с триггерами и cooldown.
 - `docs/manifesto.md` — философия, миссия, монетизация
 - `docs/architecture.md` — техника
 - `docs/roadmap.md` — фазы развития
-- `docs/adr/` — 39 архитектурных решений (ADR-001…039)
+- `docs/adr/` — 39 архитектурных решений (ADR-001…043)
 - `JOURNAL.md` — хроника
 
 ## Лицензия

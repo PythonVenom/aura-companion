@@ -1,17 +1,11 @@
-"""Aura Telegram Bot (ADR-041) — skeleton.
-
-Тонкий клиент: Telegram ⇄ Bot ⇄ Aura Core (JSON-RPC локально).
-Token: env AURA_TG_TOKEN или ~/.config/aura/telegram_token
-
-Graceful: если python-telegram-bot не установлен — не падаем.
-"""
+"""Aura Telegram Bot (ADR-041) — skeleton."""
 from __future__ import annotations
 
-import asyncio
 import os
 from pathlib import Path
 
 
+NL = chr(10)
 TOKEN_ENV = "AURA_TG_TOKEN"
 TOKEN_FILE = Path.home() / ".config" / "aura" / "telegram_token"
 ADMIN_IDS_ENV = "AURA_TG_ADMIN_IDS"
@@ -37,8 +31,6 @@ def load_admin_ids() -> set[int]:
 
 
 class AuraBot:
-    """Минимальный бот: 3 команды + voice.command в ядро."""
-
     def __init__(self, token: str | None = None) -> None:
         self.token = token or load_token()
         self.admins = load_admin_ids()
@@ -54,28 +46,26 @@ class AuraBot:
         return True
 
     async def _cmd_start(self, update, context):
-        await update.message.reply_text(
-            "Aura bot online. Команды:
-"
-            "/status — статус ядра
-"
-            "/voice <текст> — голосовая команда в Aura
-"
-            "/timer 5m чай — таймер"
+        msg = (
+            "Aura bot online. Команды:" + NL
+            + "/status — статус ядра" + NL
+            + "/voice <текст> — голосовая команда" + NL
+            + "/timer 5m чай — таймер"
         )
+        await update.message.reply_text(msg)
 
     async def _cmd_status(self, update, context):
         try:
             from aura.bootstrap import build_orchestrator
             orch = build_orchestrator()
-            await update.message.reply_text(f"✅ Ядро: {len(orch)} агентов")
+            await update.message.reply_text("OK Yadro: " + str(len(orch)) + " agentov")
         except Exception as e:
-            await update.message.reply_text(f"❌ {e}")
+            await update.message.reply_text("ERROR " + str(e))
 
     async def _cmd_voice(self, update, context):
         text = " ".join(context.args) if context.args else ""
         if not text:
-            await update.message.reply_text("Использование: /voice <текст>")
+            await update.message.reply_text("Ispolzovanie: /voice <text>")
             return
         try:
             from aura.bootstrap import build_orchestrator
@@ -83,11 +73,11 @@ class AuraBot:
             result = await orch.process(text)
             await update.message.reply_text(result[:4000])
         except Exception as e:
-            await update.message.reply_text(f"❌ {e}")
+            await update.message.reply_text("ERROR " + str(e))
 
     async def _cmd_timer(self, update, context):
         if not context.args:
-            await update.message.reply_text("Использование: /timer 5m чай")
+            await update.message.reply_text("Ispolzovanie: /timer 5m chai")
             return
         try:
             from aura.agents import time_agent
@@ -96,9 +86,9 @@ class AuraBot:
             label = " ".join(context.args[1:]) or dur
             seconds = _parse_duration(dur)
             t = time_agent.add_timer(seconds, label)
-            await update.message.reply_text(f"⏱ {t['label']} ({dur})")
+            await update.message.reply_text("Timer: " + t["label"] + " (" + dur + ")")
         except Exception as e:
-            await update.message.reply_text(f"❌ {e}")
+            await update.message.reply_text("ERROR " + str(e))
 
     def build_app(self):
         from telegram.ext import ApplicationBuilder, CommandHandler
@@ -112,12 +102,12 @@ class AuraBot:
 
     def run(self) -> None:
         if not self.is_ready():
-            print("❌ Bot не готов: нет токена или python-telegram-bot")
-            print(f"   pip install python-telegram-bot")
-            print(f"   export {TOKEN_ENV}=<token from @BotFather>")
+            print("Bot not ready: no token or python-telegram-bot")
+            print("pip install python-telegram-bot")
+            print("export " + TOKEN_ENV + "=<token>")
             return
         app = self.build_app()
-        print(f"🤖 Aura bot запущен. Admins: {self.admins or 'все'}")
+        print("Aura bot started. Admins: " + str(self.admins or "all"))
         app.run_polling()
 
 

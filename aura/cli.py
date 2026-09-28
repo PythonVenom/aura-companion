@@ -471,7 +471,7 @@ def main():
     p_bpm.set_defaults(func=cmd_bpm)
     p_dic = sub.add_parser("dictation", help="диктовка в файл")
     p_dic.add_argument("action", nargs="?", choices=["text","show","list"], default="show")
-    p_dic.add_argument("text", nargs="*", default="")
+    p_dic.add_argument("text", nargs="?", default="")
     p_dic.set_defaults(func=cmd_dictation)
 
 

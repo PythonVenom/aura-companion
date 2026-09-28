@@ -49,7 +49,28 @@ class AgentWindowControl(BaseAgent):
         )
         return any(kw in text for kw in keywords)
 
+    PENDING_CONFIRM = None  # class-level: что ждёт подтверждения
+
     async def handle(self, request: AgentRequest) -> AgentResponse:
+        text = request.text.lower()
+
+        # Bug 31: защита от закрытия активного окна без подтверждения
+        if "закрой" in text or "закрыть" in text:
+            if "окно" in text or "приложение" in text:
+                if AgentWindowControl._PENDING_CONFIRM != "close":
+                    AgentWindowControl._PENDING_CONFIRM = "close"
+                    return AgentResponse.ok(
+                        "Закрыть активное окно? Скажи «да» или «нет»",
+                        self.name,
+                    )
+                AgentWindowControl._PENDING_CONFIRM = None
+        if "да" in text and len(text) < 20:
+            if getattr(AgentWindowControl, "_PENDING_CONFIRM", None) == "close":
+                AgentWindowControl._PENDING_CONFIRM = None
+                return AgentResponse.ok(self.close_active(), self.name, silent=True)
+        if "нет" in text and len(text) < 20:
+            AgentWindowControl._PENDING_CONFIRM = None
+            return AgentResponse.ok("Отменила", self.name)
         text = request.text.lower()
 
         if any(kw in text for kw in self.LIST_KEYWORDS):

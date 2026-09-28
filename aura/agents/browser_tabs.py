@@ -124,8 +124,26 @@ class AgentBrowserTabs(BaseAgent):
                 return True
         return False
 
+    _PENDING_CLOSE = None
+
     async def handle(self, request: AgentRequest) -> AgentResponse:
         text = request.text.lower()
+
+        # Bug 31: закрытие вкладки без имени — подтверждение
+        if any(kw in text for kw in self.CLOSE_KEYWORDS):
+            name = self._extract_after(text, self.CLOSE_KEYWORDS)
+            if not name and AgentBrowserTabs._PENDING_CLOSE != "yes":
+                AgentBrowserTabs._PENDING_CLOSE = "yes"
+                return AgentResponse.ok(
+                    "Закрыть активную вкладку? Скажи «да» или «нет»",
+                    self.name,
+                )
+        if "да" in text and len(text) < 20 and AgentBrowserTabs._PENDING_CLOSE == "yes":
+            AgentBrowserTabs._PENDING_CLOSE = None
+            return AgentResponse.ok(self.close_active_tab(), self.name, silent=True)
+        if "нет" in text and len(text) < 20:
+            AgentBrowserTabs._PENDING_CLOSE = None
+            return AgentResponse.ok("Отменила", self.name)
 
         if any(kw in text for kw in self.LIST_KEYWORDS):
             return AgentResponse.ok(self.list_tabs(), self.name)

@@ -78,9 +78,10 @@ class AgentFocusSwitch(BaseAgent):
         cmd = request.text.lower()
 
         if "рабочее пространство" in cmd or "рабочий проект" in cmd:
-            self._focus_work()
+            # Bug 41: отключено до стабильности (см. INBOX, v1.0.1)
+            # self._focus_work()
             return AgentResponse.ok(
-                text="Открыла рабочее пространство: код + браузер",
+                text="Режим работы отключён (в доработке)",
                 agent_name=self.name,
             )
 

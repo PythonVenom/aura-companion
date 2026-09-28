@@ -44,6 +44,7 @@ class AgentResponse(BaseModel):
 
     status: AgentStatus
     text: str = Field("", description="Текст ответа для озвучки")
+    silent: bool = Field(False, description="True = не озвучивать (ADR-048)")
     data: dict[str, Any] = Field(default_factory=dict, description="Структурированные данные")
     error: str | None = Field(None, description="Описание ошибки")
     agent_name: str = Field("", description="Имя агента")
@@ -51,9 +52,9 @@ class AgentResponse(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
     @classmethod
-    def ok(cls, text: str, agent_name: str = "", **data: Any) -> "AgentResponse":
-        """Быстрый конструктор успешного ответа."""
-        return cls(status=AgentStatus.OK, text=text, data=data, agent_name=agent_name)
+    def ok(cls, text: str, agent_name: str = "", silent: bool = False, **data: Any) -> "AgentResponse":
+        """Быстрый конструктор успешного ответа. silent=True — не озвучивать (ADR-048)."""
+        return cls(status=AgentStatus.OK, text=text, silent=silent, data=data, agent_name=agent_name)
 
     @classmethod
     def not_handled(cls, agent_name: str = "") -> "AgentResponse":

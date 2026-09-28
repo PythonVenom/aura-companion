@@ -511,7 +511,9 @@ class AuraOrchestrator:
                 set_status("speaking", response)
                 self._duck_on()
                 self._set_barge_speaking(True)
-                self.speaker.say(response)
+                # ADR-048: silent=True — не озвучивать
+                if not self.orch.last_silent():
+                    self.speaker.say(response)
 
                 # === RAG-ПАМЯТЬ И ЖУРНАЛ (после ответа) ===
                 if self.registry:

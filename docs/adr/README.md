@@ -53,6 +53,7 @@
 | 045 | Least-Privilege Deployment | Принято |
 | 046 | Onboarding Questionnaire (RPG) | Принято |
 | 047 | Public Distribution | Принято |
+| 048 | Response Verbosity Policy | Принято |
 
 ## Как читать
 

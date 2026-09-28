@@ -115,19 +115,19 @@ class AgentMusicLocal(BaseAgent):
             return AgentResponse.ok(self.list_tracks(), self.name)
 
         if any(kw in text for kw in self.STOP_KEYWORDS):
-            return AgentResponse.ok(self.stop(), self.name)
+            return AgentResponse.ok(self.stop(), self.name, silent=True)
 
         if any(kw in text for kw in self.PAUSE_KEYWORDS):
-            return AgentResponse.ok(self.pause(), self.name)
+            return AgentResponse.ok(self.pause(), self.name, silent=True)
 
         if any(kw in text for kw in self.RESUME_KEYWORDS):
-            return AgentResponse.ok(self.resume(), self.name)
+            return AgentResponse.ok(self.resume(), self.name, silent=True)
 
         if any(kw in text for kw in self.NEXT_KEYWORDS):
-            return AgentResponse.ok(self.next_track(), self.name)
+            return AgentResponse.ok(self.next_track(), self.name, silent=True)
 
         if any(kw in text for kw in self.PREV_KEYWORDS):
-            return AgentResponse.ok(self.prev_track(), self.name)
+            return AgentResponse.ok(self.prev_track(), self.name, silent=True)
 
         if any(kw in text for kw in self.PLAY_KEYWORDS):
             query = self._extract_query(text)

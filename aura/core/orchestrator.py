@@ -45,6 +45,7 @@ class Orchestrator:
         self.tool_router = tool_router
         self.brain = brain
         self.fallback_text = "Не расслышала, Создатель, повторите"
+        self._last_response: AgentResponse | None = None
 
     def register(self, agent) -> None:
         """Зарегистрировать агента."""
@@ -89,6 +90,7 @@ class Orchestrator:
             return f"❌ Ошибка агента {agent.name}: {e}"
 
         if response.status == AgentStatus.OK:
+            self._last_response = response
             return response.text
 
         if response.status == AgentStatus.NOT_HANDLED:
@@ -98,6 +100,10 @@ class Orchestrator:
             return f"❌ {response.error or 'Ошибка'}"
 
         return self.fallback_text
+
+    def last_silent(self) -> bool:
+        """True = последний ответ был silent (ADR-048)."""
+        return bool(self._last_response and self._last_response.silent)
 
     async def process_request(self, request: AgentRequest) -> AgentResponse:
         """Обработать AgentRequest напрямую (для тестов)."""

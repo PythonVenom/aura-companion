@@ -74,6 +74,13 @@ class AuraOrchestrator:
         self.speaker = AgentSpeaker()
         self.barge_in = AgentBargeIn()
         self._halted = False  # Bug 29: halt после barge-in
+        # ADR-050: push-to-stop watcher (thread)
+        import threading
+        from scripts.aura_stop_watcher import watch as _watch_stop
+        threading.Thread(
+            target=_watch_stop, args=(self.speaker,), daemon=True, name="aura-stop"
+        ).start()
+        print("✅ Push-to-stop: /tmp/aura.stop watcher запущен")
         self.heartbeat = Heartbeat()
         self.orch = build_orchestrator()
         self.running = True

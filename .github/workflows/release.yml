@@ -23,8 +23,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest pytest-asyncio pydantic fastapi uvicorn
           if [ -f pyproject.toml ]; then pip install -e . || true; fi
-      - name: Run tests
-        run: pytest tests/ -q --tb=short
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:

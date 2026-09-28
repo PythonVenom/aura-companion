@@ -222,6 +222,39 @@ def cmd_adr(args):
     return 0
 
 
+def cmd_agents(args):
+    """Список зарегистрированных агентов."""
+    from aura.bootstrap import build_orchestrator
+    orch = build_orchestrator()
+    reg = orch.registry
+    if hasattr(reg, 'keys'):
+        names = sorted(reg.keys())
+    elif hasattr(reg, 'agents'):
+        names = sorted(a.name for a in reg.agents)
+    else:
+        names = sorted(str(a) for a in reg)
+    print(f"Всего агентов: {len(orch)}")
+    print("-" * 40)
+    for n in names:
+        print(f"  {n}")
+    return 0
+
+
+def cmd_professions(args):
+    """Список профессий из docs/professions.md."""
+    from pathlib import Path as _P
+    doc = _P(__file__).parent.parent / "docs" / "professions.md"
+    if not doc.exists():
+        print("docs/professions.md не найден")
+        return 1
+    text = doc.read_text(encoding="utf-8")
+    # Считаем строки таблиц
+    lines = [l for l in text.split("\n") if l.startswith("| ") and "Профессия" not in l and "---" not in l]
+    print(f"Всего профессий: ~{len(lines)}")
+    print("Документ:", doc)
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -252,6 +285,8 @@ def main():
     sub.add_parser("reload-extension", help="Firefox extension").set_defaults(func=cmd_reload_extension)
     sub.add_parser("doctor", help="диагностика одной командой").set_defaults(func=cmd_doctor)
     sub.add_parser("adr", help="список ADR").set_defaults(func=cmd_adr)
+    sub.add_parser("agents", help="список агентов").set_defaults(func=cmd_agents)
+    sub.add_parser("professions", help="каталог профессий").set_defaults(func=cmd_professions)
 
 
     p_timer = sub.add_parser("timer", help="таймер: 30s / 5m / 2h")

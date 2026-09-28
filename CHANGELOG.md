@@ -43,6 +43,20 @@
 ### Tests
 - 700 → 815+ passed
 
+## [0.9.5] — 2026-09-28
+
+### Добавлено
+- docs/professions.md: каталог 110+ профессий в 5 кластерах
+- **ADR-037** Third-party API Wrappers (Blender, PS, DAW, ЧПУ)
+- **ADR-038** Hardware Roadmap (Lite/Standard/Pro/Distributed)
+- **ADR-039** Distributed Aura (federation, mDNS, CRDT)
+- CLI: `aura agents`, `aura professions`
+- tests/test_cli_agents.py (2)
+- tests/test_orch_unique_names.py (4) — регрессия на dupes
+
+### Исправлено
+- **Bug 20**: 33→34 агента (collision names в registry)
+
 ## [0.9.4] — 2026-09-28
 
 ### Добавлено

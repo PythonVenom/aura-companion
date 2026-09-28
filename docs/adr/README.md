@@ -41,7 +41,8 @@
 | 033 | Bookkeeping Vertical | Проект |
 | 034 | Smart Home (MQTT) | Проект |
 | 035 | Roadmap 2026 | Принято |
-| 036 | Creative & Craftsman Vertical | Проект |
+| 038 | Hardware Roadmap | Проект |
+| 037 | Third-party API Wrappers | Проект |
 
 ## Как читать
 

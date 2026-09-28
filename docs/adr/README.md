@@ -37,6 +37,7 @@
 | 029 | Multi-client architecture | Принято |
 | 030 | Developer Mode | Проект |
 | 031 | Ethics Policy | Принято |
+| 032 | JSON-RPC Protocol | Проект |
 
 ## Как читать
 

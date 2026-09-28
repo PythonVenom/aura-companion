@@ -199,6 +199,11 @@ def cmd_reminders(args):
     return 0
 
 
+def cmd_doctor(args):
+    from aura.doctor import main as doctor_main
+    return doctor_main()
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -226,6 +231,7 @@ def main():
     p_reset = sub.add_parser("settings-reset", help="сбросить настройки")
     p_reset.set_defaults(func=cmd_settings_reset)
     sub.add_parser("reload-extension", help="Firefox extension").set_defaults(func=cmd_reload_extension)
+    sub.add_parser("doctor", help="диагностика одной командой").set_defaults(func=cmd_doctor)
 
     p_timer = sub.add_parser("timer", help="таймер: 30s / 5m / 2h")
     p_timer.add_argument("duration")

@@ -20,6 +20,7 @@ from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.health import AgentHealth
 
 from aura.agents.massage import AgentMassage
+from aura.agents.dictation import AgentDictation
 
 from aura.agents import (
     AgentAppLauncher,
@@ -127,6 +128,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentPower, modules_config)
     _try_register(orch, AgentTimeAgent, modules_config)
     _try_register(orch, AgentMassage, modules_config)
+    _try_register(orch, AgentDictation, modules_config)
     _try_register(orch, AgentHealth, modules_config)
     _try_register(orch, AgentVault, modules_config)
 

@@ -35,6 +35,15 @@ def _client_read(client: str, tail: int = 10) -> str:
     return chr(10).join(lines[-tail:])
 
 
+_ASR_ALIASES = {"Тс": "Тест"}
+
+
+def _norm_client(name: str) -> str:
+    """Нормализация имени клиента после .title(). Bug F: ASR слышит «тс»."""
+    t = name.title()
+    return _ASR_ALIASES.get(t, t)
+
+
 @dataclass
 class Session:
     """Одна сессия массажа."""
@@ -138,7 +147,7 @@ class AgentMassage(BaseAgent):
             return AgentResponse.ok(
                 "Скажи: «сессия Иванов 50 минут»", self.name
             )
-        client = m.group(1).title()
+        client = _norm_client(m.group(1))
         n = _parse_int(text)
         if not n:
             return AgentResponse.ok(
@@ -156,7 +165,7 @@ class AgentMassage(BaseAgent):
         m = re.search(r"что было с\s+(\w+)", text)
         if not m:
             return AgentResponse.ok("Скажи: «что было с Ивановым?»", self.name)
-        client = m.group(1).title()
+        client = _norm_client(m.group(1))
         hist = self._rag_read(client)
         if not hist or len(hist) < 5:
             return AgentResponse.ok(f"📋 {client}: пока нет записей", self.name)

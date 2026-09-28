@@ -103,8 +103,7 @@ class AuraOrchestrator:
         # Proactive Engine (ADR-014)
         self.proactive = default_engine(get_agent=lambda n: _get_agent(self.orch, n))
 
-    PAUSE_FLAG = str(Path.home() / ".cache/aura/aura_pause.flag")
-
+    PAUSE_FLAG = Path.home() / ".cache/aura/aura_pause.flag"
     def _is_paused(self) -> bool:
         """Проверить файл-флаг паузы (hotkey)."""
         return self.PAUSE_FLAG.exists()
@@ -474,12 +473,12 @@ class AuraOrchestrator:
                     continue
 
                 # === DIALOG FSM (ADR-012) ===
-                # === PROACTIVE (ADR-014) ===
-                proactive_msg = self.proactive.check()
-                if proactive_msg:
-                    print(f"💡 Proactive: {proactive_msg}")
-                    self._say_with_duck(proactive_msg)
-                    continue
+                # === PROACTIVE (ADR-014) — Bug 39: ОТКЛЮЧЁН до фикса ===
+                # proactive_msg = self.proactive.check()
+                # if proactive_msg:
+                #     print(f"💡 Proactive: {proactive_msg}")
+                #     self._say_with_duck(proactive_msg)
+                #     continue
 
                 if self._handle_fsm():
                     continue
@@ -546,7 +545,7 @@ class AuraOrchestrator:
                     response = asyncio.run(self.orch.process(cmd))
                 # Пишем последний диалог для виджета.
                 try:
-                    str(Path.home() / ".cache/aura/aura_last_dialog.json").write_text(
+                    (Path.home() / ".cache/aura/aura_last_dialog.json").write_text(
                         json.dumps({"user": cmd, "aura": response}, ensure_ascii=False),
                         encoding="utf-8",
                     )

@@ -135,13 +135,13 @@ class AgentPower(BaseAgent):
 
         if kind in self.NEEDS_CONFIRM:
             AgentPower._pending = kind
-            labels = {"shutdown": "Выключить ПК",
-                      "reboot": "Перезагрузить ПК",
-                      "logout": "Выйти из системы",
-                      "hibernate": "Гибернация"}
-            return AgentResponse.ok(
-                f"⚠️ {labels[kind]}? Скажи «да» или «нет»", self.name
-            )
+            labels = {
+                "shutdown": "Выключаю через 30 секунд. Скажи «отмена» чтобы остановить.",
+                "reboot": "Перезагружаю через 30 секунд. Скажи «отмена» чтобы остановить.",
+                "logout": "Выхожу из системы. Скажи «отмена» чтобы передумать.",
+                "hibernate": "Ухожу в гибернацию. Скажи «отмена» чтобы остановить.",
+            }
+            return AgentResponse.ok(labels[kind], self.name)
 
         return AgentResponse.ok(self._act(kind), self.name)
 

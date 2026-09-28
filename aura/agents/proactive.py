@@ -497,8 +497,10 @@ def time_fired_trigger() -> Trigger:
             # Bug 33: только свежие (не старше FRESH_FIRE_SECONDS)
             import time as _t
             now = _t.time()
+            # Bug 33: игнор старых + пустых
             fired = [f for f in fired
-                     if now - float(f.get("fire_at", now)) < FRESH_FIRE_SECONDS]
+                     if f.get("label")
+                     and now - float(f.get("fire_at", now)) < FRESH_FIRE_SECONDS]
             cache["fired"] = fired
             return True
         return False

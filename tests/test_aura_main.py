@@ -22,6 +22,7 @@ def _make_orch_with_mocks(media_pause=True, barge_in=None):
     orch.media_pause = MagicMock() if media_pause else None
     # barge_in=None по умолчанию: _set_barge_speaking просто вернётся
     orch.barge_in = barge_in
+    orch._halted = False  # Bug 33: debounce
     return orch
 
 

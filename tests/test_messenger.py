@@ -100,8 +100,9 @@ async def test_handle_read_last():
 @pytest.mark.asyncio
 async def test_handle_send_message():
     a = AgentMessenger()
-    # Два вызова: find + send.
+    # Три вызова: title + find + send (Bug 55).
     replies = [
+        {"ok": True, "data": {"title": ""}},   # title — пусто, чат не открыт
         {"ok": True, "data": {"found": True, "name": "Иван"}},
         {"ok": True, "data": {"typed": True}},
     ]

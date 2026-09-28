@@ -329,13 +329,21 @@ class AgentMessenger(BaseAgent):
 
     def send_message(self, chat: str, message: str) -> str:
         """Открыть чат, ввести текст (без отправки)."""
-        # 1. Найти чат.
-        find = send_command({"action": f"{self.platform}_find_chat", "query": chat})
-        if find is None or "error" in find:
-            return error_text(find)
-        data = find.get("data", {})
-        if not data.get("found"):
-            return f"🌐 Чат «{chat}» не найден"
+        # Bug 55: если чат УЖЕ открыт (title совпадает) — не искать повторно.
+        title_r = send_command({"action": f"{self.platform}_title"})
+        already_open = False
+        if title_r and title_r.get("ok"):
+            cur = (title_r.get("data", {}).get("title") or "").lower().strip()
+            if cur and (chat.lower().strip() in cur or cur in chat.lower().strip()):
+                already_open = True
+
+        if not already_open:
+            find = send_command({"action": f"{self.platform}_find_chat", "query": chat})
+            if find is None or "error" in find:
+                return error_text(find)
+            data = find.get("data", {})
+            if not data.get("found"):
+                return f"🌐 Чат «{chat}» не найден"
 
         # 2. Ввести текст.
         send = send_command({"action": f"{self.platform}_send_message", "text": message})

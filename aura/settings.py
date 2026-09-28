@@ -17,6 +17,7 @@ DEFAULTS = {
     "notifications": True,
     "proactive_enabled": True,
     "language": "ru",
+    "voice_profile": "default",
     "persona": {
         "name": "Аура",
         "address": "ты",

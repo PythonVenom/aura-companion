@@ -291,6 +291,32 @@ def cmd_wrappers_hint(args):
     return 0
 
 
+def cmd_profile(args):
+    """Voice Profiles: list / set / show."""
+    from aura import voice_profiles as vp
+    from aura import settings
+    action = getattr(args, "action", "list")
+    if action == "list":
+        for p in vp.list_profiles():
+            mark = "*" if p.name == settings.get("voice_profile", "default") else " "
+            print(f"  {mark} {p.name:15s} rate={p.rate}  {p.description}")
+        return 0
+    if action == "set":
+        name = getattr(args, "name", None)
+        if not name or name not in vp.PROFILES:
+            print(f"❌ Профиль {name!r}. Доступны: {list(vp.PROFILES.keys())}")
+            return 1
+        settings.set_value("voice_profile", name)
+        print(f"✅ Профиль: {name}")
+        return 0
+    if action == "show":
+        name = settings.get("voice_profile", "default")
+        p = vp.get_profile(name)
+        print(f"Активный: {p.name} ({p.style}, rate={p.rate})")
+        return 0
+    return 1
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -329,6 +355,10 @@ def main():
     p_hint = sub.add_parser("wrappers-hint", help="подсказка по wrapper")
     p_hint.add_argument("name", nargs="?", default=None)
     p_hint.set_defaults(func=cmd_wrappers_hint)
+    p_prof = sub.add_parser("profile", help="voice profiles")
+    p_prof.add_argument("action", nargs="?", choices=["list","set","show"], default="list")
+    p_prof.add_argument("name", nargs="?", default=None)
+    p_prof.set_defaults(func=cmd_profile)
 
 
     p_timer = sub.add_parser("timer", help="таймер: 30s / 5m / 2h")

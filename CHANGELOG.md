@@ -43,6 +43,17 @@
 ### Tests
 - 700 → 815+ passed
 
+## [0.9.8] — 2026-09-28
+
+### Добавлено
+- **scripts/aura_server.py**: TCP сервер для Blender (порт 9876)
+- **aura/voice_profiles.py**: 7 профилей (ADR-040)
+- CLI: `aura profile list|set|show`
+- **docs/craft-onboarding.md**: как мастеру начать (3 сценария)
+- **ADR-042** Web UI (htmx)
+- tests/test_voice_profiles.py (7)
+- tests/test_cli_profile.py (4)
+
 ## [0.9.7] — 2026-09-28
 
 ### Добавлено

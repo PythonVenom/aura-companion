@@ -47,6 +47,7 @@
 | 039 | Distributed Aura | Проект |
 | 040 | Voice Profiles | Проект |
 | 041 | Telegram Bot Client | Проект |
+| 042 | Web UI (htmx) | Проект |
 
 ## Как читать
 

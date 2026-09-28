@@ -418,11 +418,10 @@ class AuraOrchestrator:
         set_status("idle")
         self.heartbeat.start()
 
-        # === BARGE-IN: отключён (Фаза 10, ADR-009 — AEC default sink
-        # перебивается WirePlumber. Возврат — после фикса AEC) ===
-        # if self.barge_in and self.barge_in.ready:
-        #     if self.barge_in.start(on_speech=self._on_barge_in):
-        #         print("✅ BargeIn запущен (перебивание работает)")
+        # === BARGE-IN: включён (ADR-009 + aura-aec.service) ===
+        if self.barge_in and self.barge_in.ready:
+            if self.barge_in.start(on_speech=self._on_barge_in):
+                print("✅ BargeIn запущен (перебивание работает)")
 
         while self.running:
             try:

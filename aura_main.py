@@ -172,17 +172,19 @@ class AuraOrchestrator:
         self._aec_last_check = now
         try:
             import subprocess
+            # Bug 44: НЕ трогаем sink (echo-cancel-sink даёт троение, см. Bug 10).
+            # Достаточно source: echo-cancel-source вычитает из sink_master=alsa_output.
             r = subprocess.run(
-                ["pactl", "get-default-sink"],
+                ["pactl", "get-default-source"],
                 capture_output=True, text=True, timeout=2,
             )
             if "echo-cancel" not in r.stdout:
                 subprocess.run(
-                    ["pactl", "set-default-sink", "echo-cancel-sink"],
+                    ["pactl", "set-default-source", "echo-cancel-source"],
                     check=False, timeout=2,
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                 )
-                print("🎙️ AEC: переключён на echo-cancel-sink")
+                print("🎙️ AEC: source → echo-cancel-source")
         except Exception as e:
             print(f"⚠️ AEC force: {e}")
 

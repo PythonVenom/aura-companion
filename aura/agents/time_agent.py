@@ -7,7 +7,7 @@ from pathlib import Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
-TIMERS_PATH = Path("/tmp/aura_timers.json")
+TIMERS_PATH = Path(str(Path.home() / ".cache/aura/aura_timers.json"))
 
 # Bug E: ASR слышит "тридцать" вместо "30"
 NUM_WORDS = {

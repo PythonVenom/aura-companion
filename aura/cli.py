@@ -34,7 +34,7 @@ def cmd_health(args):
         out["components"]["service"] = "unknown"
 
     # FSM
-    fsm_path = Path("/tmp/aura_fsm.json")
+    fsm_path = Path(str(Path.home() / ".cache/aura/fsm.json"))
     if fsm_path.exists():
         try:
             data = json.loads(fsm_path.read_text())
@@ -45,7 +45,7 @@ def cmd_health(args):
         out["components"]["fsm"] = "idle"
 
     # Calendar
-    cal_path = Path("/tmp/aura_calendar.json")
+    cal_path = Path.home() / ".cache/aura/calendar.json"
     if cal_path.exists():
         try:
             out["components"]["calendar_events"] = len(json.loads(cal_path.read_text()))

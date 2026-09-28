@@ -27,7 +27,7 @@ import time
 from pathlib import Path
 
 
-STATUS_PATH = Path(os.environ.get("AURA_STATUS_PATH", "/tmp/aura_status.json"))
+STATUS_PATH = Path(os.environ.get("AURA_STATUS_PATH", str(Path.home() / ".cache/aura/aura_status.json")))
 
 VALID_STATES = frozenset({"idle", "listening", "thinking", "speaking", "paused", "error"})
 

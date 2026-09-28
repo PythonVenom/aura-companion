@@ -30,7 +30,11 @@ from pathlib import Path
 from typing import Callable
 
 
-STATE_PATH = Path(os.environ.get("AURA_PROACTIVE_PATH", "/tmp/aura_proactive.json"))
+# Bug 35: перенос из /tmp (не светить личку на видео)
+_CACHE_DIR = Path.home() / ".cache/aura"
+_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+STATE_PATH = Path(os.environ.get(
+    "AURA_PROACTIVE_PATH", str(_CACHE_DIR / "proactive.json")))
 CHECK_INTERVAL_SEC = 30
 
 
@@ -187,7 +191,7 @@ def _extract_chat_cooldown_key(chat: str, preview: str) -> str:
 
 def max_new_message_trigger(get_agent) -> Trigger:
     """Новое сообщение в Максе — pull через list_chats (без observer)."""
-    PENDING_PATH = Path("/tmp/aura_max_pending.json")
+    PENDING_PATH = Path.home() / ".cache/aura/max_pending.json"
 
     def _fetch_previews(messenger):
         """get_all_previews с fallback на get_last_message_preview (Strangler Fig)."""

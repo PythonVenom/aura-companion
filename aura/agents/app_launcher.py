@@ -122,10 +122,26 @@ class AgentAppLauncher(BaseAgent):
                 return text.replace(kw, "").strip()
         return ""
 
+    # Bug 35: алиасы для ASR-ошибок и русских названий
+    ALIASES = {
+        "фаерфокс": "firefox", "файрфакс": "firefox",
+        "фаерфокс": "firefox", "файрфокс": "firefox",
+        "фаерфокс": "firefox", "браузер": "firefox",
+        "телеграм": "telegram", "тг": "telegram",
+        "телега": "telegram",
+        "хром": "chromium", "хромиум": "chromium",
+        "код": "code", "вскод": "code", "вс код": "code",
+        "калька": "libreoffice", "офис": "libreoffice",
+        "музыка": "vlc",
+    }
+
     def find_app(self, query: str) -> dict | None:
         query_lower = query.lower().strip()
         if not query_lower:
             return None
+        # Bug 35: сначала алиасы
+        if query_lower in self.ALIASES:
+            query_lower = self.ALIASES[query_lower]
         if query_lower in self._apps_cache:
             return self._apps_cache[query_lower]
         for name, info in self._apps_cache.items():

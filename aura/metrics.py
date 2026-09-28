@@ -42,7 +42,7 @@ def collect() -> dict:
 
     # FSM state (numeric)
     try:
-        fsm = Path("/tmp/aura_fsm.json")
+        fsm = Path(str(Path.home() / ".cache/aura/fsm.json"))
         if fsm.exists():
             state = json.loads(fsm.read_text()).get("state", "idle")
             m["aura_fsm_idle"] = 1 if state == "idle" else 0

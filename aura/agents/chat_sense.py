@@ -17,12 +17,12 @@ import time
 from pathlib import Path
 
 
-STATE_PATH = Path("/tmp/aura_chat_sense.json")
+STATE_PATH = Path.home() / ".cache/aura/chat_sense.json"
 RE_MIND_TTL = 4 * 3600   # не напоминать чаще 4 часов про один чат
 
 
 # === ph.4: календарь ===
-CALENDAR_PATH = Path("/tmp/aura_calendar.json")
+CALENDAR_PATH = Path.home() / ".cache/aura/calendar.json"
 PURGE_DAYS = 3   # удаляем события старше 3 дней
 
 

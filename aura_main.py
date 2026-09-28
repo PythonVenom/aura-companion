@@ -103,7 +103,7 @@ class AuraOrchestrator:
         # Proactive Engine (ADR-014)
         self.proactive = default_engine(get_agent=lambda n: _get_agent(self.orch, n))
 
-    PAUSE_FLAG = Path("/tmp/aura_pause.flag")
+    PAUSE_FLAG = str(Path.home() / ".cache/aura/aura_pause.flag")
 
     def _is_paused(self) -> bool:
         """Проверить файл-флаг паузы (hotkey)."""
@@ -530,7 +530,7 @@ class AuraOrchestrator:
                     response = asyncio.run(self.orch.process(cmd))
                 # Пишем последний диалог для виджета.
                 try:
-                    Path("/tmp/aura_last_dialog.json").write_text(
+                    str(Path.home() / ".cache/aura/aura_last_dialog.json").write_text(
                         json.dumps({"user": cmd, "aura": response}, ensure_ascii=False),
                         encoding="utf-8",
                     )

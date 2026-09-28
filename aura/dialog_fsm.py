@@ -26,7 +26,7 @@ import time
 from pathlib import Path
 
 
-FSM_PATH = Path(os.environ.get("AURA_FSM_PATH", "/tmp/aura_fsm.json"))
+FSM_PATH = Path(os.environ.get("AURA_FSM_PATH", str(Path.home() / ".cache/aura/fsm.json")))
 VALID_STATES = frozenset({"idle", "awaiting_command", "pending_read", "awaiting_reply", "ask_text", "ask_confirm"})
 TIMEOUT_SEC = 30.0
 TIMEOUT_AWAITING = 10.0

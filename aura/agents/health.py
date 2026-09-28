@@ -6,7 +6,7 @@ from pathlib import Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
-HEALTH_PATH = Path("/tmp/aura_health.json")
+HEALTH_PATH = Path.home() / ".cache/aura/health.json"
 
 
 def _load():

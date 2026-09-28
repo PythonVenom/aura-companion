@@ -9,7 +9,7 @@ import json
 import time
 from pathlib import Path
 
-STATE_PATH = Path("/tmp/aura_media_state.json")
+STATE_PATH = Path(str(Path.home() / ".cache/aura/aura_media_state.json"))
 _TTL = 1800.0   # 30 мин
 
 VALID = frozenset({"vk", "local", "mpris"})

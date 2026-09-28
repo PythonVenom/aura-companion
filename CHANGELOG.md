@@ -43,6 +43,16 @@
 ### Tests
 - 700 → 815+ passed
 
+## [0.9.6] — 2026-09-28
+
+### Добавлено
+- **aura/wrappers/**: слой Wrappers (ADR-037)
+  - base.py: AppWrapper ABC + WrapperError
+  - grbl.py: GRBL 1.1 wrapper (ЧПУ, serial, whitelist)
+  - registry.py: WrapperRegistry + autoload (graceful)
+- CLI: `aura wrappers list|status`
+- tests/test_wrappers_base.py (13 регрессионных)
+
 ## [0.9.5] — 2026-09-28
 
 ### Добавлено

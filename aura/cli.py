@@ -255,6 +255,26 @@ def cmd_professions(args):
     return 0
 
 
+def cmd_wrappers(args):
+    """Wrappers: list / status."""
+    from aura.wrappers import get_registry
+    reg = get_registry()
+    action = getattr(args, "action", "list")
+    if action == "list":
+        names = reg.list_names()
+        print(f"Wrappers: {len(names)}")
+        for n in names:
+            print(f"  {n}")
+        return 0
+    if action == "status":
+        for st in reg.status_all():
+            avail = "✅" if st.get("available") else "❌"
+            print(f"  {avail} {st.get('name')}: {st}")
+        return 0
+    print(f"Неизвестное действие: {action}")
+    return 1
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -287,6 +307,9 @@ def main():
     sub.add_parser("adr", help="список ADR").set_defaults(func=cmd_adr)
     sub.add_parser("agents", help="список агентов").set_defaults(func=cmd_agents)
     sub.add_parser("professions", help="каталог профессий").set_defaults(func=cmd_professions)
+    p_wrap = sub.add_parser("wrappers", help="сторонние приложения")
+    p_wrap.add_argument("action", nargs="?", choices=["list", "status"], default="list")
+    p_wrap.set_defaults(func=cmd_wrappers)
 
 
     p_timer = sub.add_parser("timer", help="таймер: 30s / 5m / 2h")

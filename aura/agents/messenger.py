@@ -72,6 +72,7 @@ class AgentMessenger(BaseAgent):
     """
 
     name = "messenger"
+    platform = "max"  # Bug 51: "max" или "wa"
 
     OPEN_KEYWORDS = (
         "открой макс",
@@ -111,6 +112,19 @@ class AgentMessenger(BaseAgent):
     WA_ALIASES = ("вотсап", "ватсап", "вотсапе", "ватсапе", "whatsapp",
                   "вацап", "вотс", "вотцап", "вотсаппе")
 
+    def _detect_platform(self, text: str) -> None:
+        """Bug 51: определить платформу по тексту. Меняет self.platform."""
+        t = text.lower()
+        # WhatsApp-слова
+        wa_kw = ("вотсап", "ватсап", "whatsapp", "вацап", "вотцап",
+                 "вотсапп", "вотс")
+        if any(kw in t for kw in wa_kw):
+            self.platform = "wa"
+            return
+        # MAX-слова (по умолчанию max)
+        if "макс" in t or "max" in t:
+            self.platform = "max"
+
     def _normalize(self, text: str) -> str:
         for alias in self.MAX_ALIASES:
             if alias in text:
@@ -144,6 +158,7 @@ class AgentMessenger(BaseAgent):
         return False
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
+        self._detect_platform(request.text)
         text = self._normalize(request.text.lower())
 
         # 1. Открыть Макс — фокус на вкладку.
@@ -194,13 +209,15 @@ class AgentMessenger(BaseAgent):
 
     def open_max(self) -> str:
         """Открыть/сфокусировать вкладку Макса."""
-        result = send_command({"action": "open_tab", "url": "https://web.max.ru", "active": True})
+        url = ("https://web.whatsapp.com" if self.platform == "wa"
+               else "https://web.max.ru")
+        result = send_command({"action": "open_tab", "url": url, "active": True})
         if result is None or "error" in result:
             return error_text(result)
         return "🌐 Открыла Макс"
 
     def list_chats(self) -> str:
-        result = send_command({"action": "max_list_chats"})
+        result = send_command({"action": f"{self.platform}_list_chats"})
         if result is None or "error" in result:
             return error_text(result)
         # Ответ приходит как {ok: true, data: {count, chats}}
@@ -215,7 +232,7 @@ class AgentMessenger(BaseAgent):
 
     def get_last_message_preview(self) -> dict:
         """Вернуть {chat, preview} первого (свежего) чата."""
-        result = send_command({"action": "max_list_chats"})
+        result = send_command({"action": f"{self.platform}_list_chats"})
         if result is None or "error" in result:
             return {}
         chats = result.get("data", {}).get("chats", [])
@@ -226,7 +243,7 @@ class AgentMessenger(BaseAgent):
 
     def get_all_previews(self) -> list:
         """Вернуть [{chat, preview}, ...] для всех чатов (Bug 2)."""
-        result = send_command({"action": "max_list_chats"})
+        result = send_command({"action": f"{self.platform}_list_chats"})
         if result is None or "error" in result:
             return []
         chats = result.get("data", {}).get("chats", [])
@@ -240,14 +257,14 @@ class AgentMessenger(BaseAgent):
 
     def get_title(self) -> dict:
         """Вернуть {title, url} активной вкладки Макса."""
-        result = send_command({"action": "max_title"})
+        result = send_command({"action": f"{self.platform}_title"})
         if result is None or "error" in result:
             return {}
         return result.get("data", {})
 
     def find_chat(self, query: str) -> str:
         # Bug 37: НЕ поднимаем окно Firefox принудительно (мешало пользователю)
-        result = send_command({"action": "max_find_chat", "query": query})
+        result = send_command({"action": f"{self.platform}_find_chat", "query": query})
         if result is None or "error" in result:
             return error_text(result)
         data = result.get("data", {})
@@ -257,7 +274,7 @@ class AgentMessenger(BaseAgent):
         return f"🌐 Чат «{query}» не найден"
 
     def read_last(self) -> str:
-        result = send_command({"action": "max_read_last"})
+        result = send_command({"action": f"{self.platform}_read_last"})
         if result is None or "error" in result:
             return error_text(result)
         data = result.get("data", {})
@@ -282,7 +299,7 @@ class AgentMessenger(BaseAgent):
     def send_message(self, chat: str, message: str) -> str:
         """Открыть чат, ввести текст (без отправки)."""
         # 1. Найти чат.
-        find = send_command({"action": "max_find_chat", "query": chat})
+        find = send_command({"action": f"{self.platform}_find_chat", "query": chat})
         if find is None or "error" in find:
             return error_text(find)
         data = find.get("data", {})
@@ -290,7 +307,7 @@ class AgentMessenger(BaseAgent):
             return f"🌐 Чат «{chat}» не найден"
 
         # 2. Ввести текст.
-        send = send_command({"action": "max_send_message", "text": message})
+        send = send_command({"action": f"{self.platform}_send_message", "text": message})
         if send is None or "error" in send:
             return error_text(send)
         sd = send.get("data", {})
@@ -301,7 +318,7 @@ class AgentMessenger(BaseAgent):
 
     def finalize_send(self) -> str:
         """Отправить введённое сообщение (нажать Enter)."""
-        result = send_command({"action": "max_send_finalize"})
+        result = send_command({"action": f"{self.platform}_send_finalize"})
         if result is None or "error" in result:
             return error_text(result)
         data = result.get("data", {})
@@ -311,7 +328,7 @@ class AgentMessenger(BaseAgent):
 
     def clear_input(self) -> str:
         """Очистить поле ввода в Максе."""
-        result = send_command({"action": "max_clear_input"})
+        result = send_command({"action": f"{self.platform}_clear_input"})
         if result is None or "error" in result:
             return error_text(result)
         return "🌐 Очистила поле ввода"

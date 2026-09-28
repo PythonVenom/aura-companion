@@ -73,6 +73,7 @@ class AuraOrchestrator:
         self.listener = AgentListener()
         self.speaker = AgentSpeaker()
         self.barge_in = AgentBargeIn()
+        self._halted = False  # Bug 29: halt после barge-in
         self.heartbeat = Heartbeat()
         self.orch = build_orchestrator()
         self.running = True
@@ -111,8 +112,9 @@ class AuraOrchestrator:
             print(f"⚠️ BargeIn set_speaking: {e}")
 
     def _on_barge_in(self) -> None:
-        """Callback при перебивании: остановить речь Ауры."""
+        """Callback при перебивании: остановить речь Ауры + пометить halt."""
         print("🛑 Перебиваю Ауру (barge-in)...")
+        self._halted = True  # Bug 29: следующая реплика — halt
         try:
             self.speaker.stop_speaking()
         except Exception as e:
@@ -488,6 +490,22 @@ class AuraOrchestrator:
                         print(f"⚠️ Registry не записал: {e}")
 
                 print(f"📝 Команда: {cmd}")
+
+                # === Bug 29: HALT/RESUME после barge-in ===
+                _STOP = ("стоп", "замолчи", "хватит", "тихо", "останови",
+                         "остановись", "молчи", "заткнись")
+                _RESUME = ("продолжай", "дальше", "продолжи")
+                _low = cmd.lower()
+                if len(_low) < 40 and any(w in _low for w in _STOP):
+                    self._halted = False
+                    print("🤫 Halt (молчу)")
+                    continue  # молча — не в LLM
+                if any(w in _low for w in _RESUME):
+                    self._halted = False
+                    self._say_with_duck("Продолжаю.")
+                    continue
+                if self._halted:
+                    self._halted = False  # сброс, идём в LLM нормально
 
                 # === DIALOGUE MANAGER (ADR-013) ===
                 self.speaker.active = True

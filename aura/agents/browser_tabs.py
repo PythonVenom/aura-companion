@@ -131,29 +131,29 @@ class AgentBrowserTabs(BaseAgent):
             return AgentResponse.ok(self.list_tabs(), self.name)
 
         if any(kw in text for kw in self.NEW_KEYWORDS):
-            return AgentResponse.ok(self.new_tab(), self.name)
+            return AgentResponse.ok(self.new_tab(), self.name, silent=True)
 
         if any(kw in text for kw in self.CLOSE_KEYWORDS):
             name = self._extract_after(text, self.CLOSE_KEYWORDS)
             if name:
-                return AgentResponse.ok(self.close_tab_by_name(name), self.name)
-            return AgentResponse.ok(self.close_active_tab(), self.name)
+                return AgentResponse.ok(self.close_tab_by_name(name), self.name, silent=True)
+            return AgentResponse.ok(self.close_active_tab(), self.name, silent=True)
 
         if any(kw in text for kw in self.NEXT_KEYWORDS):
-            return AgentResponse.ok(self.next_tab(), self.name)
+            return AgentResponse.ok(self.next_tab(), self.name, silent=True)
 
         if any(kw in text for kw in self.PREV_KEYWORDS):
-            return AgentResponse.ok(self.prev_tab(), self.name)
+            return AgentResponse.ok(self.prev_tab(), self.name, silent=True)
 
         if any(kw in text for kw in self.FIND_KEYWORDS):
             name = self._extract_after(text, self.FIND_KEYWORDS)
             if not name:
                 return AgentResponse.ok("Какую вкладку искать?", self.name)
-            return AgentResponse.ok(self.find_and_activate(name), self.name)
+            return AgentResponse.ok(self.find_and_activate(name), self.name, silent=True)
 
         if text.startswith("открой ") or text.startswith("открыть "):
             rest = text.split(" ", 1)[1].strip()
-            return AgentResponse.ok(self.open_or_focus(rest), self.name)
+            return AgentResponse.ok(self.open_or_focus(rest), self.name, silent=True)
 
         return AgentResponse.not_handled(self.name)
 

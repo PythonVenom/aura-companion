@@ -103,13 +103,13 @@ class AgentAppLauncher(BaseAgent):
             name = self._extract_name(text, self.CLOSE_KEYWORDS)
             if not name:
                 return AgentResponse.ok("Что закрыть?", self.name)
-            return AgentResponse.ok(self.close_app(name), self.name)
+            return AgentResponse.ok(self.close_app(name), self.name, silent=True)
 
         if any(kw in text for kw in self.OPEN_KEYWORDS):
             name = self._extract_name(text, self.OPEN_KEYWORDS)
             if not name:
                 return AgentResponse.ok("Что открыть?", self.name)
-            return AgentResponse.ok(self.open_app(name), self.name)
+            return AgentResponse.ok(self.open_app(name), self.name, silent=True)
 
         return AgentResponse.not_handled(self.name)
 

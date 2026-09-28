@@ -102,13 +102,15 @@ class AgentWindowManager(BaseAgent):
 
         # Bug 26: обзор (toggle)
         if "обзор" in cmd or "покажи окна" in cmd or "покажи все окна" in cmd:
-            return AgentResponse.ok(text=self._overview(), agent_name=self.name)
+            return AgentResponse.ok(text=self._overview(), agent_name=self.name, silent=True)
 
         if "рабочий стол" in cmd or "раб стол" in cmd or "стол" in cmd:
-            return AgentResponse.ok(text=self._desktop(cmd), agent_name=self.name)
+            _txt = self._desktop(cmd)
+            _silent = not _txt.lower().startswith("стол")
+            return AgentResponse.ok(text=_txt, agent_name=self.name, silent=_silent)
 
         if "раздели экран" in cmd or "половина экрана" in cmd:
-            return AgentResponse.ok(text=self._split_screen(), agent_name=self.name)
+            return AgentResponse.ok(text=self._split_screen(), agent_name=self.name, silent=True)
 
         return AgentResponse.not_handled(agent_name=self.name)
 

@@ -34,8 +34,9 @@ class AgentBargeIn:
     FRAME_SIZE = int(SAMPLE_RATE * FRAME_DURATION_MS / 1000)  # 480
     VAD_AGGRESSIVENESS = 3            # было 2, ужесточили после AEC
     QUEUE_MAXSIZE = 50
-    GATE_SECONDS = 1.0                # не дёргать callback первые 1с речи Ауры
-    MIN_SPEECH_FRAMES = 3             # нужно 3 фрейма подряд, не одиночный
+    GATE_SECONDS = 2.5                # Bug 29: 2.5с (было 1.0) — ждём пока AEC устаканится
+    MIN_SPEECH_FRAMES = 10            # Bug 29: 300мс подряд (было 3=90мс) — не ловим эхо
+    COOLDOWN_SECONDS = 2.0            # Bug 29: не дёргать callback чаще 2с (было 0.5)
 
     def __init__(self):
         self.ready = False
@@ -48,7 +49,7 @@ class AgentBargeIn:
         self.aura_speaking = False
         self.on_speech = None
         self._last_speech_ts = 0.0
-        self._cooldown = 0.5  # не дёргать callback чаще 0.5 сек
+        self._cooldown = self.COOLDOWN_SECONDS  # Bug 29: 2.0с
         self._speaking_started = 0.0  # когда Аура начала говорить
         self._consecutive_speech = 0  # счётчик фреймов речи подряд
 

@@ -56,19 +56,19 @@ class AgentWindowControl(BaseAgent):
             return AgentResponse.ok(self.list_windows(), self.name)
 
         if any(kw in text for kw in self.CLOSE_KEYWORDS):
-            return AgentResponse.ok(self.close_active(), self.name)
+            return AgentResponse.ok(self.close_active(), self.name, silent=True)
 
         if any(kw in text for kw in self.FULLSCREEN_KEYWORDS):
-            return AgentResponse.ok(self.fullscreen_active(), self.name)
+            return AgentResponse.ok(self.fullscreen_active(), self.name, silent=True)
 
         if any(kw in text for kw in self.MINIMIZE_KEYWORDS):
-            return AgentResponse.ok(self.minimize_active(), self.name)
+            return AgentResponse.ok(self.minimize_active(), self.name, silent=True)
 
         if any(kw in text for kw in self.FOCUS_KEYWORDS):
             target = self._extract_target(text)
             if not target:
                 return AgentResponse.ok("На какое окно переключиться?", self.name)
-            return AgentResponse.ok(self.focus_window(target), self.name)
+            return AgentResponse.ok(self.focus_window(target), self.name, silent=True)
 
         return AgentResponse.not_handled(self.name)
 

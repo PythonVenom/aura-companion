@@ -30,4 +30,4 @@ def test_power_asks_confirm_for_pc(cmd):
     p = AgentPower()
     r = asyncio.run(p.handle(AgentRequest(text=cmd)))
     assert r.status == AgentStatus.OK
-    assert "да" in r.text.lower() or "нет" in r.text.lower()
+    assert "отмена" in r.text.lower() or "да" in r.text.lower()

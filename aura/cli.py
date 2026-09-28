@@ -317,6 +317,45 @@ def cmd_profile(args):
     return 1
 
 
+def cmd_massage(args):
+    """MassageSessionAgent: start / note / history / finish / status."""
+    from aura.agents.massage import AgentMassage
+    from aura.core.protocol import AgentRequest
+
+    a = AgentMassage()
+    action = getattr(args, "action", "status")
+    client = getattr(args, "client", None)
+    duration = getattr(args, "duration", 50)
+
+    import asyncio
+
+    if action == "start":
+        if not client:
+            print("❌ Укажи клиента: aura massage start Иванов 50")
+            return 1
+        r = asyncio.run(a.handle(AgentRequest(text=f"сессия {client} {duration}")))
+        print(r.text)
+        return 0
+
+    if action == "history":
+        if not client:
+            print("❌ Укажи клиента: aura massage history Иванов")
+            return 1
+        r = asyncio.run(a.handle(AgentRequest(text=f"что было с {client}")))
+        print(r.text)
+        return 0
+
+    if action == "status":
+        print("💆 MassageSessionAgent v0.1")
+        print("  start <клиент> <мин>  — начать сессию")
+        print("  history <клиент>      — история из RAG")
+        print("  (голосом: «сессия Иванов 50» / «запиши спина L4-L5»)")
+        return 0
+
+    print(f"❌ Неизвестное действие: {action}")
+    return 1
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -359,6 +398,11 @@ def main():
     p_prof.add_argument("action", nargs="?", choices=["list","set","show"], default="list")
     p_prof.add_argument("name", nargs="?", default=None)
     p_prof.set_defaults(func=cmd_profile)
+    p_mas = sub.add_parser("massage", help="сессии массажа")
+    p_mas.add_argument("action", nargs="?", choices=["status","start","history"], default="status")
+    p_mas.add_argument("client", nargs="?", default=None)
+    p_mas.add_argument("duration", nargs="?", type=int, default=50)
+    p_mas.set_defaults(func=cmd_massage)
 
 
     p_timer = sub.add_parser("timer", help="таймер: 30s / 5m / 2h")

@@ -23,19 +23,21 @@ def _make_orch_with_mocks(media_pause=True, barge_in=None):
     # barge_in=None по умолчанию: _set_barge_speaking просто вернётся
     orch.barge_in = barge_in
     orch._halted = False  # Bug 33: debounce
+    # Bug 38: ducker для нового _duck_on
+    orch.ducker = MagicMock()
     return orch
 
 
 def test_duck_on_calls_pause():
     orch = _make_orch_with_mocks()
     orch._duck_on()
-    orch.media_pause.pause.assert_called_once()
+    orch.ducker.duck.assert_called_once()
 
 
 def test_duck_off_calls_resume():
     orch = _make_orch_with_mocks()
     orch._duck_off()
-    orch.media_pause.resume.assert_called_once()
+    orch.ducker.un_duck.assert_called_once()
 
 
 def test_duck_on_no_media_pause():
@@ -59,16 +61,16 @@ def test_duck_off_swallows_exception():
 
 
 def test_say_with_duck_order():
-    """Порядок: pause → say → resume."""
+    """Bug 38: порядок duck → say → un_duck (music_ducker)."""
     orch = _make_orch_with_mocks()
     calls = []
-    orch.media_pause.pause.side_effect = lambda: calls.append("pause")
-    orch.media_pause.resume.side_effect = lambda: calls.append("resume")
+    orch.ducker.duck.side_effect = lambda: calls.append("duck")
+    orch.ducker.un_duck.side_effect = lambda: calls.append("un_duck")
     orch.speaker.say.side_effect = lambda text: calls.append(f"say:{text}")
 
     orch._say_with_duck("привет")
 
-    assert calls == ["pause", "say:привет", "resume"]
+    assert calls == ["duck", "say:привет", "un_duck"]
 
 
 def test_say_with_duck_waits_for_is_speaking():
@@ -82,8 +84,8 @@ def test_say_with_duck_waits_for_is_speaking():
 
     orch._say_with_duck("привет")
 
-    orch.media_pause.pause.assert_called_once()
-    orch.media_pause.resume.assert_called_once()
+    orch.ducker.duck.assert_called_once()
+    orch.ducker.un_duck.assert_called_once()
     orch.speaker.say.assert_called_once_with("привет")
 
 
@@ -94,8 +96,8 @@ def test_say_with_duck_immediate_exit():
 
     orch._say_with_duck("привет")
 
-    orch.media_pause.pause.assert_called_once()
-    orch.media_pause.resume.assert_called_once()
+    orch.ducker.duck.assert_called_once()
+    orch.ducker.un_duck.assert_called_once()
     orch.speaker.say.assert_called_once_with("привет")
 
 

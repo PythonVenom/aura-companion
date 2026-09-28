@@ -142,7 +142,7 @@ fit in unified memory. See [benchmarks/BENCHMARKS.md](benchmarks/BENCHMARKS.md).
 - [docs/manual-simple.md](docs/manual-simple.md) — beginner guide (RU) — philosophy, mission
 - [PARTNERSHIP.md](PARTNERSHIP.md) — for companies and sponsors
 - [docs/architecture.md](docs/architecture.md) — technical
-- [docs/adr/](docs/adr/) — 16 architectural decisions (ADR-001…016)
+- [docs/adr/](docs/adr/) — 39 architectural decisions (ADR-001…039)
 
 ## Contact
 

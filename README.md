@@ -134,7 +134,7 @@ Proactive — через `ProactiveEngine` с триггерами и cooldown.
 - `docs/manifesto.md` — философия, миссия, монетизация
 - `docs/architecture.md` — техника
 - `docs/roadmap.md` — фазы развития
-- `docs/adr/` — 16 архитектурных решений (ADR-001…016)
+- `docs/adr/` — 39 архитектурных решений (ADR-001…039)
 - `JOURNAL.md` — хроника
 
 ## Лицензия

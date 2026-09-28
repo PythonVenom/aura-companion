@@ -51,10 +51,22 @@ def check_all() -> tuple[list[str], int, int]:
         lines.append("  ❌ Ollama недоступен  →  systemctl --user start ollama")
     ok_count += int(ok)
 
-    # 3. T-one (ASR)
+    # 3. T-one (ASR) — sherpa-onnx + модель
     total += 1
-    ok = shutil.which("t-one") is not None or Path("/usr/local/bin/t-one").exists()
-    msg, ok = _check("T-one (ASR)", ok, "см. docs/install-advanced.md")
+    try:
+        import sherpa_onnx  # noqa: F401
+        has_lib = True
+    except ImportError:
+        has_lib = False
+    model_dir = Path.home() / "aura_project/sherpa-onnx-streaming-t-one-russian-2025-09-08"
+    has_model = (model_dir / "model.onnx").exists()
+    ok = has_lib and has_model
+    if not has_lib:
+        msg, ok = _check("T-one (ASR)", False, "pip install sherpa-onnx")
+    elif not has_model:
+        msg, ok = _check("T-one (ASR)", False, f"модель не найдена: {model_dir}")
+    else:
+        msg, _ = _check("T-one (ASR) + sherpa-onnx", True)
     lines.append(msg); ok_count += int(ok)
 
     # 4. Piper (TTS)

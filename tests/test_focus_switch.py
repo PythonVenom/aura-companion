@@ -70,7 +70,8 @@ async def test_handle_work_wayland(fs_wayland):
         with patch("aura.agents.focus_switch.time.sleep"):
             resp = await fs_wayland.handle(AgentRequest(text="рабочее пространство"))
     assert resp.status == AgentStatus.OK
-    assert "рабочее пространство" in resp.text.lower()
+    # Bug 41: _focus_work отключён, текст изменён
+    assert "отключён" in resp.text.lower() or "рабочее пространство" in resp.text.lower()
 
 
 @pytest.mark.asyncio

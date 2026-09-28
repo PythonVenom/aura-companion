@@ -279,6 +279,11 @@ class AgentAudioRouter(BaseAgent):
 
         if old_profile == profile:
             return (profile, None)
+        # Bug 42: первый вызов (old=None) — silent, чтобы не спамить при старте
+        if old_profile is None:
+            self.current_source = self.DEFAULT_SOURCE
+            self.current_sink = self.DEFAULT_SINK
+            return (profile, None)
 
         if profile in ("headset", "internal"):
             # НЕ трогаем default-source/sink: PipeWire управляет сам,

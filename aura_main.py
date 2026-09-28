@@ -166,13 +166,9 @@ class AuraOrchestrator:
         """
         import time as _t
         now = _t.time()
-        if now - getattr(self, "_aec_last_check", 0) < 30:
-            return  # не дёргаем чаще 30 сек
-        self._aec_last_check = now
-        import time as _t
-        now = _t.time()
-        if now - getattr(self, "_aec_last_check", 0) < 30:
-            return  # не дёргаем чаще 30 сек — OSD не моргает
+        # Bug 43: throttle 3 сек — если Аура говорит дольше, AEC может откатиться
+        if now - getattr(self, "_aec_last_check", 0) < 3:
+            return
         self._aec_last_check = now
         try:
             import subprocess

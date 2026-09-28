@@ -32,11 +32,15 @@ async def test_reboot_asr_typo():
 
 
 @pytest.mark.asyncio
-async def test_lock_asr_typo():
-    """ASR: "заблокирует" вместо "заблокируй" (2 правки)."""
+async def test_lock_asr_typo(monkeypatch):
+    """ASR: "заблокирует" вместо "заблокируй" (2 правки).
+    Bug 18: _lock замокан, иначе реальный loginctl заблокирует экран."""
     a = AgentPower()
+    called = []
+    monkeypatch.setattr(a, "_lock", lambda: called.append(1) or "locked")
     await a.handle(_req("заблокирует экран"))
-    assert AgentPower._pending is None  # lock не требует confirm
+    assert called, "fuzzy не сработал: _lock не вызван"
+    assert AgentPower._pending is None
 
 
 @pytest.mark.asyncio

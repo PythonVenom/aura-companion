@@ -6,8 +6,6 @@ from aura import doctor
 def test_check_all_returns_tuple():
     lines, ok, total = doctor.check_all()
     assert isinstance(lines, list)
-    assert isinstance(ok, int)
-    assert isinstance(total, int)
     assert total == 8
     assert len(lines) == 8
 

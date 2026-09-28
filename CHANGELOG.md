@@ -43,6 +43,18 @@
 ### Tests
 - 700 → 815+ passed
 
+## [0.9.3] — 2026-09-28
+
+### Добавлено
+- **ADR-032** JSON-RPC Protocol (транспорт, методы, ошибки, mTLS)
+- **ADR-033** Bookkeeping Vertical (бухгалтеры, 5 млн РФ)
+- **ADR-034** Smart Home (MQTT, Zigbee2MQTT, без облака)
+- **ADR-035** Roadmap 2026 (формализация)
+- **aura/doctor.py**: 8-пунктовая диагностика
+- **CLI**: `aura doctor`, `aura adr`
+- tests/test_doctor.py (4)
+- tests/test_adr_index.py (4) — doc-test консистентности
+
 ## [0.9.2] — 2026-09-28
 
 ### Добавлено

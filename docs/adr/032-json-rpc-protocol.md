@@ -2,22 +2,22 @@
 
 **Дата:** 2026-09-28
 **Статус:** Проект
-**Связано:** ADR-029 (Multi-client)
+**Связано:** ADR-029
 
 ## Контекст
 
-ADR-029: ядро + клиенты через JSON-RPC. Нужна детализация:
-форматы, auth, версии, ошибки.
+ADR-029: ядро + клиенты. Нужны форматы, auth, версии, ошибки.
 
 ## Решение
 
 ### Транспорт
+- **LAN:** WebSocket `ws://aura.local:8765/rpc` (mDNS)
+- **WAN:** WireGuard + `wss://<box>:8765/rpc`
+- **Auth:** mTLS + JWT (TTL 15 мин)
 
-- **LAN:** WebSocket `ws://aura.local:8765/rpc` (mDNS discovery)
-- **WAN:** WireGuard + WebSocket `wss://<box>:8765/rpc`
-- **Auth:** mTLS (клиентский серт) + JWT (TTL 15 мин)
+### Формат
 
-### Формат запроса
+Запрос:
 
     {
       "jsonrpc": "2.0",
@@ -27,34 +27,27 @@ ADR-029: ядро + клиенты через JSON-RPC. Нужна детали�
       "meta": {"client": "android-1.0", "locale": "ru"}
     }
 
-### Формат ответа
+Ответ:
 
     {
       "jsonrpc": "2.0",
       "id": "uuid-v4",
-      "result": {"text": "⏱ Активных нет", "audio_url": null},
-      "error": null
+      "result": {"text": "⏱ Активных нет"}
     }
 
 ### Методы (v1)
 
 | Method | Направление | Описание |
 |---|---|---|
-| `voice.command` | client→core | Голос/текстовая команда |
-| `voice.stream` | core→client | SSE поток TTS-аудио |
+| `voice.command` | client→core | Команда |
+| `voice.stream` | core→client | SSE TTS-аудио |
 | `agent.list` | client→core | Список агентов |
-| `agent.call` | client→core | Прямой вызов агента |
-| `state.subscribe` | client→core | Подписка на state (WebSocket) |
-| `proactive.notify` | core→client | Push проактивного сообщения |
-| `settings.get` / `settings.set` | client→core | Настройки |
+| `agent.call` | client→core | Прямой вызов |
+| `state.subscribe` | client→core | Подписка |
+| `proactive.notify` | core→client | Push |
+| `settings.get`/`set` | client→core | Настройки |
 
-### Версионирование
-
-- `/rpc` — текущая (v1, стабильная)
-- `/rpc/v2` — когда breaking changes
-- В meta: `client` содержит версию → graceful degradation
-
-### Ошибки (стандарт JSON-RPC 2.0)
+### Ошибки (JSON-RPC 2.0)
 
 | Код | Значение |
 |---|---|
@@ -70,31 +63,17 @@ ADR-029: ядро + клиенты через JSON-RPC. Нужна детали�
 | -32004 | Aura: rate limited |
 
 ### Безопасность
+- mTLS: серт при pairing (QR)
+- JWT: HS256, секрет в `/etc/aura/jwt.key`
+- Rate limit: 60 req/min
+- Audit log: danger=true → журнал
 
-- mTLS: клиентский серт выдаёт ядро при pairing (QR-код)
-- JWT: подписан HS256, секрет в `/etc/aura/jwt.key`
-- Rate limit: 60 req/min на клиента
-- Audit log: все `agent.call` с danger=true → в журнал
-
-### Что НЕ в v1
-
-- GraphQL (overkill для 7 методов)
-- gRPC (нужен protoc, тяжело для клиентов)
-- REST (WebSocket лучше для push)
-- OAuth (только mTLS+JWT)
-
-## Последствия
-
-**Плюсы:**
-- 7 методов покрывают все сценарии клиентов
-- JSON-RPC 2.0 — стандарт, все языки имеют библиотеки
-- WebSocket — real-time push
-
-**Минусы:**
-- Нужен TLS-менеджмент (cert rotation)
-- WireGuard setup для удалёнки (документация)
+### НЕ в v1
+- GraphQL (overkill)
+- gRPC (protoc тяжело)
+- REST (WebSocket лучше)
+- OAuth
 
 ## Связанные
-
 - ADR-029 (Multi-client)
 - ADR-022 (cross-platform)

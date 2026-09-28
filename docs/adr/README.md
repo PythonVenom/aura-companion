@@ -38,6 +38,9 @@
 | 030 | Developer Mode | Проект |
 | 031 | Ethics Policy | Принято |
 | 032 | JSON-RPC Protocol | Проект |
+| 033 | Bookkeeping Vertical | Проект |
+| 034 | Smart Home (MQTT) | Проект |
+| 035 | Roadmap 2026 | Принято |
 
 ## Как читать
 
@@ -49,5 +52,5 @@
 
 1. Скопировать `XXX-template.md`
 2. Заполнить: Контекст, Решение, Последствия
-3. Обновить этот README
-4. Коммит с `docs(adr): ADR-XXX`
+3. Обновить README
+4. Коммит `docs(adr): ADR-XXX`

@@ -130,14 +130,21 @@ class AgentMassage(BaseAgent):
 
     def _start(self, text: str) -> AgentResponse:
         import re
-        # Ищем имя + минуты
-        m = re.search(r"(?:сессия|массаж)\s+(\w+)\s+(\d+)", text)
+        # Bug F: ASR слышит "тс" вместо "Тест" + "тридцать" вместо "30"
+        from aura.agents.time_agent import _parse_int
+        # Ищем "сессия <имя>" затем число (цифрой или словом)
+        m = re.search(r"(?:сессия|массаж)\s+([а-яa-z_]+)", text)
         if not m:
             return AgentResponse.ok(
                 "Скажи: «сессия Иванов 50 минут»", self.name
             )
         client = m.group(1).title()
-        duration = int(m.group(2))
+        n = _parse_int(text)
+        if not n:
+            return AgentResponse.ok(
+                f"Не услышала длительность. Скажи: «сессия {client} 50»", self.name
+            )
+        duration = n
         self._current = Session(client=client, duration_min=duration)
         self._rag_save(client, f"начало сессии, {duration} мин")
         return AgentResponse.ok(

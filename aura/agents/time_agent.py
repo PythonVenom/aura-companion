@@ -9,6 +9,27 @@ from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 TIMERS_PATH = Path("/tmp/aura_timers.json")
 
+# Bug E: ASR слышит "тридцать" вместо "30"
+NUM_WORDS = {
+    "один": 1, "два": 2, "три": 3, "четыре": 4, "пять": 5,
+    "шесть": 6, "семь": 7, "восемь": 8, "девять": 9, "десять": 10,
+    "пятнадцать": 15, "двадцать": 20, "тридцать": 30,
+    "сорок": 40, "пятьдесят": 50,
+}
+
+
+def _parse_int(text: str):
+    """Вернуть (число, остаток) или None."""
+    # Сначала цифры
+    m = __import__("re").search(r"(\d+)", text)
+    if m:
+        return int(m.group(1))
+    # Потом слова
+    for w, n in NUM_WORDS.items():
+        if w in text.lower():
+            return n
+    return None
+
 
 def _load():
     if not TIMERS_PATH.exists():
@@ -69,7 +90,13 @@ class AgentTimeAgent(BaseAgent):
     async def handle(self, request: AgentRequest) -> AgentResponse:
         text = request.text.lower()
 
-        m = re.search(r"(\d+)\s*(минут|мин|сек|секунд|час)", text)
+        import re as _re
+        m = _re.search(r"(\d+)\s*(минут|мин|сек|секунд|час)", text)
+        if not m and ("таймер" in text or "напомни через" in text):
+            n_val = _parse_int(text)
+            unit = "секунд" if "секунд" in text or "сек" in text else ("минут" if "минут" in text or "мин" in text else "час")
+            if n_val:
+                m = type("M", (), {"group": lambda self, i: str(n_val) if i == 1 else unit})()
         if m and ("таймер" in text or "напомни через" in text):
             n = int(m.group(1)); unit = m.group(2)
             if "час" in unit:

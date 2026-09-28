@@ -158,6 +158,9 @@ class AgentAppLauncher(BaseAgent):
         app = self.find_app(name)
         if not app:
             return f"❌ Приложение '{name}' не найдено"
+        # Bug 50: сначала искать открытое окно → фокус, не открывать новое
+        if self._focus_existing(app["name"]):
+            return f"✅ Фокус на: {app['name']}"
         try:
             subprocess.Popen(
                 app["exec"].split(),
@@ -167,6 +170,34 @@ class AgentAppLauncher(BaseAgent):
             return f"✅ Открыл: {app['name']}"
         except Exception as e:
             return f"❌ Не удалось открыть '{app['name']}': {e}"
+
+    @staticmethod
+    def _focus_existing(app_name: str) -> bool:
+        """Bug 50: если окно с этим именем уже открыто — фокус, не новое.
+
+        Ищет по вхождению подстроки (case-insensitive) в wmctrl -l.
+        """
+        try:
+            r = subprocess.run(
+                ["wmctrl", "-l"],
+                capture_output=True, text=True, timeout=2,
+            )
+            if r.returncode != 0:
+                return False
+            needle = app_name.lower()
+            for line in r.stdout.splitlines():
+                if needle in line.lower():
+                    # Формат: <id> <desktop> <host> <title>
+                    win_id = line.split()[0]
+                    subprocess.run(
+                        ["wmctrl", "-i", "-a", win_id],
+                        check=False, timeout=2,
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                    )
+                    return True
+        except Exception:
+            pass
+        return False
 
     def close_app(self, name: str) -> str:
         # Flatpak

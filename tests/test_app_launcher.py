@@ -53,9 +53,10 @@ class TestListApps:
 
 class TestOpenAppWithMock:
     @pytest.mark.asyncio
+    @patch("aura.agents.app_launcher.AgentAppLauncher._focus_existing", return_value=False)
     @patch("aura.agents.app_launcher.subprocess.Popen")
     @patch("aura.agents.app_launcher.AgentAppLauncher.find_app")
-    async def test_open_app_calls_popen(self, mock_find, mock_popen, agent: AgentAppLauncher) -> None:
+    async def test_open_app_calls_popen(self, mock_find, mock_popen, mock_focus, agent: AgentAppLauncher) -> None:
         mock_find.return_value = {
             "name": "TestApp",
             "exec": "/usr/bin/testapp --flag",

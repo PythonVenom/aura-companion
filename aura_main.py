@@ -158,12 +158,19 @@ class AuraOrchestrator:
         else:
             print("⚠️ VK Music: токен не найден, проверьте vk_token.txt")
 
+    _aec_checked = False  # Bug 40: вызываем раз в 30 сек
+
     def _ensure_aec(self) -> None:
         """Bug 40: принудительно переключить sink на echo-cancel перед речью.
 
         Aura говорила в alsa_output → эхо попадало в микрофон → barge-in ловил
         саму Ауру. WirePlumber периодически откатывает sink обратно.
         """
+        import time as _t
+        now = _t.time()
+        if now - getattr(self, "_aec_last_check", 0) < 30:
+            return  # не дёргаем чаще 30 сек
+        self._aec_last_check = now
         try:
             import subprocess
             r = subprocess.run(

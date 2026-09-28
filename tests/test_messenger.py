@@ -69,8 +69,13 @@ async def test_handle_list_chats():
 @pytest.mark.asyncio
 async def test_handle_find_chat():
     a = AgentMessenger()
-    reply = {"ok": True, "data": {"found": True, "name": "Иван Зеленин"}}
-    with patch("aura.agents.messenger.send_command", side_effect=lambda c, t=5.0: reply):
+    # Bug 57: 2 вызова — find + title (verify-after-action).
+    replies = [
+        {"ok": True, "data": {"found": True, "name": "Иван Зеленин"}},
+        {"ok": True, "data": {"title": "Иван Зеленин"}},
+    ]
+    it = iter(replies)
+    with patch("aura.agents.messenger.send_command", side_effect=lambda c, t=5.0: next(it)):
         resp = await a.handle(AgentRequest(text="аура найди чат с иваном в максе"))
     assert "Иван" in resp.text
 

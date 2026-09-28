@@ -76,8 +76,18 @@ class AgentMusicLocal(BaseAgent):
         except Exception:
             pass
 
+    # Bug 56: не перехватываем «следующий» если речь о столах/вкладках/окнах
+    YIELD_CONTEXT = (
+        "рабочий стол", "раб стол", "стол ", "стол.", "вкладк",
+        "окно", "рабочее пространство", "desktop",
+    )
+
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
+        # Bug 56: yield если «следующий» + контекст другого агента
+        if any(kw in text for kw in self.YIELD_CONTEXT):
+            if any(kw in text for kw in self.NEXT_KEYWORDS + self.PREV_KEYWORDS + self.STOP_KEYWORDS):
+                return False
         # Bug 14 ph.3: если last_active=vk — уступаем media_pause / vk_music.
         from aura.agents import media_state
         _yield_kw = (

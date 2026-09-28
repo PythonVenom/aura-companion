@@ -294,15 +294,37 @@ class AgentMessenger(BaseAgent):
         return result.get("data", {})
 
     def find_chat(self, query: str) -> str:
-        # Bug 37: НЕ поднимаем окно Firefox принудительно (мешало пользователю)
+        # Bug 37: НЕ поднимаем Firefox принудительно.
         result = send_command({"action": f"{self.platform}_find_chat", "query": query})
         if result is None or "error" in result:
             return error_text(result)
         data = result.get("data", {})
-        if data.get("found"):
-            name = data.get("name", query)
-            return f"🌐 Открыла чат: {name[:60]}"
-        return f"🌐 Чат «{query}» не найден"
+        if not data.get("found"):
+            return f"🌐 Чат «{query}» не найден"
+
+        # Bug 57: verify-after-action — проверяем что чат РЕАЛЬНО открылся.
+        import time
+        time.sleep(0.8)  # ждём перерисовки UI
+        title_r = send_command({"action": f"{self.platform}_title"})
+        cur_title = ""
+        if title_r and title_r.get("ok"):
+            cur_title = (title_r.get("data", {}).get("title") or "").strip()
+
+        found_name = (data.get("name") or query).strip()
+        q_low = query.lower().strip()
+        t_low = cur_title.lower()
+
+        # Совпадение: query или found_name в title (или наоборот)
+        ok = (
+            (q_low and q_low in t_low) or
+            (t_low and t_low in q_low) or
+            (found_name.lower() in t_low) or
+            (t_low and t_low in found_name.lower())
+        )
+        if ok:
+            return f"🌐 Открыла чат: {cur_title[:60]}"
+        # Не открылся — честный fail
+        return f"🌐 Клик по «{query}» не сработал (title: {cur_title[:40]!r})"
 
     def read_last(self) -> str:
         result = send_command({"action": f"{self.platform}_read_last"})

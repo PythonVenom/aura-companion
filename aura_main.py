@@ -74,8 +74,7 @@ class AuraOrchestrator:
         self.speaker = AgentSpeaker()
         self.barge_in = AgentBargeIn()
         self._halted = False  # Bug 29: halt после barge-in
-        # Bug 40: force AEC при старте
-        self._ensure_aec()
+        # Bug 46: _ensure_aec отключён (pactl deadlock при переключении)
         # ADR-050: push-to-stop watcher (thread)
         import threading
         from scripts.aura_stop_watcher import watch as _watch_stop
@@ -229,11 +228,18 @@ class AuraOrchestrator:
         (после синтеза piper). Иначе resume срабатывает мгновенно.
         """
         print(f"🔊 Скажу: {text[:80]}")
-        self._ensure_aec()
+        # Bug 46: _ensure_aec ОТКЛЮЧЁН (pactl мог зависнуть → deadlock)
+        # AEC работает через source, уже переключён вручную.
         self._duck_on()
         self._set_barge_speaking(True)
         self.speaker.say(text)
+        # Bug 46: timeout 30 сек — если is_speaking застрял True, не висим вечно
+        _wait_start = time.time()
         while self.speaker.is_speaking:
+            if time.time() - _wait_start > 30:
+                print("⚠️ Speaker timeout 30с — принудительный reset")
+                self.speaker.is_speaking = False
+                break
             time.sleep(0.05)
         self._set_barge_speaking(False)
         self._duck_off()
@@ -588,7 +594,7 @@ class AuraOrchestrator:
                     pass
                 print(f"🤖 {response}")
                 set_status("speaking", response)
-                self._ensure_aec()
+                # Bug 46: _ensure_aec отключён (pactl deadlock)
                 self._duck_on()
                 self._set_barge_speaking(True)
                 # ADR-048: silent=True — не озвучивать

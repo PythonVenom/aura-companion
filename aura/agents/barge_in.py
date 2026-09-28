@@ -33,10 +33,11 @@ class AgentBargeIn:
     FRAME_DURATION_MS = 30
     FRAME_SIZE = int(SAMPLE_RATE * FRAME_DURATION_MS / 1000)  # 480
     VAD_AGGRESSIVENESS = 3            # было 2, ужесточили после AEC
+    MIN_RMS = 700                     # Bug 45: эхо от колонок < 700, речь пользователя > 700
     QUEUE_MAXSIZE = 50
     GATE_SECONDS = 4.0                # Bug 29: 2.5с (было 1.0) — ждём пока AEC устаканится
-    MIN_SPEECH_FRAMES = 15            # Bug 29: 300мс подряд (было 3=90мс) — не ловим эхо
-    COOLDOWN_SECONDS = 3.0            # Bug 29: не дёргать callback чаще 2с (было 0.5)
+    MIN_SPEECH_FRAMES = 20  # Bug 45: 0.6с подряд            # Bug 29: 300мс подряд (было 3=90мс) — не ловим эхо
+    COOLDOWN_SECONDS = 5.0  # Bug 45: 5с между            # Bug 29: не дёргать callback чаще 2с (было 0.5)
 
     def __init__(self):
         self.ready = False
@@ -143,6 +144,14 @@ class AgentBargeIn:
                 continue
 
             if len(frame) != self.FRAME_SIZE * 2:
+                continue
+
+            # Bug 45: RMS-гейт — эхо от колонок тише речи пользователя
+            import numpy as _np
+            _samples = _np.frombuffer(frame, dtype=_np.int16).astype(_np.float32)
+            _rms = int(_np.sqrt(_np.mean(_samples * _samples))) if len(_samples) else 0
+            if _rms < self.MIN_RMS:
+                self._consecutive_speech = 0
                 continue
 
             try:

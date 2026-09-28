@@ -1,8 +1,6 @@
-# Architecture Decision Records
+# ADR Index — Aura
 
-Все архитектурные решения проекта Aura.
-
-Формат: [MADR](https://adr.github.io/madr/).
+Все архитектурные решения проекта.
 
 ## Список
 
@@ -31,16 +29,23 @@
 | 021 | Flash-install | Принято |
 | 022 | Cross-platform strategy | Принято |
 | 023 | Voice Customization | Принято |
+| 024 | Android Deployment | Принято |
+| 025 | Aura Lite | Принято |
+| 026 | Medical Module | Проект |
+| 027 | TimeAgent | Принято |
+| 028 | Licensing Strategy | Принято |
+| 029 | Multi-client architecture | Принято |
+| 030 | Developer Mode | Проект |
 
 ## Как читать
 
-- **Принято** — реализовано в коде
-- **Отложено** — решено, но не реализовано
-- **Устарело** — заменено другим ADR
+- **Принято** — реализовано или зафиксировано
+- **Проект** — решено, но не реализовано
+- **Отложено** — отложено до условий
 
 ## Как добавить
 
-1. Скопировать шаблон: `docs/adr/XXX-template.md`
+1. Скопировать `XXX-template.md`
 2. Заполнить: Контекст, Решение, Последствия
 3. Обновить этот README
 4. Коммит с `docs(adr): ADR-XXX`

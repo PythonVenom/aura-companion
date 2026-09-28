@@ -5,7 +5,7 @@
 [![CI](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml/badge.svg)](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-930-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-940-brightgreen.svg)](#)
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)](#)
 
 **Проводник в цифровой мир** — локальный голосовой ИИ-компаньон для Linux.

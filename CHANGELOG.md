@@ -43,6 +43,29 @@
 ### Tests
 - 700 → 815+ passed
 
+## [0.9.1] — 2026-09-28
+
+### Добавлено
+- TimeAgent: таймеры + будильники (AgentTimeAgent)
+- HealthAgent: напоминания о лекарствах/воде/перерывах (AgentHealth)
+- aura/nlp.py: fuzzy_match (Levenshtein ≤2) для ASR
+- config_wizard: 5 вопросов (имя/ты-вы/характер/юмор/голос)
+- settings: persona в DEFAULTS (name/address/style/humor/voice_gender)
+- ADR-024 Android Deployment
+- ADR-025 Aura Lite (512 МБ RAM)
+- ADR-026 Medical Module (проект)
+- ADR-027 TimeAgent
+- ADR-028 Licensing Strategy
+- ADR-029 Multi-client architecture
+- ADR-030 Developer Mode (проект)
+
+### Исправлено
+- **power.py**: confirm для shutdown/reboot/logout/hibernate (Bug fix)
+- settings.load(): deepcopy DEFAULTS (изоляция между тестами)
+
+### Изменено
+- bootstrap: 32 → 34 агента (time_agent, health)
+
 ## [0.9.0-alpha] — 2026-09-27
 
 ### Added

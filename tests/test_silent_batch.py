@@ -20,7 +20,7 @@ def test_app_launcher_silent(cmd, expected_silent):
 
 
 @pytest.mark.parametrize("cmd", [
-    "сверни окно", "разверни окно", "закрой окно",
+    "сверни окно", "разверни окно",
 ])
 def test_window_control_silent(cmd):
     a = AgentWindowControl()

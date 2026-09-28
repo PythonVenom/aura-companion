@@ -127,7 +127,11 @@ class TestClose:
     async def test_close(self, mock_run, agent: AgentWindowControl) -> None:
         mock_run.return_value = MagicMock(returncode=0)
 
-        response = await agent.handle(AgentRequest(text="закрой окно"))
+        # Bug 31: сначала подтверждение
+        r1 = await agent.handle(AgentRequest(text="закрой окно"))
+        assert "да" in r1.text.lower() or "нет" in r1.text.lower()
+        # Подтверждаем
+        response = await agent.handle(AgentRequest(text="да"))
 
         assert response.status == AgentStatus.OK
         assert "закрыто" in response.text.lower()

@@ -174,7 +174,10 @@ async def test_close_active_tab_ok():
     ]
     agent, fake, p = make_agent(replies)
     try:
-        resp = await agent.handle(AgentRequest(text="закрой вкладку"))
+        # Bug 31: сначала подтверждение
+        r1 = await agent.handle(AgentRequest(text="закрой вкладку"))
+        assert "да" in r1.text.lower() or "нет" in r1.text.lower()
+        resp = await agent.handle(AgentRequest(text="да"))
     finally:
         p.stop()
     assert "Закрыла" in resp.text

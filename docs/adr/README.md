@@ -49,6 +49,7 @@
 | 041 | Telegram Bot Client | Проект |
 | 042 | Web UI (htmx) | Проект |
 | 043 | Release Checklist v1.0 | Принято |
+| 044 | Founder-First Beachhead | Принято |
 
 ## Как читать
 

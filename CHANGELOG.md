@@ -43,6 +43,21 @@
 ### Tests
 - 700 → 815+ passed
 
+## [0.9.10] — 2026-09-28
+
+### Добавлено
+- **ADR-044** Founder-First Beachhead
+  - Первый пользователь = автор (6 контекстов)
+  - MVP: MassageSessionAgent + Dictation + ConstructionCalc + BPM
+  - Метрики: 20+/день -> 10 -> 100 -> 1000
+
+### Исправлено
+- scripts/stability_report.py: 
+ в heredoc -> SyntaxError
+
+### Уточнено
+- CPU 44% в systemctl = false alarm (накопленный)
+
 ## [0.9.9] — 2026-09-28
 
 ### Добавлено

@@ -15,6 +15,7 @@ from __future__ import annotations
 import subprocess
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
+from aura.nlp import fuzzy_match
 
 
 class AgentPower(BaseAgent):
@@ -49,7 +50,7 @@ class AgentPower(BaseAgent):
             + self.LOGOUT_KEYWORDS
             + self.HIBERNATE_KEYWORDS
         )
-        return any(kw in text for kw in keywords)
+        return fuzzy_match(text, keywords)
 
     # Bug: необратимые действия без confirm
     NEEDS_CONFIRM = frozenset({"shutdown", "reboot", "logout", "hibernate"})
@@ -85,19 +86,19 @@ class AgentPower(BaseAgent):
                 self.name,
             )
 
-        # Определяем действие
+        # Определяем действие (fuzzy — Bug 17 ASR-устойчивость)
         kind = None
-        if any(kw in text for kw in self.SHUTDOWN_KEYWORDS):
+        if fuzzy_match(text, self.SHUTDOWN_KEYWORDS):
             kind = "shutdown"
-        elif any(kw in text for kw in self.REBOOT_KEYWORDS):
+        elif fuzzy_match(text, self.REBOOT_KEYWORDS):
             kind = "reboot"
-        elif any(kw in text for kw in self.HIBERNATE_KEYWORDS):
+        elif fuzzy_match(text, self.HIBERNATE_KEYWORDS):
             kind = "hibernate"
-        elif any(kw in text for kw in self.LOGOUT_KEYWORDS):
+        elif fuzzy_match(text, self.LOGOUT_KEYWORDS):
             kind = "logout"
-        elif any(kw in text for kw in self.SUSPEND_KEYWORDS):
+        elif fuzzy_match(text, self.SUSPEND_KEYWORDS):
             kind = "suspend"
-        elif any(kw in text for kw in self.LOCK_KEYWORDS):
+        elif fuzzy_match(text, self.LOCK_KEYWORDS):
             kind = "lock"
 
         if kind is None:

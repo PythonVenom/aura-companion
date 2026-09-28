@@ -3,7 +3,7 @@
 [![CI](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml/badge.svg)](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-1031-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-1080-brightgreen.svg)](#)
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)](#)
 
 **A guide into the digital world** — a local voice AI companion for Linux.
@@ -24,7 +24,7 @@ Read more — [MANIFESTO.md](MANIFESTO.md).
 
 ---
 
-**Status:** v0.9.6-alpha · **1031 tests** · **33 agents** · **43 ADR**
+**Status:** v0.9.6-alpha · **1080 tests** · **37 agents** · **43 ADR**
 Stack: Python 3.12 · asyncio · Ollama qwen2.5:7b · T-one (ASR) · Piper (TTS)
 · ChromaDB (RAG) · PipeWire · MPRIS · Firefox WebExtension
 

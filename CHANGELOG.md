@@ -43,6 +43,26 @@
 ### Tests
 - 700 → 815+ passed
 
+## [0.10.0] — 2026-09-28
+
+### Добавлено — ADR-044 Beachhead MVP
+- **MassageSessionAgent**: сессия + file-based storage клиентов
+- **DictationAgent**: диктовка в файл дня
+- **ConstructionCalc**: 10 материалов, расчёт по ГОСТ
+- **AgentBPM**: метроном + категории темпа
+- **voice_autoswitch**: расписание день (sport/massage/construction/dev)
+- CLI: massage, calc, bpm, profile
+
+### Исправлено
+- Bug A: .capitalize() -> .title() (кириллица)
+- Bug B: _start сохраняет сессию
+- Bug C: RAG -> file-based storage клиентов
+
+### Метрики
+- Тесты: 1005 -> ~1080
+- Агентов: 33 -> 37
+- ADR: 43 -> 44
+
 ## [0.9.10] — 2026-09-28
 
 ### Добавлено

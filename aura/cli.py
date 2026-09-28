@@ -356,6 +356,32 @@ def cmd_massage(args):
     return 1
 
 
+def cmd_calc(args):
+    """Калькулятор стройматериалов."""
+    from aura.agents.construction import calc_material, NORMS
+    if not args.material:
+        print("📐 Материалы:", ", ".join(sorted(NORMS.keys())))
+        return 0
+    r = calc_material(args.material, args.area)
+    if not r:
+        print(f"❌ Не знаю материал: {args.material}")
+        return 1
+    print(f"📐 {r.material}: {r.amount} {r.unit} на {args.area} м² ({r.description})")
+    return 0
+
+
+def cmd_bpm(args):
+    """Метроном."""
+    from aura.agents.bpm import bpm_to_interval
+    try:
+        interval = bpm_to_interval(args.bpm)
+    except ValueError as e:
+        print(f"❌ {e}")
+        return 1
+    print(f"🥁 {args.bpm} BPM = {interval} мс/удар")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -403,6 +429,13 @@ def main():
     p_mas.add_argument("client", nargs="?", default=None)
     p_mas.add_argument("duration", nargs="?", type=int, default=50)
     p_mas.set_defaults(func=cmd_massage)
+    p_calc = sub.add_parser("calc", help="калькулятор стройматериалов")
+    p_calc.add_argument("material", nargs="?", default=None)
+    p_calc.add_argument("area", nargs="?", type=float, default=1.0)
+    p_calc.set_defaults(func=cmd_calc)
+    p_bpm = sub.add_parser("bpm", help="метроном")
+    p_bpm.add_argument("bpm", type=int)
+    p_bpm.set_defaults(func=cmd_bpm)
 
 
     p_timer = sub.add_parser("timer", help="таймер: 30s / 5m / 2h")

@@ -18,9 +18,13 @@ def test_watch_calls_stop_speaking(monkeypatch):
 
     t = threading.Thread(target=watch, args=(speaker,), daemon=True)
     t.start()
-    time.sleep(0.2)
+    time.sleep(0.3)  # дать потоку стартовать
     STOP_FILE.touch()
-    time.sleep(0.4)
+    # ждём до 2 сек — не flaky
+    for _ in range(20):
+        if speaker.stop_speaking.called:
+            break
+        time.sleep(0.1)
     STOP_FILE.unlink(missing_ok=True)
 
     assert speaker.stop_speaking.called

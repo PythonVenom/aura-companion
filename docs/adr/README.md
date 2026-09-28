@@ -50,6 +50,7 @@
 | 042 | Web UI (htmx) | Проект |
 | 043 | Release Checklist v1.0 | Принято |
 | 044 | Founder-First Beachhead | Принято |
+| 045 | Least-Privilege Deployment | Принято |
 
 ## Как читать
 

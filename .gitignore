@@ -15,6 +15,7 @@ voices/
 # Secrets
 vk_token.txt
 .env
+config.ini
 
 # Logs
 *.log

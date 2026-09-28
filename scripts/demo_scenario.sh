@@ -14,19 +14,19 @@ echo "════════════════════════�
 sleep 4
 
 hr; echo ">>> 1. Таймер"; sleep 1
-python -m aura.cli timer 30s чай; sleep 3
+venv/bin/python -m aura.cli timer 30s чай; sleep 3
 
 hr; echo ">>> 2. Метроном"; sleep 1
-python -m aura.cli bpm 120; sleep 3
+venv/bin/python -m aura.cli bpm 120; sleep 3
 
 hr; echo ">>> 3. Стройматериалы"; sleep 1
-python -m aura.cli calc плитка 29; sleep 3
+venv/bin/python -m aura.cli calc плитка 29; sleep 3
 
 hr; echo ">>> 4. Массаж"; sleep 1
-python -m aura.cli massage start Демо 50; sleep 3
+venv/bin/python -m aura.cli massage start Демо 50; sleep 3
 
 hr; echo ">>> 5. Диктовка"; sleep 1
-python -m aura.cli dictation text "спина L4-L5 напряжение"; sleep 3
+venv/bin/python -m aura.cli dictation text "спина L4-L5 напряжение"; sleep 3
 
 hr
 echo "GitHub: github.com/PythonVenom/aura-companion"

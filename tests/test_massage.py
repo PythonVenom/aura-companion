@@ -185,3 +185,23 @@ async def test_note_without_rag_still_saves_locally(agent):
     await agent.handle(_req("сессия Сидоров 30"))
     await agent.handle(_req("запиши колено"))
     assert "колено" in agent._current.notes
+
+
+# --- Bugfix (live-test) ---
+
+@pytest.mark.asyncio
+async def test_start_saves_to_rag():
+    """Bug B: start должен сохранять сессию в RAG."""
+    a = AgentMassage()
+    a._rag = _FakeRAG()
+    await a.handle(_req("сессия Тест_Клиент 30"))
+    assert len(a._rag.saved) == 1
+    assert "начало сессии" in a._rag.saved[0][0]
+
+
+@pytest.mark.asyncio
+async def test_client_name_title():
+    """Bug A: 'тест_клиент' -> 'Тест_Клиент' (не 'Тест_клиент')."""
+    a = AgentMassage()
+    await a.handle(_req("сессия тест_клиент 30"))
+    assert a._current.client == "Тест_Клиент"

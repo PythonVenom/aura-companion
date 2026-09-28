@@ -116,9 +116,10 @@ class AgentMassage(BaseAgent):
             return AgentResponse.ok(
                 "Скажи: «сессия Иванов 50 минут»", self.name
             )
-        client = m.group(1).capitalize()
+        client = m.group(1).title()
         duration = int(m.group(2))
         self._current = Session(client=client, duration_min=duration)
+        self._rag_save(client, f"начало сессии, {duration} мин")
         return AgentResponse.ok(
             f"✅ Сессия {client}, {duration} мин. Начали.", self.name
         )
@@ -128,9 +129,11 @@ class AgentMassage(BaseAgent):
         m = re.search(r"что было с\s+(\w+)", text)
         if not m:
             return AgentResponse.ok("Скажи: «что было с Ивановым?»", self.name)
-        client = m.group(1).capitalize()
+        client = m.group(1).title()
         hist = self._rag_read(client)
-        return AgentResponse.ok(f"📋 История {client}: {hist[:200]}", self.name)
+        if not hist or len(hist) < 5:
+            return AgentResponse.ok(f"📋 {client}: пока нет записей", self.name)
+        return AgentResponse.ok(f"📋 {client}: {hist[:300]}", self.name)
 
     def _note(self, text: str) -> AgentResponse:
         if not self._current:

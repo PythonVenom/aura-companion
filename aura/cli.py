@@ -204,6 +204,24 @@ def cmd_doctor(args):
     return doctor_main()
 
 
+def cmd_adr(args):
+    """Список ADR из docs/adr/."""
+    from pathlib import Path as _P
+    adr_dir = _P(__file__).parent.parent / "docs" / "adr"
+    files = sorted(adr_dir.glob("[0-9][0-9][0-9]-*.md"))
+    if not files:
+        print("ADR не найдены")
+        return 1
+    for f in files:
+        try:
+            first = f.read_text(encoding="utf-8").split("\n")[0]
+            title = first.lstrip("# ").strip()
+            print(f"  {f.stem[:3]}  {title}")
+        except Exception:
+            print(f"  {f.stem}")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -230,8 +248,11 @@ def main():
 
     p_reset = sub.add_parser("settings-reset", help="сбросить настройки")
     p_reset.set_defaults(func=cmd_settings_reset)
+
     sub.add_parser("reload-extension", help="Firefox extension").set_defaults(func=cmd_reload_extension)
     sub.add_parser("doctor", help="диагностика одной командой").set_defaults(func=cmd_doctor)
+    sub.add_parser("adr", help="список ADR").set_defaults(func=cmd_adr)
+
 
     p_timer = sub.add_parser("timer", help="таймер: 30s / 5m / 2h")
     p_timer.add_argument("duration")

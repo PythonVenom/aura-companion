@@ -5,7 +5,7 @@
 [![CI](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml/badge.svg)](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-1107-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-1140-brightgreen.svg)](#)
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)](#)
 
 ▶️ [Demo (90 sec, test run)](https://github.com/PythonVenom/aura-companion/releases/tag/demo-test-run)
@@ -27,7 +27,7 @@
 
 ---
 
-**Статус:** v1.0.0 · **1107 тестов** · **37 агентов** · **47 ADR**
+**Статус:** v1.0.0 · **1140 тестов** · **37 агентов** · **49 ADR**
 Стек: Python 3.12 · asyncio · Ollama qwen2.5:7b · T-one (ASR) · Piper (TTS) ·
 ChromaDB (RAG) · PipeWire · MPRIS · Firefox WebExtension
 
@@ -37,6 +37,23 @@ ChromaDB (RAG) · PipeWire · MPRIS · Firefox WebExtension
     cd ~/aura_project
     ./install.sh
     aura doctor    # проверка готовности
+
+### Какой install.sh выбрать?
+
+| ОС | Файл |
+|---|---|
+| **Arch Linux** (рекомендуется) | `./install.sh` |
+| Ubuntu / Debian | `./install_ubuntu.sh` |
+| Fedora | `./install_fedora.sh` |
+| Alpine | `./install_alpine.sh` |
+| WSL (Windows) | `./install_wsl.sh` |
+| Windows (нативно) | `install_windows.ps1` |
+| macOS | `./install_macos.sh` |
+| ARM (Raspberry, Orange) | `./install_arm.sh` |
+| Arch ARM | `./install_arch_arm.sh` |
+| Android (Termux) | `./install_android.sh` |
+
+**Для первого запуска — Arch Linux.** Остальные — экспериментальные.
 
 Подробно:
 - [docs/manual.md](docs/manual.md) — полный справочник
@@ -148,7 +165,7 @@ Proactive — через `ProactiveEngine` с триггерами и cooldown.
 - `docs/manifesto.md` — философия, миссия, монетизация
 - `docs/architecture.md` — техника
 - `docs/roadmap.md` — фазы развития
-- `docs/adr/` — 39 архитектурных решений (ADR-001…043)
+- `docs/adr/` — 49 архитектурных решений (ADR-001…052)
 - `JOURNAL.md` — хроника
 
 ## Лицензия

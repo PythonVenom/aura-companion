@@ -396,12 +396,26 @@ class AgentMessenger(BaseAgent):
 
     # --- Разбор аргументов ---
 
+    # Bug 61: стоп-слова — где заканчивается имя чата
+    CHAT_STOP = (" и напиши", " и отправь", " или ", " а потом", " потом ",
+                 " затем ", " напиши ", " напиши,", " отправь", " сообщение",
+                 " и ", " а ", " с текстом", " текст ", ", напиши")
+
     @staticmethod
     def _extract_chat_name(text: str) -> str:
-        for kw in ("найди чат с", "найди чат", "открой чат с", "открой чат", "перейди в чат с", "перейди в чат"):
+        for kw in ("найди чат с", "найди чат", "открой чат с", "открой чат",
+                   "перейди в чат с", "перейди в чат"):
             if kw in text:
                 idx = text.index(kw) + len(kw)
                 rest = text[idx:].strip().strip(".,!?")
+                if not rest:
+                    continue
+                # Обрезаем по стоп-словам
+                for stop in AgentMessenger.CHAT_STOP:
+                    if stop in rest:
+                        rest = rest.split(stop, 1)[0].strip()
+                # Убираем хвостовые предлоги
+                rest = rest.strip(" .,!?")
                 if rest:
                     return rest
         return ""

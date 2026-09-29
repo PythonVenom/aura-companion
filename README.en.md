@@ -3,10 +3,10 @@
 [![CI](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml/badge.svg)](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-1107-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-1140-brightgreen.svg)](#)
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)](#)
 
-**A guide into the digital world** — a local voice AI companion for Linux.
+**Voice layer over the OS.** Local. Open source. No cloud.
 
 Not "Alexa in a terminal". A personal agent: listens to the microphone,
 answers with voice, executes commands on your computer. **Everything local —

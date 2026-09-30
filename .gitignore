@@ -80,3 +80,7 @@ firefox_extension_mv3/
 # Aura runtime config
 settings.json
 .config/aura/
+sys
+sys.*
+sys
+sys.*

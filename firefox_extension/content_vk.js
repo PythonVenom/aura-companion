@@ -143,14 +143,14 @@ function listVKNews() {
 
 
 function vkNextTrack() {
-    const btn = document.querySelector('.audio_player__next, [aria-label='next']');
+    const btn = document.querySelector(".audio_player__next, [aria-label='next']");
     if (btn) { btn.click(); return { ok: true }; }
     return { ok: false };
 }
 
 
 function vkPrevTrack() {
-    const btn = document.querySelector('.audio_player__prev, [aria-label='prev']');
+    const btn = document.querySelector(".audio_player__prev, [aria-label='prev']");
     if (btn) { btn.click(); return { ok: true }; }
     return { ok: false };
 }

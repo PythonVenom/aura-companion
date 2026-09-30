@@ -36,8 +36,15 @@ async function findTelegramTab() {
 }
 
 async function findVKTab() {
-    const tabs = await browser.tabs.query({ url: "*://vk.com/*" });
-    return tabs[0] || null;
+    // Bug 64: VK в РФ — vk.ru, не vk.com
+    const tabs = await browser.tabs.query({});
+    for (const t of tabs) {
+        const u = (t.url || "").toLowerCase();
+        if (u.includes("vk.com") || u.includes("vk.ru")) {
+            return t;
+        }
+    }
+    return null;
 }
 
 async function findMaxTab() {
@@ -218,14 +225,18 @@ async function handleCommand(msg) {
         case "vk_finalize":
         case "vk_current": {
             const vkTab = await findVKTab();
+            console.log("[Aura VK] findVKTab:", vkTab ? vkTab.id + " " + vkTab.url : "null");
             if (!vkTab) return { error: "vk tab not found" };
             const payload = { action: action };
             if (msg.section) payload.section = msg.section;
             if (msg.text) payload.text = msg.text;
             if (msg.query) payload.query = msg.query;
             try {
-                return await browser.tabs.sendMessage(vkTab.id, payload);
+                const r = await browser.tabs.sendMessage(vkTab.id, payload);
+                console.log("[Aura VK] response:", r);
+                return r;
             } catch (e) {
+                console.error("[Aura VK] sendMessage error:", e.toString());
                 return { error: "content script: " + e.toString() };
             }
         }

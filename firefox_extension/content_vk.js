@@ -119,7 +119,7 @@ function listVKFriends() {
 
 
 function listVKGroups() {
-    const items = document.querySelectorAll('.groups_list .group_row, [data-testid='groups-row']');
+    const items = document.querySelectorAll(".groups_list .group_row, [data-testid='groups-row']");
     const groups = [];
     items.forEach((el, i) => {
         if (i >= 20) return;
@@ -131,7 +131,7 @@ function listVKGroups() {
 
 
 function listVKNews() {
-    const items = document.querySelectorAll('.wall_post, [data-testid='wall-post']');
+    const items = document.querySelectorAll(".wall_post, [data-testid='wall-post']");
     const news = [];
     items.forEach((el, i) => {
         if (i >= 10) return;

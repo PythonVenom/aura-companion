@@ -40,6 +40,27 @@
       ],
       "run_at": "document_idle",
       "all_frames": true
+    },
+    {
+      "matches": [
+        "*://vk.com/*",
+        "*://*.vk.com/*",
+        "*://vk.ru/*",
+        "*://*.vk.ru/*"
+      ],
+      "js": [
+        "content_vk.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://web.telegram.org/*"
+      ],
+      "js": [
+        "content_telegram.js"
+      ],
+      "run_at": "document_idle"
     }
   ]
 }

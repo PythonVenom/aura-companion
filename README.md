@@ -5,18 +5,16 @@
 [![CI](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml/badge.svg)](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-1140-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-1144-brightgreen.svg)](#)
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)](#)
 
 ▶️ [Demo (90 sec, test run)](https://github.com/PythonVenom/aura-companion/releases/tag/demo-test-run)
 
 **Голосовой слой над ОС.** Локально. Open source. Без облака.
 
-Не «Алиса в терминале», а личный агент: слушает микрофон, отвечает голосом,
-выполняет команды на компьютере. Всё локально — никаких облаков.
+Не «Алиса в терминале». Не «ассистент». **Опора.** Слушает микрофон, отвечает голосом, выполняет команды на компьютере. Всё локально — никаких облаков.
 
-**Миссия:** сделать цифровой мир доступным для тех, кому сложно с мышью,
-клавиатурой и мелкими шрифтами:
+**Миссия:** сделать цифровой мир доступным для тех, кому сложно с мышью, клавиатурой и мелкими шрифтами. Не «помощник» — **опора**. Когнитивный и физический протез.
 
 - **пожилые** — голосом: свет, ТВ, чайник, обогреватель
 - **незрячие** — голосом: чаты, почта, банк, покупки
@@ -27,9 +25,8 @@
 
 ---
 
-**Статус:** v1.0.0 · **1140 тестов** · **37 агентов** · **49 ADR**
-Стек: Python 3.12 · asyncio · Ollama qwen2.5:7b · T-one (ASR) · Piper (TTS) ·
-ChromaDB (RAG) · PipeWire · MPRIS · Firefox WebExtension
+**Статус:** v1.0.0 · **1144 теста** · **37 агентов** · **50 ADR**
+Стек: Python 3.12 · asyncio · Ollama qwen2.5:7b · T-one (ASR) · Piper (TTS) · ChromaDB (RAG) · PipeWire · MPRIS · Firefox WebExtension
 
 ## Быстрый старт
 
@@ -68,14 +65,43 @@ ChromaDB (RAG) · PipeWire · MPRIS · Firefox WebExtension
 - **Python:** 3.11+
 - **Опционально:** PipeWire (для AEC / чистого слуха)
 
+## Железо
+
+### Текущий прототип
+
+- **CPU:** Intel Core i7-8750H @ 2.20GHz (6 ядер, 12 потоков, Coffee Lake-H)
+- **RAM:** 31 GiB
+- **GPU:** NVIDIA GeForce GTX 1070 Mobile (8 GB VRAM) + Intel UHD Graphics 630
+- **Swap:** 4 GiB
+- **ОС:** Arch Linux + Plasma (Wayland)
+- **Аудио:** PipeWire
+- **Архитектура:** x86_64
+
+### Что нужно для развития
+
+**Тестовое железо (для кросс-платформенных тестов):**
+
+- **Intel N100** (mini-PC) — x86_64, низкое энергопотребление.
+- **AMD Strix Halo** — APU с NPU, локальный AI-инференс.
+- **Qualcomm Snapdragon X Elite** — ARM64, кросс-платформа.
+
+**Периферия (для accessibility-тестов):**
+
+- **Экзоскелет** — голосовое управление locomotion.
+- **BCI/eye-tracking** — для LIS (locked-in syndrome).
+- **Датчики падения** — экстренное реагирование.
+
+### Почему это важно
+
+Aura — кросс-платформенный слой. Чтобы тестировать на всех ОС и архитектурах, нужно железо. Компании, которые дают железо, получают ранний доступ к тестам Aura на их платформе.
+
 ## Установка
 
     git clone <URL> ~/aura_project
     cd ~/aura_project
     ./install.sh
 
-Установщик поставит системные пакеты, Python-зависимости, скачает модели
-T-one и Piper, настроит systemd.
+Установщик поставит системные пакеты, Python-зависимости, скачает модели T-one и Piper, настроит systemd.
 
 Dry-run (посмотреть, что будет сделано, без изменений):
 
@@ -88,8 +114,7 @@ Dry-run (посмотреть, что будет сделано, без изме
     ollama pull qwen2.5:7b-instruct-q4_K_M
     ollama pull nomic-embed-text
 
-Если места мало — можно обойтись без них. Аура потеряет умные ответы,
-но базовые команды (время, погода, вкладки, музыка) будут работать.
+Если места мало — можно обойтись без них. Аура потеряет умные ответы, но базовые команды (время, погода, вкладки, музыка) будут работать.
 
 2. VK-токен (опционально, для VK-музыки):
 
@@ -134,11 +159,9 @@ System Settings -> Shortcuts -> Add Application -> Aura Pause
 
 Горячая клавиша — пауза/возобновление прослушки.
 
-KDE виджет — кружок в трее со статусом (ждёт / слушает / думает / говорит /
-на паузе).
+KDE виджет — кружок в трее со статусом (ждёт / слушает / думает / говорит / на паузе).
 
-**Proactive:** утренний брифинг, уведомление о новом сообщении в Максе
-(«Зачитать?»).
+**Proactive:** утренний брифинг, уведомление о новом сообщении в Максе («Зачитать?»).
 
 ## Что НЕ умеет (пока)
 
@@ -149,23 +172,20 @@ KDE виджет — кружок в трее со статусом (ждёт / 
 
 ## Архитектура
 
-Модульная: 33 агента, три уровня роутинга (реестр → tool_router → brain).
-Диалог — через FSM (`idle` / `awaiting_command` / `pending_read`).
-Proactive — через `ProactiveEngine` с триггерами и cooldown.
+Модульная: 33 агента, три уровня роутинга (реестр → tool_router → brain). Диалог — через FSM (`idle` / `awaiting_command` / `pending_read`). Proactive — через `ProactiveEngine` с триггерами и cooldown.
 
 См. `docs/architecture.md` и `docs/adr/`.
 
 ## Документация
+
 - [docs/manual.md](docs/manual.md) — руководство пользователя
 - [docs/manual-simple.md](docs/manual-simple.md) — для начинающих
 - [CONTRIBUTING.md](CONTRIBUTING.md) — как помочь
 - [ARCHITECTURE.md](ARCHITECTURE.md) — архитектура
-
-
 - `docs/manifesto.md` — философия, миссия, монетизация
 - `docs/architecture.md` — техника
 - `docs/roadmap.md` — фазы развития
-- `docs/adr/` — 49 архитектурных решений (ADR-001…052)
+- `docs/adr/` — 50 архитектурных решений (ADR-001…052)
 - `JOURNAL.md` — хроника
 
 ## Лицензия
@@ -192,13 +212,19 @@ Aura — независимый open-source проект. Всё локальн�
 - **CloudTips** — https://pay.cloudtips.ru/p/9ce9959c (0% для донатора)
 - **Boosty** — https://boosty.to/aura_companion
 - **DonationAlerts** — <вписать ссылку>
-- **Boosty** — https://boosty.to/aura_companion
 
-Средства идут на: тестовое железо (N100, Strix Halo), модели, работу над кросс-платформой.
+**Куда идут средства:**
+
+- **Жизнь:** врачи, лекарства, питание. Разработчик имеет инвалидность (опорно-двигательный аппарат) и работает над проектом 10 часов в день.
+- **Тестовое железо:** Intel N100 (x86_64), AMD Strix Halo (APU + NPU), Qualcomm ARM (кросс-платформа).
+- **Работа над Aura:** кросс-платформенный слой, accessibility, pull-модель обновлений.
+
+Каждый донат = больше времени на код. Каждый спонсор = шаг к доступности для всех.
 
 ## Партнёрство
 
 Проект открыт для:
+
 - **Спонсорства** (модель AMD ↔ Blender: независимый разработчик + open source)
 - **Грантов** на accessibility / AI / Linux
 - **Железо** для тестов (AMD Strix Halo, Intel AI PC, Qualcomm ARM)

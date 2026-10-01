@@ -84,3 +84,6 @@ sys
 sys.*
 sys
 sys.*
+
+# aider (dev tool)
+.aider*

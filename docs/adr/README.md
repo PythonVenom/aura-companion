@@ -57,6 +57,8 @@
 | 050 | Aura Health v0.1 — Read-only Диагностика | Принято |
 | 052 | ASR Sample Rate Matching | Принято |
 | 066 | ASR num_threads и idle CPU | Принято (частично) |
+| 067 | Widget Control Panel | Принято |
+| 068 | Recon Subsystem | Принято |
 
 ## Как читать
 

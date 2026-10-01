@@ -53,7 +53,7 @@ class AgentListener(MicroAgent):
             self.recognizer = sherpa_onnx.OnlineRecognizer.from_t_one_ctc(
                 model=model,
                 tokens=tokens,
-                num_threads=2,
+                num_threads=1,
                 sample_rate=self.sample_rate,
                 decoding_method="greedy_search",
             )

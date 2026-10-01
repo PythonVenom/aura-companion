@@ -561,14 +561,21 @@ class AuraOrchestrator:
                 self._ensure_aec()
                 # Bug 38: приглушаем музыку ПОКА слушаем (интеллектуальный duck)
                 self._duck_on()
-                heard = self.listener.listen(timeout=8)  # Bug 34
+                # Bug 73: timeout 2 вместо 8 — ChatBridge голодал до 8 сек
+                heard = self.listener.listen(timeout=2)
                 if not heard:
-                    # Ничего не услышали — вернуть звук
                     self._duck_off()
+                    # === ЧАТ: второй drain после listen (Bug 73) ===
+                    self._drain_chat_queue()
+                    time.sleep(0.05)
+                    continue
 
                 if not heard:
                     time.sleep(0.1)
                     continue
+
+                # === ЧАТ: drain после успешного listen ===
+                self._drain_chat_queue()
 
                 if not self._is_activated(heard):
                     time.sleep(0.1)

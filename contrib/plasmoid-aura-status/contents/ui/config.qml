@@ -2,8 +2,10 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
+import org.kde.kcmutils as KCM
 
-Kirigami.FormLayout {
+KCM.SimpleKCM {
+    Kirigami.FormLayout {
     id: page
 
     property alias cfg_popupWidth: wSpin.value
@@ -66,4 +68,5 @@ Kirigami.FormLayout {
         wrapMode: Text.WordWrap
         Layout.preferredWidth: 260
     }
+}
 }

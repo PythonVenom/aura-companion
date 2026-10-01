@@ -58,6 +58,7 @@
 | 052 | ASR Sample Rate Matching | Принято |
 | 066 | ASR num_threads и idle CPU | Принято (частично) |
 | 067 | Widget Control Panel | Принято |
+| 074 | Bug 68 false positive (sherpa resampler) | Принято |
 | 068 | Recon Subsystem | Принято |
 
 ## Как читать

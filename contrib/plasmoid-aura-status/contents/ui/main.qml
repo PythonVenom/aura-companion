@@ -1,4 +1,4 @@
-// Aura Status Plasmoid — читает /tmp/aura_status.json через executable datasource.
+// Aura Status Plasmoid — читает "$HOME/.cache/aura/aura_status.json" через executable datasource.
 // XMLHttpRequest с file:// в Plasma 6 блокируется — используем Plasma5Support.
 
 import QtQuick
@@ -59,7 +59,7 @@ PlasmoidItem {
         }
 
         function fetch() {
-            connectSource("cat /tmp/aura_status.json 2>/dev/null");
+            connectSource("cat \"$HOME/.cache/aura/aura_status.json\" 2>/dev/null");
         }
     }
 
@@ -85,7 +85,7 @@ PlasmoidItem {
         }
 
         function fetch() {
-            connectSource("cat /tmp/aura_last_dialog.json 2>/dev/null");
+            connectSource("cat \"$HOME/.cache/aura/aura_last_dialog.json\" 2>/dev/null");
         }
     }
 

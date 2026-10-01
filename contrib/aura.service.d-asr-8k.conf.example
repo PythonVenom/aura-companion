@@ -1,0 +1,2 @@
+[Service]
+Environment="AURA_ASR_SR=8000"

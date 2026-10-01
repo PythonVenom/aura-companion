@@ -42,6 +42,9 @@ from aura.agents.barge_in import AgentBargeIn
 # Новая модульная сборка
 from aura.bootstrap import build_orchestrator
 from aura.status import set_status, clear_status
+from aura.core.chat_bridge import ChatBridge
+from aura.core.chat_watcher import ChatWatcher
+import queue as _queue
 from aura import settings
 from aura.heartbeat import Heartbeat
 from aura.dialog_fsm import get_state as fsm_get, clear_state as fsm_clear, set_state as fsm_set
@@ -85,6 +88,9 @@ class AuraOrchestrator:
         self.heartbeat = Heartbeat()
         self.orch = build_orchestrator()
         self.running = True
+        self.chat_bridge = ChatBridge()
+        self.chat_queue: _queue.Queue = _queue.Queue()
+        self.chat_watcher = ChatWatcher(self.chat_bridge, self.chat_queue)
 
         # Достаём агентов, которых будем дёргать вручную
         self.journal = _get_agent(self.orch, "journal")
@@ -462,6 +468,26 @@ class AuraOrchestrator:
 
         return False
 
+    def _drain_chat_queue(self) -> None:
+        """Обработать сообщения из чата (ChatBridge → orchestrator → history)."""
+        while True:
+            try:
+                msg = self.chat_queue.get_nowait()
+            except _queue.Empty:
+                return
+            user_text = (msg or {}).get("user", "").strip()
+            if not user_text:
+                continue
+            try:
+                response = asyncio.run(self.orch.process(user_text))
+            except Exception as e:
+                response = f"❌ {e}"
+            try:
+                self.chat_bridge.append_history(user_text, response)
+            except Exception as e:
+                print(f"⚠️ chat history: {e}", flush=True)
+            # не говорим вслух — это текстовый чат
+
     def run(self) -> None:
         """Главный цикл — паритет с AuraCore.run."""
         print("\n" + "=" * 60)
@@ -480,6 +506,7 @@ class AuraOrchestrator:
 
         set_status("idle")
         self.heartbeat.start()
+        self.chat_watcher.start()
 
         # === BARGE-IN: включён (ADR-009 + aura-aec.service) ===
         if self.barge_in and self.barge_in.ready:
@@ -524,6 +551,9 @@ class AuraOrchestrator:
 
                 if self._handle_dialog():
                     continue
+
+                # === ЧАТ: text-based IPC ===
+                self._drain_chat_queue()
 
                 # Слушаем (timeout 8 секунд)
                 set_status("listening")

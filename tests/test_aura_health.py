@@ -4,7 +4,8 @@ sys.path.insert(0, "scripts")
 
 def test_parse_thread_count_from_proc():
     from aura_health import parse_thread_count
-    assert parse_thread_count(17194) >= 1
+    import os
+    assert parse_thread_count(os.getpid()) >= 1
 
 def test_detect_thread_leak_detects_growth():
     from aura_health import detect_thread_leak

@@ -26,7 +26,8 @@ detect_gpu() {
 }
 
 detect_profile() {
-    local ram=$1 cores=$2
+    local ram=$1
+    # cores зарезервировано на будущее
     if [ "$ram" -le 4 ]; then echo "minimal"
     elif [ "$ram" -le 8 ]; then echo "low"
     elif [ "$ram" -le 16 ]; then echo "medium"
@@ -37,7 +38,7 @@ detect_profile() {
 AURA_RAM_GB=$(detect_ram)
 AURA_CPU_CORES=$(detect_cores)
 AURA_GPU=$(detect_gpu)
-AURA_PROFILE=$(detect_profile "$AURA_RAM_GB" "$AURA_CPU_CORES")
+AURA_PROFILE=$(detect_profile "$AURA_RAM_GB")
 
 export AURA_RAM_GB AURA_CPU_CORES AURA_GPU AURA_PROFILE
 

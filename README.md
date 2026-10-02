@@ -52,6 +52,12 @@
 
 ## Установка
 
+**Ubuntu / Debian / Mint / Fedora (универсально):**
+
+    curl -fsSL https://raw.githubusercontent.com/PythonVenom/aura-companion/master/install_universal.sh | bash
+
+**Arch Linux:**
+
     git clone <URL> ~/aura_project
     cd ~/aura_project
     ./install.sh

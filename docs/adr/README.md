@@ -59,6 +59,7 @@
 | 066 | ASR num_threads и idle CPU | Принято (частично) |
 | 067 | Widget Control Panel | Принято |
 | 062 | Dragon Core (визуальный слой) | Проект |
+| 078 | Universal Installer + Hardware Profiles | Принято |
 | 077 | Universal UI Agent (Proposed) | Проект |
 | 076 | Emergency Response | Принято |
 | 075 | VoiceGate — VAD перед ASR | Принято |

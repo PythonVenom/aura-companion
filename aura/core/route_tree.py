@@ -1,9 +1,4 @@
-"""RouteTree — конкретная BT для Aura (ADR-094, ADR-107, ADR-108).
-
-Возвращает {"route": "<name>", "action": "<verb>", "args": {...}}.
-Orchestrator превращает это в capability "<route>.<action>" и зовёт
-dispatcher.dispatch(...). Лист "ask" — fallback (пропускаем дальше).
-"""
+"""RouteTree — конкретная BT для Aura (ADR-094, ADR-107, ADR-108)."""
 from __future__ import annotations
 import re
 from aura.core.router_bt import Selector, Leaf

@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.5.0 — 2026-10-02 (Опора)
+
+### Added
+- CareAgent — напоминания (вода, еда, сон) — ADR-085
+- VoiceJournal — дневник настроения — ADR-086
+- Hands-Free Mode — голос без «Аура» — ADR-095
+- Context Memory — «что делал 10 мин назад» — ADR-096
+- Focus Mode — не отвлекать N минут — ADR-097
+- ADR-093 Copilot Mode, ADR-094 Behavior Tree
+
+### Tests
+- 1255 → 1266 passed (+11)
+
 ## v2.0.0 — 2026-10-02
 
 ### Added

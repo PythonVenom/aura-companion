@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Aura
+Comment=Voice layer over the OS
+Exec=xdg-open http://127.0.0.1:8765/ui
+Icon=audio-input-microphone
+Categories=Utility;Accessibility;
+Keywords=voice;assistant;ai;

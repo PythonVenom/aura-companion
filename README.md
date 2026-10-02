@@ -5,7 +5,7 @@
 [![CI](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml/badge.svg)](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-1144-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-1271-brightgreen.svg)](#)
 [![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?logo=arch-linux&logoColor=white)](#)
 
 ▶️ [Demo (90 sec, test run)](https://github.com/PythonVenom/aura-companion/releases/tag/demo-test-run)
@@ -14,7 +14,7 @@
 
 Слушает микрофон, отвечает голосом, выполняет команды на компьютере. Всё локально — никаких облаков.
 
-**Статус:** v1.0.0 · **1144 теста** · **37 агентов** · **50 ADR**
+**Статус:** v1.0.0 · **1271 тест** · **37 агентов** · **50 ADR**
 Стек: Python 3.12 · asyncio · Ollama qwen2.5:7b · T-one (ASR) · Piper (TTS) · ChromaDB (RAG) · PipeWire · MPRIS · Firefox WebExtension
 
 ## Быстрый старт

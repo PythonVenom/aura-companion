@@ -66,7 +66,7 @@
 | 091 | Egress Broker (MVP) | Принято |
 | 090 | Plugin System (manifest + CLI) | Принято |
 | 088 | Multi-AI Orchestration | Проект |
-| 086 | Email Secretary | Проект |
+| 086 | Voice Journal (дневник) | Принято |
 | 085 | Care Coordinator (MVP: напоминания) | Принято |
 | 084 | Logbook (бортовой журнал) | Принято |
 | 083 | Wake-word (openWakeWord) | Принято |

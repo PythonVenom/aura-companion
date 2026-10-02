@@ -79,3 +79,30 @@ def test_status_reads_json(tmp_cache, mock_systemctl):
 def test_status_no_file(tmp_cache, mock_systemctl):
     args = MagicMock(json=True)
     assert aura_ctl.cmd_status(args) == 0
+
+def test_panic_stops_service(tmp_cache, mock_systemctl):
+    assert aura_ctl.cmd_panic(None) == 0
+    assert ["systemctl", "--user", "stop", "aura.service"] in mock_systemctl
+
+
+def test_panic_mutes_mic(tmp_cache, mock_systemctl):
+    assert aura_ctl.cmd_panic(None) == 0
+    cmds = [c[0] if isinstance(c, list) else c for c in mock_systemctl]
+    assert any("wpctl" in str(c) for c in cmds)
+
+
+def test_panic_writes_log(tmp_cache, mock_systemctl):
+    aura_ctl.cmd_panic(None)
+    log = tmp_cache / "panic.log"
+    assert log.exists()
+    assert "panic" in log.read_text(encoding="utf-8").lower()
+
+
+def test_mute_mic(tmp_cache, mock_systemctl):
+    assert aura_ctl.cmd_mute(None) == 0
+    assert any("set-mute" in str(c) and "1" in str(c) for c in mock_systemctl)
+
+
+def test_unmute_mic(tmp_cache, mock_systemctl):
+    assert aura_ctl.cmd_unmute(None) == 0
+    assert any("set-mute" in str(c) and "0" in str(c) for c in mock_systemctl)

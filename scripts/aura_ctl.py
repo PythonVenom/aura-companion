@@ -14,6 +14,7 @@ CACHE_DIR = Path(os.environ.get("AURA_CACHE_DIR", str(Path.home() / ".cache/aura
 PAUSE_FLAG = CACHE_DIR / "aura_pause.flag"
 STATUS_FILE = CACHE_DIR / "aura_status.json"
 SERVICE = "aura.service"
+DEFAULT_SOURCE = "@DEFAULT_SOURCE@"
 
 
 def _run(cmd, **kw):
@@ -61,6 +62,39 @@ def cmd_kill(args):
     return 0
 
 
+
+def cmd_panic(args):
+    """Экстренный останов: stop service + mute mic + лог."""
+    from datetime import datetime
+    log_path = CACHE_DIR / "panic.log"
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    try:
+        log_path.write_text(
+            f"[{datetime.now().isoformat()}] PANIC triggered\n",
+            encoding="utf-8",
+        )
+    except Exception:
+        pass
+    _run(["systemctl", "--user", "stop", SERVICE])
+    _run(["wpctl", "set-mute", DEFAULT_SOURCE, "1"])
+    _notify("Aura", "🆘 PANIC: остановлена, микрофон замьючен", "process-stop")
+    print("panic")
+    return 0
+
+
+def cmd_mute(args):
+    _run(["wpctl", "set-mute", DEFAULT_SOURCE, "1"])
+    _notify("Аура", "🔇 Микрофон замьючен", "audio-input-microphone-muted")
+    print("muted")
+    return 0
+
+
+def cmd_unmute(args):
+    _run(["wpctl", "set-mute", DEFAULT_SOURCE, "0"])
+    _notify("Аура", "🎙 Микрофон включён", "audio-input-microphone")
+    print("unmuted")
+    return 0
+
 def cmd_status(args):
     if STATUS_FILE.exists():
         try:
@@ -90,6 +124,9 @@ def main():
     sub.add_parser("restart").set_defaults(func=cmd_restart)
     sub.add_parser("stop").set_defaults(func=cmd_stop)
     sub.add_parser("kill").set_defaults(func=cmd_kill)
+    sub.add_parser("panic").set_defaults(func=cmd_panic)
+    sub.add_parser("mute").set_defaults(func=cmd_mute)
+    sub.add_parser("unmute").set_defaults(func=cmd_unmute)
     p_status = sub.add_parser("status")
     p_status.add_argument("--json", action="store_true")
     p_status.set_defaults(func=cmd_status)

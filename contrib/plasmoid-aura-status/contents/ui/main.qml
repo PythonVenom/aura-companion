@@ -174,6 +174,36 @@ PlasmoidItem {
                 }
             }
 
+            // === EMERGENCY ===
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 4
+
+                PlasmaComponents3.Button {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 44
+                    text: "🆘 PANIC"
+                    icon.name: "process-stop"
+                    onClicked: ctlSource.call("panic")
+                }
+
+                PlasmaComponents3.Button {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 44
+                    text: "🔇 Mute mic"
+                    icon.name: "audio-input-microphone-muted"
+                    onClicked: ctlSource.call("mute")
+                }
+
+                PlasmaComponents3.Button {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 44
+                    text: "🎙 Unmute"
+                    icon.name: "audio-input-microphone"
+                    onClicked: ctlSource.call("unmute")
+                }
+            }
+
             // === ЧАТ ===
             Text {
                 text: "Чат с Aura"

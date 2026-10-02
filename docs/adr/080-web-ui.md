@@ -4,43 +4,32 @@
 **Статус:** Принято
 
 ## Контекст
-
-Aura работает на многих DE/ОС. Нативный виджет на каждую DE = 13+ штук.
+Нативный виджет на каждую DE = 13+ штук. Нужен универсальный UI.
 Решение: одна HTML-страница через HTTP API (ADR-079).
 
 ## Решение
-
-Одна страница `aura/web/ui.html`, отдаётся через `GET /ui`.
-- Чистый HTML + vanilla JS (без фреймворков, без CDN)
-- Работает в любом браузере: Firefox, Chrome, Safari, Edge
-- Работает offline (без внешних зависимостей)
-- Mobile-friendly (viewport, media queries)
-- Poll /status каждые 2 сек
+`aura/web/ui.html` — single-page, vanilla JS, без CDN.
+- GET /ui — отдаёт HTML
 - Chat: POST /chat + GET /chat/history
+- Poll /status каждые 2 сек
+- Работает offline, mobile-friendly
 
 ## Уникальность
-
-- 100% DE сразу
-- 100% ОС сразу
-- Ноль установки для user (открыл браузер)
-- PWA-ready (можно добавить manifest позже)
+- 100% DE сразу (браузер есть везде)
+- 100% ОС сразу (Firefox/Chrome/Safari/Edge)
+- PWA-ready (manifest позже)
 
 ## YAGNI
-
-- Не используем React/Vue (избыточно для 1 страницы)
-- Не используем Tailwind (инлайн CSS)
-- Нет авторизации (localhost only, MVP)
-- Нет WebSocket (poll 2 сек достаточно)
+- Не React/Vue (избыточно)
+- Не Tailwind (инлайн CSS)
+- Нет auth (localhost, MVP)
+- Нет WebSocket (poll 2 сек)
 
 ## Последствия
-
-- Все клиенты могут использовать этот UI как fallback
-- iPhone/Android через браузер = PWA
-- SNI (pystray) → можно открыть Web UI
+- Fallback для всех клиентов
+- iPhone/Android через PWA
+- SNI → может открыть Web UI
 - Windows/Mac — то же
 
 ## Ссылки
-
-- ADR-079 (HTTP API)
-- ADR-042 (Web UI skeleton — старый, htmx)
-- ADR-067 (Widget Plasma — нативный)
+ADR-042 (старый skeleton), ADR-079 (HTTP API), ADR-067 (Plasma widget)

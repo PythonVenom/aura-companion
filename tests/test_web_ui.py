@@ -1,4 +1,4 @@
-"""Тесты для aura/web/static — отдача HTML UI."""
+"""Тесты для aura/web/ui — HTML UI (ADR-080)."""
 from __future__ import annotations
 from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
@@ -31,12 +31,10 @@ def test_ui_contains_chat_input(client):
 
 def test_ui_contains_fetch_chat(client):
     r = client.get("/ui")
-    # UI должен вызывать POST /chat
     assert "/chat" in r.text
 
 
-def test_ui_is_single_page(client):
-    # Нет ссылок на внешние JS (работает offline)
+def test_ui_offline_no_cdn(client):
     r = client.get("/ui")
     assert "unpkg.com" not in r.text
     assert "cdn." not in r.text

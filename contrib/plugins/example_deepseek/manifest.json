@@ -1,0 +1,16 @@
+{
+  "id": "deepseek",
+  "name": "DeepSeek AI",
+  "version": "1.0.0",
+  "author": "community",
+  "risk_level": "cloud",
+  "data_leaves_device": true,
+  "endpoint": "https://api.deepseek.com",
+  "warns": [
+    "Задачи уходят на сервер DeepSeek",
+    "Логи хранятся у DeepSeek 30 дней",
+    "Не отправляй личные данные"
+  ],
+  "requires": ["api_key"],
+  "user_consent_required": true
+}

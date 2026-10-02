@@ -25,6 +25,7 @@ from aura.agents.context_agent import AgentRecentActivity
 from aura.agents.focus_agent import AgentFocusMode
 from aura.agents.recon import AgentRecon
 from aura.agents.journal_mood import VoiceJournal
+from aura.agents.capability_agent import AgentCapabilities
 
 from aura.agents.massage import AgentMassage
 from aura.agents.dictation import AgentDictation

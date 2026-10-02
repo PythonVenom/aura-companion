@@ -62,6 +62,7 @@
 | 081 | SNI Tray (pystray) | Принято |
 | 080 | Web UI (universal HTML+JS) | Принято |
 | 079 | HTTP API (DE-agnostic) | Принято |
+| 102 | HTN Planner | Принято (MVP) |
 | 101 | Capability Graph | Принято (MVP) |
 | 100 | World Model | Принято (MVP) |
 | 099 | Behavior Tree Integration | Принято (MVP) |

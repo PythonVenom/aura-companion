@@ -62,6 +62,9 @@
 | 081 | SNI Tray (pystray) | Принято |
 | 080 | Web UI (universal HTML+JS) | Принято |
 | 079 | HTTP API (DE-agnostic) | Принято |
+| 095 | Hands-Free Mode | Принято (MVP) |
+| 094 | Behavior Tree Routing | Проект |
+| 093 | Copilot Mode (R2-D2) | Проект |
 | 092 | Astra Linux + РФ госсектор | Проект |
 | 091 | Egress Broker (MVP) | Принято |
 | 090 | Plugin System (manifest + CLI) | Принято |

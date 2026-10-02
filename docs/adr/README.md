@@ -62,6 +62,11 @@
 | 081 | SNI Tray (pystray) | Принято |
 | 080 | Web UI (universal HTML+JS) | Принято |
 | 079 | HTTP API (DE-agnostic) | Принято |
+| 091 | Egress Broker | Проект |
+| 090 | Plugin System | Проект |
+| 088 | Multi-AI Orchestration | Проект |
+| 086 | Email Secretary | Проект |
+| 085 | Care Coordinator + Briefing | Проект |
 | 084 | Logbook (бортовой журнал) | Принято |
 | 083 | Wake-word (openWakeWord) | Принято |
 | 078 | Universal Installer + Hardware Profiles | Принято |

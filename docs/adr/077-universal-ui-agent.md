@@ -1,7 +1,7 @@
 # ADR-077: Universal UI Agent
 
 **Дата:** 2026-10-02
-**Статус:** Proposed
+**Статус:** Proposed (разведка завершена)
 
 ## Контекст
 
@@ -59,12 +59,36 @@ MVP тестируем на: **1 сайт (VK) + 1 системное окно**
 80% ценности — браузер (VK, WhatsApp, Telegram — bridge есть).
 20% — системный UI (настройки, файловый менеджер).
 
-## Открытые вопросы
+## Разведка (2026-10-02)
 
-1. AT-SPI на Wayland — работает? (проверить)
-2. Vision OCR: tesseract / PaddleOCR / VLM?
-3. Формат «элемента» в контракте LLM: DOM-node? координаты? текст?
-4. Стоимость: 1 скриншот + LLM = сколько секунд на клик?
+**AT-SPI на Wayland:** `pyatspi` и `gi Atspi` не установлены. `xdotool` (X11),
+`ydotool` (Wayland) есть. AT-SPI требует установки + проверки на Wayland
+(скорее всего не работает или работает частично).
+
+**Vision OCR:** `maim` + `tesseract` (rus+eng) уже используются в `screen_reader.py`.
+`vision.py` (pyautogui) — X11 only, на Wayland отключён.
+
+**Firefox bridge:** работает. `content_vk.js` умеет click, querySelector,
+input.dispatchEvent. `vk_web.py` — 14 action. **Это MVP-путь.**
+
+**Tool router:** `qwen2.5:7b-instruct-q4_K_M` через Ollama, tool calling.
+Уже есть system_prompt и реестр tools.
+
+## Решение (уточнено)
+
+MVP UI Agent = **Firefox bridge + LLM routing** для одного сценария:
+«Аура, напиши Ивану: <текст>».
+
+Не в MVP:
+- AT-SPI системный UI (позже, отдельный эпик)
+- Vision OCR для click (только для чтения сейчас)
+- Кроссплатформенность
+
+## Открытые вопросы (обновлено)
+
+1. Как искать диалог по имени в VK DOM? (нужен селектор + поиск)
+2. Подтверждение перед отправкой — через FSM (awaiting_confirm уже есть)
+3. Формат «элемента» — DOM-селектор + человекочитаемое имя
 
 ## Последствия
 

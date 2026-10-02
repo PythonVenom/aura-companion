@@ -4,7 +4,7 @@ from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 from aura.core.context import get_context
 
 
-class AgentContextMemory(BaseAgent):
+class AgentRecentActivity(BaseAgent):
     name = "context_recent"
     MODULE_ALWAYS = True
     KEYWORDS = ("что я делал", "что делал", "чем занимался",
@@ -21,4 +21,4 @@ class AgentContextMemory(BaseAgent):
         return AgentResponse.ok(ctx.summary(minutes=10), self.name)
 
 
-__all__ = ["AgentContextMemory"]
+__all__ = ["AgentRecentActivity"]

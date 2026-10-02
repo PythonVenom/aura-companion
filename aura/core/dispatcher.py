@@ -20,6 +20,14 @@ def get_handler(capability: str) -> Optional[Callable]:
 
 def dispatch(capability: str, args: dict) -> tuple:
     """(ok, result_or_error)"""
+    # honeypot (ADR-115): ловушка срабатывает ДО настоящего handler'а
+    try:
+        from aura.security.tarpit import is_trap, tarpit_response
+        if is_trap(capability):
+            r = tarpit_response(capability, args)
+            return True, str(r)[:500]
+    except Exception:
+        pass
     h = _HANDLERS.get(capability)
     if h is None:
         return False, f"no handler for {capability}"

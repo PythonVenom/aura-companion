@@ -116,3 +116,4 @@
 | 119 | Scaffold Framework | Проект |
 | 120 | Plugin System | Проект |
 | 121 | Config-Driven Features | Проект |
+| 116 | Evals v0 (golden dataset) | Принято |

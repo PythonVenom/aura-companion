@@ -69,6 +69,14 @@ class Orchestrator:
         """
         request = AgentRequest(text=text)
 
+        # observability (ADR-112)
+        try:
+            from aura.observability import new_trace, log
+            new_trace("process")
+            log("input", text=text[:120])
+        except Exception:
+            pass
+
         agent = self.registry.find(request)
         if agent is None:
             # 2. RouteTree → dispatcher (быстрый regex-роутинг)

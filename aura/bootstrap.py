@@ -18,6 +18,9 @@ from pathlib import Path
 
 from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.health import AgentHealth
+from aura.agents.recon import AgentRecon
+from aura.agents.care import CareAgent
+from aura.agents.journal_mood import VoiceJournal
 
 from aura.agents.massage import AgentMassage
 from aura.agents.dictation import AgentDictation
@@ -228,6 +231,10 @@ def build_orchestrator() -> Orchestrator:
 
     # --- Уровень 10: Internet — последним (общий "найди") ---
     _try_register(orch, AgentInternet, modules_config)
+    # v2.5: приоритет для автора
+    orch.registry.register(AgentRecon())
+    orch.registry.register(CareAgent())
+    orch.registry.register(VoiceJournal())
     _load_plugins(orch)
     return orch
 

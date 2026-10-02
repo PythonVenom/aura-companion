@@ -1,16 +1,6 @@
-"""DeepSeek plugin — агент для Aura (ADR-090).
-
-Использование:
-    «Аура, спроси у DeepSeek про async в Python»
-    → AgentDeepSeek.handle() → Egress Broker → API → ответ
-
-Env:
-    DEEPSEEK_API_KEY — обязателен
-    AURA_DEEPSEEK_MODEL — default deepseek-chat
-"""
+"""AgentDeepSeek — плагин для Aura (ADR-090)."""
 from __future__ import annotations
 import os
-
 from aura.core.egress_broker import EgressBroker, BrokerPolicy
 
 
@@ -45,34 +35,21 @@ class AgentDeepSeek:
         prompt = self._extract_prompt(text)
         if not prompt:
             return "❌ Пустой запрос"
-
         if not self.broker.check_budget(cost=0.01):
-            return "❌ Бюджет API исчерпан на сегодня"
-
-        payload = {
-            "prompt": prompt,
-            "user_name": "test",     # будет отфильтрован
-            "model": self.model,
-        }
-        clean = self.broker.filter_payload(payload)
-
-        try:
-            import httpx
-        except ImportError:
-            return "❌ httpx не установлен: pip install httpx"
-
+            return "❌ Бюджет API исчерпан"
         try:
             self.broker.validate_endpoint(self.ENDPOINT)
         except PermissionError as e:
             return f"❌ {e}"
-
+        try:
+            import httpx
+        except ImportError:
+            return "❌ httpx не установлен"
+        clean = self.broker.filter_payload({"prompt": prompt, "model": self.model})
         try:
             r = httpx.post(
                 self.ENDPOINT,
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json",
-                },
+                headers={"Authorization": f"Bearer {self.api_key}"},
                 json={
                     "model": clean["model"],
                     "messages": [{"role": "user", "content": clean["prompt"]}],
@@ -81,12 +58,10 @@ class AgentDeepSeek:
                 timeout=60.0,
             )
             r.raise_for_status()
-            data = r.json()
-            answer = data["choices"][0]["message"]["content"]
             self.broker.record_spend(0.01)
-            return answer
+            return r.json()["choices"][0]["message"]["content"]
         except Exception as e:
-            return f"❌ DeepSeek error: {e}"
+            return f"❌ DeepSeek: {e}"
 
 
 __all__ = ["AgentDeepSeek"]

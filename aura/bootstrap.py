@@ -101,6 +101,33 @@ def _try_register(orch, agent_class, config: dict) -> bool:
         return False
 
 
+def _load_plugins(orch) -> int:
+    """Загрузить плагины из ~/.local/share/aura/plugins/ (ADR-090)."""
+    try:
+        from aura.core.plugin_manager import PluginManager
+        pm = PluginManager()
+        plugins = pm.list_plugins()
+        loaded = 0
+        for p in plugins:
+            plugin_dir = pm.root / p.id
+            py = plugin_dir / "plugin.py"
+            if not py.exists():
+                continue
+            try:
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(f"aura_plugin_{p.id}", py)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                loaded += 1
+            except Exception as e:
+                print(f"⚠️ plugin {p.id}: {e}")
+        if loaded:
+            print(f"🔌 Плагинов загружено: {loaded}")
+        return loaded
+    except Exception:
+        return 0
+
+
 def build_orchestrator() -> Orchestrator:
     """
     Собрать Orchestrator со всеми агентами.
@@ -129,6 +156,7 @@ def build_orchestrator() -> Orchestrator:
     else:
         brain = AgentBrain()
     orch = Orchestrator(tool_router=tool_router, brain=brain)
+    _load_plugins(orch)
     modules_config = load_modules_config()
 
     # --- Уровень 1: простые и точные ---

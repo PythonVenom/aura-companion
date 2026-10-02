@@ -1,0 +1,7 @@
+{
+  "uuid": "aura@pythonvenom.local",
+  "name": "Aura",
+  "description": "Status indicator for Aura",
+  "shell-version": ["45", "46", "47"],
+  "version": 1
+}

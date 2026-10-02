@@ -65,10 +65,25 @@ def _append_chat(user: str) -> None:
         f.write(json.dumps({"user": user, "ts": time.time()}, ensure_ascii=False) + "\n")
 
 
+
+
+def _read_ui_html() -> str:
+    from pathlib import Path as _P
+    p = _P(__file__).parent / "ui.html"
+    if p.exists():
+        return p.read_text(encoding="utf-8")
+    return "<html><body><h1>Aura UI not found</h1></body></html>"
+
+
 def create_app(orchestrator=None, bridge=None) -> FastAPI:
     app = FastAPI(title="Aura API", version="0.1.0")
     _orch = orchestrator
 
+
+    @app.get("/ui", response_class=None)
+    def ui():
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse(content=_read_ui_html())
     @app.get("/health")
     def health():
         return {"status": "ok", "ts": time.time()}

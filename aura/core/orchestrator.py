@@ -27,6 +27,36 @@ import asyncio
 from aura.core.protocol import AgentRequest, AgentResponse, AgentStatus
 from aura.core.registry import AgentRegistry
 
+# MEMORY_HOOK_V4 — v4.0 orchestrator integration (ADR-122, 123, 124)
+def _mem_read(text: str):
+    """Recall из всех слоёв + context manager."""
+    try:
+        from aura.core.memory import recall
+        return recall(text, n=8)
+    except Exception:
+        return []
+
+def _mem_write(user_text: str, aura_text: str):
+    """Записать в working + episodic + extractor (semantic/social)."""
+    try:
+        from aura.core.context_manager import get_context_manager
+        cm = get_context_manager()
+        cm.push("user", user_text)
+        cm.push("aura", aura_text)
+    except Exception:
+        pass
+    try:
+        from aura.core.memory.episodic import get_episodic
+        get_episodic().remember(user_text, aura_text)
+    except Exception:
+        pass
+    try:
+        from aura.core.memory.extractor import apply_semantic, apply_social
+        apply_semantic(user_text)
+        apply_social(user_text)
+    except Exception:
+        pass
+
 
 class Orchestrator:
     """
@@ -77,6 +107,17 @@ class Orchestrator:
         except Exception:
             pass
 
+        # ReAct ветка (ADR-123) — для многошаговых запросов
+        try:
+            from aura.core.react_loop import should_use_react, react_loop
+            if should_use_react(text):
+                r = await asyncio.to_thread(react_loop, text)
+                answer = r.get("answer") or self.fallback_text
+                _mem_write(text, answer)
+                return answer
+        except Exception as e:
+            print(f"⚠️ ReAct: {e}")
+
         agent = self.registry.find(request)
         if agent is None:
             # 2. RouteTree → dispatcher (быстрый regex-роутинг)
@@ -91,6 +132,7 @@ class Orchestrator:
                             cap = f"{route}.{action}"
                             ok, result = self.dispatcher.dispatch(cap, args)
                             if ok:
+                                _mem_write(text, str(result))
                                 return result
                 except Exception as e:
                     print(f"⚠️ RouteTree: {e}")
@@ -122,6 +164,7 @@ class Orchestrator:
 
         if response.status == AgentStatus.OK:
             self._last_response = response
+            _mem_write(text, response.text)
             return response.text
 
         if response.status == AgentStatus.NOT_HANDLED:

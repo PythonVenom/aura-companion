@@ -1,75 +1,58 @@
-"""Тесты ReAct Loop."""
+"""Тесты ReAct + Context + Streaming (ADR-123, 124, 127)."""
 from __future__ import annotations
-from aura.core.react_loop import ReActLoop, Step, Episode, format_episode
-from aura.core.htn_planner import Operator
 
 
-def _exec_ok(cap, args):
-    return True, f"did {cap}"
-
-def _exec_fail(cap, args):
-    return False, "nope"
-
-def _exec_mixed(cap, args):
-    return ("ok" in cap), f"result of {cap}"
+def test_should_use_react_multi_step():
+    from aura.core.react_loop import should_use_react
+    assert should_use_react("включи музыку и потом открой вк")
+    assert should_use_react("сначала вк, а затем почта")
+    assert should_use_react("если пойдёт дождь, закрой окно пожалуйста сейчас")  # длинное
 
 
-def test_single_step_success():
-    loop = ReActLoop(executor=_exec_ok)
-    ops = [Operator("x.y", {}, "test")]
-    ep = loop.run("test", ops)
-    assert ep.done is True
-    assert len(ep.steps) == 1
-    assert ep.steps[0].ok is True
+def test_should_not_use_react_simple():
+    from aura.core.react_loop import should_use_react
+    assert not should_use_react("пауза")
+    assert not should_use_react("который час")
 
 
-def test_single_step_fail():
-    loop = ReActLoop(executor=_exec_fail)
-    ops = [Operator("x.y", {}, "test")]
-    ep = loop.run("test", ops)
-    assert ep.done is False
-    assert ep.steps[0].ok is False
+def test_whitelist_no_power():
+    from aura.core.react_loop import REACT_WHITELIST
+    assert "power.lock" not in REACT_WHITELIST
+    assert "control.pause" not in REACT_WHITELIST
+    assert "music.play" in REACT_WHITELIST
 
 
-def test_max_iterations_cap():
-    loop = ReActLoop(executor=_exec_ok)
-    ops = [Operator(f"x.{i}", {}, "") for i in range(10)]
-    ep = loop.run("test", ops)
-    assert len(ep.steps) == ReActLoop.MAX_ITERATIONS
+def test_context_manager_build_messages():
+    from aura.core.context_manager import ContextManager
+    cm = ContextManager(window=5)
+    cm.push("user", "привет")
+    cm.push("aura", "привет")
+    msgs = cm.build_messages("как дела")
+    assert msgs[-1] == {"role": "user", "content": "как дела"}
+    assert msgs[0]["role"] == "system"
 
 
-def test_executor_exception():
-    def boom(cap, args):
-        raise RuntimeError("boom")
-    loop = ReActLoop(executor=boom)
-    ops = [Operator("x.y", {}, "test")]
-    ep = loop.run("test", ops)
-    assert ep.done is False
-    assert "boom" in ep.steps[0].error
+def test_context_manager_priority_recall():
+    from aura.core.context_manager import ContextManager
+    from aura.core.memory.recall import MemoryHit
+    cm = ContextManager(window=5)
+    hits = [MemoryHit("semantic", 0.9,
+                      {"subject": "батя", "predicate": "PREFERS", "object": "Чайковский"})]
+    msgs = cm.build_messages("что любит батя", recall_hits=hits)
+    sys_msgs = [m for m in msgs if m["role"] == "system"]
+    assert any("Чайковский" in m["content"] for m in sys_msgs)
 
 
-def test_custom_reflector():
-    def always_done(goal, steps):
-        return True, "custom"
-    loop = ReActLoop(executor=_exec_fail, reflector=always_done)
-    ops = [Operator("x.y", {}, "")]
-    ep = loop.run("test", ops)
-    assert ep.done is True
-    assert ep.reason == "custom"
+def test_streaming_imports():
+    from aura.core.inference import stream_chat, generate
+    assert callable(stream_chat)
+    assert callable(generate)
 
 
-def test_empty_operators():
-    loop = ReActLoop(executor=_exec_ok)
-    ep = loop.run("test", [])
-    assert ep.done is False
-    assert ep.steps == []
-
-
-def test_format_episode():
-    loop = ReActLoop(executor=_exec_ok)
-    ops = [Operator("x.y", {}, "")]
-    ep = loop.run("test", ops)
-    s = format_episode(ep)
-    assert "test" in s
-    assert "DONE" in s
-    assert "OK" in s
+def test_react_loop_smoke():
+    """ReAct не падает без LLM — graceful."""
+    from aura.core.react_loop import react_loop
+    r = react_loop("который час", max_iterations=1)
+    assert "answer" in r
+    assert "steps" in r
+    assert "iterations" in r

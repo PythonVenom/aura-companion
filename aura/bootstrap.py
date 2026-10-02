@@ -20,6 +20,7 @@ from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.health import AgentHealth
 from aura.agents.care import CareAgent
 from aura.agents.hands_free import AgentHandsFree
+from aura.agents.open_resolver import AgentOpenResolver
 from aura.agents.context_agent import AgentRecentActivity
 from aura.agents.focus_agent import AgentFocusMode
 from aura.agents.recon import AgentRecon
@@ -225,6 +226,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentVKMusic, modules_config)
 
     # --- Уровень 8: опасные, но широкие ключи ---
+    _try_register(orch, AgentOpenResolver, modules_config)
     _try_register(orch, AgentAppLauncher, modules_config)
     _try_register(orch, AgentWindowControl, modules_config)
     _try_register(orch, AgentScreenReader, modules_config)

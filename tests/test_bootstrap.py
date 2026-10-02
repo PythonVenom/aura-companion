@@ -162,7 +162,8 @@ class TestFallback:
 
 class TestOrder:
     def test_registration_order(self, orch) -> None:
-        names = orch.registry.list_names()
+        # Плагины (ADR-090) — с префиксом plugin_, не в core-порядке
+        names = [n for n in orch.registry.list_names() if not n.startswith("plugin_")]
         assert names[0] == "time"
         assert names[-1] == "internet"
         assert "messenger" in names

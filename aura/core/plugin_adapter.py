@@ -13,7 +13,7 @@ class PluginAgentWrapper:
 
     def __init__(self, plugin_agent: Any, plugin_id: str):
         self._agent = plugin_agent
-        self.name = plugin_id
+        self.name = f"plugin_{plugin_id}"
         self.description = f"Plugin: {plugin_id}"
         self.active = True
 
@@ -45,11 +45,23 @@ def register_plugin_agent(orch, agent_cls, plugin_id: str) -> None:
         return
     wrapper = PluginAgentWrapper(instance, plugin_id)
     try:
-        # Реестр может требовать BaseAgent-подобный интерфейс
-        orch.registry.register(wrapper) if hasattr(orch.registry, "register") else None
-        # Fallback — добавить в _agents напрямую
-        if hasattr(orch.registry, "_agents"):
-            orch.registry._agents[plugin_id] = wrapper
+        reg = orch.registry
+        name = wrapper.name
+        # Основной путь: register(agent)
+        if hasattr(reg, "register"):
+            try:
+                reg.register(wrapper)
+                return
+            except Exception:
+                pass
+        # Fallback: _agents dict
+        if hasattr(reg, "_agents") and isinstance(getattr(reg, "_agents"), dict):
+            reg._agents[name] = wrapper
+            return
+        # Fallback: _agents list — append
+        if hasattr(reg, "_agents") and isinstance(getattr(reg, "_agents"), list):
+            reg._agents.append(wrapper)
+            return
     except Exception as e:
         print(f"⚠️ register {plugin_id}: {e}")
 

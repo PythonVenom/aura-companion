@@ -167,7 +167,6 @@ def build_orchestrator() -> Orchestrator:
     else:
         brain = AgentBrain()
     orch = Orchestrator(tool_router=tool_router, brain=brain)
-    _load_plugins(orch)
     modules_config = load_modules_config()
 
     # --- Уровень 1: простые и точные ---
@@ -229,6 +228,7 @@ def build_orchestrator() -> Orchestrator:
 
     # --- Уровень 10: Internet — последним (общий "найди") ---
     _try_register(orch, AgentInternet, modules_config)
+    _load_plugins(orch)
     return orch
 
 

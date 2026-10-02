@@ -62,7 +62,7 @@
 | 081 | SNI Tray (pystray) | Принято |
 | 080 | Web UI (universal HTML+JS) | Принято |
 | 079 | HTTP API (DE-agnostic) | Принято |
-| 091 | Egress Broker | Проект |
+| 091 | Egress Broker (MVP) | Принято |
 | 090 | Plugin System (manifest + CLI) | Принято |
 | 088 | Multi-AI Orchestration | Проект |
 | 086 | Email Secretary | Проект |

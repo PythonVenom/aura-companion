@@ -19,6 +19,7 @@ from pathlib import Path
 from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.health import AgentHealth
 from aura.agents.care import CareAgent
+from aura.agents.hands_free import AgentHandsFree
 from aura.agents.recon import AgentRecon
 from aura.agents.journal_mood import VoiceJournal
 
@@ -233,6 +234,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentInternet, modules_config)
     # v2.5: приоритет для автора
     orch.registry.register(CareAgent())
+    orch.registry.register(AgentHandsFree())
     orch.registry.register(AgentRecon())
     orch.registry.register(VoiceJournal())
     _load_plugins(orch)

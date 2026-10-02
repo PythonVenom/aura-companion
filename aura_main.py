@@ -42,6 +42,7 @@ from aura.agents.barge_in import AgentBargeIn
 # Новая модульная сборка
 from aura.bootstrap import build_orchestrator
 from aura.status import set_status, clear_status
+from aura.core import hands_free
 from aura.core.chat_bridge import ChatBridge
 from aura.core.chat_watcher import ChatWatcher
 import queue as _queue
@@ -578,8 +579,10 @@ class AuraOrchestrator:
                 self._drain_chat_queue()
 
                 if not self._is_activated(heard):
-                    time.sleep(0.1)
-                    continue
+                    # Hands-Free: пропустить без активации
+                    if not hands_free.is_active():
+                        time.sleep(0.1)
+                        continue
 
                 print("🔔 Активация!")
                 cmd = self._strip_activation(heard).strip()

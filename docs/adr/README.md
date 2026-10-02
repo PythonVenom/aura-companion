@@ -67,7 +67,7 @@
 | 090 | Plugin System (manifest + CLI) | Принято |
 | 088 | Multi-AI Orchestration | Проект |
 | 086 | Email Secretary | Проект |
-| 085 | Care Coordinator + Briefing | Проект |
+| 085 | Care Coordinator (MVP: напоминания) | Принято |
 | 084 | Logbook (бортовой журнал) | Принято |
 | 083 | Wake-word (openWakeWord) | Принято |
 | 078 | Universal Installer + Hardware Profiles | Принято |

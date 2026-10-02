@@ -27,7 +27,7 @@ import asyncio
 from aura.core.protocol import AgentRequest, AgentResponse, AgentStatus
 from aura.core.registry import AgentRegistry
 
-# MEMORY_HOOK_V4 — v4.0 orchestrator integration (ADR-122, 123, 124)
+# CONSTITUTION_HOOK + MEMORY_HOOK_V4 — v4.0 orchestrator integration (ADR-122, 123, 124)
 def _mem_read(text: str):
     """Recall из всех слоёв + context manager."""
     try:
@@ -104,6 +104,21 @@ class Orchestrator:
             from aura.observability import new_trace, log
             new_trace("process")
             log("input", text=text[:120])
+        except Exception:
+            pass
+
+        # Constitution (ADR-129) — проверка ПЕРЕД любым ответом
+        try:
+            from aura.core.constitution import check as _const_check
+            allowed, refusal, rule_id = _const_check(text)
+            if not allowed:
+                try:
+                    from aura.observability import log as _log
+                    _log("constitution.refuse", rule=rule_id, text=text[:120])
+                except Exception:
+                    pass
+                _mem_write(text, refusal)
+                return refusal
         except Exception:
             pass
 

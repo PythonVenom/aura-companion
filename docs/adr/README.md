@@ -122,3 +122,4 @@
 | 126 | Meta-Memory (Confidence) | Принято |
 | 127 | LLM Inference Upgrade | Принято |
 | 128 | Hallucination Evaluation | Принято |
+| 129 | Constitution (Values & Refusals) | Принято |

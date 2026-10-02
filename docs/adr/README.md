@@ -63,6 +63,7 @@
 | 080 | Web UI (universal HTML+JS) | Принято |
 | 079 | HTTP API (DE-agnostic) | Принято |
 | 107 | RouteTree Integration | Принято (MVP) |
+| 108 | v3.0 — Release | Accepted |
 | 106 | Paths Module | Принято |
 | 105 | Bridge Architecture | Принято (MVP) |
 | 104 | Capability Dispatcher | Принято (MVP) |

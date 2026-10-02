@@ -34,14 +34,16 @@ function listVKShortcuts() {
 
 
 function navigateVK(section) {
-    // Голосовая навигация: «вк лента», «вк друзья».
+    // Голосовая навигация: «вк лента», «вк друзья», «вк im», «вк audio».
     const shortcuts = listVKShortcuts();
+    const sec = (section || "").toLowerCase().trim();
     const found = shortcuts.find(s =>
-        s.name.toLowerCase().includes(section.toLowerCase())
+        s.name.toLowerCase().includes(sec) ||
+        s.url.toLowerCase().includes("/" + sec)
     );
     if (found) {
         location.href = found.url;
-        return { ok: true, url: found.url };
+        return { ok: true, url: found.url, name: found.name };
     }
     return { ok: false, error: "section not found: " + section };
 }

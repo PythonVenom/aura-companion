@@ -40,10 +40,18 @@ class Orchestrator:
         response = await orch.process("который час")
     """
 
-    def __init__(self, tool_router=None, brain=None) -> None:
+    def __init__(self, tool_router=None, brain=None, dispatcher=None) -> None:
         self.registry = AgentRegistry()
         self.tool_router = tool_router
         self.brain = brain
+        self.dispatcher = dispatcher
+        self.route_tree = None
+        if dispatcher is not None:
+            try:
+                from aura.core.route_tree import build_route_tree
+                self.route_tree = build_route_tree()
+            except Exception as e:
+                print(f"⚠️ RouteTree init: {e}")
         self.fallback_text = "Не расслышала, Создатель, повторите"
         self._last_response: AgentResponse | None = None
 
@@ -63,7 +71,22 @@ class Orchestrator:
 
         agent = self.registry.find(request)
         if agent is None:
-            # 2. ToolRouter
+            # 2. RouteTree → dispatcher (быстрый regex-роутинг)
+            if self.route_tree is not None and self.dispatcher is not None:
+                try:
+                    routed = self.route_tree.handle(text, {})
+                    if routed and isinstance(routed, dict):
+                        route = routed.get("route", "")
+                        action = routed.get("action", "")
+                        args = routed.get("args", {}) or {}
+                        if route and route != "ask" and action:
+                            cap = f"{route}.{action}"
+                            ok, result = self.dispatcher.dispatch(cap, args)
+                            if ok:
+                                return result
+                except Exception as e:
+                    print(f"⚠️ RouteTree: {e}")
+            # 3. ToolRouter
             if self.tool_router is not None:
                 try:
                     result = await asyncio.to_thread(self.tool_router.route, text)

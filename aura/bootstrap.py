@@ -176,7 +176,8 @@ def build_orchestrator() -> Orchestrator:
         print("⚡ Brain ОТКЛЮЧЁН (AURA_BRAIN=0) — только агенты")
     else:
         brain = AgentBrain()
-    orch = Orchestrator(tool_router=tool_router, brain=brain)
+    from aura.core import dispatcher as _dispatcher
+    orch = Orchestrator(tool_router=tool_router, brain=brain, dispatcher=_dispatcher)
     modules_config = load_modules_config()
 
     # --- Уровень 1: простые и точные ---

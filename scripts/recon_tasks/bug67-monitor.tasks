@@ -1,0 +1,26 @@
+# tag: bug67-monitor
+# description: 24h мониторинг Bug 67 (залипание ASR-loop) после ADR-075 VAD
+
+## id=01 name=letchenel-count
+cmd: journalctl --user -u aura.service --since "24 hours ago" --no-pager | grep -ciE "летеченел|леченел"
+
+## id=02 name=false-activations
+cmd: journalctl --user -u aura.service --since "24 hours ago" --no-pager | grep "Распознано" | wc -l
+
+## id=03 name=cpu-now
+cmd: PID=$(pgrep -f aura_main | head -1); if [ -n "$PID" ]; then ps -p $PID -o %cpu,etime --no-headers; else echo "dead"; fi
+
+## id=04 name=threads
+cmd: ls /proc/$(pgrep -f aura_main | head -1)/task 2>/dev/null | wc -l
+
+## id=05 name=aec-status
+cmd: pactl info 2>/dev/null | grep "Default Source"
+
+## id=06 name=resampler-count
+cmd: journalctl --user -u aura.service --since "1 hour ago" --no-pager | grep -c "Creating a resampler"
+
+## id=07 name=halt-events
+cmd: journalctl --user -u aura.service --since "24 hours ago" --no-pager | grep -icE "перебиваю|Halt"
+
+## id=08 name=service-uptime
+cmd: systemctl --user show aura.service -p ActiveEnterTimestamp -p NRestarts --no-pager

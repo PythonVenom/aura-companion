@@ -123,3 +123,4 @@
 | 127 | LLM Inference Upgrade | Принято |
 | 128 | Hallucination Evaluation | Принято |
 | 129 | Constitution (Values & Refusals) | Принято |
+| 130 | Accessibility (WCAG 2.2 AA + Elder) | Принято |

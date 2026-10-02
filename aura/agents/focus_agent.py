@@ -4,10 +4,10 @@ from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 from aura.core import focus
 
 
-class AgentFocus(BaseAgent):
+class AgentFocusMode(BaseAgent):
     name = "focus_mode"
     MODULE_ALWAYS = True
-    ON_KEYWORDS = ("фокус", "не отвлекай", "не отвлекать",
+    ON_KEYWORDS = ("не отвлекай", "не отвлекать", "режим фокуса", "тишина на", "фокус на работу",
                    "режим работы", "тишина на")
     OFF_KEYWORDS = ("выключи фокус", "хватит фокуса", "отвлекай",
                     "фокус выкл")
@@ -22,6 +22,13 @@ class AgentFocus(BaseAgent):
         if not self.can_handle(request):
             return AgentResponse.not_handled(self.name)
         text = request.text.lower()
+        # Приоритет: ON → OFF → STATUS (иначе "не отвлекай" → OFF)
+        if any(kw in text for kw in self.ON_KEYWORDS):
+            focus.enable(seconds=3600)
+            return AgentResponse.ok(
+                "Фокус 60 минут. Не отвлекаю. Скажи 'выключи фокус' если что",
+                self.name,
+            )
         if any(kw in text for kw in self.OFF_KEYWORDS):
             focus.disable()
             return AgentResponse.ok("Фокус выключен", self.name)
@@ -32,11 +39,7 @@ class AgentFocus(BaseAgent):
                     self.name,
                 )
             return AgentResponse.ok("Фокус не активен", self.name)
-        focus.enable(seconds=3600)
-        return AgentResponse.ok(
-            "Фокус 60 минут. Не отвлекаю. Скажи 'выключи фокус' если что",
-            self.name,
-        )
+        return AgentResponse.not_handled(self.name)
 
 
-__all__ = ["AgentFocus"]
+__all__ = ["AgentFocusMode"]

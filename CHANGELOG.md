@@ -1,5 +1,31 @@
 # Changelog
 
+## v2.0.0 — 2026-10-02
+
+### Added
+- Wake-word (openWakeWord) — ADR-083
+- HTTP API FastAPI (localhost:8765) — ADR-079
+- Web UI (universal HTML+JS, работает везде) — ADR-080
+- SNI tray (pystray, 90% DE) — ADR-081
+- GNOME Shell Extension — contrib/gnome-extension
+- Cinnamon Applet — contrib/cinnamon-applet
+- XFCE genmon plugin — contrib/xfce-plugin
+- Logbook (бортовой журнал) — ADR-084
+- Plugin System (manifest + manager + CLI + adapter) — ADR-090
+- Egress Broker (whitelist + filter + budget) — ADR-091
+- AgentDeepSeek plugin (DeepSeek API) — ADR-088
+- Astra Linux adapter + ADR-092
+
+### Changed
+- bootstrap: плагины загружаются с префиксом `plugin_`
+- aura_plugin CLI (list/install/remove/info)
+
+### Fixed
+- test_bootstrap: фильтр плагинов из core-порядка
+
+### Tests
+- 1205 → 1239 passed (+34)
+
 ## v1.1.0 — 2026-10-02
 
 ### Added

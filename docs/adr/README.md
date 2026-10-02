@@ -59,6 +59,7 @@
 | 066 | ASR num_threads и idle CPU | Принято (частично) |
 | 067 | Widget Control Panel | Принято |
 | 062 | Dragon Core (визуальный слой) | Проект |
+| 079 | HTTP API (DE-agnostic) | Принято |
 | 083 | Wake-word (openWakeWord) | Принято |
 | 078 | Universal Installer + Hardware Profiles | Принято |
 | 077 | Universal UI Agent (Proposed) | Проект |

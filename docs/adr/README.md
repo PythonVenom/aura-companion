@@ -62,6 +62,7 @@
 | 081 | SNI Tray (pystray) | Принято |
 | 080 | Web UI (universal HTML+JS) | Принято |
 | 079 | HTTP API (DE-agnostic) | Принято |
+| 101 | Capability Graph | Принято (MVP) |
 | 099 | Behavior Tree Integration | Принято (MVP) |
 | 098 | Resolution Cascade | Принято (MVP) |
 | 097 | Focus Mode | Принято (MVP) |

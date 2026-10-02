@@ -199,6 +199,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentJournal, modules_config)
     _try_register(orch, AgentRAGMemory, modules_config)
     _try_register(orch, AgentRegistry, modules_config)
+    _try_register(orch, AgentCapabilities, modules_config)
     _try_register(orch, AgentFunctions, modules_config)
     _try_register(orch, AgentUpdates, modules_config)
     _try_register(orch, AgentSecurity, modules_config)

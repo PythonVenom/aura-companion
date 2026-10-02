@@ -113,7 +113,90 @@ def _register_defaults():
         hands_free.disable()
         return "handsfree off"
 
+    # music
+    def music_play(args):
+        import subprocess
+        q = args.get("query", "")
+        subprocess.Popen(["xdg-open", f"https://vk.com/audio?q={q}"],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return f"playing {q}"
+
+    def music_pause(args):
+        import subprocess
+        subprocess.run(["playerctl", "pause"], capture_output=True, timeout=2)
+        return "paused"
+
+    def music_next(args):
+        import subprocess
+        subprocess.run(["playerctl", "next"], capture_output=True, timeout=2)
+        return "next"
+
+    def music_prev(args):
+        import subprocess
+        subprocess.run(["playerctl", "previous"], capture_output=True, timeout=2)
+        return "prev"
+
+    # time
+    def time_now(args):
+        import time
+        return time.strftime("%H:%M")
+
+    def time_date(args):
+        import time
+        return time.strftime("%Y-%m-%d, %A")
+
+    # app
+    def app_launch(args):
+        import subprocess
+        name = args.get("name", "")
+        if not name:
+            return "no name"
+        subprocess.Popen([name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return f"launched {name}"
+
+    # browser
+    def browser_open(args):
+        import subprocess
+        url = args.get("url", "")
+        if not url:
+            return "no url"
+        subprocess.Popen(["xdg-open", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return f"opened {url}"
+
+    # power
+    def power_lock(args):
+        import subprocess
+        subprocess.Popen(["loginctl", "lock-session"],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return "locked"
+
+    # control (aura_ctl)
+    def control_pause(args):
+        import subprocess, sys
+        from pathlib import Path as P
+        ctl = P(__file__).parent.parent.parent / "scripts/aura_ctl.py"
+        subprocess.run([sys.executable, str(ctl), "pause"], timeout=5)
+        return "paused aura"
+
+    def control_resume(args):
+        import subprocess, sys
+        from pathlib import Path as P
+        ctl = P(__file__).parent.parent.parent / "scripts/aura_ctl.py"
+        subprocess.run([sys.executable, str(ctl), "resume"], timeout=5)
+        return "resumed aura"
+
     register("world.state", world_state)
+    register("music.play", music_play)
+    register("music.pause", music_pause)
+    register("music.next", music_next)
+    register("music.prev", music_prev)
+    register("time.now", time_now)
+    register("time.date", time_date)
+    register("app.launch", app_launch)
+    register("browser.open", browser_open)
+    register("power.lock", power_lock)
+    register("control.pause", control_pause)
+    register("control.resume", control_resume)
     register("context.recent", context_recent)
     register("care.list", care_list)
     register("care.add", care_add)

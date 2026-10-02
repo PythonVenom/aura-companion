@@ -62,6 +62,7 @@
 | 081 | SNI Tray (pystray) | Принято |
 | 080 | Web UI (universal HTML+JS) | Принято |
 | 079 | HTTP API (DE-agnostic) | Принято |
+| 107 | RouteTree Integration | Принято (MVP) |
 | 106 | Paths Module | Принято |
 | 105 | Bridge Architecture | Принято (MVP) |
 | 104 | Capability Dispatcher | Принято (MVP) |

@@ -59,6 +59,7 @@
 | 066 | ASR num_threads и idle CPU | Принято (частично) |
 | 067 | Widget Control Panel | Принято |
 | 062 | Dragon Core (визуальный слой) | Проект |
+| 081 | SNI Tray (pystray) | Принято |
 | 080 | Web UI (universal HTML+JS) | Принято |
 | 079 | HTTP API (DE-agnostic) | Принято |
 | 083 | Wake-word (openWakeWord) | Принято |

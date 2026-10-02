@@ -51,8 +51,9 @@ def _build_music_leaf():
     return Leaf(
         "music",
         match=lambda t, c: _has(t, "включи", "поставь", "играй",
-                                "следующ", "предыдущ", "pause", "play ",
-                                "включи музыку", "включи трек"),
+                                "следующ", "предыдущ", "next", "prev",
+                                "pause", "play ", "включи музыку",
+                                "включи трек", "музык", "трек", "песн"),
         action=action,
     )
 
@@ -65,7 +66,8 @@ def _build_time_leaf():
     return Leaf(
         "time",
         match=lambda t, c: _has(t, "который час", "сколько времени",
-                                "время", "дата", "какое сегодня", "time now"),
+                                "время", "дата", "какое сегодня",
+                                "какой день", "какой сегодня", "time now"),
         action=action,
     )
 
@@ -105,9 +107,9 @@ def _build_ask_leaf():
 
 def build_route_tree() -> Selector:
     return Selector("aura_root", [
+        _build_music_leaf(),
         _build_control_leaf(),
         _build_power_leaf(),
-        _build_music_leaf(),
         _build_time_leaf(),
         _build_browser_leaf(),
         _build_app_leaf(),

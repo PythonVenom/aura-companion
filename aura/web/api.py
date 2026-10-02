@@ -122,15 +122,11 @@ def create_app(orchestrator=None, bridge=None) -> FastAPI:
         if not text:
             raise HTTPException(status_code=400, detail="empty user message")
         # MVP: пишем в inbox (watcher обработает) + синхронный ответ через orchestrator
+        # File-based IPC: пишем в inbox, watcher обработает,
+        # UI поллит /chat/history через 2-3 сек.
+        # Sync-ответ не нужен (см. ADR-069, ADR-079).
         _append_chat(text)
-        aura_text = ""
-        if _orch is not None:
-            try:
-                import asyncio
-                aura_text = asyncio.run(_orch.process(text))
-            except Exception as e:
-                aura_text = f"error: {e}"
-        return ChatResponse(user=text, aura=aura_text, ts=time.time())
+        return ChatResponse(user=text, aura="", ts=time.time())
 
     return app
 

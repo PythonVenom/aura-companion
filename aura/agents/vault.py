@@ -27,7 +27,7 @@ class AgentVault(BaseAgent):
 
     name = "vault"
 
-    FACTS_FILE = os.path.expanduser("~/aura_project/vault.json")
+    FACTS_FILE = str(__import__("aura.paths", fromlist=["CACHE_DIR"]).CACHE_DIR / "vault.json")
 
     KEYWORDS = (
         "мои факты",

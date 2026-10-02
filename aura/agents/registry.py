@@ -47,7 +47,7 @@ class AgentRegistry(BaseAgent):
     MODULE_ALWAYS = True
 
     # Путь к файлу — не меняем при миграции
-    MEMORY_FILE = os.path.expanduser("~/aura_project/memory_registry.json")
+    MEMORY_FILE = str(__import__("aura.paths", fromlist=["CACHE_DIR"]).CACHE_DIR / "memory_registry.json")
 
     # Ключевые слова для can_handle
     KEYWORDS = (

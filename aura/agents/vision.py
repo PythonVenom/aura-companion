@@ -28,7 +28,7 @@ class AgentVision(BaseAgent):
 
     KEYWORDS = ("скриншот", "сделай снимок", "снимок экрана")
 
-    SCREENSHOT_PATH = os.path.expanduser("~/aura_project/screenshot.png")
+    SCREENSHOT_PATH = str(__import__("aura.paths", fromlist=["CACHE_DIR"]).CACHE_DIR / "screenshot.png")
 
     def __init__(self) -> None:
         self.is_wayland = _detect_wayland()

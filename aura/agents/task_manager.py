@@ -31,7 +31,7 @@ class AgentTaskManager(BaseAgent):
 
     name = "task_manager"
 
-    TASKS_FILE = os.path.expanduser("~/aura_project/tasks.json")
+    TASKS_FILE = str(__import__("aura.paths", fromlist=["CACHE_DIR"]).CACHE_DIR / "tasks.json")
 
     KEYWORDS = (
         "мои задачи",

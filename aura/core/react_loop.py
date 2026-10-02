@@ -1,31 +1,88 @@
-"""Full ReAct Loop — plan/act/observe/reflect (ADR-123).
+"""ReAct Loop — Reason + Act + Observe + Reflect (ADR-103).
 
-Наука:
-- Yao, S. et al. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. ICLR 2023.
-- Shinn, N. et al. (2023). Reflexion: Language Agents with Verbal Reinforcement Learning. NeurIPS.
-- Wang, X. et al. (2022). Self-Consistency Improves Chain of Thought Reasoning. ICLR 2023.
-- Yao, S. et al. (2023). Tree of Thoughts: Deliberate Problem Solving. NeurIPS.
+Итеративный цикл: план → действие → наблюдение → оценка → повтор.
+Используется для многошаговых задач («напиши сайт», «почини X»).
 
-Архитектура:
-    User input → THOUGHT → ACTION → OBSERVE → (loop ≤3) → ANSWER
-
-Безопасность:
-- max_iterations=3
-- whitelist capability (не все handler доступны)
-- каждый шаг → observability.log
-- при ошибке → graceful fallback
+MVP: 3 итерации макс, рефлексия через простые эвристики.
+Позже — LLM-рефлексия.
 """
 from __future__ import annotations
-import json
-import urllib.request
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Callable, Optional
 
-OLLAMA_URL = "http://localhost:11434/api/chat"
-MODEL = "qwen2.5:7b-instruct-q4_K_M"
-TIMEOUT = 30
 
-# Capability, доступные ReAct-агенту (не power.*, не control.*)
+@dataclass
+class Step:
+    iteration: int
+    operator: str
+    args: dict
+    result: str = ""
+    ok: bool = False
+    error: str = ""
+
+
+@dataclass
+class Episode:
+    goal: str
+    steps: list = field(default_factory=list)
+    done: bool = False
+    reason: str = ""
+
+
+class ReActLoop:
+    MAX_ITERATIONS = 3
+
+    def __init__(self, executor: Callable, reflector: Callable = None):
+        """executor(operator, args) → (ok, result_or_error)
+        reflector(goal, steps) → (done: bool, reason: str)
+        """
+        self.executor = executor
+        self.reflector = reflector or self._default_reflector
+
+    def _default_reflector(self, goal: str, steps: list) -> tuple:
+        """Simple: done если все шаги ok, иначе нет."""
+        if not steps:
+            return False, "no steps executed"
+        if all(s.ok for s in steps):
+            return True, "all steps succeeded"
+        return False, f"failed: {[s.error for s in steps if not s.ok]}"
+
+    def run(self, goal: str, operators: list) -> Episode:
+        ep = Episode(goal=goal)
+        for i, op in enumerate(operators[:self.MAX_ITERATIONS], 1):
+            step = Step(iteration=i, operator=op.capability, args=op.args)
+            try:
+                ok, result = self.executor(op.capability, op.args)
+                step.ok = bool(ok)
+                step.result = str(result)[:200]
+            except Exception as e:
+                step.ok = False
+                step.error = str(e)
+            ep.steps.append(step)
+
+        ep.done, ep.reason = self.reflector(goal, ep.steps)
+        return ep
+
+
+def format_episode(ep: Episode) -> str:
+    lines = [f"Цель: {ep.goal}", f"Статус: {'DONE' if ep.done else 'FAILED'}"]
+    for s in ep.steps:
+        mark = "OK" if s.ok else "ERR"
+        lines.append(f"  {s.iteration}. [{mark}] {s.operator} → {s.result or s.error}")
+    lines.append(f"Итог: {ep.reason}")
+    return "\n".join(lines)
+
+
+__all__ = ["Step", "Episode", "ReActLoop", "format_episode"]
+
+# ============ v4.0 (ADR-123): high-level ReAct ============
+import json as _json
+import urllib.request as _ur
+
+_REACT_MODEL = "qwen2.5:7b-instruct-q4_K_M"
+_REACT_URL = "http://localhost:11434/api/chat"
+_REACT_TIMEOUT = 30
+
 REACT_WHITELIST = {
     "music.play", "music.pause", "music.next", "music.prev",
     "time.now", "time.date",
@@ -35,118 +92,85 @@ REACT_WHITELIST = {
     "recon.run", "focus.enable", "focus.disable",
 }
 
-SYSTEM_PROMPT = """Ты — Аура, локальный семейный ИИ. Ты рассуждаешь шаг за шагом (ReAct).
-
-На каждом шаге верни ТОЛЬКО JSON:
-{"thought": "...", "action": "capability.name" или null, "args": {}, "answer": "..."}
-
-Правила:
-1. Если нужна информация/действие — задай action.
-2. Если можешь ответить прямо — задай answer, action=null.
-3. Не выдумывай capability, которых нет в списке.
-4. Отвечай кратко, по-русски.
-
-Доступные capabilities:
-- music.play (query), music.pause, music.next, music.prev
-- time.now, time.date
-- app.launch (name), browser.open (url)
-- world.state, context.recent (minutes)
-- care.list, journal.stats (days)
-- recon.run
-- focus.enable, focus.disable
-"""
+_REACT_SYSTEM = (
+    "Ты Аура. Рассуждай шаг за шагом. Верни ТОЛЬКО JSON: "
+    "{\"thought\":\"...\",\"action\":\"capability.name\" или null,"
+    "\"args\":{},\"answer\":\"...\"}. "
+    "Не выдумывай capability. Отвечай кратко по-русски."
+)
 
 
-@dataclass
-class ReActStep:
-    thought: str
-    action: Optional[str]
-    args: dict
-    observation: Optional[str] = None
-    answer: Optional[str] = None
+def should_use_react(text):
+    raw = text.lower().strip()
+    t = " " + raw + " "
+    markers = (" и потом ", " и заодно ", " сначала ", " после этого ",
+               " если ", " когда ", " а затем ", " затем ")
+    if any(m in t for m in markers):
+        return True
+    if len(raw.split()) > 12:
+        return True
+    return False
 
 
-def _llm(messages: list[dict]) -> Optional[dict]:
+def _llm_json(messages):
     try:
-        data = json.dumps({
-            "model": MODEL,
+        data = _json.dumps({
+            "model": _REACT_MODEL,
             "messages": messages,
             "stream": False,
             "format": "json",
             "options": {"temperature": 0.3, "num_predict": 400},
         }).encode("utf-8")
-        req = urllib.request.Request(OLLAMA_URL, data=data,
-                                     headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-            body = json.loads(r.read().decode("utf-8"))
+        req = _ur.Request(_REACT_URL, data=data,
+                          headers={"Content-Type": "application/json"})
+        with _ur.urlopen(req, timeout=_REACT_TIMEOUT) as r:
+            body = _json.loads(r.read().decode("utf-8"))
         text = body.get("message", {}).get("content", "").strip()
-        return json.loads(text) if text else None
+        return _json.loads(text) if text else None
     except Exception:
         return None
 
 
-def react_loop(user_text: str, max_iterations: int = 3,
-               history: Optional[list[dict]] = None) -> dict:
-    """Запустить ReAct. Возвращает {answer, steps, iterations}."""
-    try:
-        from aura.observability import new_trace, log
-        new_trace("react")
-    except Exception:
-        log = lambda *a, **kw: None
-
-    messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
+def react_loop(user_text, max_iterations=3, history=None):
+    msgs = [{"role": "system", "content": _REACT_SYSTEM}]
     if history:
-        messages.extend(history[-5:])
-    messages.append({"role": "user", "content": user_text})
+        msgs.extend(history[-5:])
+    msgs.append({"role": "user", "content": user_text})
 
-    steps: list[ReActStep] = []
+    steps = []
     for i in range(max_iterations):
-        obj = _llm(messages)
+        obj = _llm_json(msgs)
         if not obj:
-            log("react.llm_fail", iteration=i)
             break
+        thought = str(obj.get("thought", ""))
+        action = obj.get("action")
+        args = obj.get("args") or {}
+        answer = obj.get("answer")
+        steps.append({"thought": thought, "action": action,
+                      "args": args, "answer": answer})
 
-        step = ReActStep(
-            thought=str(obj.get("thought", "")),
-            action=obj.get("action"),
-            args=obj.get("args") or {},
-            answer=obj.get("answer"),
-        )
-        steps.append(step)
-        log("react.step", iteration=i, action=step.action or "answer")
+        if answer and not action:
+            return {"answer": answer, "steps": steps, "iterations": i + 1}
 
-        if step.answer and not step.action:
-            return {"answer": step.answer, "steps": steps, "iterations": i + 1}
-
-        if step.action:
-            if step.action not in REACT_WHITELIST:
-                step.observation = f"capability '{step.action}' недоступна"
+        if action:
+            if action not in REACT_WHITELIST:
+                obs = "capability недоступна: " + action
             else:
                 try:
                     from aura.core import dispatcher
-                    ok, res = dispatcher.dispatch(step.action, step.args)
-                    step.observation = res if ok else f"error: {res}"
+                    ok, res = dispatcher.dispatch(action, args)
+                    obs = res if ok else "error: " + str(res)
                 except Exception as e:
-                    step.observation = f"exception: {e}"
-            messages.append({"role": "assistant", "content": json.dumps({
-                "thought": step.thought, "action": step.action, "args": step.args
-            }, ensure_ascii=False)})
-            messages.append({"role": "user", "content": f"Observation: {step.observation}"})
+                    obs = "exception: " + str(e)
+            msgs.append({"role": "assistant",
+                         "content": _json.dumps({"thought": thought,
+                                                 "action": action,
+                                                 "args": args},
+                                                ensure_ascii=False)})
+            msgs.append({"role": "user", "content": "Observation: " + obs})
 
-    # Финальный ответ если не было answer
-    final = steps[-1].answer if steps and steps[-1].answer else             (steps[-1].observation if steps else "Не смогла")
-    return {"answer": final, "steps": steps, "iterations": len(steps)}
-
-
-def should_use_react(text: str) -> bool:
-    """Эвристика: использовать ли ReAct вместо простого dispatch."""
-    t = text.lower()
-    # Многошаговые маркеры
-    markers = (" и потом ", " и заодно ", " сначала ", " после этого ",
-               " если ", " когда ", " а затем ", " затем ")
-    if any(m in t for m in markers):
-        return True
-    # Длинные запросы
-    if len(text.split()) > 12:
-        return True
-    return False
+    final = steps[-1].get("answer") if steps else None
+    if not final and steps and steps[-1].get("observation"):
+        final = steps[-1]["observation"]
+    return {"answer": final or "Не смогла",
+            "steps": steps, "iterations": len(steps)}

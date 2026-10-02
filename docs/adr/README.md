@@ -62,6 +62,7 @@
 | 081 | SNI Tray (pystray) | Принято |
 | 080 | Web UI (universal HTML+JS) | Принято |
 | 079 | HTTP API (DE-agnostic) | Принято |
+| 104 | Capability Dispatcher | Принято (MVP) |
 | 103 | ReAct Loop | Принято (MVP) |
 | 102 | HTN Planner | Принято (MVP) |
 | 101 | Capability Graph | Принято (MVP) |

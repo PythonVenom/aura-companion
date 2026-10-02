@@ -29,11 +29,8 @@ class AgentReact(BaseAgent):
         if not ops:
             return AgentResponse.ok(f"Нет плана для: {goal}", self.name)
 
-        # Mock executor: пока без реального действия — просто отчёт
-        def mock_exec(cap, args):
-            return True, f"step {cap} acknowledged"
-
-        loop = ReActLoop(executor=mock_exec)
+        from aura.core.dispatcher import dispatch
+        loop = ReActLoop(executor=dispatch)
         ep = loop.run(goal, ops)
         return AgentResponse.ok(format_episode(ep), self.name)
 

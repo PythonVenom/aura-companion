@@ -12,6 +12,9 @@ class AgentPlanner(BaseAgent):
 
     def can_handle(self, request):
         t = request.text.lower().strip()
+        # Не перехватывать «выполни план» — это AgentReact
+        if "выполни план" in t or "запусти план" in t or "сделай по плану" in t:
+            return False
         return any(k in t for k in self.KEYWORDS)
 
     async def handle(self, request):

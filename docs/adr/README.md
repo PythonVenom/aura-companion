@@ -106,3 +106,13 @@
 3. Обновить README
 4. Коммит `docs(adr): ADR-XXX`
 | 109 | Post-Release Review (PRR) | Принято |
+| 110 | GitHub Face Refresh | Проект |
+| 111 | Threat Model (STRIDE) | Проект |
+| 112 | Observability (logs+traces) | Проект |
+| 113 | Bridge Auth | Проект |
+| 114 | Backup/Restore/Migration | Проект |
+| 115 | Honeypots & Deception | Проект |
+| 118 | Core i18n | Проект |
+| 119 | Scaffold Framework | Проект |
+| 120 | Plugin System | Проект |
+| 121 | Config-Driven Features | Проект |

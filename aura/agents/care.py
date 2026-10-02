@@ -1,7 +1,4 @@
-"""CareAgent — напоминания для автора (еда, вода, таблетки, сон).
-
-ADR-085. Учитывает особенности: грыжи, 10ч/день, забывает о себе.
-"""
+"""CareAgent — напоминания (еда, вода, сон) — ADR-085."""
 from __future__ import annotations
 import json
 from dataclasses import dataclass, field, asdict
@@ -25,14 +22,13 @@ class CareTask:
 def should_trigger(task: CareTask, now: datetime) -> bool:
     if not task.enabled:
         return False
-    hhmm = now.strftime("%H:%M")
-    return hhmm in task.times
+    return now.strftime("%H:%M") in task.times
 
 
 class CareAgent(BaseAgent):
     name = "care"
     MODULE_ALWAYS = True
-    KEYWORDS = ("напомни", "напоминания", "напоминание", "пить воду",
+    KEYWORDS = ("напомни", "напоминания", "пить воду",
                 "поесть", "таблетки", "поспать", "забота")
 
     def __init__(self):
@@ -48,10 +44,8 @@ class CareAgent(BaseAgent):
                 return
             except Exception:
                 pass
-        # Defaults
-        self.add_task("water", ["10:00", "13:00", "16:00", "19:00"],
-                      "Выпей воды")
-        self.add_task("food", ["09:00", "14:00", "19:00"], "Поешь")
+        self.add_task("water", ["10:00","13:00","16:00","19:00"], "Выпей воды")
+        self.add_task("food", ["09:00","14:00","19:00"], "Поешь")
         self.add_task("sleep", ["23:00"], "Пора спать")
         self._save()
 
@@ -80,9 +74,9 @@ class CareAgent(BaseAgent):
     async def handle(self, request: AgentRequest) -> AgentResponse:
         if not self.can_handle(request):
             return AgentResponse.not_handled(self.name)
-        lines = ["📋 Напоминания:"]
+        lines = ["Напоминания:"]
         for t in self.tasks:
-            lines.append(f"  • {t.name}: {', '.join(t.times)} — {t.message}")
+            lines.append(f"  - {t.name}: {', '.join(t.times)} — {t.message}")
         return AgentResponse.ok("\n".join(lines), self.name)
 
 

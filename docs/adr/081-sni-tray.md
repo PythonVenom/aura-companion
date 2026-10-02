@@ -43,3 +43,10 @@ StatusNotifierItem (SNI) — стандарт D-Bus, покрывает ~90% Lin
 
 ## Ссылки
 ADR-079 (HTTP API), ADR-080 (Web UI), ADR-067 (Plasma widget)
+
+
+## Реализовано (2026-10-02)
+- aura/core/tray.py — SNI через pystray (90% DE)
+- contrib/gnome-extension/ — GNOME Shell Extension (skeleton, polling /status)
+- contrib/cinnamon-applet/ — Cinnamon applet (skeleton, polling /status)
+- contrib/xfce-plugin/ — XFCE genmon (готов к использованию)

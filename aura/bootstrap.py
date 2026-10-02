@@ -102,9 +102,10 @@ def _try_register(orch, agent_class, config: dict) -> bool:
 
 
 def _load_plugins(orch) -> int:
-    """Загрузить плагины из ~/.local/share/aura/plugins/ (ADR-090)."""
+    """Загрузить плагины и зарегистрировать их агентов в оркестраторе (ADR-090)."""
     try:
         from aura.core.plugin_manager import PluginManager
+        from aura.core.plugin_adapter import register_plugin_agent
         pm = PluginManager()
         plugins = pm.list_plugins()
         loaded = 0
@@ -118,13 +119,23 @@ def _load_plugins(orch) -> int:
                 spec = importlib.util.spec_from_file_location(f"aura_plugin_{p.id}", py)
                 mod = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(mod)
-                loaded += 1
+                # Найти первый класс с методом can_handle
+                agent_cls = None
+                for name in dir(mod):
+                    obj = getattr(mod, name)
+                    if isinstance(obj, type) and hasattr(obj, "can_handle") and hasattr(obj, "handle"):
+                        agent_cls = obj
+                        break
+                if agent_cls is not None:
+                    register_plugin_agent(orch, agent_cls, p.id)
+                    loaded += 1
             except Exception as e:
                 print(f"⚠️ plugin {p.id}: {e}")
         if loaded:
             print(f"🔌 Плагинов загружено: {loaded}")
         return loaded
-    except Exception:
+    except Exception as e:
+        print(f"⚠️ _load_plugins: {e}")
         return 0
 
 

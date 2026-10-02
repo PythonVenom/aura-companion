@@ -9,10 +9,12 @@ TAG="${1:?usage: release.sh vX.Y [-m message]}"
 MSG="${2:-Release $TAG}"
 
 echo "==> 1/5 pytest"
-if ! pytest -q 2>&1 | tail -1 | grep -q "passed" || pytest -q 2>&1 | grep -q "failed"; then
-    echo "❌ pytest не зелёный — тег отменён"
+if ! pytest -q >/tmp/aura_pytest.log 2>&1; then
+    tail -5 /tmp/aura_pytest.log
+    echo "❌ pytest exit != 0 — тег отменён"
     exit 1
 fi
+tail -1 /tmp/aura_pytest.log
 
 echo "==> 2/5 git status clean?"
 if [ -n "$(git status --porcelain)" ]; then

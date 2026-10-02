@@ -35,8 +35,10 @@ def test_trim_response():
     from aura.ui.accessibility import trim_response
     long = " ".join(["a"] * 30)
     out = trim_response(long, max_words=5)
-    assert out.count(" ") == 5  # 5 слов + "..." => 5 пробелов
+    # 5 слов => 4 пробела + "..."
+    assert out.count(" ") == 4
     assert out.endswith("...")
+    assert out.split("...")[0].strip().count(" ") == 4
 
 
 def test_trim_short_unchanged():

@@ -117,3 +117,8 @@
 | 120 | Plugin System | Проект |
 | 121 | Config-Driven Features | Проект |
 | 116 | Evals v0 (golden dataset) | Принято |
+| 122 | Memory Architecture (10 слоёв) | Принято |
+| 125 | Social Memory (Family Graph) | Принято |
+| 126 | Meta-Memory (Confidence) | Принято |
+| 127 | LLM Inference Upgrade | Принято |
+| 128 | Hallucination Evaluation | Принято |

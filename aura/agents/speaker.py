@@ -20,7 +20,7 @@ from aura.agents.base import MicroAgent
 class AgentSpeaker(MicroAgent):
     def __init__(self):
         super().__init__("speaker", "Голос Ауры")
-        self.voice_path = os.path.expanduser("~/aura_project/voices/ru_RU-irina-medium.onnx")
+        self.voice_path = str(__import__("aura.paths", fromlist=["MODELS_DIR"]).MODELS_DIR / "voices/ru_RU-irina-medium.onnx")
         self.piper_cmd = os.path.expanduser("~/.local/bin/piper")
         self.aplay_process = None
         self.speech_queue = queue.Queue()

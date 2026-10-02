@@ -50,7 +50,7 @@ class AgentVKMusic(BaseAgent):
 
     TOKEN_PATHS = [
         "vk_token.txt",
-        os.path.expanduser("~/aura_project/vk_token.txt"),
+        str(__import__("aura.paths", fromlist=["CACHE_DIR"]).CACHE_DIR / "vk_token.txt"),
         os.path.expanduser("~/vk_token.txt"),
         "./vk_token.txt",
     ]

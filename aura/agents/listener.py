@@ -52,7 +52,7 @@ class AgentListener(MicroAgent):
             self.sd = sd
             self.np = np
 
-            model_dir = os.path.expanduser("~/aura_project/sherpa-onnx-streaming-t-one-russian-2025-09-08")
+            model_dir = str(__import__("aura.paths", fromlist=["MODELS_DIR"]).MODELS_DIR / "sherpa-onnx-streaming-t-one-russian-2025-09-08")
             model = os.path.join(model_dir, "model.onnx")
             tokens = os.path.join(model_dir, "tokens.txt")
 

@@ -55,7 +55,7 @@ class AgentJournal(BaseAgent):
     MODULE_ALWAYS = True
 
     # Путь к журналу — не меняем при миграции
-    JOURNAL_FILE = os.path.expanduser("~/aura_project/JOURNAL.md")
+    JOURNAL_FILE = str(__import__("aura.paths", fromlist=["CACHE_DIR"]).CACHE_DIR / "JOURNAL.md")
 
     # Ключевые слова для can_handle
     SHOW_KEYWORDS = ("покажи журнал", "что я делал", "что было")

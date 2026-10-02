@@ -168,6 +168,13 @@ def build_orchestrator() -> Orchestrator:
     Returns:
         Orchestrator с зарегистрированными агентами.
     """
+    # Honeypots (ADR-115): устанавливаем canary-файлы при старте
+    try:
+        from aura.security import canary
+        canary.install()
+    except Exception:
+        pass
+
     tool_router = AgentToolRouter()
     # Bug 47: AURA_BRAIN=0 в env → brain отключён (fast path для видео)
     import os as _os

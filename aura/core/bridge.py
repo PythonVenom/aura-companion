@@ -20,12 +20,29 @@ SOCKET_PATH = "/tmp/aura_firefox.sock"
 DEFAULT_TIMEOUT = 5.0
 
 
+def _load_token() -> str:
+    """Bridge token (ADR-113). Мягкий режим."""
+    from pathlib import Path as _P
+    p = _P.home() / ".config" / "aura" / "bridge_token"
+    if not p.exists():
+        return ""
+    try:
+        return p.read_text(encoding="utf-8").strip()
+    except Exception:
+        return ""
+
+
 def send_command(cmd: dict, timeout: float = DEFAULT_TIMEOUT) -> dict | None:
     """
     Отправить команду в bridge. Получить ответ.
 
     Возвращает dict. При ошибках — {"error": "..."}.
     """
+    # ADR-113: добавляем токен (мягкий режим)
+    tok = _load_token()
+    if tok:
+        cmd = {**cmd, "_token": tok}
+
     try:
         payload = json.dumps(cmd, ensure_ascii=False).encode("utf-8")
         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:

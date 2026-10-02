@@ -27,6 +27,7 @@ from aura.agents.recon import AgentRecon
 from aura.agents.journal_mood import VoiceJournal
 from aura.agents.capability_agent import AgentCapabilities
 from aura.agents.planner_agent import AgentPlanner
+from aura.agents.react_agent import AgentReact
 
 from aura.agents.massage import AgentMassage
 from aura.agents.dictation import AgentDictation
@@ -203,6 +204,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentRegistry, modules_config)
     _try_register(orch, AgentCapabilities, modules_config)
     _try_register(orch, AgentPlanner, modules_config)
+    _try_register(orch, AgentReact, modules_config)
     _try_register(orch, AgentFunctions, modules_config)
     _try_register(orch, AgentUpdates, modules_config)
     _try_register(orch, AgentSecurity, modules_config)

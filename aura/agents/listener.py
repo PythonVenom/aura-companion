@@ -22,6 +22,7 @@ import os
 import queue
 import time
 from aura.agents.base import MicroAgent
+from aura.core.vad import VoiceGate
 
 
 class AgentListener(MicroAgent):
@@ -34,6 +35,15 @@ class AgentListener(MicroAgent):
         # Bug 48: T-one обучен на 16kHz. 8kHz → сдвиг частот ×2 → ошибки ASR.
         # Env override: AURA_ASR_SR=8000 для проверки.
         self.sample_rate = int(os.environ.get("AURA_ASR_SR", "16000"))
+
+        # Bug 72 / ADR-075: VAD-гейт перед ASR (webrtcvad)
+        try:
+            self.voice_gate = VoiceGate(
+                sample_rate=self.sample_rate, aggressiveness=3, mode=2
+            )
+        except Exception as e:
+            print(f"⚠️ VoiceGate: {e}")
+            self.voice_gate = None
 
         try:
             import sherpa_onnx
@@ -125,10 +135,18 @@ class AgentListener(MicroAgent):
                     data = None
 
                 if data is not None:
-                    chunk = data.astype(self.np.float32).flatten() / 32768.0
-                    s.accept_waveform(self.sample_rate, chunk)
-                    while self.recognizer.is_ready(s):
-                        self.recognizer.decode_stream(s)
+                    accept = True
+                    if self.voice_gate is not None:
+                        try:
+                            if not self.voice_gate.is_speech(data.tobytes()):
+                                accept = False
+                        except Exception as e:
+                            print(f"⚠️ VAD: {e}", flush=True)
+                    if accept:
+                        chunk = data.astype(self.np.float32).flatten() / 32768.0
+                        s.accept_waveform(self.sample_rate, chunk)
+                        while self.recognizer.is_ready(s):
+                            self.recognizer.decode_stream(s)
 
                 text_now = self.recognizer.get_result(s).strip().lower()
 

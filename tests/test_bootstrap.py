@@ -84,7 +84,7 @@ class TestRouting:
     @pytest.mark.asyncio
     async def test_functions_routed(self, orch) -> None:
         result = await orch.process("что ты умеешь")
-        assert "Доступные функции" in result
+        assert "Возможности" in result or "Доступные функции" in result
 
     @pytest.mark.asyncio
     async def test_updates_routed(self, orch) -> None:

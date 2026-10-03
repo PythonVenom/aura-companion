@@ -35,9 +35,13 @@ TEMPLATES = {
 def render(intent: str, **kw) -> str:
     tpl = TEMPLATES.get(intent, TEMPLATES["unknown"])
     try:
-        return tpl.format(**kw)
+        out = tpl.format(**kw)
+        # если placeholder не заполнен (остались {xxx}) — unknown
+        if "{" in out and "}" in out:
+            return TEMPLATES["unknown"]
+        return out
     except KeyError:
-        return tpl
+        return TEMPLATES["unknown"]
 
 
 def render_now(intent: str) -> str:

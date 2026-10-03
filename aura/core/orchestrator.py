@@ -143,7 +143,9 @@ class Orchestrator:
         agent = self.registry.find(request)
         if agent is None:
             # 2. TIER0_FASTPATH (ADR-152): 90% простых команд — мгновенно
-            #    (только если ни один агент не взял)
+            #    (только если ни один агент не взял И dispatcher есть)
+            if self.dispatcher is None:
+                return self.fallback_text
             try:
                 from aura.core.tier0_orchestrator import get_tier0
                 t0 = get_tier0().process(text)

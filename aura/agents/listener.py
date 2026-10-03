@@ -77,15 +77,12 @@ class AgentListener(MicroAgent):
             self.ready = False
 
     def pause(self):
-        """Mute mic — на время TTS Aura."""
+        """Mute mic — на время TTS Aura (Bug 74, ITU-T G.168)."""
         self._paused = True
-        self.audio_queue = None
 
     def resume(self):
         """Unmute mic — после TTS + cooldown."""
         self._paused = False
-        import queue
-        self.audio_queue = queue.Queue()
 
     def set_last_response(self, text: str):
         """Сохранить последний TTS — для self-echo detection."""
@@ -122,6 +119,16 @@ class AgentListener(MicroAgent):
         return self.stream
 
     def listen(self, timeout=6):
+        # ECHO FILTER (Bug 74): не слушаем если paused, отсеиваем эхо
+        if self._paused:
+            return ""
+        result = self._listen_impl(timeout)
+        if result and self._is_self_echo(result):
+            print(f"🔇 Echo ignored: {result[:40]}")
+            return ""
+        return result
+
+    def _listen_impl(self, timeout=6):
         """
         Слушать микрофон до endpoint, тишины или таймаута.
 

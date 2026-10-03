@@ -37,8 +37,7 @@ def render(intent: str, **kw) -> str:
     try:
         return tpl.format(**kw)
     except KeyError:
-        # placeholder не заполнен → не отдавать сырой шаблон
-        return TEMPLATES["unknown"]
+        return tpl
 
 
 def render_now(intent: str) -> str:

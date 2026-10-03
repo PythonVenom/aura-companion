@@ -182,7 +182,7 @@ def build_orchestrator() -> Orchestrator:
         _root = _P(__file__).resolve().parents[1]
         _sys.path.insert(0, str(_root))
         from scripts.hardware_detect import detect, save as _hw_save
-        from aura.inference.model_selector import select as _ms_select, save as _ms_save, summary as _ms_summary
+        from aura.inference.model_selector import select as _ms_select, save as _ms_save
         _hw = detect()
         _cfg = _ms_select(_hw)
         _hw_save(_hw)

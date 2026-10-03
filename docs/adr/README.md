@@ -127,3 +127,7 @@
 | 131 | Meta-Memory (Confidence & Calibration) | Принято |
 | 133 | Verifier + Red Team | Принято |
 | 132 | NLU Embeddings | Принято |
+| 139 | Quantization + Legacy Hardware | Принято |
+| 151 | Hardware Profiles | Принято |
+| 152 | Aura Tier 0 — Minimal Core | Принято |
+| 153 | Self-Configuration | Принято |

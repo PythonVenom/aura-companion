@@ -1,0 +1,21 @@
+# Hardware profiles (ADR-151)
+minimal:
+  desc: "Elder care / слабое железо (Pentium, 8GB)"
+  model: "qwen2.5:1.5b-instruct-q4_K_M"
+  react_max_iterations: 1
+  streaming: true
+  max_response_words: 15
+
+standard:
+  desc: "Домашний ноут (8-16 GB)"
+  model: "qwen2.5:3b-instruct-q4_K_M"
+  react_max_iterations: 2
+  streaming: true
+  max_response_words: 30
+
+powerful:
+  desc: "Десктоп / сервер (16+ GB)"
+  model: "qwen2.5:7b-instruct-q4_K_M"
+  react_max_iterations: 3
+  streaming: true
+  max_response_words: 0

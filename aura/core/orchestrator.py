@@ -37,7 +37,7 @@ def _mem_read(text: str):
         return []
 
 def _mem_write(user_text: str, aura_text: str):
-    """Записать в working + episodic + extractor (semantic/social)."""
+    """EXTRACTOR_RUNTIME (ADR-122): работа + эпизод + semantic + social."""
     try:
         from aura.core.context_manager import get_context_manager
         cm = get_context_manager()
@@ -50,10 +50,17 @@ def _mem_write(user_text: str, aura_text: str):
         get_episodic().remember(user_text, aura_text)
     except Exception:
         pass
+    # EXTRACTOR_RUNTIME: semantic + social в фоне (thread)
     try:
-        from aura.core.memory.extractor import apply_semantic, apply_social
-        apply_semantic(user_text)
-        apply_social(user_text)
+        import threading
+        def _bg():
+            try:
+                from aura.core.memory.extractor import apply_semantic, apply_social
+                apply_semantic(user_text)
+                apply_social(user_text)
+            except Exception:
+                pass
+        threading.Thread(target=_bg, daemon=True).start()
     except Exception:
         pass
 
@@ -107,7 +114,23 @@ class Orchestrator:
         except Exception:
             pass
 
-        # Constitution (ADR-129) — проверка ПЕРЕД любым ответом
+        # TIER0_FASTPATH (ADR-152): 90% команд — мгновенно
+        try:
+            from aura.core.tier0_orchestrator import get_tier0
+            t0 = get_tier0().process(text)
+            if t0.source in ("constitution", "dispatcher", "template"):
+                try:
+                    from aura.observability import log as _log
+                    _log("tier0.hit", source=t0.source, intent=t0.intent)
+                except Exception:
+                    pass
+                _mem_write(text, t0.response)
+                return t0.response
+            # fallback → продолжаем в LLM
+        except Exception as e:
+            print(f"⚠️ Tier0: {e}")
+
+        # Constitution (ADR-129) — резервная проверка (Tier0 уже проверил)
         try:
             from aura.core.constitution import check as _const_check
             allowed, refusal, rule_id = _const_check(text)

@@ -175,6 +175,22 @@ def build_orchestrator() -> Orchestrator:
     except Exception:
         pass
 
+    # AUTO_CONFIG_V7 (ADR-153): детект железа → профиль
+    try:
+        import sys as _sys
+        from pathlib import Path as _P
+        _root = _P(__file__).resolve().parents[1]
+        _sys.path.insert(0, str(_root))
+        from scripts.hardware_detect import detect, save as _hw_save
+        from aura.inference.model_selector import select as _ms_select, save as _ms_save, summary as _ms_summary
+        _hw = detect()
+        _cfg = _ms_select(_hw)
+        _hw_save(_hw)
+        _ms_save(_cfg)
+        print(f"🔧 Hardware: {_hw.profile} | LLM: {_cfg.llm or '(none)'}")
+    except Exception as _e:
+        print(f"⚠️ Auto-config: {_e}")
+
     tool_router = AgentToolRouter()
     # Bug 47: AURA_BRAIN=0 в env → brain отключён (fast path для видео)
     import os as _os

@@ -59,12 +59,26 @@ class SemanticMemory:
         return self._ready
 
     def _embed(self, text: str) -> Optional[list[float]]:
+        # CACHE_V7 (ADR-153): LRU
+        try:
+            from aura.core.caches import emb_get, emb_put
+            cached = emb_get(text)
+            if cached:
+                return cached
+        except Exception:
+            emb_put = lambda *a, **kw: None
         try:
             data = json.dumps({"model": EMBED_MODEL, "prompt": text}).encode("utf-8")
             req = urllib.request.Request(EMBED_URL, data=data,
                                          headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(req, timeout=15) as r:
-                return json.loads(r.read().decode("utf-8")).get("embedding")
+                emb = json.loads(r.read().decode("utf-8")).get("embedding")
+                if emb:
+                    try:
+                        emb_put(text, emb)
+                    except Exception:
+                        pass
+                return emb
         except Exception:
             return None
 

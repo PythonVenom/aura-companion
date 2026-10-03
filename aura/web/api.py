@@ -20,6 +20,10 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+# DEDUP (Bug 74): защита от API-loop
+_LAST_CHAT: dict = {}  # {user_text: ts}
+_DEDUP_SEC = 2.0
+
 
 class ChatRequest(BaseModel):
     user: str
@@ -121,6 +125,19 @@ def create_app(orchestrator=None, bridge=None) -> FastAPI:
         text = (req.user or "").strip()
         if not text:
             raise HTTPException(status_code=400, detail="empty user message")
+        # DEDUP (Bug 74): не принимать тот же текст < 2 сек
+        import time as _t
+        now = _t.time()
+        last = _LAST_CHAT.get(text, 0)
+        if now - last < _DEDUP_SEC:
+            print(f"🔇 API dedup: {text[:40]}")
+            return ChatResponse(user=text, aura="(dedup)", ts=now)
+        _LAST_CHAT[text] = now
+        # Чистка старых ключей
+        if len(_LAST_CHAT) > 100:
+            cutoff = now - 60
+            _LAST_CHAT.clear()
+            _LAST_CHAT.update({k: v for k, v in _LAST_CHAT.items() if v > cutoff})
         # MVP: пишем в inbox (watcher обработает) + синхронный ответ через orchestrator
         # File-based IPC: пишем в inbox, watcher обработает,
         # UI поллит /chat/history через 2-3 сек.

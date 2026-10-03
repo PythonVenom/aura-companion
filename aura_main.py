@@ -483,6 +483,11 @@ class AuraOrchestrator:
         return False
 
     def _drain_chat_queue(self) -> None:
+        # CHAT_DEDUP (Bug 74): не обрабатывать одинаковое < 2 сек
+        import time as _t
+        if not hasattr(self, "_chat_dedup"):
+            self._chat_dedup = {}
+        _DEDUP_SEC = 2.0
         """Обработать сообщения из чата (ChatBridge → orchestrator → history)."""
         while True:
             try:
@@ -492,6 +497,12 @@ class AuraOrchestrator:
             user_text = (msg or {}).get("user", "").strip()
             if not user_text:
                 continue
+            # CHAT_DEDUP: skip если то же < 2 сек
+            _now = _t.time()
+            if _now - self._chat_dedup.get(user_text, 0) < _DEDUP_SEC:
+                print(f"🔇 chat dedup: {user_text[:40]}")
+                continue
+            self._chat_dedup[user_text] = _now
             try:
                 response = asyncio.run(self.orch.process(user_text))
             except Exception as e:

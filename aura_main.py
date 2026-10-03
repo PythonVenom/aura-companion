@@ -228,28 +228,41 @@ class AuraOrchestrator:
                 print(f"⚠️ Resume: {e}")
 
     def _say_with_duck(self, text: str) -> None:
-        """Сказать короткое сообщение с паузой музыки (блокирующе).
+        """MIC_MUTE_FIX (ITU-T G.168): глушим mic на TTS + cooldown 1.5с.
 
-        Ждём is_speaking, а не aplay_process: say() ставит флаг
-        синхронно, а aplay_process создаётся в потоке позже
-        (после синтеза piper). Иначе resume срабатывает мгновенно.
+        Иначе Aura слышит свой же голос → echo-loop (Bug 74).
         """
         print(f"🔊 Скажу: {text[:80]}")
-        # Bug 46: _ensure_aec ОТКЛЮЧЁН (pactl мог зависнуть → deadlock)
-        # AEC работает через source, уже переключён вручную.
+        # MIC_MUTE_FIX: mute mic + запомнили ответ
+        try:
+            if self.listener is not None:
+                self.listener.pause()
+                self.listener.set_last_response(text)
+        except Exception as e:
+            print(f"⚠️ listener.pause: {e}")
+
         self._duck_on()
         self._set_barge_speaking(True)
-        self.speaker.say(text)
-        # Bug 46: timeout 30 сек — если is_speaking застрял True, не висим вечно
-        _wait_start = time.time()
-        while self.speaker.is_speaking:
-            if time.time() - _wait_start > 30:
-                print("⚠️ Speaker timeout 30с — принудительный reset")
-                self.speaker.is_speaking = False
-                break
-            time.sleep(0.05)
-        self._set_barge_speaking(False)
-        self._duck_off()
+        try:
+            self.speaker.say(text)
+            _wait_start = time.time()
+            while self.speaker.is_speaking:
+                if time.time() - _wait_start > 30:
+                    print("⚠️ Speaker timeout 30с")
+                    self.speaker.is_speaking = False
+                    break
+                time.sleep(0.05)
+        finally:
+            self._set_barge_speaking(False)
+            self._duck_off()
+            # cooldown 1.5с — эхо затихнет
+            time.sleep(1.5)
+            # unmute
+            try:
+                if self.listener is not None:
+                    self.listener.resume()
+            except Exception as e:
+                print(f"⚠️ listener.resume: {e}")
 
     @classmethod
     def _activation_words(cls):

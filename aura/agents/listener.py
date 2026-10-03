@@ -32,6 +32,9 @@ class AgentListener(MicroAgent):
         self.recognizer = None
         self.stream = None
         self.audio_queue = None
+        # Echo-loop fix: pause mic on TTS + self-echo filter (ITU-T G.168)
+        self._paused = False
+        self._last_response = ""
         # Bug 48: T-one обучен на 16kHz. 8kHz → сдвиг частот ×2 → ошибки ASR.
         # Env override: AURA_ASR_SR=8000 для проверки.
         self.sample_rate = int(os.environ.get("AURA_ASR_SR", "16000"))
@@ -72,6 +75,32 @@ class AgentListener(MicroAgent):
         except Exception as e:
             print(f"⚠️ Ошибка T-one: {e}")
             self.ready = False
+
+    def pause(self):
+        """Mute mic — на время TTS Aura."""
+        self._paused = True
+        self.audio_queue = None
+
+    def resume(self):
+        """Unmute mic — после TTS + cooldown."""
+        self._paused = False
+        import queue
+        self.audio_queue = queue.Queue()
+
+    def set_last_response(self, text: str):
+        """Сохранить последний TTS — для self-echo detection."""
+        self._last_response = text or ""
+
+    def _is_self_echo(self, heard: str) -> bool:
+        """Jaccard similarity > 0.7 → это эхо, не юзер."""
+        if not self._last_response or not heard:
+            return False
+        a = set(heard.lower().split())
+        b = set(self._last_response.lower().split())
+        if not a or not b:
+            return False
+        j = len(a & b) / len(a | b)
+        return j > 0.7
 
     def _audio_callback(self, indata, frames, time_info, status):
         if status:

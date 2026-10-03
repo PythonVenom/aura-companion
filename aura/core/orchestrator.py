@@ -115,18 +115,20 @@ class Orchestrator:
             pass
 
         # TIER0_FASTPATH (ADR-152): 90% команд — мгновенно
+        # TIER0_GUARD: не перехватываем если orchestrator пустой (тесты)
         try:
-            from aura.core.tier0_orchestrator import get_tier0
-            t0 = get_tier0().process(text)
-            if t0.source in ("constitution", "dispatcher", "template"):
-                try:
-                    from aura.observability import log as _log
-                    _log("tier0.hit", source=t0.source, intent=t0.intent)
-                except Exception:
-                    pass
-                _mem_write(text, t0.response)
-                return t0.response
-            # fallback → продолжаем в LLM
+            if len(self.registry) > 0:
+                from aura.core.tier0_orchestrator import get_tier0
+                t0 = get_tier0().process(text)
+                if t0.source in ("constitution", "dispatcher", "template"):
+                    try:
+                        from aura.observability import log as _log
+                        _log("tier0.hit", source=t0.source, intent=t0.intent)
+                    except Exception:
+                        pass
+                    _mem_write(text, t0.response)
+                    return t0.response
+                # fallback → продолжаем в LLM
         except Exception as e:
             print(f"⚠️ Tier0: {e}")
 

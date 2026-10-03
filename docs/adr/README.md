@@ -124,3 +124,6 @@
 | 128 | Hallucination Evaluation | Принято |
 | 129 | Constitution (Values & Refusals) | Принято |
 | 130 | Accessibility (WCAG 2.2 AA + Elder) | Принято |
+| 131 | Meta-Memory (Confidence & Calibration) | Принято |
+| 133 | Verifier + Red Team | Принято |
+| 132 | NLU Embeddings | Принято |

@@ -114,24 +114,6 @@ class Orchestrator:
         except Exception:
             pass
 
-        # TIER0_FASTPATH (ADR-152): 90% команд — мгновенно
-        # TIER0_GUARD: не перехватываем если orchestrator пустой (тесты)
-        try:
-            if len(self.registry) > 0:
-                from aura.core.tier0_orchestrator import get_tier0
-                t0 = get_tier0().process(text)
-                if t0.source in ("constitution", "dispatcher", "template"):
-                    try:
-                        from aura.observability import log as _log
-                        _log("tier0.hit", source=t0.source, intent=t0.intent)
-                    except Exception:
-                        pass
-                    _mem_write(text, t0.response)
-                    return t0.response
-                # fallback → продолжаем в LLM
-        except Exception as e:
-            print(f"⚠️ Tier0: {e}")
-
         # Constitution (ADR-129) — резервная проверка (Tier0 уже проверил)
         try:
             from aura.core.constitution import check as _const_check
@@ -160,7 +142,23 @@ class Orchestrator:
 
         agent = self.registry.find(request)
         if agent is None:
-            # 2. RouteTree → dispatcher (быстрый regex-роутинг)
+            # 2. TIER0_FASTPATH (ADR-152): 90% простых команд — мгновенно
+            #    (только если ни один агент не взял)
+            try:
+                from aura.core.tier0_orchestrator import get_tier0
+                t0 = get_tier0().process(text)
+                if t0.source in ("dispatcher", "template"):
+                    try:
+                        from aura.observability import log as _log
+                        _log("tier0.hit", source=t0.source, intent=t0.intent)
+                    except Exception:
+                        pass
+                    _mem_write(text, t0.response)
+                    return t0.response
+            except Exception as e:
+                print(f"⚠️ Tier0: {e}")
+
+            # 3. RouteTree → dispatcher (быстрый regex-роутинг)
             if self.route_tree is not None and self.dispatcher is not None:
                 try:
                     routed = self.route_tree.handle(text, {})

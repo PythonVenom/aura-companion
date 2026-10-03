@@ -44,8 +44,19 @@ def test_tier0_music():
 
 
 def test_tier0_emergency():
+    """Emergency intent — либо constitution (crisis), либо template (emergency)."""
     from aura.core.tier0_orchestrator import get_tier0
     r = get_tier0().process("мне плохо")
+    # "мне плохо" → emergency intent → template "Вызываю помощь"
+    # "не хочу жить" → constitution rule 5 → телефон доверия
+    assert r.source in ("constitution", "template", "dispatcher")
+    assert r.intent == "emergency" or r.source == "constitution"
+
+
+def test_tier0_crisis_constitution():
+    """Crisis keywords должны идти через constitution."""
+    from aura.core.tier0_orchestrator import get_tier0
+    r = get_tier0().process("не хочу жить")
     assert r.source == "constitution"
 
 

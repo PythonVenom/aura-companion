@@ -32,6 +32,7 @@ from aura.agents.blind import AgentBlind
 from aura.agents.blind_reply import AgentBlindReply
 from aura.agents.sms_bridge import AgentSMS
 from aura.agents.meds_offline import AgentMedsOffline
+from aura.agents.proactive_alert import AgentProactiveAlert
 from aura.agents.health import AgentHealth
 from aura.agents.care import CareAgent
 from aura.agents.hands_free import AgentHandsFree
@@ -234,6 +235,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentBlindReply, modules_config)  # T048
     _try_register(orch, AgentSMS, modules_config)  # T046
     _try_register(orch, AgentMedsOffline, modules_config)  # T-mesh-1
+    _try_register(orch, AgentProactiveAlert, modules_config)  # T054
     _try_register(orch, AgentTime, modules_config)
     _try_register(orch, AgentPower, modules_config)
     _try_register(orch, AgentTimeAgent, modules_config)

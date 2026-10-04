@@ -131,3 +131,5 @@
 | 151 | Hardware Profiles | Принято |
 | 152 | Aura Tier 0 — Minimal Core | Принято |
 | 153 | Self-Configuration | Принято |
+
+- [ADR-155](155-neuro-rights.md) — Neuro-rights для Aura (2026-10-05)

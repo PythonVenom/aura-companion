@@ -1,22 +1,14 @@
 # Aura
 
-Локальный голосовой помощник. Работает без облака.
-Данные не покидают устройство.
-
-Помогает говорить с цифровым миром — банк, госуслуги, врачи,
-связь — голосом.
+Локальный голосовой помощник. Работает без облака. Данные не покидают устройство.
+Помогает говорить с цифровым миром — банк, госуслуги, врачи, связь — голосом.
 
 ![Tests](https://img.shields.io/badge/tests-1403_passed-green)
 ![ADR](https://img.shields.io/badge/ADR-115-blue)
 ![Agents](https://img.shields.io/badge/agents-48-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-## Для кого
-
-Пожилые, незрячие, люди с моторными и ментальными особенностями.
-Все, кому цифровой мир даётся трудно.
-
-## Что умеет
+## Что уже работает
 
 - Голосовой ввод и вывод — офлайн, русский
 - Звонки, сообщения, почта — голосом
@@ -25,23 +17,36 @@
 - Погода, время, музыка, радио
 - Экстренный вызов, детектор падения
 - Чтение уведомлений вслух, голосовой ответ
-- Озвучка сообщений из Telegram, WhatsApp, VK, MAX
+- Озвучка из Telegram, WhatsApp, VK, MAX
+- 48 агентов, 115 архитектурных решений, 1403 теста
 
-## Инженерная документация
+## Для кого
 
-Все архитектурные решения — в [docs/adr/](docs/adr/) (ADR, 115 штук).
-Тесты — `pytest tests/`.
+Пожилые, незрячие, люди с моторными и ментальными особенностями.
+Все, кому цифровой мир даётся трудно.
 
 ## Установка
 
-Инструкции по платформам — [docs/INSTALL.md](docs/INSTALL.md).
-Arch, Ubuntu, Debian, Fedora, Alpine, macOS, Windows, WSL,
-Android, ARM, Astra Linux.
+[docs/INSTALL.md](docs/INSTALL.md) — Arch, Ubuntu, Debian, Fedora, Alpine,
+macOS, Windows, WSL, Android, ARM, Astra Linux.
 
 ## Языки
 
-[docs/LANGUAGES.md](docs/LANGUAGES.md) — русский, английский,
-испанский, китайский.
+[docs/LANGUAGES.md](docs/LANGUAGES.md) — RU / EN / ES / ZH.
+
+## Инженерная документация
+
+- [docs/adr/](docs/adr/) — 115 архитектурных решений
+- [docs/MANIFESTO.md](docs/MANIFESTO.md) — принципы
+- [docs/architecture.md](docs/architecture.md) — архитектура
+
+## Об авторе
+
+**pythonvenom** — автор и архитектор Aura.
+Один человек довёл систему до 48 агентов, 115 ADR и 1403 зелёных тестов.
+Локальный AI, accessibility, elder care.
+
+**[Контакты для партнёров →](CONTACTS.md)**
 
 ## Лицензия
 

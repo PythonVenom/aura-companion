@@ -1,24 +1,43 @@
-# Контакты Aura
+# Контакты и партнёрство
 
-## Разработка и сообщество
-- **GitHub Issues** — баги, идеи, вопросы: [github.com/PythonVenom/aura-companion/issues](https://github.com/PythonVenom/aura-companion/issues)
-- **GitHub Discussions** — общие темы: [discussions](https://github.com/PythonVenom/aura-companion/discussions)
-- **Telegram** — прямые вопросы: [@Pyth0nVen0m](https://t.me/Pyth0nVen0m)
-- **YouTube** — демо и разработка: [@dev1nr0ss36](https://youtube.com/@dev1nr0ss36)
-- **MAX** — мессенджер (для тестирования Aura): [max.ru/u/32480561](https://max.ru/u/32480561)
+## Автор
 
-## Поддержка проекта
-- **CloudTips:** https://pay.cloudtips.ru/p/9ce9959c
-- **Boosty:** https://boosty.to/aura_companion
-- **DonationAlerts:** <вписать после регистрации>
+**pythonvenom** — автор и архитектор Aura.
+Локальный AI, accessibility, elder care.
 
-## Партнёрство
-- **Спонсорство, гранты, железо, интеграции:** GitHub Issues с меткой `partnership`
-- **Прямой контакт (email):** <вписать>
-- **Telegram:** [@Pyth0nVen0m](https://t.me/Pyth0nVen0m)
+- GitHub: [@PythonVenom](https://github.com/PythonVenom)
+- Email: (укажи свой)
+- Локация: Россия
 
-## Тематика обращений
-- 🐛 **Bug** — воспроизводимая ошибка → Issue с шаблоном `bug.yml`
-- 💡 **Feature** — идея улучшения → Issue с шаблоном `feature.yml`
-- 🤝 **Partnership** — сотрудничество, гранты, железо → Issue с шаблоном `partnership.yml`
-- 💰 **Donate** — поддержка разработки → CloudTips / Boosty / DonationAlerts
+## Что уже сделано
+
+Один человек довёл проект до работающего состояния:
+
+- 48 агентов (голос, звонки, лекарства, умный дом, экстренный вызов)
+- 115 архитектурных решений (ADR)
+- 1403 зелёных теста
+- 11 платформ (Linux, macOS, Windows, Android, ARM, Astra Linux)
+- Локальный AI — без облака, без подписок, без слежки
+
+## Что ищу
+
+- **Тестовое железо** — мини-ПК или ноутбук с NPU для локального AI
+  (AMD Styx Halo, Intel Lunar Lake, Qualcomm X Elite, NVIDIA Jetson)
+- **Партнёров** — компании в accessibility, elder care, локальном AI
+- **Интервью** — я автор и архитектор этой системы. Готов работать
+  над вашим стеком в роли создателя локальных AI-агентов.
+- **Финансирование** — гранты, инвестиции, зарплата. На жизнь и развитие.
+
+## Что предлагаю
+
+- Экспертизу в локальном AI: offline LLM, ASR, TTS
+- Архитектуру 48 агентов и 115 ADR — целостная система, не набор скриптов
+- Доступность для миллионов людей, кому цифровой мир даётся трудно
+- Полный open-source стек на Python — можно изучать, форкать, строить
+
+## Открыт для
+
+- Интервью и технических разговоров
+- Сотрудничества с AMD, Intel, NVIDIA, Qualcomm, Samsung
+- Разговора с фондами, акселераторами, грантовыми программами
+- Партнёрства с компаниями elder care и accessibility

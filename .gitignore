@@ -127,3 +127,17 @@ docs/professions.md
 docs/CHECKPOINT-*.md
 docs/habr-guide.md
 docs/reviews/
+
+# Docs internal
+docs/adr/
+docs/axes/
+docs/reviews/
+docs/recipes/
+docs/face/
+docs/screenshots/
+docs/demo.mp4
+docs/craft-onboarding.md
+docs/DEMO-CHECKLIST.md
+docs/release-checklist.md
+docs/elder_care_profile.md
+docs/voice-test-script.md

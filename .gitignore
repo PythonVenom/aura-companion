@@ -107,14 +107,12 @@ build/
 docs/internal/
 docs/roadmap/
 docs/strategy-2026.md
-docs/professions.md
 docs/CHECKPOINT-*.md
 
 # Internal (public face)
 docs/internal/
 docs/roadmap/
 docs/strategy-2026.md
-docs/professions.md
 docs/CHECKPOINT-*.md
 docs/habr-guide.md
 docs/reviews/
@@ -123,13 +121,11 @@ docs/reviews/
 docs/internal/
 docs/roadmap/
 docs/strategy-2026.md
-docs/professions.md
 docs/CHECKPOINT-*.md
 docs/habr-guide.md
 docs/reviews/
 
 # Docs internal
-docs/adr/
 docs/axes/
 docs/reviews/
 docs/recipes/

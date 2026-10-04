@@ -38,6 +38,7 @@ from aura.agents.soul_talk import AgentSoulTalk
 from aura.agents.reminiscence import AgentReminiscence
 from aura.agents.kid_structure import AgentKidStructure
 from aura.agents.kid_therapy import AgentKidTherapy
+from aura.agents.health_twin import AgentHealthTwin
 from aura.agents.health import AgentHealth
 from aura.agents.care import CareAgent
 from aura.agents.hands_free import AgentHandsFree
@@ -246,6 +247,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentReminiscence, modules_config)  # T053
     _try_register(orch, AgentKidStructure, modules_config)  # T055
     _try_register(orch, AgentKidTherapy, modules_config)  # T056
+    _try_register(orch, AgentHealthTwin, modules_config)  # T-twin-1
     _try_register(orch, AgentTime, modules_config)
     _try_register(orch, AgentPower, modules_config)
     _try_register(orch, AgentTimeAgent, modules_config)

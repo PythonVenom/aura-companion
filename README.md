@@ -1,70 +1,52 @@
-# Aura — Voice Guide to the Digital World
+# Aura — голосовой проводник в цифровой мир
 
-> A local-first AI companion. Not a voice assistant — a world mediator.
-> For elderly, blind, motor-impaired, and everyone who struggles with the digital world.
+> Локальный AI-компаньон. Не голосовой ассистент — прослойка мира.
+> Для пожилых, незрячих, моторных ограничений и всех, кому цифровой мир даётся трудно.
 
-[![CI](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml/badge.svg)](https://github.com/PythonVenom/aura-companion/actions/workflows/ci.yml)
 ![Tests](https://img.shields.io/badge/tests-1403_passed-green)
 ![ADR](https://img.shields.io/badge/ADR-115-blue)
 ![Agents](https://img.shields.io/badge/agents-48-orange)
 ![Handlers](https://img.shields.io/badge/handlers-22-purple)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-<video src="docs/demo.mp4" autoplay loop muted playsinline width="600"></video>
+## Почему Aura существует
 
-## Why Aura exists
+Я — pythonvenom. Я начал Aura **для себя** — у меня свои трудности с цифровым
+миром — и для **пожилых людей с ограниченными возможностями**.
 
-I am pythonvenom. I started Aura for **myself** — I have my own difficulties
-with the digital world — and for **elderly people with disabilities**.
+Цифровой мир стал обязательным: банк, связь, госуслуги, врачи. Но вход
+в него требует мыши, клавиатуры, мелкого шрифта, десятка кликов
+и памяти на пароли. Для миллионов людей это **барьер**:
 
-The digital world has become mandatory: bank, calls, government, doctors.
-But entering it requires a mouse, keyboard, tiny fonts, a dozen clicks,
-and memory for passwords. For millions, this is a **barrier**:
+- Пожилые — мышь как враг, шрифт как испытание
+- Незрячие — скринридеры сложны, сайты не адаптированы
+- Моторные ограничения — курсор непослушен
+- Ментальные особенности — структура теряется, память подводит
 
-- Elderly — mouse is an enemy, font is a test
-- Blind — screen readers are complex, sites are not adapted
-- Motor impairments — the cursor does not obey
-- Mental specifics — structure is lost, memory fails
+**Аура отвечает голосом.** Один инструмент, который есть у всех.
+Локально. Никаких облаков, подписок, слежки.
 
-**Aura answers with voice.** One tool everyone has. Locally. No cloud, no subscriptions, no surveillance.
+> Не «для инвалидов». Для **всех**, кому цифровой мир даётся трудно.
+> Это миллиарды людей.
 
-> Not "for the disabled." For **everyone** who finds the digital world hard.
-> That is billions of people.
+## Что такое Аура
 
-## What Aura is
+- **Голос** — T-one streaming ASR (русский) + Piper TTS с ruaccent
+- **Локальный LLM** — Ollama qwen2.5:7b, работает offline
+- **48 агентов** — время / музыка / браузер / power / care / journal / ...
+- **22 dispatcher handler-а**
+- **RAG-память** — ChromaDB, помнит диалоги
+- **115 ADR** — все решения задокументированы
+- **1403 unit-теста** — зелёные
+- **Работает на**: KDE / GNOME / XFCE / Cinnamon / MATE + X11 / Wayland
 
-- **Voice-first** — T-one streaming ASR (Russian) + Piper TTS with ruaccent
-- **Local LLM** — Ollama qwen2.5:7b, works offline
-- **48 agents** — time / music / browser / power / care / journal / ...
-- **22 dispatcher handlers**
-- **RAG memory** — ChromaDB, remembers dialogues
-- **115 ADRs** — every design decision documented
-- **1403 unit tests** — green
-- **Works on**: KDE / GNOME / XFCE / Cinnamon / MATE + X11 / Wayland
-
-## Quick start
-
-### Способ 1: из исходников
+## Быстрый старт
 
     git clone https://github.com/PythonVenom/aura-companion.git
     cd aura-companion
     python -m venv venv && source venv/bin/activate
     pip install -r requirements.txt
     python -m aura
-
-### Способ 2: AppImage (портативно, без установки)
-
-    chmod +x Aura-*.AppImage
-    ./Aura-*.AppImage
-
-### Способ 3: Docker
-
-    cd packaging/docker
-    docker compose up -d
-
-### Способ 4: AUR (Arch)
-
-    yay -S aura-companion
 
 ## 10 осей проекта (карта Aura v7.2 → v8.0)
 
@@ -90,55 +72,56 @@ and memory for passwords. For millions, this is a **barrier**:
 - **Фаза III — Mars-grade (6 мес):** v10.x → Formal + self-healing
 - **Фаза IV — Automotive deep (год 2-3):** v11-v13 → AAOS, CAN-bus, OEM
 
-## Philosophy
+## Принципы
 
-1. **Local-first.** Everything runs on your machine. Your data is yours.
-2. **Simplicity as respect.** Not a "convenient interface", but an interface that **requires no learning**.
-3. **The name is yours.** By default "Aura". But the user can rename to "Katya", "Marusya", "Grandpa" — like a family member.
-4. **Extensibility as philosophy.** Not replacing a human — connecting them to the world.
-5. **Accessibility is the core**, not a bolt-on feature.
+1. **Локальность прежде всего.** Всё работает на твоём железе. Данные — твои.
+2. **Простота как уважение.** Не «удобный интерфейс», а интерфейс, который **не требует обучения**.
+3. **Имя — твоё.** По умолчанию «Аура». Но пользователь может назвать её «Катя», «Маруся», «Дед» — как родного человека.
+4. **Расширяемость как философия.** Не заменять человека — соединять его с миром.
+5. **Accessibility — не «фича», а основа.**
 
-## Who it is for
+## Для кого
 
-- **Elderly** — voice control: light, TV, kettle, calls
-- **Blind and low-vision** — voice: chats, mail, bank, shopping
-- **Motor impairments** — voice instead of mouse
-- **Mental specifics** — structure, memory, reminders
-- **Anyone** who wants local-first, no-cloud AI
+- **Пожилые** — голосом: свет, ТВ, чайник, звонки
+- **Незрячие и слабовидящие** — голосом: чаты, почта, банк, покупки
+- **Моторные ограничения** — голосом вместо мыши
+- **Ментальные особенности** — структура, память, напоминания
+- **Все**, кому нужен локальный AI без облака
 
-## What works
+## Что работает
 
-- Voice input (T-one streaming ASR, Russian)
-- Voice output (Piper + ruaccent stress marks)
-- 48 agents: time, music, browser, apps, power, care, journal
-- RAG memory (dialogues persist)
-- Echo filter, graceful SIGTERM
+- Голосовой ввод (T-one streaming ASR, русский)
+- Ответ голосом (Piper + ruaccent ударения)
+- 48 агентов: время, музыка, браузер, приложения, power, care, journal
+- RAG-память (диалоги сохраняются)
+- Echo-filter, graceful SIGTERM
 - Tier 0 fast-path
-- env/ layer: KDE / GNOME / XFCE / Cinnamon / MATE + X11 / Wayland
+- env/ слой: KDE / GNOME / XFCE / Cinnamon / MATE + X11 / Wayland
 
-## What does NOT work yet (early access)
+## Что НЕ работает (early access)
 
-- Elder profile on Linux Mint — **in testing**
-- install.sh — build from source for now
-- Flatpak / AUR / PyPI — not published yet
-- Android / iOS / Windows — roadmap only
+- Elder профиль на Linux Mint — **в тестировании**
+- install.sh — собери из исходников
+- Flatpak / AUR / PyPI — пока не опубликованы
+- Android / iOS / Windows — только roadmap
 
-## Support the project
+## Поддержать проект
 
-Aura is non-commercial open source. If it helps you or your loved ones:
+Aura — некоммерческий open-source. Если она полезна для тебя
+или твоих близких:
 
-- ⭐ Star on GitHub
-- 🐛 Issue or PR (code, docs, translations)
+- ⭐ Star на GitHub
+- 🐛 Issue или PR (код, доки, переводы)
 - 💰 [CloudTips](https://pay.cloudtips.ru/p/9ce9959c) · [Boosty](https://boosty.to/aura_companion)
-- 🤝 [Partnership](PARTNERSHIP.md)
+- 🤝 [Партнёрство](PARTNERSHIP.md)
 
-Donations go to: CI runners, test devices, domains.
+Донаты идут на: CI runners, тестовые устройства, домены.
 
-## Languages
+## Языки
 
 - [English](README.md)
 - [Русский](README.ru.md)
 
-## License
+## Лицензия
 
-MIT — see [LICENSE](LICENSE).
+MIT — см. [LICENSE](LICENSE).

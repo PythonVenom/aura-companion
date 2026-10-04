@@ -101,3 +101,20 @@ dist/
 build/
 *.egg-info/
 .aura/metrics.json
+
+# Internal
+.docs/internal/
+docs/internal/
+docs/roadmap/
+docs/strategy-2026.md
+docs/professions.md
+docs/CHECKPOINT-*.md
+
+# Internal (public face)
+docs/internal/
+docs/roadmap/
+docs/strategy-2026.md
+docs/professions.md
+docs/CHECKPOINT-*.md
+docs/habr-guide.md
+docs/reviews/

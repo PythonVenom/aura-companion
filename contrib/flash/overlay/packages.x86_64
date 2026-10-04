@@ -1,0 +1,13 @@
+# Aura: пакеты поверх releng
+python
+python-pip
+python-virtualenv
+git
+sudo
+nano
+pipewire
+pipewire-pulse
+pipewire-audio
+wireplumber
+playerctl
+vlc

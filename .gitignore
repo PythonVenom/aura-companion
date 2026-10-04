@@ -1,0 +1,103 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+.venv/
+
+# Large models (не коммитим)
+gigaam_model/
+sherpa-onnx-streaming-t-one-russian-2025-09-08/
+vosk_model_streaming/
+vosk_model_big/
+voices/
+
+# Secrets
+vk_token.txt
+.env
+config.ini
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Старые версии
+aura_agent*.py
+aura_*_backup.py
+aura_*.bak
+aura_interrupt.py
+aura_optimized.py
+aura.py
+aura_smart.py
+aura_ui.py
+system_aura.py
+tray_icon.py
+
+# Тесты и скриншоты
+*.png
+*.wav
+
+# Архивы
+*.7z
+*.zip
+*.tar.bz2
+
+# Runtime data (не коммитим — это данные, не код)
+memory_registry.json
+*.db
+*.sqlite
+chroma/
+chroma_db/
+vault.json
+
+# Приватное — не публикуем
+JOURNAL.md
+MISE_EN_PLACE.md
+TODO.md
+docs/context-for-new-chat.md
+docs/dead-code.txt
+docs/vision-archive-*.md
+logs/
+gigaam_model
+sherpa-onnx*
+vosk_model*
+voices/
+aura.tar.gz
+vm_script.sh
+nohup.out
+
+# Разрешаем скриншоты для README
+!docs/screenshots/*.png
+firefox_extension_mv3/
+
+# Aura runtime config
+settings.json
+.config/aura/
+sys
+sys.*
+sys
+sys.*
+
+# aider (dev tool)
+.aider*
+aura-local/
+
+# Личные планы и state (не для GitHub)
+.aura/tasks.json
+.aura/bugs.json
+.aura/roadmap.json
+docs/plans/
+plans.md
+NOTES.md
+
+dist/
+build/
+*.egg-info/
+.aura/metrics.json

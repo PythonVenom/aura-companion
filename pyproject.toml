@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aura-companion"
+version = "7.2.0"
+description = "Local voice AI companion for elder care. Open source, no cloud."
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "PythonVenom", email = "noreply@github.com"}]
+requires-python = ">=3.10"
+keywords = ["ai", "voice", "elder-care", "russian", "local-first", "accessibility"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Russian",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Home Automation",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.32",
+    "pydantic>=2.0",
+    "sherpa-onnx>=1.9",
+    "sounddevice>=0.4",
+    "webrtcvad>=2.0",
+    "chromadb>=0.4",
+    "httpx>=0.27",
+    "jinja2>=3.1",
+    "psutil>=6.0",
+    "setuptools<81",  # pkg_resources для webrtcvad
+    "python-multipart>=0.0.9",  # FastAPI Form
+]
+
+[project.optional-dependencies]
+tts = ["piper-tts", "ruaccent>=1.0", "razdel>=0.5"]
+dev = ["pytest>=8.0", "ruff", "mypy"]
+
+[project.scripts]
+aura = "aura.cli:main"
+aura-backup = "tools.aura_backup:main"
+
+[project.urls]
+Homepage = "https://github.com/PythonVenom/aura-companion"
+Issues = "https://github.com/PythonVenom/aura-companion/issues"
+Changelog = "https://github.com/PythonVenom/aura-companion/blob/master/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["aura"]
+
+[tool.hatch.build.targets.sdist]
+include = ["aura/", "README.md", "LICENSE", "pyproject.toml"]

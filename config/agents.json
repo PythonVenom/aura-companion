@@ -1,0 +1,209 @@
+{
+  "version": "1.0",
+  "default_enabled": true,
+  "agents": {
+    "time": {
+      "enabled": true,
+      "requires": []
+    },
+    "time_agent": {
+      "enabled": true,
+      "requires": []
+    },
+    "power": {
+      "enabled": true,
+      "requires": []
+    },
+    "massage": {
+      "enabled": true,
+      "requires": []
+    },
+    "dictation": {
+      "enabled": true,
+      "requires": []
+    },
+    "construction": {
+      "enabled": true,
+      "requires": []
+    },
+    "bpm": {
+      "enabled": true,
+      "requires": []
+    },
+    "health": {
+      "enabled": true,
+      "requires": []
+    },
+    "vault": {
+      "enabled": true,
+      "requires": []
+    },
+    "music_ducker": {
+      "enabled": true,
+      "requires": []
+    },
+    "music_local": {
+      "enabled": true,
+      "requires": []
+    },
+    "media_pause": {
+      "enabled": true,
+      "requires": []
+    },
+    "audio_pult": {
+      "enabled": true,
+      "requires": []
+    },
+    "journal": {
+      "enabled": true,
+      "requires": []
+    },
+    "rag_memory": {
+      "enabled": true,
+      "requires": []
+    },
+    "registry": {
+      "enabled": true,
+      "requires": []
+    },
+    "capabilities": {
+      "enabled": true,
+      "requires": []
+    },
+    "planner": {
+      "enabled": true,
+      "requires": []
+    },
+    "react_agent": {
+      "enabled": true,
+      "requires": []
+    },
+    "functions": {
+      "enabled": true,
+      "requires": []
+    },
+    "updates": {
+      "enabled": true,
+      "requires": []
+    },
+    "security": {
+      "enabled": true,
+      "requires": []
+    },
+    "audio_router": {
+      "enabled": true,
+      "requires": []
+    },
+    "vision": {
+      "enabled": true,
+      "requires": []
+    },
+    "focus_switch": {
+      "enabled": true,
+      "requires": []
+    },
+    "window_manager": {
+      "enabled": true,
+      "requires": []
+    },
+    "context_memory": {
+      "enabled": true,
+      "requires": []
+    },
+    "text_editor": {
+      "enabled": true,
+      "requires": []
+    },
+    "checklist": {
+      "enabled": true,
+      "requires": []
+    },
+    "at_spi": {
+      "enabled": true,
+      "requires": []
+    },
+    "mcp": {
+      "enabled": true,
+      "requires": []
+    },
+    "telegram": {
+      "enabled": true,
+      "requires": []
+    },
+    "vk_web": {
+      "enabled": true,
+      "requires": []
+    },
+    "vk_music": {
+      "enabled": true,
+      "requires": [
+        "vk_web"
+      ]
+    },
+    "browser_tabs": {
+      "enabled": true,
+      "requires": []
+    },
+    "messenger": {
+      "enabled": true,
+      "requires": []
+    },
+    "open_resolver": {
+      "enabled": true,
+      "requires": []
+    },
+    "app_launcher": {
+      "enabled": true,
+      "requires": []
+    },
+    "window_control": {
+      "enabled": true,
+      "requires": []
+    },
+    "screen_reader": {
+      "enabled": true,
+      "requires": []
+    },
+    "media_search": {
+      "enabled": true,
+      "requires": []
+    },
+    "internet": {
+      "enabled": true,
+      "requires": []
+    },
+    "care": {
+      "enabled": true,
+      "requires": []
+    },
+    "handsfree": {
+      "enabled": true,
+      "requires": []
+    },
+    "context_recent": {
+      "enabled": true,
+      "requires": []
+    },
+    "focus_mode": {
+      "enabled": true,
+      "requires": []
+    },
+    "recon": {
+      "enabled": true,
+      "requires": []
+    },
+    "journal_mood": {
+      "enabled": true,
+      "requires": []
+    },
+    "plugin_deepseek": {
+      "enabled": true,
+      "requires": []
+    },
+    "weather": {
+      "enabled": false,
+      "requires": [],
+      "note": "не зарегистрирован пока"
+    }
+  }
+}

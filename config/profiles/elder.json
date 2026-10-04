@@ -1,0 +1,35 @@
+{
+  "name": "elder",
+  "description": "Профиль для пожилого пользователя (батя, Linux Mint)",
+  "de": "cinnamon",
+  "session": "x11",
+  "distro": "linuxmint",
+  "sound": "pipewire",
+  "min_turn_silence": 1.8,
+  "text_stable_seconds": 2.5,
+  "silence_fallback": 3.0,
+  "tts_speed": 0.9,
+  "tts_voice": "ru_RU-irina-medium",
+  "address": "none",
+  "confirm_actions": true,
+  "confirm_phrase": "Хорошо, делаю",
+  "fallback_phrase": "Прости, я не расслышала. Повтори, пожалуйста",
+  "barge_in": false,
+  "listener_timeout": 4.0,
+  "sos_phrases": [
+    "мне плохо",
+    "помогите",
+    "вызови скорую",
+    "плохо мне"
+  ],
+  "wake_words": [
+    "аура",
+    "аурушка",
+    "эй аура"
+  ],
+  "vad_aggressiveness": 2,
+  "voice_volume_boost": 1.1,
+  "accent_model": "big",
+  "sos_contact": "",
+  "proactive_check_minutes": 60
+}

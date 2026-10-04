@@ -1,0 +1,28 @@
+# Maintainer: PythonVenom <noreply@github.com>
+pkgname=aura-companion
+pkgver=7.2.0
+pkgrel=1
+pkgdesc="Local voice AI companion for elder care (open source, no cloud)"
+arch=('any')
+url="https://github.com/PythonVenom/aura-companion"
+license=('MIT')
+depends=('python' 'pipewire' 'ollama' 'mpv')
+makedepends=('python-build' 'python-installer' 'python-wheel' 'python-hatchling')
+optdepends=(
+    'piper-tts: TTS voice'
+    'sherpa-onnx: streaming ASR'
+)
+source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
+# AURA_PKGBUILD_FIX_V1 — sha256 будет добавлен через updpkgsums
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/$pkgname-$pkgver"
+    python -m build --wheel --no-isolation
+}
+
+package() {
+    cd "$srcdir/$pkgname-$pkgver"
+    python -m installer --destdir="$pkgdir" dist/*.whl
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

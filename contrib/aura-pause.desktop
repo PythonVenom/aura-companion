@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Aura Pause
+Exec=/home/pythonvenom/aura_project/contrib/toggle_aura_pause.sh
+Icon=audio-input-microphone
+Terminal=false
+Categories=Utility;

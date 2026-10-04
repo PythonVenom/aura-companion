@@ -1,0 +1,17 @@
+# tag: widget
+# description: состояние виджета org.aura.status
+
+## id=01 name=installed
+cmd: kpackagetool6 --type=Plasma/Applet --list 2>&1 | grep -A2 aura
+
+## id=02 name=files
+cmd: find ~/.local/share/plasma/plasmoids/org.aura.status -type f
+
+## id=03 name=metadata
+file: ~/.local/share/plasma/plasmoids/org.aura.status/metadata.json
+
+## id=04 name=config-xml
+file: ~/.local/share/plasma/plasmoids/org.aura.status/contents/config/main.xml
+
+## id=05 name=plasma-qml-errors
+cmd: journalctl --user -n 100 --no-pager | grep -iE "org.aura.status.*error|aura.*qml" | tail -10

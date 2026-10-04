@@ -1,0 +1,6 @@
+ruaccent>=1.0
+razdel>=0.5
+
+setuptools<81  # pkg_resources for webrtcvad
+
+python-multipart>=0.0.9  # FastAPI Form

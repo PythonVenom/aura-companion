@@ -1,0 +1,17 @@
+# tag: bugs
+# description: активные баги (67, 68, 72) + диагностика ASR
+
+## id=01 name=cpu-idle
+cmd: ps -p $(pgrep -f aura_main | head -1) -o %cpu,etime,pid 2>/dev/null
+
+## id=02 name=threads
+cmd: ls /proc/$(pgrep -f aura_main | head -1)/task 2>/dev/null | wc -l
+
+## id=03 name=resampler
+cmd: journalctl --user -u aura.service --no-pager -n 50 | grep -c "Creating a resampler"
+
+## id=04 name=last-messages
+cmd: journalctl --user -u aura.service --no-pager -n 20 | tail -15
+
+## id=05 name=aura-status
+file: ~/.cache/aura/aura_status.json

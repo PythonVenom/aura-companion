@@ -1,0 +1,21 @@
+# Aura systemd user unit — шаблон.
+# @PROJECT_DIR@ заменяется на реальный путь при установке (install.sh).
+# Пользователь: systemctl --user enable --now aura.service
+[Unit]
+Description=Aura AI Companion
+After=graphical-session.target ollama.service
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=@PROJECT_DIR@
+Environment="DISPLAY=:0"
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=@PROJECT_DIR@/run_aura.sh
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

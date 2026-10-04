@@ -1,0 +1,7 @@
+{
+  "uuid": "aura@pythonvenom",
+  "name": "Aura",
+  "description": "Aura status indicator",
+  "version": "0.1.0",
+  "max-instances": 1
+}

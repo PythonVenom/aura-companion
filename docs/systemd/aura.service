@@ -1,0 +1,18 @@
+[Unit]
+Description=Aura AI Companion
+After=graphical-session.target ollama.service
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pythonvenom/aura_project
+Environment="DISPLAY=:0"
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/home/pythonvenom/aura_project/run_aura.sh
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

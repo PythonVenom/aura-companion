@@ -206,3 +206,20 @@ PXE boot (Intel 1999), archiso (Arch Wiki), Yocto/Buildroot (2010).
 Модель: Kali Linux (инструмент на флешке), Tails (носитель целиком).
 
 *— pythonvenom*
+
+---
+
+## Принцип: Aura расширяется в физический мир
+
+Aura — не только софт. Это слой, который может управлять
+физическими устройствами: умный дом, завод, стройка, ebike.
+
+Электровелосипед-вездеход (far_shelf, v12):
+- 2× редукторных hub-мотора, VESC (open-source FOC)
+- 52V 30Ah, ~150 км, рама Enduro Boost 148×12, fat-tire
+- Интеграция: Aura ↔ VESC через Bluetooth + CAN-bus
+- Наука: EN 15194, IEC 62133, FOC (TI 2015), Vedder 2013
+
+Один движок — много вертикалей. Физический мир — часть Aura.
+
+*— pythonvenom*

@@ -1,0 +1,48 @@
+# Aura Live ISO — минимальный набор
+# Наука: archiso, base + KDE Plasma (дружелюбно для elder care)
+
+# Base
+base
+base-devel
+linux
+linux-firmware
+mkinitcpio
+sudo
+networkmanager
+grub
+efibootmgr
+systemd-boot
+
+# Desktop (KDE Plasma — крупный шрифт, дружелюбно)
+plasma-meta
+sddm
+konsole
+dolphin
+kate
+
+# Aura core deps
+python
+python-pip
+pipewire
+pipewire-pulse
+wireplumber
+libpulse
+playerctl
+qt6-tools
+
+# Accessibility (T-acc-1, T-acc-2)
+speech-dispatcher
+espeak-ng
+alsa-utils
+unzip
+
+# Firefox для bridge (native messaging)
+firefox
+
+# Утилиты
+vim
+nano
+htop
+curl
+wget
+git

@@ -12,6 +12,20 @@ MSG="${2:-batch commit}"
 
 log() { printf "\033[1;34m[batch]\033[0m %s\n" "$*"; }
 
+# Backlog guard (Goldratt 1984 — не перегружай систему)
+BACKLOG_LIMIT=120
+BACKLOG_NOW=$(python3 -c "
+import json
+from pathlib import Path
+d = json.loads((Path.home()/'aura_project/.aura/tasks.json').read_text(encoding='utf-8'))
+print(sum(1 for t in d['tasks'] if t['state']=='backlog'))
+")
+if [ "$BACKLOG_NOW" -gt "$BACKLOG_LIMIT" ]; then
+    log "⚠️  Backlog = $BACKLOG_NOW > $BACKLOG_LIMIT. Сначала закрывай!"
+    log "   Продолжаем через 10 сек (Ctrl+C — стоп)"
+    sleep 10
+fi
+
 # 1. AST всех изменённых .py
 log "AST check..."
 CHANGED=$(git diff --name-only HEAD | grep '\.py$' || true)
@@ -26,8 +40,8 @@ fi
 log "pytest..."
 pytest -q --tb=short 2>&1 | tail -3
 
-# 3. Mark done (если ID переданы)
-if [ -n "$TASKS" ]; then
+# 3. Mark done (только если были изменённые .py — фикс реальный)
+if [ -n "$TASKS" ] && [ -n "$CHANGED" ]; then
     log "Mark done: $TASKS"
     python3 <<PYEOF
 import json

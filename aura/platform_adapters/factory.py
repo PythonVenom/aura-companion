@@ -15,9 +15,8 @@ def get_platform() -> BasePlatform:
         from aura.platform_adapters.linux import LinuxPlatform
         return LinuxPlatform()
     if sys_name == "darwin":
-        # TODO: T-port-4 — macOS
-        from aura.platform_adapters.linux import LinuxPlatform
-        return LinuxPlatform()
+        from aura.platform_adapters.macos import MacOSPlatform
+        return MacOSPlatform()
     # TODO: T-port-3 — Windows, T-port-6 — BSD
     from aura.platform_adapters.linux import LinuxPlatform
     return LinuxPlatform()

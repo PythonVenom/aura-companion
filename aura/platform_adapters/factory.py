@@ -1,5 +1,6 @@
 """Factory — выбрать адаптер по текущей ОС."""
 from __future__ import annotations
+import os
 import platform as _plat
 from aura.platform_adapters.base import BasePlatform
 
@@ -7,9 +8,17 @@ from aura.platform_adapters.base import BasePlatform
 def get_platform() -> BasePlatform:
     sys_name = _plat.system().lower()
     if sys_name == "linux":
+        # Termux → Android HAL
+        if "com.termux" in os.environ.get("PREFIX", ""):
+            from aura.platform_adapters.android import AndroidPlatform
+            return AndroidPlatform()
         from aura.platform_adapters.linux import LinuxPlatform
         return LinuxPlatform()
-    # Заглушки для будущих платформ (T-port-3..6)
+    if sys_name == "darwin":
+        # TODO: T-port-4 — macOS
+        from aura.platform_adapters.linux import LinuxPlatform
+        return LinuxPlatform()
+    # TODO: T-port-3 — Windows, T-port-6 — BSD
     from aura.platform_adapters.linux import LinuxPlatform
     return LinuxPlatform()
 

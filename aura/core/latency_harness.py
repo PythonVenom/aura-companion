@@ -68,12 +68,18 @@ def run_suite(suite: dict[str, Callable], iterations: int = 3) -> dict:
 
 
 def percentile(values: list[float], p: float) -> float:
-    """p в [0, 100]. Простая nearest-rank (Kleppmann 2017)."""
+    """p в [0, 100]. Nearest-rank (Wikipedia, Kleppmann 2017).
+
+    rank = ceil(p/100 * n), clamp to [1, n], idx = rank - 1.
+    Для [1..100]: p50=50, p95=95, p99=99.
+    """
+    import math
     if not values:
         return 0.0
     sorted_v = sorted(values)
-    k = max(0, min(len(sorted_v) - 1, int(round(p / 100.0 * (len(sorted_v) - 1)))))
-    return sorted_v[k]
+    n = len(sorted_v)
+    rank = max(1, min(n, math.ceil(p / 100.0 * n)))
+    return sorted_v[rank - 1]
 
 
 def summarize(results: dict[str, list[float]]) -> dict:

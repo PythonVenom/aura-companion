@@ -2,7 +2,7 @@
 from __future__ import annotations
 import numpy as np
 
-WAKE_PHRASES = ["hey_jarvis"]
+WAKE_PHRASES = ["aura"]
 SAMPLE_RATE = 16000
 CHUNK_SAMPLES = 1280
 MIN_BYTES = CHUNK_SAMPLES * 2
@@ -13,7 +13,7 @@ class WakeWordDetector:
         if not 0.0 < threshold < 1.0:
             raise ValueError("threshold must be in (0, 1)")
         self.threshold = threshold
-        self.model_names = model_names or ["hey_jarvis"]
+        self.model_names = model_names or ["aura"]
         self._model = _model
         self._last_score = 0.0
         self.enabled = _model is not None
@@ -41,7 +41,7 @@ class WakeWordDetector:
     def from_openwakeword(cls, threshold: float = 0.5, model_names=None):
         try:
             from openwakeword.model import Model
-            m = Model(wakeword_models=model_names or ["hey_jarvis"])
+            m = Model(wakeword_models=model_names or ["aura"])
             return cls(threshold=threshold, model_names=model_names, _model=m)
         except Exception:
             return cls(threshold=threshold, model_names=model_names, _model=None)

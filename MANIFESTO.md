@@ -223,3 +223,24 @@ Aura — не только софт. Это слой, который может 
 Один движок — много вертикалей. Физический мир — часть Aura.
 
 *— pythonvenom*
+
+---
+
+## Принцип: hardening — не «когда-нибудь», а часть v8.0
+
+Каркас готов (14 платформ, 49 агентов, 1425 тестов). Теперь — hardening.
+Критерии v8.0 «Arch 100%» невозможны без:
+
+- Шифрования данных покоя (NIST SP 800-111)
+- Code signing (Authenticode, Apple Notary)
+- Consent flow (GDPR Art.7, 152-ФЗ)
+- Backup / restore (GFS)
+- Concurrency (SQLite WAL)
+- Emergency stop (SCRAM — NRC 1979)
+
+Наука: Boehm 1981 — 40-60% времени уходит на maintenance, не на новые фичи.
+Brooks 1975 — падают не на функциях, а на интеграции и edge cases.
+
+Мы это делаем в v8.0, не «потом».
+
+*— pythonvenom*

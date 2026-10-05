@@ -1,28 +1,51 @@
-# Maintainer: PythonVenom <noreply@github.com>
+# Maintainer: pythonvenom <https://github.com/PythonVenom\>
+# Aura — локальный голосовой помощник (elder care, accessibility)
+# Наука: Arch packaging (PKGBUILD spec), PEP 517 (Python build)
+
 pkgname=aura-companion
-pkgver=7.2.0
+pkgver=0.7.9
 pkgrel=1
-pkgdesc="Local voice AI companion for elder care (open source, no cloud)"
+pkgdesc="Локальный голосовой помощник (elder care, accessibility)"
 arch=('any')
 url="https://github.com/PythonVenom/aura-companion"
 license=('MIT')
-depends=('python' 'pipewire' 'ollama' 'mpv')
-makedepends=('python-build' 'python-installer' 'python-wheel' 'python-hatchling')
-optdepends=(
-    'piper-tts: TTS voice'
-    'sherpa-onnx: streaming ASR'
+depends=(
+    'python'
+    'python-pip'
+    'pipewire'
+    'pipewire-pulse'
+    'wireplumber'
+    'libpulse'
+    'playerctl'
+    'qt6-tools'
 )
-source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
-# AURA_PKGBUILD_FIX_V1 — sha256 будет добавлен через updpkgsums
-sha256sums=('SKIP')
+optdepends=(
+    'speech-dispatcher: TTS для незрячих'
+    'espeak-ng: fallback TTS'
+    'alsa-utils: запись (arecord) для ASR'
+    'firefox: native messaging bridge'
+    'ollama: локальный LLM'
+    'kdeconnect: SMS bridge'
+)
+provides=('aura')
+conflicts=()
+source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz")
+sha256sums=('SKIP')  # TODO: заполнить после релиза
 
 build() {
-    cd "$srcdir/$pkgname-$pkgver"
+    cd "${srcdir}/${pkgname}-${pkgver}" 2>/dev/null || cd "${srcdir}/${pkgname}"
     python -m build --wheel --no-isolation
 }
 
 package() {
-    cd "$srcdir/$pkgname-$pkgver"
-    python -m installer --destdir="$pkgdir" dist/*.whl
-    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    cd "${srcdir}/${pkgname}-${pkgver}" 2>/dev/null || cd "${srcdir}/${pkgname}"
+    python -m installer --destdir="${pkgdir}" dist/*.whl
+
+    # Документация
+    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+    install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+
+    # Symlink для CLI
+    install -d "${pkgdir}/usr/bin"
+    ln -sf "/usr/bin/aura_main.py" "${pkgdir}/usr/bin/aura" 2>/dev/null || true
 }

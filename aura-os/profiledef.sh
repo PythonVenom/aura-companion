@@ -21,3 +21,8 @@ file_permissions=(
   ["/root"]="0:0:750"
   ["/usr/local/bin/aura-live-setup"]="0:0:755"
 )
+
+# Кастомизация airootfs (установка Aura)
+customize_airootfs() {
+    : # TODO: yay -S aura-companion --noconfirm
+}

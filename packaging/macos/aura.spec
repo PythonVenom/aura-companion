@@ -46,7 +46,8 @@ exe = EXE(
     strip=False,
     upx=False,               # UPX плохо работает на macOS
     console=False,
-    target_arch="universal2",  # Intel + Apple Silicon
+    # target_arch не задаём: CI даёт x86_64 или arm64.
+    # Для universal2 нужен universal Python — отдельная сборка (v8.2).
 )
 
 coll = COLLECT(exe, a.binaries, a.zipfiles, a.datas, name="aura")

@@ -56,6 +56,29 @@ def is_available() -> bool:
     return _get_or_create_key() is not None
 
 
+# --- T-eng-2: WAL + concurrency ---
+# Наука: SQLite WAL (sqlite.org), Kleppmann 2017 (DDIA)
+# Readers не блокируют writer, writer не блокирует readers.
+# busy_timeout — ждать до 10 сек, не падать сразу.
+BUSY_TIMEOUT_MS = 10_000
+
+
+def _configure_concurrency(conn) -> None:
+    """WAL mode + busy_timeout (T-eng-2).
+
+    WAL: readers + 1 writer параллельно (SQLite 3.7+).
+    NORMAL synchronous: быстрее FULL, безопаснее OFF.
+    """
+    try:
+        conn.execute("PRAGMA journal_mode = WAL")
+        conn.execute(f"PRAGMA busy_timeout = {BUSY_TIMEOUT_MS}")
+        conn.execute("PRAGMA synchronous = NORMAL")
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA cache_size = -2000")  # 2 MB кэш
+    except Exception:
+        pass
+
+
 def _configure_cipher(conn) -> None:
     """Настроить SQLCipher: AES-256-CBC, PBKDF2-HMAC-SHA512, 256k итераций."""
     if not HAS_SQLCIPHER:
@@ -79,7 +102,9 @@ def connect(path: Path | str, *, encrypt: bool = True):
     path.parent.mkdir(parents=True, exist_ok=True)
 
     if not encrypt:
-        return sqlite3.connect(str(path))
+        conn = sqlite3.connect(str(path))  # AURA_WAL_V1
+        _configure_concurrency(conn)
+        return conn
 
     if not HAS_SQLCIPHER:
         warnings.warn(
@@ -88,7 +113,9 @@ def connect(path: Path | str, *, encrypt: bool = True):
             RuntimeWarning,
             stacklevel=2,
         )
-        return sqlite3.connect(str(path))
+        conn = sqlite3.connect(str(path))  # AURA_WAL_V1
+        _configure_concurrency(conn)
+        return conn
 
     key = _get_or_create_key()
     if not key:
@@ -97,12 +124,15 @@ def connect(path: Path | str, *, encrypt: bool = True):
             RuntimeWarning,
             stacklevel=2,
         )
-        return sqlite3.connect(str(path))
+        conn = sqlite3.connect(str(path))  # AURA_WAL_V1
+        _configure_concurrency(conn)
+        return conn
 
     conn = sqlcipher.connect(str(path))
     # ВАЖНО: сначала PRAGMA key, потом всё остальное
     conn.execute(f"PRAGMA key = \"{key}\"")
     _configure_cipher(conn)
+    _configure_concurrency(conn)  # AURA_WAL_V1
     # Проверка: читается ли схема (если нет — wrong key)
     try:
         conn.execute("SELECT count(*) FROM sqlite_master").fetchone()

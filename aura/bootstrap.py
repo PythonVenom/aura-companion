@@ -41,6 +41,7 @@ from aura.agents.kid_therapy import AgentKidTherapy
 from aura.agents.health_twin import AgentHealthTwin
 from aura.agents.federated_adapter import AgentFederatedAdapter
 from aura.agents.routine_learner import AgentRoutineLearner
+from aura.agents.onboarding import AgentOnboarding
 from aura.agents.health import AgentHealth
 from aura.agents.care import CareAgent
 from aura.agents.hands_free import AgentHandsFree
@@ -252,6 +253,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentHealthTwin, modules_config)  # T-twin-1
     _try_register(orch, AgentFederatedAdapter, modules_config)  # T-fed-1
     _try_register(orch, AgentRoutineLearner, modules_config)  # T-user-1
+    _try_register(orch, AgentOnboarding, modules_config)  # T-user-2
     _try_register(orch, AgentTime, modules_config)
     _try_register(orch, AgentPower, modules_config)
     _try_register(orch, AgentTimeAgent, modules_config)

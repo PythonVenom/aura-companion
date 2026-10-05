@@ -182,12 +182,12 @@ class AuraOrchestrator:
             # Достаточно source: echo-cancel-source вычитает из sink_master=alsa_output.
             r = subprocess.run(
                 ["pactl", "get-default-source"],
-                capture_output=True, text=True, timeout=2,
+                capture_output=True, text=True, timeout=8,
             )
             if "echo-cancel" not in r.stdout:
                 subprocess.run(
                     ["pactl", "set-default-source", "echo-cancel-source"],
-                    check=False, timeout=2,
+                    check=False, timeout=8,
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                 )
                 print("🎙️ AEC: source → echo-cancel-source")
@@ -430,7 +430,7 @@ class AuraOrchestrator:
             return True
 
         # Новая «Аура ...» — сброс.
-        if "аура" in text or "aura" in text:
+        if state != "awaiting_command" and ("аура" in text or "aura" in text):
             print("🔔 Активация — сброс FSM")
             fsm_clear()
             return False
@@ -601,7 +601,8 @@ class AuraOrchestrator:
                 # Bug 38: приглушаем музыку ПОКА слушаем (интеллектуальный duck)
                 self._duck_on()
                 # Bug 73: timeout 2 вместо 8 — ChatBridge голодал до 8 сек
-                heard = self.listener.listen(timeout=2)
+                heard = self.listener.listen(timeout=8)
+                print(f"🎤 heard={heard!r}")
                 if not heard:
                     self._duck_off()
                     # === ЧАТ: второй drain после listen (Bug 73) ===

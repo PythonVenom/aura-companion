@@ -42,9 +42,20 @@ def test_get_none_for_other_os():
 
 
 def test_get_none_for_missing_module():
-    # feature в реестре, но модуль без класса → None
-    with patch.object(os_features, "current_os", return_value="windows"):
-        # windows.py — заглушка без SAPIAdapter → None
+    """Feature в REGISTRY, но import модуля падает → None (graceful).
+
+    Не зависит от того, реализован ли adapter сейчас — мокаем import.
+    """
+    with patch.object(os_features, "current_os", return_value="windows"), \
+         patch("importlib.import_module", side_effect=ImportError("mock")):
+        assert os_features.get("windows.sapi") is None
+
+
+def test_get_none_for_missing_attribute():
+    """Feature в REGISTRY, модуль есть, класса нет → None (graceful)."""
+    with patch.object(os_features, "current_os", return_value="windows"), \
+         patch("importlib.import_module", return_value=type("EmptyMod", (), {})()):
+        # в модуле нет SAPIAdapter → AttributeError → None
         assert os_features.get("windows.sapi") is None
 
 

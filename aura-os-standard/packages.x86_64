@@ -1,0 +1,52 @@
+# Aura Standard ISO — установка + десктоп
+# Наука: archiso + archinstall + Calamares
+
+# Base
+base
+base-devel
+linux
+linux-firmware
+mkinitcpio
+sudo
+networkmanager
+grub
+efibootmgr
+systemd-boot
+
+# Desktop (KDE Plasma)
+plasma-meta
+sddm
+konsole
+dolphin
+kate
+
+# Aura core deps
+python
+python-pip
+pipewire
+pipewire-pulse
+wireplumber
+libpulse
+playerctl
+qt6-tools
+
+# Accessibility
+speech-dispatcher
+espeak-ng
+alsa-utils
+unzip
+
+# Installers
+archinstall
+calamares
+
+# Firefox (bridge)
+firefox
+
+# Утилиты
+vim
+nano
+htop
+curl
+wget
+git

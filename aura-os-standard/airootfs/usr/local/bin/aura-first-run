@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Aura First Run Wizard — после первой загрузки.
+# Наука: Microsoft 2015 (first-run), Nielsen 1993 (progressive disclosure).
+
+set -euo pipefail
+
+log() { printf "\033[1;34m[aura-first-run]\033[0m %s\n" "$*"; }
+
+echo "Привет. Я — Аура. Твой личный помощник."
+echo "Давай познакомимся — это займёт 1 минуту."
+sleep 2
+
+# Проверить профиль
+PROFILE=$(cat /etc/aura-profile 2>/dev/null | awk '{print $2}' || echo "custom")
+log "Профиль: $PROFILE"
+
+case "$PROFILE" in
+    elder)  exec python -m aura --onboarding --profile=elder ;;
+    rolling) exec python -m aura --onboarding --profile=rolling ;;
+    kid)    exec python -m aura --onboarding --profile=kid ;;
+    media)  exec python -m aura --onboarding --profile=media ;;
+    *)      log "Кастомный профиль — Aura доступна командой 'aura'"; exit 0 ;;
+esac

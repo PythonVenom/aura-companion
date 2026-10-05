@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Aura Installer — дружелюбный TUI поверх archinstall.
+# Наука: archinstall (JSON config), progressive disclosure (Nielsen 1993).
+
+set -euo pipefail
+
+log() { printf "\033[1;34m[aura-install]\033[0m %s\n" "$*"; }
+die() { printf "\033[1;31m[error]\033[0m %s\n" "$*" >&2; exit 1; }
+
+command -v archinstall >/dev/null || die "archinstall не найден"
+[ "$EUID" -eq 0 ] || die "Нужны root-права"
+
+# === Профиль ===
+clear
+cat <<'BANNER'
+╔══════════════════════════════════════════╗
+║   Aura Standard — установка              ║
+║   Локальный голосовой помощник           ║
+╚══════════════════════════════════════════╝
+
+Выбери профиль:
+
+  1) Elder       — для пожилых (крупный UI, минимум)
+  2) Rolling     — для разработчиков (полный стек)
+  3) Kid         — для детей (ограничения, игры)
+  4) Media       — медиа-центр (Kodi)
+  5) Custom      — обычная archinstall (без Aura)
+
+BANNER
+read -rp "Твой выбор [1-5]: " PROFILE_CHOICE
+
+case "$PROFILE_CHOICE" in
+    1) PROFILE="elder" ;;
+    2) PROFILE="rolling" ;;
+    3) PROFILE="kid" ;;
+    4) PROFILE="media" ;;
+    5) PROFILE="custom" ;;
+    *) die "Неверный выбор" ;;
+esac
+
+log "Профиль: $PROFILE"
+
+# === archinstall config ===
+CONFIG_DIR="/root/aura-install"
+mkdir -p "$CONFIG_DIR"
+
+cat > "$CONFIG_DIR/config.json" <<JSON
+{
+  "archinstall-language": "Russian",
+  "audio_config": null,
+  "bootloader": "systemd-bootctl",
+  "kernels": ["linux"],
+  "profile": {
+    "main": "KDE Plasma",
+    "details": []
+  },
+  "packages": [
+    "python",
+    "python-pip",
+    "pipewire",
+    "pipewire-pulse",
+    "wireplumber",
+    "speech-dispatcher",
+    "espeak-ng",
+    "alsa-utils",
+    "firefox"
+  ],
+  "custom-commands": [
+    "git clone https://github.com/PythonVenom/aura-companion /opt/aura",
+    "cd /opt/aura && sudo -u $USERNAME python -m pip install --user -e . || true",
+    "echo 'aura: $PROFILE' > /etc/aura-profile"
+  ]
+}
+JSON
+
+log "Конфиг archinstall: $CONFIG_DIR/config.json"
+log "Запускаю archinstall..."
+sleep 2
+
+archinstall --config "$CONFIG_DIR/config.json"
+
+log "Установка завершена. После перезагрузки — Aura First Run Wizard."

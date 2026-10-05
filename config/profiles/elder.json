@@ -23,9 +23,7 @@
     "плохо мне"
   ],
   "wake_words": [
-    "аура",
-    "аурушка",
-    "эй аура"
+    "hey jarvis"
   ],
   "vad_aggressiveness": 2,
   "voice_volume_boost": 1.1,

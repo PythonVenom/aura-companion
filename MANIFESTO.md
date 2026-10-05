@@ -187,3 +187,22 @@ Lean Construction (Koskela 1992).
 Меняется только профиль и набор агентов.
 
 *— pythonvenom*
+
+---
+
+## Принцип: Пентаграмма Aura — 5 флешек
+
+Как у пентестера — набор инструментов на поясе.
+Каждая флешка = один сценарий. Один движок, 5 обёрток.
+
+1. **Aura Live** — демо без установки (любое железо)
+2. **Aura Lite** — SBC, RPi Zero, IoT (1 ГБ RAM)
+3. **Aura Standard** — домашний ноут (8 ГБ RAM)
+4. **AuraOS** — свой дистрибутив на базе Arch (16+ ГБ)
+5. **Aura Rescue** — восстановление + emergency
+
+Наука: Live USB (стандарт 2000-х), Multiboot (Ventoy/GRUB 2),
+PXE boot (Intel 1999), archiso (Arch Wiki), Yocto/Buildroot (2010).
+Модель: Kali Linux (инструмент на флешке), Tails (носитель целиком).
+
+*— pythonvenom*

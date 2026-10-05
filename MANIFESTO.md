@@ -244,3 +244,24 @@ Brooks 1975 — падают не на функциях, а на интегра�
 Мы это делаем в v8.0, не «потом».
 
 *— pythonvenom*
+
+---
+
+## Принцип: Aura — плазма, не замена
+
+Aura не конкурирует с ОС. Она течёт в их форму и перенимает их свойства:
+
+- **Astra Linux** — MAC, ГОСТ-крипто, ФСТЭК (готовность)
+- **Windows** — SAPI/WSR, Hello, Defender
+- **macOS** — Keychain, Touch ID, Shortcuts
+- **Android** — Intents, Foreground service
+- **Arch** — systemd, PipeWire, AUR
+- **BSD** — Capsicum, pledge/unveil
+
+Одно ядро. Один API для пользователя. Много ОС-сосудов.
+Наука: Margulis 1967 (симбиогенез), Gamma 1994 (Adapter),
+Dijkstra 1968 (слои), Nissenbaum 2004 (контекст).
+
+Aura — не «ещё одно окно». Aura — плазма, которая делает ОС лучше.
+
+*— pythonvenom*

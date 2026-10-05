@@ -265,3 +265,35 @@ Dijkstra 1968 (слои), Nissenbaum 2004 (контекст).
 Aura — не «ещё одно окно». Aura — плазма, которая делает ОС лучше.
 
 *— pythonvenom*
+
+---
+
+## Принцип: Aura — инструмент разработчика
+
+Aura создавалась для elder care. Но её ядро применимо шире.
+Разработчики тоже страдают от рутины и accessibility-барьеров.
+
+Aura становится voice-copilot:
+- **Bug logging голосом** — «Aura, баг: кнопка X не работает»
+- **Code review** — «Aura, что делает функция parse_args?»
+- **Commit** — «Aura, закоммить: fix input lag»
+- **Build** — «Aura, собери Windows + Linux»
+- **Docs search** — «Aura, найди в Steamworks: achievements API»
+
+SDK: `pip install aura-steam-sdk` — для gamedev.
+CLI: `aura dev build/test/commit/deploy`.
+
+Один движок. Два профиля:
+- Aura for Elder — простой UI (приоритет №1)
+- Aura for Devs — CLI + IDE + CI/CD (параллельно)
+
+Наука: Brooks 1975 (productivity), Nielsen 1993 (usability),
+Licklider 1960 (symbiosis), IGDA 2012 (accessibility).
+
+Почему Steam?
+- Steam Deck = Arch + KDE = наша база.
+- Steamworks SDK = канал дистрибуции.
+- 27 млн разработчиков и игроков.
+- Accessibility для геймеров — новая вертикаль elder care.
+
+*— pythonvenom*

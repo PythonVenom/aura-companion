@@ -19,3 +19,10 @@ powerful:
   react_max_iterations: 3
   streaming: true
   max_response_words: 0
+
+lite:
+  desc: "SBC / очень слабое железо (RPi 3, 2GB) — без LLM"
+  model: "none"
+  react_max_iterations: 0
+  streaming: true
+  max_response_words: 20

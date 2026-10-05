@@ -150,8 +150,8 @@ def full_check() -> dict:
 
     # Overall
     issues = []
-    if ram["total_gb"] < 4:
-        issues.append("RAM < 4 ГБ")
+    if ram["total_gb"] < 2:  # AURA_RAM_FIX_V1 — 4→2 (реально 1 ГБ + LLM 1.5)
+        issues.append("RAM < 2 ГБ")
     if not audio["has_alsa"] and not audio["has_pipewire"]:
         issues.append("аудио-сервер не найден")
     if audio["sources"] == 0:

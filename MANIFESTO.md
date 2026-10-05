@@ -297,3 +297,34 @@ Licklider 1960 (symbiosis), IGDA 2012 (accessibility).
 - Accessibility для геймеров — новая вертикаль elder care.
 
 *— pythonvenom*
+
+---
+
+## Принцип: Aura внутри игр
+
+Aura — не «рядом с игрой». Aura — **внутри игры**.
+
+Три архитектуры:
+1. **Overlay** — поверх любой игры, без модов (Discord-style, Gamescope)
+2. **WebSocket bridge** — игра открывает порт → Aura подключается
+3. **Engine plugin** — Unity / Unreal / Godot (глубокая интеграция)
+
+Для кого:
+- **Elder gamers** (25%+ играют)
+- **Игроки с ограничениями** (RSI, моторика)
+- **Обычные игроки** — быстрые голосовые команды
+
+Примеры:
+- «Aura, использовать зелье» (RPG)
+- «Aura, перезарядись» (шутер)
+- «Aura, атакуй базу» (стратегия)
+- «Aura, кто онлайн?» (MMO)
+
+Всё **локально**. Без облака. Игрок решает, что передавать.
+Наука: IGDA 2012, AbleGamers 2004, Steam Input API (Valve 2015),
+Discord 2015, Gamescope (Valve 2022), RFC 6455.
+
+Steam Deck = Arch + KDE = наша база.
+Elder care — приоритет №1. In-game — параллельно.
+
+*— pythonvenom*

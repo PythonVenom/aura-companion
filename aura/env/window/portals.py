@@ -42,8 +42,11 @@ def screenshot() -> Path | None:
         try:
             subprocess.run(["grim", str(out)], timeout=5, check=True)
             return out
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.portals').debug(
+                'portals error: %s', e)
 
     if shutil.which("spectacle"):
         # KDE Plasma (Wayland)
@@ -54,8 +57,11 @@ def screenshot() -> Path | None:
                 timeout=8, check=True,
             )
             return out if out.exists() else None
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.portals').debug(
+                'portals error: %s', e)
 
     if shutil.which("gnome-screenshot"):
         # GNOME (Wayland)
@@ -66,8 +72,11 @@ def screenshot() -> Path | None:
                 timeout=8, check=True,
             )
             return out if out.exists() else None
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.portals').debug(
+                'portals error: %s', e)
 
     return None
 
@@ -84,8 +93,11 @@ def active_window_title() -> str | None:
             )
             if r.returncode == 0 and r.stdout.strip():
                 return r.stdout.strip()
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.portals').debug(
+                'portals error: %s', e)
 
     # На GNOME Wayland
     if shutil.which("gdbus"):
@@ -100,8 +112,11 @@ def active_window_title() -> str | None:
             )
             if r.returncode == 0 and "true" in r.stdout:
                 return r.stdout.strip().strip("'()")
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.portals').debug(
+                'portals error: %s', e)
 
     return None
 

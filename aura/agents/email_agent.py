@@ -46,8 +46,11 @@ class AgentEmail(MicroAgent):
             pwd = keyring.get_password(KEYRING_SERVICE, "password")
             if addr and pwd:
                 return addr, pwd
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.email_agent').debug(
+                'email_agent error: %s', e)
         return None
 
     def _send(self, text: str) -> AgentResponse:

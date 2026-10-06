@@ -129,8 +129,11 @@ class AgentListener(MicroAgent):
                 from razdel import tokenize
                 toks = [t.text for t in tokenize(result)]
                 result = ' '.join(toks)
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.listener').debug(
+                    'listener error: %s', e)
         if result and self._is_self_echo(result):
             print(f"🔇 Echo ignored: {result[:40]}")
             return ""

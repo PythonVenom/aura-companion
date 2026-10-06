@@ -21,8 +21,11 @@ def _load():
 def _save(items):
     try:
         HEALTH_PATH.write_text(json.dumps(items, ensure_ascii=False), encoding="utf-8")
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.health').debug(
+            'health error: %s', e)
 
 
 def add_reminder(text, every_minutes=60):

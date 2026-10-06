@@ -68,8 +68,11 @@ class AgentSensors(BaseAgent):
             if cfg.get("emergency_contact"):
                 # Фоном, не блокируя
                 pass
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.sensors').debug(
+                'sensors error: %s', e)
         return AgentResponse.ok(text=message, agent_name=self.name)
 
     def _log(self, kind: str) -> None:
@@ -83,6 +86,9 @@ class AgentSensors(BaseAgent):
         try:
             if CONFIG.exists():
                 return json.loads(CONFIG.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.sensors').debug(
+                'sensors error: %s', e)
         return {"broker": "", "topics": {}, "emergency_contact": ""}

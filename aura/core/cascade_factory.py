@@ -31,8 +31,11 @@ def resolve_window(target: str, ctx: dict) -> str | None:
         for line in r.stdout.splitlines():
             if target.lower() in line.lower():
                 return line
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.cascade_factory').warning(
+            'cascade_factory error: %s', e)
     return None
 
 

@@ -60,8 +60,11 @@ def detect_cpu() -> dict:
                     if ln.lower().startswith("socket(s):"):
                         sockets = int(ln.split(":", 1)[1].strip())
                 info["cores"] = cores_per * sockets
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.system_check').debug(
+            'system_check error: %s', e)
     return info
 
 
@@ -75,8 +78,11 @@ def detect_ram() -> dict:
                     kb = int(line.split()[1])
                     info["total_gb"] = round(kb / 1024 / 1024, 1)
                     break
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.system_check').debug(
+            'system_check error: %s', e)
     return info
 
 
@@ -96,8 +102,11 @@ def detect_gpu() -> list:
                     gpus.append({"vendor": "intel", "raw": line})
                 else:
                     gpus.append({"vendor": "unknown", "raw": line})
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.system_check').debug(
+            'system_check error: %s', e)
     return gpus
 
 
@@ -176,8 +185,11 @@ def _distro_name() -> str:
             for line in f:
                 if line.startswith("PRETTY_NAME="):
                     return line.split("=", 1)[1].strip().strip('"')
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.system_check').debug(
+            'system_check error: %s', e)
     return platform.system()
 
 

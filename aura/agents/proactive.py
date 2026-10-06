@@ -64,8 +64,11 @@ class ProactiveEngine:
         try:
             if STATE_PATH.exists():
                 return json.loads(STATE_PATH.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.proactive').debug(
+                'proactive error: %s', e)
         return {}
 
     def _save_state(self) -> None:
@@ -73,8 +76,11 @@ class ProactiveEngine:
             tmp = STATE_PATH.with_suffix(STATE_PATH.suffix + ".tmp")
             tmp.write_text(json.dumps(self._state, ensure_ascii=False), encoding="utf-8")
             os.replace(tmp, STATE_PATH)
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.proactive').debug(
+                'proactive error: %s', e)
 
     def _is_in_cooldown(self, trigger: Trigger) -> bool:
         last_ts = self._state.get(trigger.name, 0)
@@ -124,8 +130,11 @@ def _collect_briefing(get_agent) -> str:
             # Используем публичный метод internet — спросить погоду.
             # Заглушка — Фаза 17.2 доработает.
             pass
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.proactive').debug(
+                'proactive error: %s', e)
 
     # Блок 3: задачи (journal)
     journal = get_agent("journal") if get_agent else None
@@ -134,8 +143,11 @@ def _collect_briefing(get_agent) -> str:
             tasks = journal.get_pending_tasks()
             if tasks:
                 blocks.append(f"Незакрытых задач: {len(tasks)}.")
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.proactive').debug(
+                'proactive error: %s', e)
 
     return " ".join(blocks) if blocks else "Доброе утро, Создатель."
 
@@ -202,8 +214,11 @@ def max_new_message_trigger(get_agent) -> Trigger:
                 one = messenger.get_last_message_preview() or {}
                 if one.get("chat") and one.get("preview"):
                     return [one]
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.proactive').debug(
+                'proactive error: %s', e)
         return []
 
     def condition(state: dict) -> bool:
@@ -228,8 +243,11 @@ def max_new_message_trigger(get_agent) -> Trigger:
             try:
                 if is_own_message(chat, preview):
                     continue
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.proactive').debug(
+                    'proactive error: %s', e)
             filtered.append({"chat": chat, "preview": preview})
 
         seen = set(state.get("max_seen_keys", []))
@@ -277,8 +295,11 @@ def max_new_message_trigger(get_agent) -> Trigger:
                            ensure_ascii=False),
                 encoding="utf-8",
             )
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.proactive').debug(
+                'proactive error: %s', e)
         return True
 
     def action() -> str:
@@ -290,8 +311,11 @@ def max_new_message_trigger(get_agent) -> Trigger:
             try:
                 from aura.dialog_fsm import set_state as fsm_set
                 fsm_set("pending_read", chat=chat, text=preview)
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.proactive').debug(
+                    'proactive error: %s', e)
             if chat:
                 return f"Создатель, новое сообщение от {chat}. Зачитать?"
             return "Создатель, новое сообщение в Максе. Зачитать?"
@@ -327,8 +351,11 @@ def unanswered_messages_trigger(get_agent) -> Trigger:
                 events = chat_sense.extract_events(previews)
                 for ev in events:
                     chat_sense.save_event(ev)
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.proactive').debug(
+                    'proactive error: %s', e)
             items = chat_sense.find_unanswered(previews)
             items = chat_sense.filter_by_reminder_ttl(items)
             if not items:

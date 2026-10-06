@@ -25,8 +25,11 @@ def set_active(source: str, chat: str = "") -> None:
                        ensure_ascii=False),
             encoding="utf-8",
         )
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.media_state').debug(
+            'media_state error: %s', e)
 
 
 def get_active() -> str | None:
@@ -56,8 +59,11 @@ def get_active_chat() -> str:
 def clear() -> None:
     try:
         STATE_PATH.unlink(missing_ok=True)
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.media_state').debug(
+            'media_state error: %s', e)
 
 
 __all__ = ["set_active", "get_active", "get_active_chat", "clear", "STATE_PATH"]

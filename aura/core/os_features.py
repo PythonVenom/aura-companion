@@ -62,8 +62,11 @@ def current_os() -> str:
             release = Path("/etc/os-release").read_text(encoding="utf-8")
             if "astra" in release.lower():
                 return "astra"
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.os_features').warning(
+                'os_features error: %s', e)
         # Android (Termux)
         import os as _os
         if "com.termux" in _os.environ.get("PREFIX", ""):

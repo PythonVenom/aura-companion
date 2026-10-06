@@ -43,13 +43,19 @@ def _mem_write(user_text: str, aura_text: str):
         cm = get_context_manager()
         cm.push("user", user_text)
         cm.push("aura", aura_text)
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.orchestrator').warning(
+            'orchestrator error: %s', e)
     try:
         from aura.core.memory.episodic import get_episodic
         get_episodic().remember(user_text, aura_text)
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.orchestrator').warning(
+            'orchestrator error: %s', e)
     # EXTRACTOR_RUNTIME: semantic + social в фоне (thread)
     try:
         import threading
@@ -58,11 +64,17 @@ def _mem_write(user_text: str, aura_text: str):
                 from aura.core.memory.extractor import apply_semantic, apply_social
                 apply_semantic(user_text)
                 apply_social(user_text)
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.orchestrator').warning(
+                    'orchestrator error: %s', e)
         threading.Thread(target=_bg, daemon=True).start()
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.orchestrator').warning(
+            'orchestrator error: %s', e)
 
 
 class Orchestrator:
@@ -112,8 +124,11 @@ class Orchestrator:
             from aura.observability import new_trace, log
             new_trace("process")
             log("input", text=text[:120])
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.orchestrator').warning(
+                'orchestrator error: %s', e)
 
         # Constitution (ADR-129) — резервная проверка (Tier0 уже проверил)
         try:
@@ -123,12 +138,18 @@ class Orchestrator:
                 try:
                     from aura.observability import log as _log
                     _log("constitution.refuse", rule=rule_id, text=text[:120])
-                except Exception:
-                    pass
+                except Exception as e:
+                    # F-006: не глотать (раздел 17 промта)
+                    import logging
+                    logging.getLogger('aura.orchestrator').warning(
+                        'orchestrator error: %s', e)
                 _mem_write(text, refusal)
                 return refusal
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.orchestrator').warning(
+                'orchestrator error: %s', e)
 
         # ReAct ветка (ADR-123) — для многошаговых запросов
         try:
@@ -154,8 +175,11 @@ class Orchestrator:
                     try:
                         from aura.observability import log as _log
                         _log("tier0.hit", source=t0.source, intent=t0.intent)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        # F-006: не глотать (раздел 17 промта)
+                        import logging
+                        logging.getLogger('aura.orchestrator').warning(
+                            'orchestrator error: %s', e)
                     _mem_write(text, t0.response)
                     return t0.response
             except Exception as e:
@@ -266,8 +290,11 @@ class Orchestrator:
                 if m:
                     out.append(self._FUZZY_MAP[m[0]])
                     continue
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.orchestrator').warning(
+                    'orchestrator error: %s', e)
             out.append(w)
         return " ".join(out)
 

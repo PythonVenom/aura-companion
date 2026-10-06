@@ -109,8 +109,11 @@ class AgentTaskManager(BaseAgent):
         try:
             with open(self.tasks_file, "w", encoding="utf-8") as f:
                 json.dump(self.tasks, f, ensure_ascii=False, indent=2)
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.task_manager').debug(
+                'task_manager error: %s', e)
 
 
 __all__ = ["AgentTaskManager"]

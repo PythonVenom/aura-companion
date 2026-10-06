@@ -92,6 +92,9 @@ class AgentHomeAssistant(BaseAgent):
         try:
             if CONFIG.exists():
                 return json.loads(CONFIG.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.homeassistant').debug(
+                'homeassistant error: %s', e)
         return {"url": "", "token": "", "lights": {}}

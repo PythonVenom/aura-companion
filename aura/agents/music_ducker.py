@@ -84,8 +84,11 @@ class AgentMusicDucker(BaseAgent):
                     ["pactl", "set-sink-input-volume", sid, f"{vol}%"],
                     check=False,
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.music_ducker').debug(
+                    'music_ducker error: %s', e)
         self.active_sink_inputs = {}
         return "🔊 Восстановила фоновый звук."
 

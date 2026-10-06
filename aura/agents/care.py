@@ -42,8 +42,11 @@ class CareAgent(BaseAgent):
                 for t in data.get("tasks", []):
                     self.tasks.append(CareTask(**t))
                 return
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.care').debug(
+                    'care error: %s', e)
         self.add_task("water", ["10:00","13:00","16:00","19:00"], "Выпей воды")
         self.add_task("food", ["09:00","14:00","19:00"], "Поешь")
         self.add_task("sleep", ["23:00"], "Пора спать")
@@ -57,8 +60,11 @@ class CareAgent(BaseAgent):
                            ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.care').debug(
+                'care error: %s', e)
 
     def add_task(self, name: str, times: list, message: str):
         self.tasks.append(CareTask(name=name, times=times, message=message))

@@ -103,6 +103,9 @@ class AgentFinElder(BaseAgent):
         try:
             if CONFIG.exists():
                 return json.loads(CONFIG.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.fin_elder').debug(
+                'fin_elder error: %s', e)
         return {"pension_day": 8, "utility_period": "20-25"}

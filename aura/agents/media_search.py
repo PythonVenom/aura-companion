@@ -141,8 +141,11 @@ class AgentMediaSearch(BaseAgent):
                             "file": full_path,
                             "title": os.path.splitext(f)[0],
                         })
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.media_search').debug(
+                'media_search error: %s', e)
 
     # --- Поиск ---
 

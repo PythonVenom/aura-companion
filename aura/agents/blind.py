@@ -55,8 +55,11 @@ class AgentBlind(MicroAgent):
             return
         try:
             subprocess.run(cmd + [text], timeout=30, check=False)
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.blind').debug(
+                'blind error: %s', e)
 
     def _start(self) -> AgentResponse:
         if self._monitor_proc and self._monitor_proc.poll() is None:

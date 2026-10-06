@@ -76,8 +76,11 @@ class SemanticMemory:
                 if emb:
                     try:
                         emb_put(text, emb)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        # F-006: не глотать (раздел 17 промта)
+                        import logging
+                        logging.getLogger('aura.semantic').warning(
+                            'semantic error: %s', e)
                 return emb
         except Exception:
             return None

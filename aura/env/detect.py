@@ -29,8 +29,11 @@ def _detect_distro() -> str:
         for line in content.splitlines():
             if line.startswith("ID="):
                 return line.split("=", 1)[1].strip().strip(chr(34)).lower()
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.detect').debug(
+            'detect error: %s', e)
     return "unknown"
 
 

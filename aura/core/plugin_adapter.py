@@ -52,8 +52,11 @@ def register_plugin_agent(orch, agent_cls, plugin_id: str) -> None:
             try:
                 reg.register(wrapper)
                 return
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.plugin_adapter').warning(
+                    'plugin_adapter error: %s', e)
         # Fallback: _agents dict
         if hasattr(reg, "_agents") and isinstance(getattr(reg, "_agents"), dict):
             reg._agents[name] = wrapper

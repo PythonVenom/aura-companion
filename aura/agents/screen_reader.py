@@ -141,8 +141,11 @@ class AgentScreenReader(BaseAgent):
             if tmp_path and os.path.exists(tmp_path):
                 try:
                     os.remove(tmp_path)
-                except Exception:
-                    pass
+                except Exception as e:
+                    # F-006: не глотать (раздел 17 промта)
+                    import logging
+                    logging.getLogger('aura.screen_reader').debug(
+                        'screen_reader error: %s', e)
 
 
 __all__ = ["AgentScreenReader"]

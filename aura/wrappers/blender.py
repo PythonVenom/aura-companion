@@ -63,8 +63,11 @@ class BlenderWrapper(AppWrapper):
         if self._sock:
             try:
                 self._sock.close()
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.blender').debug(
+                    'blender error: %s', e)
         self._sock = None
         self._connected = False
 

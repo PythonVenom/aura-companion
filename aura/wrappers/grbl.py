@@ -83,8 +83,11 @@ class GRBLWrapper(AppWrapper):
         if self._serial:
             try:
                 self._serial.close()
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.grbl').debug(
+                    'grbl error: %s', e)
         self._serial = None
         self._connected = False
 

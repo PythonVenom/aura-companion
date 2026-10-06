@@ -63,8 +63,11 @@ class AgentRAGMemory(BaseAgent):
             custom = settings.get("rag_db_path", "")
             if custom:
                 return custom
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.rag_memory').debug(
+                'rag_memory error: %s', e)
         return str(Path.home() / ".local" / "share" / "aura" / "rag_db")
     COLLECTION_NAME = "aura_dialogs"
     EMBED_MODEL = "nomic-embed-text"

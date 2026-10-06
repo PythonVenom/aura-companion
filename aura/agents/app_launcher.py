@@ -85,8 +85,11 @@ class AgentAppLauncher(BaseAgent):
                                 "exec": exec_cmd,
                                 "file": f,
                             }
-                except Exception:
-                    pass
+                except Exception as e:
+                    # F-006: не глотать (раздел 17 промта)
+                    import logging
+                    logging.getLogger('aura.app_launcher').debug(
+                        'app_launcher error: %s', e)
 
     # Bug 53: веб-мессенджеры — не приложения
     WEB_BLOCKLIST = ("ватсап", "вотсап", "whatsapp", "вацап", "вотцап",
@@ -202,8 +205,11 @@ class AgentAppLauncher(BaseAgent):
                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                     )
                     return True
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.app_launcher').debug(
+                'app_launcher error: %s', e)
         return False
 
     def close_app(self, name: str) -> str:
@@ -226,8 +232,11 @@ class AgentAppLauncher(BaseAgent):
                     if name_lower in app_name.lower() or name_lower in app_id.lower():
                         subprocess.run(["flatpak", "kill", app_id], check=False)
                         return f"✅ Закрыл: {app_name}"
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.app_launcher').debug(
+                'app_launcher error: %s', e)
 
         # Native
         candidates = [name]
@@ -250,8 +259,11 @@ class AgentAppLauncher(BaseAgent):
                 )
                 if result.returncode == 0:
                     return f"✅ Закрыл: {cand}"
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.app_launcher').debug(
+                    'app_launcher error: %s', e)
 
         return f"❌ Процесс '{name}' не найден"
 

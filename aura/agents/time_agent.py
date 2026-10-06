@@ -43,8 +43,11 @@ def _load():
 def _save(items):
     try:
         TIMERS_PATH.write_text(json.dumps(items, ensure_ascii=False), encoding="utf-8")
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.time_agent').debug(
+            'time_agent error: %s', e)
 
 
 def add_timer(seconds, label=""):

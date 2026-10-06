@@ -92,8 +92,11 @@ class TrayIcon:
                 cmd, shell=True,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.tray').warning(
+                'tray error: %s', e)
 
     def _open_web(self) -> None:
         self._run(f"xdg-open {self.api_url}/ui")
@@ -123,8 +126,11 @@ class TrayIcon:
         if self._icon is not None:
             try:
                 self._icon.stop()
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.tray').warning(
+                    'tray error: %s', e)
 
     def refresh_state(self) -> str:
         s = self._get_state()
@@ -134,8 +140,11 @@ class TrayIcon:
                 self._icon.icon = make_icon_image(state_to_color(s))
                 self._icon.title = f"Aura: {s}"
                 self._icon.update_menu()
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.tray').warning(
+                    'tray error: %s', e)
         return s
 
     def run(self) -> None:

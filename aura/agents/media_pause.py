@@ -84,8 +84,11 @@ class AgentMediaPause(BaseAgent):
             ok = get_media().pause_all()
             if ok:
                 return True
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.media_pause').debug(
+                'media_pause error: %s', e)
         if not self.ready:
             return False
         players = [self.player] if self.player else self._list_players()

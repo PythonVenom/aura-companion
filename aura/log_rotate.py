@@ -44,8 +44,11 @@ def gzip_old():
                     with open(f, "rb") as src, gzip.open(gz, "wb") as dst:
                         dst.write(src.read())
                     f.unlink()
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.log_rotate').debug(
+                'log_rotate error: %s', e)
 
 
 def purge_old():
@@ -57,8 +60,11 @@ def purge_old():
             d = datetime.strptime(date_str, "%Y-%m-%d")
             if d.date() < cutoff.date():
                 f.unlink()
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.log_rotate').debug(
+                'log_rotate error: %s', e)
 
 
 def run():

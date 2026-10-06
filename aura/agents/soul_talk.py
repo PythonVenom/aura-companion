@@ -123,8 +123,11 @@ class AgentSoulTalk(MicroAgent):
             reply = await brain.ask(prompt)
             if reply:
                 return AgentResponse.ok(text=reply, agent_name=self.name)
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.soul_talk').debug(
+                'soul_talk error: %s', e)
 
         # Fallback — если LLM недоступен
         return AgentResponse.ok(

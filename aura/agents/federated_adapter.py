@@ -76,8 +76,11 @@ class AgentFederatedAdapter(MicroAgent):
                             "input": "",
                             "output": text[:500],
                         })
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.federated_adapter').debug(
+                    'federated_adapter error: %s', e)
 
         # 2. Memories (autobiography)
         if MEM_DB.exists():
@@ -94,8 +97,11 @@ class AgentFederatedAdapter(MicroAgent):
                             "input": "",
                             "output": text[:500],
                         })
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.federated_adapter').debug(
+                    'federated_adapter error: %s', e)
 
         # 3. Health twin events (facts, не диалоги)
         if TWIN_DB.exists():
@@ -118,8 +124,11 @@ class AgentFederatedAdapter(MicroAgent):
                             "input": "",
                             "output": text[:300],
                         })
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.federated_adapter').debug(
+                    'federated_adapter error: %s', e)
 
         return samples
 

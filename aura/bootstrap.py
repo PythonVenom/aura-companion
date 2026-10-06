@@ -200,8 +200,11 @@ def build_orchestrator() -> Orchestrator:
     try:
         from aura.security import canary
         canary.install()
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.bootstrap').debug(
+            'bootstrap error: %s', e)
 
     # AUTO_CONFIG_V7 (ADR-153): детект железа → профиль
     try:

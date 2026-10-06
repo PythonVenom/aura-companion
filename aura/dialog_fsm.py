@@ -48,8 +48,11 @@ def set_state(state: str, chat: str = "", text: str = "") -> None:
         tmp = FSM_PATH.with_suffix(FSM_PATH.suffix + ".tmp")
         tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
         os.replace(tmp, FSM_PATH)
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.dialog_fsm').debug(
+            'dialog_fsm error: %s', e)
 
 
 def get_state() -> dict:
@@ -84,8 +87,11 @@ def clear_state() -> None:
     """Сбросить в idle."""
     try:
         FSM_PATH.unlink(missing_ok=True)
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.dialog_fsm').debug(
+            'dialog_fsm error: %s', e)
 
 
 __all__ = ["set_state", "get_state", "clear_state", "FSM_PATH", "VALID_STATES", "TIMEOUT_SEC"]

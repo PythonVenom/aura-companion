@@ -63,8 +63,11 @@ class ChatBridge:
                 f.write(json.dumps(payload, ensure_ascii=False) + "\n")
                 f.flush()
                 os.fsync(f.fileno())
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.chat_bridge').warning(
+                'chat_bridge error: %s', e)
 
 
 __all__ = ["ChatBridge", "DEFAULT_CACHE"]

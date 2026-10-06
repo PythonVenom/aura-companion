@@ -111,8 +111,11 @@ class AgentBargeIn:
             try:
                 self.stream.stop()
                 self.stream.close()
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.barge_in').debug(
+                    'barge_in error: %s', e)
             self.stream = None
         if self.thread is not None:
             self.thread.join(timeout=1.0)

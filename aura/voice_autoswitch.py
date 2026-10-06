@@ -39,8 +39,11 @@ def apply_if_changed() -> str | None:
         if new:
             settings.set_value("voice_profile", new)
             return new
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.voice_autoswitch').debug(
+            'voice_autoswitch error: %s', e)
     return None
 
 

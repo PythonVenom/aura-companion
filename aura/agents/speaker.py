@@ -90,14 +90,20 @@ class AgentSpeaker(MicroAgent):
                         try:
                             self.aplay_process.kill()
                             self.aplay_process.wait(timeout=1.0)
-                        except Exception:
-                            pass
+                        except Exception as e:
+                            # F-006: не глотать (раздел 17 промта)
+                            import logging
+                            logging.getLogger('aura.speaker').debug(
+                                'speaker error: %s', e)
                     finally:
                         os.unlink(text_file)
                         try:
                             os.unlink(wav_file)
-                        except Exception:
-                            pass
+                        except Exception as e:
+                            # F-006: не глотать (раздел 17 промта)
+                            import logging
+                            logging.getLogger('aura.speaker').debug(
+                                'speaker error: %s', e)
                 else:
                     subprocess.Popen(
                         ['espeak-ng', '-v', 'ru', '-p', '60', '-s', '160', text],
@@ -172,8 +178,11 @@ class AgentSpeaker(MicroAgent):
             try:
                 self.aplay_process.terminate()
                 self.aplay_process.wait(timeout=1.0)
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.speaker').debug(
+                    'speaker error: %s', e)
             self.aplay_process = None
 
     def stop_speaking(self):

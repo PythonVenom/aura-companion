@@ -26,8 +26,11 @@ def dispatch(capability: str, args: dict) -> tuple:
         if is_trap(capability):
             r = tarpit_response(capability, args)
             return True, str(r)[:500]
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.dispatcher').warning(
+            'dispatcher error: %s', e)
     h = _HANDLERS.get(capability)
     if h is None:
         return False, f"no handler for {capability}"

@@ -18,8 +18,11 @@ class AgentAtSpi(MicroAgent):
             from gi.repository import Atspi
             self.Atspi = Atspi
             self.ready = True
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.at_spi').debug(
+                'at_spi error: %s', e)
 
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()

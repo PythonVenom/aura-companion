@@ -35,8 +35,11 @@ def log(event: str, **fields) -> None:
     try:
         with _LOG_PATH.open("a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.__init__').debug(
+            '__init__ error: %s', e)
 
 def tail(n: int = 20) -> list[dict]:
     if not _LOG_PATH.exists(): return []

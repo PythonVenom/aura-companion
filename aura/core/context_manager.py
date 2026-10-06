@@ -40,8 +40,11 @@ class ContextManager:
         try:
             SUMMARY_PATH.parent.mkdir(parents=True, exist_ok=True)
             SUMMARY_PATH.write_text(text, encoding="utf-8")
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.context_manager').warning(
+                'context_manager error: %s', e)
 
     def summary(self) -> str:
         return self._summary

@@ -40,8 +40,11 @@ def _save_calendar(items: list) -> None:
         CALENDAR_PATH.write_text(
             json.dumps(items, ensure_ascii=False, indent=2),
             encoding="utf-8")
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.chat_sense').debug(
+            'chat_sense error: %s', e)
 
 
 def save_event(event: dict) -> None:
@@ -165,8 +168,11 @@ def _load_state() -> dict:
 def _save_state(state: dict) -> None:
     try:
         STATE_PATH.write_text(json.dumps(state, ensure_ascii=False), encoding="utf-8")
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.chat_sense').debug(
+            'chat_sense error: %s', e)
 
 
 _WEEKDAYS = {

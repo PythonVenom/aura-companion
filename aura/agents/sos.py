@@ -35,8 +35,11 @@ class AgentSOS(BaseAgent):
             custom = settings.get("sos_phrases", [])
             if custom:
                 return tuple(custom)
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.sos').debug(
+                'sos error: %s', e)
         return cls.SOS_PHRASES
 
     def can_handle(self, request: AgentRequest) -> bool:

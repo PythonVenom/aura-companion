@@ -57,8 +57,11 @@ def load() -> dict:
         if SETTINGS_PATH.exists():
             data = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
             result.update(data)
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.settings').debug(
+            'settings error: %s', e)
     return result
 
 
@@ -70,8 +73,11 @@ def save(settings: dict) -> None:
             json.dumps(settings, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.settings').debug(
+            'settings error: %s', e)
 
 
 def get(key: str, default=None):

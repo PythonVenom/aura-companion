@@ -25,8 +25,11 @@ class Tier0Orchestrator:
             allowed, refusal, _ = cc(text)
             if not allowed:
                 return Tier0Result(None, 1.0, refusal, "constitution")
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.tier0_orchestrator').warning(
+                'tier0_orchestrator error: %s', e)
         intent, conf = self._classify(text)
         if intent is None:
             return Tier0Result(None, conf,
@@ -38,8 +41,11 @@ class Tier0Orchestrator:
                 ok, res = dispatcher.dispatch(intent, {})
                 if ok:
                     return Tier0Result(intent, conf, str(res)[:200], "dispatcher")
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.tier0_orchestrator').warning(
+                'tier0_orchestrator error: %s', e)
         return Tier0Result(intent, conf, self._render(intent), "template")
 
 

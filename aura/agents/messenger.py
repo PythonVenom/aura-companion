@@ -346,8 +346,11 @@ class AgentMessenger(BaseAgent):
                 check=False, timeout=2,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.messenger').debug(
+                'messenger error: %s', e)
 
     def send_message(self, chat: str, message: str) -> str:
         """Открыть чат, ввести текст (без отправки)."""

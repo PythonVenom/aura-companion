@@ -72,6 +72,9 @@ class AgentMatter(BaseAgent):
         try:
             if CONFIG.exists():
                 return json.loads(CONFIG.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.matter').debug(
+                'matter error: %s', e)
         return {"server_url": "", "devices": {}}

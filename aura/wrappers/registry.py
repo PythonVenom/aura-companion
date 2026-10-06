@@ -28,8 +28,11 @@ def _autoload() -> None:
             mod = __import__(modname, fromlist=[clsname])
             cls = getattr(mod, clsname)
             register(cls)
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.registry').debug(
+                'registry error: %s', e)
 
 
 class WrapperRegistry:

@@ -73,8 +73,11 @@ class AgentVKMusic(BaseAgent):
                     if token and len(token) > 10:
                         self.token = token
                         return True
-                except Exception:
-                    pass
+                except Exception as e:
+                    # F-006: не глотать (раздел 17 промта)
+                    import logging
+                    logging.getLogger('aura.vk_music').debug(
+                        'vk_music error: %s', e)
         return False
 
     def _vk_request(self, method: str, params: dict) -> dict:

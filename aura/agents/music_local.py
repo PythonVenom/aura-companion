@@ -74,8 +74,11 @@ class AgentMusicLocal(BaseAgent):
             for p in self.music_dir.rglob("*"):
                 if p.is_file() and p.suffix.lower() in AUDIO_EXTS:
                     self.tracks.append(p)
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.music_local').debug(
+                'music_local error: %s', e)
 
     # Bug 56: не перехватываем «следующий» если речь о столах/вкладках/окнах
     YIELD_CONTEXT = (

@@ -49,16 +49,22 @@ def set_status(state: str, text: str = "") -> None:
         tmp = STATUS_PATH.with_suffix(STATUS_PATH.suffix + ".tmp")
         tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
         os.replace(tmp, STATUS_PATH)
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.status').debug(
+            'status error: %s', e)
 
 
 def clear_status() -> None:
     """Убрать файл статуса (при остановке)."""
     try:
         STATUS_PATH.unlink(missing_ok=True)
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.status').debug(
+            'status error: %s', e)
 
 
 __all__ = ["set_status", "clear_status", "STATUS_PATH", "VALID_STATES"]

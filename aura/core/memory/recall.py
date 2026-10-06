@@ -45,8 +45,11 @@ def recall(query: str, n: int = 8) -> list[MemoryHit]:
         for i, turn in enumerate(get_working().last(10)):
             hits.append(MemoryHit("working", 1.0 - i * 0.02,
                                   {"role": turn.role, "text": turn.text}))
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.recall').warning(
+            'recall error: %s', e)
 
     # 3. Semantic
     try:
@@ -58,8 +61,11 @@ def recall(query: str, n: int = 8) -> list[MemoryHit]:
                     0.6 * f.confidence + 0.4 * _recency_score(f.ts),
                     {"subject": f.subject, "predicate": f.predicate,
                      "object": f.object, "confidence": f.confidence}))
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.recall').warning(
+            'recall error: %s', e)
 
     # 7. Social (только если упоминается известное имя)
     try:
@@ -78,8 +84,11 @@ def recall(query: str, n: int = 8) -> list[MemoryHit]:
                         hits.append(MemoryHit("social", 0.7,
                             {"event": ev["kind"], "date": ev["date"],
                              "of": ent.name}))
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.recall').warning(
+            'recall error: %s', e)
 
     # 6. Emotional (последние N дней)
     try:
@@ -90,8 +99,11 @@ def recall(query: str, n: int = 8) -> list[MemoryHit]:
             if st.get("count", 0) > 0:
                 hits.append(MemoryHit("emotional", 0.5,
                                       {"mood_avg": st.get("avg"), "count": st["count"]}))
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.recall').warning(
+            'recall error: %s', e)
 
     hits.sort(key=lambda h: h.score, reverse=True)
     return hits[:n]

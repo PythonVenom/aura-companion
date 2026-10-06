@@ -156,10 +156,16 @@ class AgentFocusSwitch(BaseAgent):
                     ["xdotool", "search", "--name", "Firefox", "windowsize", str(half_w), str(h)],
                     check=False,
                 )
-            except Exception:
-                pass
-        except Exception:
-            pass
+            except Exception as e:
+                # F-006: не глотать (раздел 17 промта)
+                import logging
+                logging.getLogger('aura.focus_switch').debug(
+                    'focus_switch error: %s', e)
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.focus_switch').debug(
+                'focus_switch error: %s', e)
 
 
 __all__ = ["AgentFocusSwitch"]

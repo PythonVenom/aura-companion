@@ -94,7 +94,7 @@ class AgentTaskManager(BaseAgent):
     def get_plan(self) -> str:
         if not self.tasks:
             return "📋 Задач нет."
-        first = list(self.tasks.values())[0]
+        first = next(iter(self.tasks.values()))
         return f"📋 Сегодня {len(self.tasks)} задач. Начнём с первой: {first}?"
 
     def _load(self) -> None:

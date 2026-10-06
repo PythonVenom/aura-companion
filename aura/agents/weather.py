@@ -1,12 +1,18 @@
-"""Weather agent — live прогноз (OpenWeatherMap + Yandex fallback).
+"""Weather agent — Open-Meteo (бесплатно, без ключа).
 
 Bug 51: LLM галлюцинировал погоду. Этот агент даёт live-данные.
+API: https://open-meteo.com — free, no key, UV + apparent_temperature.
+
+Д4 (наука):
+- Open-Meteo API: https://open-meteo.com/en/docs
+- Wind chill: Environment Canada (2001), NOAA
+- Heat index: Rothfusz (1979), NWS SR 90-23
+- ISO 7730:2005, Fanger (1970) — одежда и комфорт
+- WHO (2002) — Global Solar UV Index
 """
-import os
 import json
-import urllib.request
 import urllib.parse
-from datetime import datetime, timedelta
+import urllib.request
 
 try:
     from aura.agents.base import MicroAgent
@@ -14,9 +20,21 @@ except Exception:
     MicroAgent = object
 
 
-OPENWEATHER_KEY = os.environ.get("OPENWEATHER_API_KEY", "")
-YANDEX_KEY = os.environ.get("YANDEX_WEATHER_KEY", "")
-DEFAULT_CITY = os.environ.get("AURA_CITY", "Москва")
+DEFAULT_CITY = "Москва"
+# Координаты городов РФ (расширять по мере нужды)
+CITY_COORDS = {
+    "москва": (55.7558, 37.6173),
+    "санкт-петербург": (59.9343, 30.3351),
+    "спб": (59.9343, 30.3351),
+    "питер": (59.9343, 30.3351),
+    "новосибирск": (55.0084, 82.9357),
+    "екатеринбург": (56.8389, 60.6057),
+    "казань": (55.8304, 49.0661),
+    "самара": (53.1959, 50.1002),
+    "краснодар": (45.0355, 38.9753),
+    "сочи": (43.5855, 39.7231),
+    "владивосток": (43.1332, 131.9113),
+}
 
 
 class WeatherAgent(MicroAgent):
@@ -29,145 +47,130 @@ class WeatherAgent(MicroAgent):
             self.description = "Погода"
 
     # ---- helpers ----
-    # ---- наука (Д4): ветер/жара/одежда ----
     @staticmethod
-    def _feels_like(t: float, wind_kmh: float, humidity: float) -> float:
-        """Ощущаемая температура.
-        Wind chill: Environment Canada (2001), NOAA.
-        Heat index: Rothfusz (1979), NWS SR 90-23.
-        """
-        if t <= 10 and wind_kmh > 4.8:
-            return (13.12 + 0.6215 * t - 11.37 * wind_kmh ** 0.16
-                    + 0.3965 * t * wind_kmh ** 0.16)
-        if t >= 26 and humidity >= 40:
-            return (-8.78 + 1.61 * t + 2.33 * humidity
-                    - 0.146 * t * humidity + 0.0001 * t * t * humidity)
-        return t
+    def _coords(city: str):
+        key = city.lower().strip()
+        return CITY_COORDS.get(key, CITY_COORDS["москва"])
+
+    def _fetch(self, city: str, days: int = 1):
+        lat, lon = self._coords(city)
+        params = {
+            "latitude": lat,
+            "longitude": lon,
+            "current": "temperature_2m,apparent_temperature,weather_code,"
+                       "wind_speed_10m,relative_humidity_2m",
+            "daily": "temperature_2m_max,temperature_2m_min,uv_index_max,"
+                     "weather_code",
+            "timezone": "Europe/Moscow",
+            "forecast_days": max(2, days + 1),
+        }
+        url = "https://api.open-meteo.com/v1/forecast?" + urllib.parse.urlencode(params)
+        with urllib.request.urlopen(url, timeout=8) as r:
+            return json.load(r)
+
+    @staticmethod
+    def _weather_ru(code: int) -> str:
+        if code == 0: return "ясно"
+        if code in (1, 2): return "малооблачно"
+        if code == 3: return "облачно"
+        if code in (45, 48): return "туман"
+        if code in (51, 53, 55, 56, 57): return "морось"
+        if code in (61, 63, 65, 66, 67): return "дождь"
+        if code in (71, 73, 75, 77): return "снег"
+        if code in (80, 81, 82): return "ливень"
+        if code in (85, 86): return "снегопад"
+        if code in (95, 96, 99): return "гроза"
+        return "переменно"
 
     @staticmethod
     def _elder_advice(t: float, feels: float, wind_kmh: float,
-                      humidity: float) -> str:
-        """Совет по одежде для пожилого. ISO 7730, Fanger 1970."""
+                      humidity: float, uv: float) -> str:
+        """Совет для пожилого. ISO 7730, Fanger 1970, WHO 2002."""
         parts = []
-        if feels < 0:
+        base = feels if abs(feels - t) >= 2 else t
+        if base < 0:
             parts.append("очень холодно — шапка, перчатки, шарф")
-        elif feels < 10:
+        elif base < 10:
             parts.append("прохладно — тёплая куртка")
-        elif feels < 18:
+        elif base < 18:
             parts.append("свежо — лёгкая куртка")
-        elif feels < 25:
+        elif base < 25:
             parts.append("тепло — рубашка с длинным рукавом")
-        elif feels < 30:
+        elif base < 30:
             parts.append("жарко — футболка, пей воду")
         else:
             parts.append("очень жарко — не выходи днём, пей воду")
         if wind_kmh >= 20:
             parts.append("ветрено — одевайся плотнее")
         if humidity >= 70 and t >= 22:
-            parts.append("душно — открой окно или включи вентилятор")
+            parts.append("душно — открой окно")
+        if uv is not None and uv >= 6:
+            parts.append("UV высокий — панама и очки")
         return ", ".join(parts)
 
-    def _format_current(self, city: str, t: float, desc: str,
-                        wind_ms: float, humidity: float) -> str:
-        wind_kmh = wind_ms * 3.6
-        feels = self._feels_like(t, wind_kmh, humidity)
-        advice = self._elder_advice(t, feels, wind_kmh, humidity)
-        feels_txt = ""
-        if abs(feels - t) >= 2:
-            feels_txt = f", ощущается как {feels:+.0f}°"
-        return f"Сейчас в {city} {t:+.0f}°{feels_txt}, {desc}. {advice.capitalize()}."
+    def _format_current(self, city: str, data: dict) -> str:
+        cur = data["current"]
+        t = cur["temperature_2m"]
+        feels = cur["apparent_temperature"]
+        wind_kmh = cur["wind_speed_10m"]
+        humidity = cur["relative_humidity_2m"]
+        desc = self._weather_ru(cur["weather_code"])
+        uv = data.get("daily", {}).get("uv_index_max", [None])[0]
+        advice = self._elder_advice(t, feels, wind_kmh, humidity, uv)
+        feels_txt = f", ощущается как {feels:+.0f}°" if abs(feels - t) >= 2 else ""
+        uv_txt = f" UV {uv:.0f}." if uv is not None and uv >= 3 else ""
+        return (f"Сейчас в {city} {t:+.0f}°{feels_txt}, {desc}.{uv_txt} "
+                f"{advice.capitalize()}.")
 
-    def _owm_current(self, city: str) -> str | None:
-        if not OPENWEATHER_KEY:
-            return None
+    def _format_day(self, city: str, data: dict, day: int = 1) -> str:
+        d = data["daily"]
         try:
-            url = (
-                "https://api.openweathermap.org/data/2.5/weather?"
-                + urllib.parse.urlencode({
-                    "q": city,
-                    "appid": OPENWEATHER_KEY,
-                    "units": "metric",
-                    "lang": "ru",
-                })
-            )
-            with urllib.request.urlopen(url, timeout=5) as r:
-                d = json.load(r)
-            t = d["main"]["temp"]
-            humidity = d["main"].get("humidity", 50)
-            desc = d["weather"][0]["description"]
-            wind_ms = d.get("wind", {}).get("speed", 0)
-            return self._format_current(city, t, desc, wind_ms, humidity)
-        except Exception as e:
-            return f"OWM error: {e}"
-
-    def _owm_forecast(self, city: str, days: int = 1) -> str | None:
-        if not OPENWEATHER_KEY:
-            return None
-        try:
-            url = (
-                "https://api.openweathermap.org/data/2.5/forecast?"
-                + urllib.parse.urlencode({
-                    "q": city,
-                    "appid": OPENWEATHER_KEY,
-                    "units": "metric",
-                    "lang": "ru",
-                })
-            )
-            with urllib.request.urlopen(url, timeout=5) as r:
-                d = json.load(r)
-            target = datetime.now() + timedelta(days=days)
-            # Найти ближайший дневной слот
-            best = None
-            best_delta = 1e9
-            for item in d["list"]:
-                dt = datetime.fromtimestamp(item["dt"])
-                # 12:00 целевого дня
-                want = target.replace(hour=12, minute=0, second=0, microsecond=0)
-                delta = abs((dt - want).total_seconds())
-                if delta < best_delta:
-                    best_delta = delta
-                    best = item
-            if not best:
-                return None
-            t = best["main"]["temp"]
-            desc = best["weather"][0]["description"]
-            word = "Завтра" if days == 1 else "Послезавтра"
-            return f"{word} в {city} ожидается {t:+.0f}°, {desc}."
-        except Exception as e:
-            return f"OWM forecast error: {e}"
+            t_max = d["temperature_2m_max"][day]
+            t_min = d["temperature_2m_min"][day]
+            code = d["weather_code"][day]
+        except (IndexError, KeyError):
+            return "Не могу получить прогноз."
+        word = "Завтра" if day == 1 else "Послезавтра"
+        return f"{word} в {city} {t_min:+.0f}°…{t_max:+.0f}°, {self._weather_ru(code)}."
 
     # ---- API агента ----
     def now(self, city: str | None = None) -> str:
         c = city or DEFAULT_CITY
-        r = self._owm_current(c)
-        return r or "Не могу получить погоду — нет доступа к сервису."
+        try:
+            data = self._fetch(c, days=1)
+            return self._format_current(c, data)
+        except Exception as e:
+            return f"Не могу получить погоду: {e}"
 
     def tomorrow(self, city: str | None = None) -> str:
         c = city or DEFAULT_CITY
-        r = self._owm_forecast(c, days=1)
-        return r or "Не могу получить прогноз — нет доступа к сервису."
+        try:
+            data = self._fetch(c, days=2)
+            return self._format_day(c, data, day=1)
+        except Exception as e:
+            return f"Не могу получить прогноз: {e}"
 
     def after_tomorrow(self, city: str | None = None) -> str:
         c = city or DEFAULT_CITY
-        r = self._owm_forecast(c, days=2)
-        return r or "Не могу получить прогноз — нет доступа к сервису."
+        try:
+            data = self._fetch(c, days=3)
+            return self._format_day(c, data, day=2)
+        except Exception as e:
+            return f"Не могу получить прогноз: {e}"
 
-    # AURA_RURAL_WEATHER_V1 — T038 погода для дачи
     def rural_forecast(self, city: str | None = None) -> str:
-        """Погода на 3 дня — для планирования дачных работ."""
         c = city or DEFAULT_CITY
-        results = []
-        for days in (0, 1, 2):
-            r = self._owm_forecast(c, days=days) if days > 0 else self._owm_current(c)
-            if r:
-                results.append(r)
-        if not results:
-            return "Не могу получить прогноз для дачи."
-        return "\n".join(results)
+        try:
+            data = self._fetch(c, days=3)
+            lines = [self._format_current(c, data)]
+            for d in (1, 2):
+                lines.append(self._format_day(c, data, day=d))
+            return "\n".join(lines)
+        except Exception as e:
+            return f"Не могу получить прогноз для дачи: {e}"
 
     def handle(self, text: str) -> str:
         t = text.lower()
-        # AURA_RURAL_WEATHER_V1 — дача
         if "дач" in t or "3 дня" in t or "три дня" in t or "выходные" in t:
             return self.rural_forecast()
         if "завтра" in t and "послезавтра" not in t:
@@ -177,17 +180,17 @@ class WeatherAgent(MicroAgent):
         return self.now()
 
 
-# ---- CLI smoke ----
-if __name__ == "__main__":
-    a = WeatherAgent()
-    print("NOW:     ", a.now())
-    print("TOMORROW:", a.tomorrow())
-    print("AFTER:   ", a.after_tomorrow())
-
-
-# ==== Наука (Д4) ====
+# ==== Наука (Д4) — референсы ====
+# - Open-Meteo (2024). Free Weather API. https://open-meteo.com/en/docs
 # - Environment Canada (2001). Wind Chill Index.
 # - Rothfusz, L.P. (1979). The Heat Index Equation. NWS SR 90-23.
 # - ISO 7730:2005. Ergonomics of the thermal environment.
 # - Fanger, P.O. (1970). Thermal Comfort. Danish Technical Press.
 # - WHO (2002). Global Solar UV Index: A Practical Guide.
+
+
+if __name__ == "__main__":
+    a = WeatherAgent()
+    print("NOW:     ", a.now())
+    print("TOMORROW:", a.tomorrow())
+    print("AFTER:   ", a.after_tomorrow())

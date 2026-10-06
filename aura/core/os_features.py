@@ -16,9 +16,8 @@ Feature ID: "<os>.<feature>" — напр. "windows.sapi", "macos.keychain",
 from __future__ import annotations
 import importlib
 import platform
-import sys
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 
 # Реестр: feature_id → (module_path, class_name)

@@ -13,8 +13,6 @@ D-Bus интерфейсы:
 from __future__ import annotations
 import subprocess
 import shutil
-import json
-import time
 from pathlib import Path
 
 

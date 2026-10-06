@@ -63,7 +63,7 @@ class AgentVKWeb(MicroAgent):
                 data = result.get("data", {})
                 if data.get("ok"):
                     return AgentResponse.ok(f"🌐 VK: {ru_name}", self.name)
-                return AgentResponse.ok(f"❌ VK: раздел не найден", self.name)
+                return AgentResponse.ok("❌ VK: раздел не найден", self.name)
 
         # 2. Список разделов
         if "что можно" in text or "разделы" in text or "куда" in text:

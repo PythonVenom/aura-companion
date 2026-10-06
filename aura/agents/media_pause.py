@@ -64,7 +64,6 @@ class AgentMediaPause(BaseAgent):
             return False
         # Bug 14 ph.3: только если last_active=vk или mpris.
         # Если local — music_local обработает первым.
-        from aura.agents import media_state
         return media_state.get_active() in ("vk", "mpris")
 
     async def handle(self, request: AgentRequest) -> AgentResponse:

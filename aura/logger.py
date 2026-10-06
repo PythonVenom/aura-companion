@@ -8,7 +8,6 @@
 from __future__ import annotations
 
 import sys
-import time
 
 
 LEVELS = {"debug": 0, "info": 1, "warn": 2, "error": 3}

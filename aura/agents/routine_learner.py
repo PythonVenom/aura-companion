@@ -11,11 +11,10 @@
 "после завтрака принимает таблетки". Проактивно напоминать.
 """
 from __future__ import annotations
-import json
 import sqlite3
 import time
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse

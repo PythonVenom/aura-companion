@@ -66,8 +66,6 @@ class AgentSensors(BaseAgent):
         try:
             cfg = self._load_config()
             if cfg.get("emergency_contact"):
-                from aura.agents.sos import AgentSOS
-                import asyncio
                 # Фоном, не блокируя
                 pass
         except Exception:

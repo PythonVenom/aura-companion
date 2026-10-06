@@ -89,7 +89,8 @@ def _register_defaults():
 
     # recon.run
     def recon_run(args):
-        import subprocess, sys
+        import subprocess
+        import sys
         from pathlib import Path as P
         r = subprocess.run(
             [sys.executable, str(P(__file__).parent.parent.parent / "scripts/aura_recon.py"),
@@ -184,14 +185,16 @@ def _register_defaults():
 
     # control (aura_ctl)
     def control_pause(args):
-        import subprocess, sys
+        import subprocess
+        import sys
         from pathlib import Path as P
         ctl = P(__file__).parent.parent.parent / "scripts/aura_ctl.py"
         subprocess.run([sys.executable, str(ctl), "pause"], timeout=5)
         return "paused aura"
 
     def control_resume(args):
-        import subprocess, sys
+        import subprocess
+        import sys
         from pathlib import Path as P
         ctl = P(__file__).parent.parent.parent / "scripts/aura_ctl.py"
         subprocess.run([sys.executable, str(ctl), "resume"], timeout=5)

@@ -402,7 +402,7 @@ def cmd_dictation(args):
     if action == "show":
         f = DICTATION_DIR / (datetime.now().strftime("%Y-%m-%d") + ".md")
         if not f.exists():
-            print(f"📄 Нет файла за сегодня. Будет создан при первой диктовке.")
+            print("📄 Нет файла за сегодня. Будет создан при первой диктовке.")
             return 0
         print(f.read_text(encoding="utf-8"))
         return 0

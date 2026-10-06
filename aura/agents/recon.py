@@ -4,7 +4,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
+from aura.core.protocol import AgentResponse, BaseAgent
 
 PROJECT = Path(__file__).parent.parent.parent
 

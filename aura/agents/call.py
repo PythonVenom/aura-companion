@@ -81,7 +81,7 @@ class AgentCall(BaseAgent):
                     agent_name=self.name,
                 )
             return AgentResponse.ok(
-                text=f"⚠️ Telegram: send_message error",
+                text="⚠️ Telegram: send_message error",
                 agent_name=self.name,
             )
         except Exception as e:

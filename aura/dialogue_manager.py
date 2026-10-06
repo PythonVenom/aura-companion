@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Callable
 
 
 TIMEOUT_SEC = 120.0   # 2 минуты на весь сценарий

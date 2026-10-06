@@ -7,7 +7,6 @@
 - Retrieval: детектор прошлого времени → сохранение → подтягивание
 """
 from __future__ import annotations
-import re
 import sqlite3
 import time
 from pathlib import Path

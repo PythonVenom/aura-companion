@@ -159,7 +159,6 @@ class AgentVKMusic(BaseAgent):
     def play(self) -> str:
         if not self.token:
             return "❌ VK токен не найден"
-        from aura.agents import media_state
         media_state.set_active("vk")
 
         try:

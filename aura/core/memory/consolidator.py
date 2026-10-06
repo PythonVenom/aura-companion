@@ -87,6 +87,5 @@ def run_all() -> dict:
 
 
 if __name__ == "__main__":
-    import sys
     result = run_all()
     print(json.dumps(result, ensure_ascii=False, indent=2))

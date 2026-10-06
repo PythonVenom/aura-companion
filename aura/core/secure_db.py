@@ -15,7 +15,6 @@ Fallback:
 - Если нет → warning + обычный SQLite (graceful degradation).
 """
 from __future__ import annotations
-import os
 import sqlite3
 import warnings
 from pathlib import Path

@@ -84,7 +84,7 @@ def run(first_run: bool = True) -> dict:
 
     print()
     print("=" * 55)
-    print(f"  Готово!")
+    print("  Готово!")
     print("=" * 55)
     print(f"  Имя: {persona['name']}")
     print(f"  Обращение: {persona['address']}")

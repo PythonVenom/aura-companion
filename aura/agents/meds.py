@@ -5,11 +5,10 @@
 """
 from __future__ import annotations
 
-import json
 import sqlite3
 import threading
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent

@@ -13,7 +13,6 @@ from __future__ import annotations
 import subprocess
 import urllib.request
 import json
-from pathlib import Path
 
 
 MENU_ITEMS = [
@@ -132,7 +131,6 @@ class TrayIcon:
         self._last_state = s
         if self._icon is not None:
             try:
-                from PIL import Image
                 self._icon.icon = make_icon_image(state_to_color(s))
                 self._icon.title = f"Aura: {s}"
                 self._icon.update_menu()

@@ -11,9 +11,7 @@
 только предлагает.
 """
 from __future__ import annotations
-import time
 from datetime import datetime
-from pathlib import Path
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
@@ -121,7 +119,6 @@ class AgentPredictor(MicroAgent):
         s = routine.handle_sync_status() if hasattr(routine, "handle_sync_status") else None
         # Прямой запрос к routine
         try:
-            from aura.core.protocol import AgentRequest
             # Быстрый путь — через публичный predict
             n = len(routine.predict())
             return AgentResponse.ok(

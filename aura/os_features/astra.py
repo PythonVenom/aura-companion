@@ -12,7 +12,6 @@ Aura может повышать/понижать уровень через pdpl
 Если Astra нет → graceful degradation (None).
 """
 from __future__ import annotations
-import os
 import shutil
 import subprocess
 from pathlib import Path

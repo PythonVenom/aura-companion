@@ -81,7 +81,7 @@ def summary() -> str:
 
 # === AgentChecklist: BaseAgent обёртка ===
 
-from aura.core.protocol import AgentRequest, AgentResponse, AgentStatus
+from aura.core.protocol import AgentRequest, AgentResponse
 
 
 class AgentChecklist(MicroAgent):

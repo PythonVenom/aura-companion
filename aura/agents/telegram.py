@@ -82,7 +82,7 @@ class AgentTelegram(MicroAgent):
                 data = result.get("data", {})
                 if data.get("found"):
                     return AgentResponse.ok(f"🌐 Telegram: {data.get('name')}", self.name)
-                return AgentResponse.ok(f"❌ Telegram: не найден", self.name)
+                return AgentResponse.ok("❌ Telegram: не найден", self.name)
 
         # 3. Прочитать последнее
         if "прочитай" in text or "что пишут" in text or "последнее" in text:

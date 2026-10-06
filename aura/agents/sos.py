@@ -1,7 +1,6 @@
 """SOS agent — экстренный вызов. T011."""
 from __future__ import annotations
 import json
-import subprocess
 import time
 from pathlib import Path
 

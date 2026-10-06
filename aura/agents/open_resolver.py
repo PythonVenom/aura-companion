@@ -1,7 +1,7 @@
 """AgentOpenResolver — открой X через Cascade (ADR-098/099)."""
 from __future__ import annotations
 import subprocess
-from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
+from aura.core.protocol import AgentResponse, BaseAgent
 from aura.core.cascade_factory import build_app_cascade
 
 WEB_MAP = {

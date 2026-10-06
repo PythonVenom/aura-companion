@@ -1,6 +1,8 @@
 """Canary tokens — файлы-приманки (ADR-115)."""
 from __future__ import annotations
-import os, json, time
+import os
+import json
+import time
 from pathlib import Path
 
 CANARY_DIR = Path.home() / ".aura" / "canary"

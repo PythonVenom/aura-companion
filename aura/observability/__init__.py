@@ -1,6 +1,9 @@
 """Structured logging + trace (ADR-112). Без внешних зависимостей."""
 from __future__ import annotations
-import json, time, uuid, os
+import json
+import time
+import uuid
+import os
 from pathlib import Path
 from datetime import datetime, timezone
 

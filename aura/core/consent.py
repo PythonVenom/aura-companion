@@ -18,7 +18,6 @@ Scopes: microphone, emotion_voice, reminiscence, health_twin,
         location, network, telemetry (всегда off).
 """
 from __future__ import annotations
-import json
 import time
 from datetime import datetime, timezone
 from pathlib import Path

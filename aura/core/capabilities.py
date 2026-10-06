@@ -42,7 +42,25 @@ CLASSES: dict[str, set[str]] = {
         "pytest", "ruff", "mcp", "text_editor", "time",
     },
     "admin": {"*"},
-    "guest": {"voice", "time", "weather"},  # demo, без persistence
+    "guest": {"voice", "time", "weather"},
+    "auto_electric": {
+        "voice", "time", "weather",
+        "obd:read", "obd:clear", "obd:decode", "obd:vin",
+        "can:read", "can:write", "can:decode", "can:anomaly",
+        "multimeter:read", "oscilloscope:read",
+        "wire_diagram:search",
+        "car:history:read", "car:history:write",
+        "wine:launch",
+        "1c:write", "1c:read",
+        "print:receipt",
+    },
+    "auto_mechanic": {
+        "voice", "time",
+        "car:history:read", "car:history:write",
+        "1c:write", "1c:read",
+        "print:receipt", "print:work_order",
+        "parts:search", "prices:read",
+    },  # demo, без persistence
 }
 
 

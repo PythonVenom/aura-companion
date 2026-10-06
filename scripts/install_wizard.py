@@ -26,6 +26,8 @@ PROFILES = {
     "blind":   {"name": "Незрячий", "base": "blind", "trees": [], "channel": "stable"},
     "dev":     {"name": "Разработчик", "base": "dev", "trees": [], "channel": "rolling"},
     "guest":   {"name": "Демо/флешка", "base": "guest", "trees": [], "channel": "lts"},
+    "auto-electric": {"name": "Автоэлектрик", "base": "auto_electric", "trees": ["auto_vag", "auto_ford", "auto_asia", "auto_china", "auto_russia"], "channel": "stable"},
+    "auto-mechanic": {"name": "Автомеханик", "base": "auto_mechanic", "trees": [], "channel": "stable"},
 }
 
 CHANNELS = {

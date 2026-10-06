@@ -27,7 +27,7 @@ jobs:
       - name: Install Python deps
         run: |
           python -m pip install --upgrade pip
-          if [ -f pyproject.toml ]; then pip install -e . || true; fi
+          if [ -f pyproject.toml ]; then pip install -e .; fi
           pip install pytest pytest-asyncio pytest-cov
       - name: Run tests
         run: |
@@ -35,6 +35,19 @@ jobs:
             --ignore=tests/test_mouse.py \
             --ignore=tests/test_text_editor.py \
             --ignore=tests/test_vision.py
+
+      - name: Bootstrap check (обязательные агенты)
+        run: |
+          python -c "
+          from aura.bootstrap import build_orchestrator
+          o = build_orchestrator()
+          names = set(o.registry.list_names())
+          required = {'sos','meds','fall','call','fin_elder','email','time','care','handsfree'}
+          missing = required - names
+          assert not missing, f'CRITICAL: missing agents {missing}'
+          print(f'OK: {len(names)} agents registered')
+          "
+
 
   cross-platform-import:
     name: Cross-platform imports
@@ -61,4 +74,4 @@ jobs:
           python -c "from aura.platform.macos import MacOSAudio; print('Mac ok')"
           python -c "from aura.platform.linux import LinuxAudio; print('Linux ok')"
           python -c "from aura.platform.ubuntu import UbuntuAudio; print('Ubuntu ok')"
-          python -m pytest tests/test_pal.py tests/test_pal_windows.py tests/test_pal_macos.py -q || true
+          python -m pytest tests/test_pal.py tests/test_pal_windows.py tests/test_pal_macos.py -q

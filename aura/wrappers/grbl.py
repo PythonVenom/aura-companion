@@ -92,9 +92,8 @@ class GRBLWrapper(AppWrapper):
         self._connected = False
 
     def execute(self, cmd: str, params: dict[str, Any] | None = None) -> dict:
-        if not self._connected:
-            if not self.connect():
-                return {"ok": False, "error": "not connected"}
+        if not self._connected and not self.connect():
+            return {"ok": False, "error": "not connected"}
 
         if not self.is_safe(cmd):
             raise WrapperError(

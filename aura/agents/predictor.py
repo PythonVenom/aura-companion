@@ -117,7 +117,7 @@ class AgentPredictor(MicroAgent):
                 text="⚠️ Routine learner недоступен.",
                 agent_name=self.name,
             )
-        s = routine.handle_sync_status() if hasattr(routine, "handle_sync_status") else None
+        routine.handle_sync_status() if hasattr(routine, "handle_sync_status") else None
         # Прямой запрос к routine
         try:
             # Быстрый путь — через публичный predict

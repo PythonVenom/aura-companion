@@ -195,7 +195,7 @@ class AgentRAGMemory(BaseAgent):
 
             answer = f"🔍 Нашла {len(results['documents'][0])} воспоминаний:\n"
             for i, (doc, meta) in enumerate(
-                zip(results["documents"][0], results["metadatas"][0]), 1
+                zip(results["documents"][0], results["metadatas"][0], strict=False), 1
             ):
                 ts = meta.get("timestamp", "")[:19]
                 answer += f"\n{i}. [{ts}]\n   {doc[:200]}...\n"

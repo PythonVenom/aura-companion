@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import subprocess
+import contextlib
 
 
 class MacOSAudio:
@@ -37,21 +38,17 @@ class MacOSAudio:
         return False
 
     def duck(self, level: float = 0.2) -> None:
-        try:
+        with contextlib.suppress(Exception):
             subprocess.run(
                 ["osascript", "-e",
                  f"set volume output volume {int(level*100)}"],
                 capture_output=True, timeout=2)
-        except Exception:
-            pass
 
     def unduck(self) -> None:
-        try:
+        with contextlib.suppress(Exception):
             subprocess.run(
                 ["osascript", "-e", "set volume output volume 100"],
                 capture_output=True, timeout=2)
-        except Exception:
-            pass
 
 
 class MacOSService:
@@ -93,13 +90,11 @@ class MacOSService:
             return False
 
     def notify(self, title: str, body: str) -> None:
-        try:
+        with contextlib.suppress(Exception):
             subprocess.run(
                 ["osascript", "-e",
                  f'display notification "{body}" with title "{title}"'],
                 capture_output=True, timeout=2)
-        except Exception:
-            pass
 
 
 class MacOSMedia:

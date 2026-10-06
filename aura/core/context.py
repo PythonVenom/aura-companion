@@ -20,7 +20,7 @@ class ContextMemory:
     def __init__(self, maxlen: int = DEFAULT_MAX):
         self.events: deque = deque(maxlen=maxlen)
 
-    def add(self, kind: str, text: str, meta: dict = None) -> None:
+    def add(self, kind: str, text: str, meta: dict | None = None) -> None:
         self.events.append(ContextEvent(kind=kind, text=text, ts=time.time(), meta=meta or {}))
 
     def recent(self, minutes: int = 10) -> list:

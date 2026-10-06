@@ -145,7 +145,7 @@ class AgentHealthTwin(MicroAgent):
                 agent_name=self.name,
             )
         lines = [f"🧬 Timeline за {days:.0f}д ({len(rows)} событий):"]
-        for eid, ts, kind, subject, payload in rows[-20:]:
+        for _eid, ts, kind, subject, payload in rows[-20:]:
             when = time.strftime("%m-%d %H:%M", time.localtime(ts))
             preview = ""
             try:
@@ -201,7 +201,7 @@ class AgentHealthTwin(MicroAgent):
             ).fetchall()
             for (nid,) in nbrs:
                 if nid not in visited:
-                    q.append((nid, path_so_far + [nid]))
+                    q.append((nid, [*path_so_far, nid]))
         conn.close()
         if not path:
             return AgentResponse.ok(

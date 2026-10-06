@@ -56,7 +56,7 @@ class AndroidPlatform(BasePlatform):
         for cmd in (["mpv", "--no-video", "--really-quiet"],
                     ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet"]):
             if shutil.which(cmd[0]):
-                subprocess.run(cmd + [str(path)], check=False, timeout=60)
+                subprocess.run([*cmd, str(path)], check=False, timeout=60)
                 return
 
     def audio_record(self, seconds: int, out: Path) -> bool:

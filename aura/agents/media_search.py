@@ -132,7 +132,7 @@ class AgentMediaSearch(BaseAgent):
 
     def _scan_dir(self, path: str, result: list, extensions: tuple) -> None:
         try:
-            for root, dirs, files in os.walk(path):
+            for root, _dirs, files in os.walk(path):
                 for f in files:
                     if f.lower().endswith(extensions):
                         full_path = os.path.join(root, f)

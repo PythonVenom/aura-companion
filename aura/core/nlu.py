@@ -67,7 +67,7 @@ def _embed(text: str) -> list | None:
 def _cosine(a: list, b: list) -> float:
     if not a or not b:
         return 0.0
-    num = sum(x * y for x, y in zip(a, b))
+    num = sum(x * y for x, y in zip(a, b, strict=False))
     da = math.sqrt(sum(x * x for x in a))
     db = math.sqrt(sum(y * y for y in b))
     if da == 0 or db == 0:

@@ -18,6 +18,7 @@ import sys
 import threading
 import time
 from pathlib import Path
+import contextlib
 
 STOP_FILE = Path.home() / ".local/share/aura/STOP"
 STATE_DIR = Path.home() / ".local/share/aura"
@@ -111,10 +112,8 @@ def install_signal_handlers() -> None:
         sys.exit(130 if signum == signal.SIGINT else 0)
 
     for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGUSR1):
-        try:
+        with contextlib.suppress(ValueError, OSError):
             signal.signal(sig, _handler)
-        except (ValueError, OSError):
-            pass
 
 
 def check_and_raise() -> None:

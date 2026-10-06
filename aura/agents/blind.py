@@ -55,7 +55,7 @@ class AgentBlind(MicroAgent):
         if not cmd:
             return
         try:
-            subprocess.run(cmd + [text], timeout=30, check=False)
+            subprocess.run([*cmd, text], timeout=30, check=False)
         except Exception as e:
             # F-006: не глотать (раздел 17 промта)
             import logging

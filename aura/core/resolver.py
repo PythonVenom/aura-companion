@@ -19,7 +19,7 @@ class ResolutionCascade:
     def __init__(self, steps: list):
         self.steps = steps
 
-    def resolve(self, target: str, ctx: dict = None) -> dict:
+    def resolve(self, target: str, ctx: dict | None = None) -> dict:
         ctx = ctx or {}
         for step in self.steps:
             try:

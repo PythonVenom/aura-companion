@@ -105,7 +105,7 @@ class AgentBrain:
         timeouts = (20, 15, 10)
         last_error = None
         empty_seen = False
-        for model, t in zip(self.FALLBACK_MODELS, timeouts):
+        for model, t in zip(self.FALLBACK_MODELS, timeouts, strict=False):
             resp, err = self._try_model(model, messages, t)
             if resp:
                 self.context_history.append({"role": "assistant", "content": resp})

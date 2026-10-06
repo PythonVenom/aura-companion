@@ -94,9 +94,8 @@ class AgentMediaPause(BaseAgent):
         players = [self.player] if self.player else self._list_players()
         paused: list[str] = []
         for p in players:
-            if self._player_status(p) == "Playing":
-                if self._player_cmd(p, "pause"):
-                    paused.append(p)
+            if self._player_status(p) == "Playing" and self._player_cmd(p, "pause"):
+                paused.append(p)
         if paused:
             self._paused_players = paused
             from aura.agents import media_state

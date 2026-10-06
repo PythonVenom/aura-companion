@@ -43,7 +43,7 @@ class LinuxPlatform(BasePlatform):
     def audio_play(self, path: Path) -> None:
         for cmd in self._audio_players():
             if shutil.which(cmd[0]):
-                subprocess.run(cmd + [str(path)], check=False, timeout=60)
+                subprocess.run([*cmd, str(path)], check=False, timeout=60)
                 return
 
     def audio_record(self, seconds: int, out: Path) -> bool:
@@ -88,7 +88,7 @@ class LinuxPlatform(BasePlatform):
                     ["espeak", "-v", "ru"]):
             if shutil.which(cmd[0]):
                 try:
-                    subprocess.run(cmd + [text], timeout=30, check=False)
+                    subprocess.run([*cmd, text], timeout=30, check=False)
                     return True
                 except Exception:
                     continue

@@ -11,7 +11,7 @@ class KDEX11Adapter(WindowManager):
     def _q(self, *args, timeout=3) -> str:
         try:
             r = subprocess.run(
-                [self.QDBUS, "org.kde.KWin", "/KWin"] + list(args),
+                [self.QDBUS, "org.kde.KWin", "/KWin", *list(args)],
                 capture_output=True, text=True, timeout=timeout)
             return r.stdout.strip()
         except Exception:

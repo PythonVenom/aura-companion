@@ -311,9 +311,7 @@ class Orchestrator:
             return True
         # >40% небуквенных символов
         letters = sum(1 for c in t if c.isalpha())
-        if letters / max(len(t), 1) < 0.5:
-            return True
-        return False
+        return letters / max(len(t), 1) < 0.5
 
     @staticmethod
     def _non_russian(text: str) -> bool:

@@ -108,10 +108,7 @@ class AgentScreenReader(BaseAgent):
             os.close(fd)
 
             # Скриншот
-            if window_id:
-                shot_cmd = ["maim", "-i", window_id, tmp_path]
-            else:
-                shot_cmd = ["maim", tmp_path]
+            shot_cmd = ["maim", "-i", window_id, tmp_path] if window_id else ["maim", tmp_path]
 
             shot = subprocess.run(shot_cmd, capture_output=True, text=True, check=False)
             if shot.returncode != 0:

@@ -33,7 +33,7 @@ class Episode:
 class ReActLoop:
     MAX_ITERATIONS = 3
 
-    def __init__(self, executor: Callable, reflector: Callable = None):
+    def __init__(self, executor: Callable, reflector: Callable | None = None):
         """executor(operator, args) → (ok, result_or_error)
         reflector(goal, steps) → (done: bool, reason: str)
         """
@@ -108,9 +108,7 @@ def should_use_react(text):
                " если ", " когда ", " а затем ", " затем ")
     if any(m in t for m in markers):
         return True
-    if len(raw.split()) > 12:
-        return True
-    return False
+    return len(raw.split()) > 12
 
 
 def _llm_json(messages):

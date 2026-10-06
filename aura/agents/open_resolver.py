@@ -46,9 +46,8 @@ class AgentOpenResolver(BaseAgent):
             return AgentResponse.not_handled(self.name)
         c = build_app_cascade()
         r = c.resolve(target)
-        if r["level"] == "app":
-            if self._spawn([r["value"]]):
-                return AgentResponse.ok(f"Открываю {target}", self.name)
+        if r["level"] == "app" and self._spawn([r["value"]]):
+            return AgentResponse.ok(f"Открываю {target}", self.name)
         if r["level"] == "window":
             return AgentResponse.ok(f"Окно {target} уже открыто", self.name)
         url = WEB_MAP.get(target)

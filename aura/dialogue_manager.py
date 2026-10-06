@@ -31,7 +31,7 @@ _MAX_CHAT_WORDS = 3
 def _split_chat_text(words: list) -> tuple:
     """Разделить на (chat, text). chat — до 3 слов без маркеров текста."""
     chat_words = []
-    for i, w in enumerate(words):
+    for _i, w in enumerate(words):
         clean = w.strip(".,!? ").lower()
         if clean in _TEXT_MARKERS:
             break

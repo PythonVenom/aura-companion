@@ -186,7 +186,6 @@ class AgentListener(MicroAgent):
             # 2–3 с стабильности текста для русского.
             TEXT_STABLE_SECONDS = 2.5     # было 1.5
             SILENCE_FALLBACK = 3.0        # было 2.0
-            MIN_TURN_SILENCE = 0.8        # Bug 51: не финалим до 800 мс тишины
 
             while time.time() - start < timeout:
                 try:

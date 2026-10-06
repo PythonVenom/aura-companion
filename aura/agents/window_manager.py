@@ -87,12 +87,7 @@ class AgentWindowManager(BaseAgent):
             return True
         # Bug 23: "стол 2", "стол два"
         import re as _re
-        if _re.search(
-            r"\bстол\s+(\d|один|два|три|четыре|пять|шесть|семь|восемь|девять|десять)",
-            text,
-        ):
-            return True
-        return False
+        return bool(_re.search(r"\bстол\s+(\d|один|два|три|четыре|пять|шесть|семь|восемь|девять|десять)", text))
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         if not self.can_handle(request):

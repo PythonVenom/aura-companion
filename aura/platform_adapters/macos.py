@@ -44,7 +44,7 @@ class MacOSPlatform(BasePlatform):
         for cmd in (["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet"],
                     ["mpv", "--no-video", "--really-quiet"]):
             if shutil.which(cmd[0]):
-                subprocess.run(cmd + [str(path)], check=False, timeout=120)
+                subprocess.run([*cmd, str(path)], check=False, timeout=120)
                 return
 
     def audio_record(self, seconds: int, out: Path) -> bool:

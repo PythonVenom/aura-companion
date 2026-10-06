@@ -149,22 +149,18 @@ class AgentSpeaker(MicroAgent):
             from aura import settings as _s
             persona = _s.load().get("persona", {})
             address = persona.get("address", "ты")
-            style = persona.get("style", "warm")
+            persona.get("style", "warm")
         except Exception:
-            address, style = "ты", "warm"
+            address, _style = "ты", "warm"
 
         # Обращение
         # >>> AURA_NO_ADDRESS_V1
         # Дефолт: address != "вы" → вокатив НЕ добавляется.
         # Elder care (backlog, дальняя полка): address == "вы" + persona.honorific.
-        if address == "вы":
-            suffix = persona.get("honorific", "Создатель")
-        else:
-            suffix = ""
+        suffix = persona.get("honorific", "Создатель") if address == "вы" else ""
 
-        if suffix and suffix.lower() not in text.lower():
-            if len(text) < 50:
-                text = f"{text}, {suffix}"
+        if suffix and suffix.lower() not in text.lower() and len(text) < 50:
+            text = f"{text}, {suffix}"
         if text.endswith('.'):
             text = text[:-1] + '...'
         text = text.replace("аура", "Аура").replace("создатель", "Создатель")

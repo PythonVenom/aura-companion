@@ -8,10 +8,7 @@ from aura import settings
 
 
 def _ask(prompt: str, default: str = "") -> str:
-    if default:
-        prompt = f"{prompt} [{default}]: "
-    else:
-        prompt = f"{prompt}: "
+    prompt = f"{prompt} [{default}]: " if default else f"{prompt}: "
     try:
         return input(prompt).strip() or default
     except (EOFError, KeyboardInterrupt):

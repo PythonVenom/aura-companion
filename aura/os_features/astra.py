@@ -16,6 +16,7 @@ from __future__ import annotations
 import shutil
 import subprocess
 from pathlib import Path
+import contextlib
 
 # Уровни MAC Parsec (Astra docs)
 # 0 = несекретно, 1 = ДСП, 2 = секретно, 3 = сов. секретно, 4 = особой важности
@@ -108,10 +109,8 @@ class ParsecAdapter:
             level = None
             for line in raw.splitlines():
                 if "level" in line.lower():
-                    try:
+                    with contextlib.suppress(ValueError):
                         level = int(line.split(":")[-1].strip())
-                    except ValueError:
-                        pass
             return {"level": level, "raw": raw}
         except Exception:
             return None

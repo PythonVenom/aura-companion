@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import subprocess
+import contextlib
 
 
 class LinuxAudio:
@@ -43,19 +44,15 @@ class LinuxAudio:
             return False
 
     def duck(self, level: float = 0.2) -> None:
-        try:
+        with contextlib.suppress(Exception):
             subprocess.run(["pactl", "set-sink-volume", "@DEFAULT_SINK@",
                             f"{int(level*100)}%"],
                            capture_output=True, timeout=2)
-        except Exception:
-            pass
 
     def unduck(self) -> None:
-        try:
+        with contextlib.suppress(Exception):
             subprocess.run(["pactl", "set-sink-volume", "@DEFAULT_SINK@", "100%"],
                            capture_output=True, timeout=2)
-        except Exception:
-            pass
 
 
 class LinuxService:
@@ -78,11 +75,9 @@ class LinuxService:
             return False
 
     def notify(self, title: str, body: str) -> None:
-        try:
+        with contextlib.suppress(Exception):
             subprocess.run(["notify-send", title, body],
                            capture_output=True, timeout=2)
-        except Exception:
-            pass
 
 
 class LinuxMedia:

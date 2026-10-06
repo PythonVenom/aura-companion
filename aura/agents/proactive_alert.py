@@ -133,10 +133,9 @@ class AgentProactiveAlert(MicroAgent):
 
     def check(self) -> bool:
         """Публичный API: проверить, нужна ли эскалация. True = тревога."""
-        if self._since_last() >= self._threshold():
-            if not self._get("alert_active", False):
-                self._set("alert_active", True)
-                return True
+        if self._since_last() >= self._threshold() and not self._get("alert_active", False):
+            self._set("alert_active", True)
+            return True
         return False
 
     def clear_alert(self) -> None:

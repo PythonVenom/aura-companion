@@ -143,7 +143,7 @@ class AgentAudioRouter(BaseAgent):
     def _run_pactl(self, args: list[str]) -> str:
         try:
             result = subprocess.run(
-                ["pactl"] + args,
+                ["pactl", *args],
                 capture_output=True,
                 text=True,
                 timeout=3,

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import contextlib
 
 
 class UbuntuAudio:
@@ -52,19 +53,15 @@ class UbuntuAudio:
             return False
 
     def duck(self, level: float = 0.2) -> None:
-        try:
+        with contextlib.suppress(Exception):
             subprocess.run(["pactl", "set-sink-volume", "@DEFAULT_SINK@",
                             f"{int(level*100)}%"],
                            capture_output=True, timeout=2)
-        except Exception:
-            pass
 
     def unduck(self) -> None:
-        try:
+        with contextlib.suppress(Exception):
             subprocess.run(["pactl", "set-sink-volume", "@DEFAULT_SINK@", "100%"],
                            capture_output=True, timeout=2)
-        except Exception:
-            pass
 
 
 # Linux реализация совместима — наследуем

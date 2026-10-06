@@ -429,9 +429,7 @@ def is_spam(chat: str, preview: str) -> bool:
     if any(w in low for w in _SPAM_WORDS):
         return True
     # Нет кириллических букв — вряд ли человек
-    if not any(c.isalpha() for c in preview):
-        return True
-    return False
+    return bool(not any(c.isalpha() for c in preview))
 
 
 def search_chats(previews: list, query: str) -> list:

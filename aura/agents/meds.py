@@ -134,7 +134,7 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
 
     def _status(self) -> AgentResponse:
         conn = sqlite3.connect(DB)
-        now = datetime.now().strftime("%H:%M")
+        datetime.now().strftime("%H:%M")
         rows = conn.execute(
             "SELECT name, time_str FROM meds WHERE taken=0 ORDER BY time_str"
         ).fetchall()
@@ -227,7 +227,7 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
                     (now, int(time.time()) - 3600),
                 ).fetchall()
                 conn.close()
-                for mid, name in rows:
+                for _mid, name in rows:
                     print(f"⏰ MEDS: пора принять {name}", flush=True)
                     # TODO: say() голосом
             except Exception as e:

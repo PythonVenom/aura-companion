@@ -17,6 +17,7 @@ import platform
 import shutil
 import subprocess
 from pathlib import Path
+import contextlib
 
 
 def _run(cmd: list, timeout: int = 3) -> str:
@@ -49,10 +50,8 @@ def detect_cpu() -> dict:
             if k == "model name":
                 info["model"] = v
             elif k == "cpu(s)":
-                try:
+                with contextlib.suppress(ValueError):
                     info["threads"] = int(v)
-                except ValueError:
-                    pass
             elif k == "core(s) per socket":
                 cores_per = int(v)
                 sockets = 1

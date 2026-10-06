@@ -81,10 +81,9 @@ class AgentBargeIn:
         def callback(indata, frames, time_info, status):
             if not self.running:
                 return
-            try:
+            import contextlib
+            with contextlib.suppress(queue.Full):
                 self.audio_queue.put_nowait(bytes(indata))
-            except queue.Full:
-                pass  # отбрасываем старые
 
         try:
             self.stream = self.sd.InputStream(

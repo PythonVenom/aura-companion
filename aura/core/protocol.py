@@ -31,8 +31,8 @@ class AgentStatus(StrEnum):
 class AgentRequest(BaseModel):
     """Запрос к агенту."""
 
-    text: str = Field(..., description="Исходный текст команды от пользователя")
-    command: str = Field("", description="Нормализованная команда (если есть)")
+    text: str = Field(default="", description="Исходный текст команды от пользователя")
+    command: str = Field(default="", description="Нормализованная команда (если есть)")
     args: dict[str, Any] = Field(default_factory=dict, description="Аргументы команды")
     context: dict[str, Any] = Field(default_factory=dict, description="Контекст")
     timestamp: datetime = Field(default_factory=datetime.now)
@@ -44,11 +44,11 @@ class AgentResponse(BaseModel):
     """Ответ агента."""
 
     status: AgentStatus
-    text: str = Field("", description="Текст ответа для озвучки")
-    silent: bool = Field(False, description="True = не озвучивать (ADR-048)")
+    text: str = Field(default="", description="Текст ответа для озвучки")
+    silent: bool = Field(default=False, description="True = не озвучивать (ADR-048)")
     data: dict[str, Any] = Field(default_factory=dict, description="Структурированные данные")
-    error: str | None = Field(None, description="Описание ошибки")
-    agent_name: str = Field("", description="Имя агента")
+    error: str | None = Field(default=None, description="Описание ошибки")
+    agent_name: str = Field(default="", description="Имя агента")
 
     model_config = {"arbitrary_types_allowed": True}
 
@@ -69,7 +69,7 @@ class AgentResponse(BaseModel):
                    agent_name=agent_name)
 
     @classmethod
-    def error(cls, message: str, agent_name: str = "") -> AgentResponse:
+    def error_response(cls, message: str, agent_name: str = "") -> AgentResponse:
         """Ошибка обработки."""
         return cls(status=AgentStatus.ERROR, error=message, agent_name=agent_name)
 

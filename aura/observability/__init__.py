@@ -3,9 +3,8 @@ from __future__ import annotations
 
 import json
 import os
-import time
 import uuid
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 _LOG_PATH = Path(os.path.expanduser("~/.cache/aura/logs.jsonl"))

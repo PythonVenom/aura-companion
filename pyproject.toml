@@ -112,3 +112,31 @@ known-first-party = ["aura"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+# ═══════════════════════════════════════════════════════════════
+# Mypy — статическая типизация (F-019)
+# ═══════════════════════════════════════════════════════════════
+# Наука (Д4): раздел 19 промта — обоснованные ignore.
+# Раздел 25 — не гонимся за 100% coverage, критичное типизировано.
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_return_any = false
+warn_unused_configs = true
+disallow_untyped_defs = false
+check_untyped_defs = true
+
+# Windows-only модули: mypy на Linux не знает эти API
+[[tool.mypy.overrides]]
+module = ["aura.platform.windows", "aura.os_features.windows"]
+ignore_errors = true
+
+# ChromaDB, pystray, vlc — динамические библиотеки без полных stub
+[[tool.mypy.overrides]]
+module = ["aura.agents.rag_memory", "aura.core.memory.*", "aura.core.tray"]
+ignore_errors = true
+
+# Опциональные зависимости
+[[tool.mypy.overrides]]
+module = ["aura.wrappers.*", "aura.agents.mouse", "aura.agents.text_editor"]
+ignore_errors = true

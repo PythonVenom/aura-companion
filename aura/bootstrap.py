@@ -152,6 +152,9 @@ def _load_plugins(orch) -> int:
             try:
                 import importlib.util
                 spec = importlib.util.spec_from_file_location(f"aura_plugin_{p.id}", py)
+                if spec is None or spec.loader is None:
+                    print(f"⚠️ Плагин {p.id}: spec не создан")
+                    continue
                 mod = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(mod)
                 # Найти первый класс с методом can_handle

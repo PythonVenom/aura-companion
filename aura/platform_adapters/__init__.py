@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import platform
 import sys
-from pathlib import Path
 
 
 def detect_platform() -> dict:

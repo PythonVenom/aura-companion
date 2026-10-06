@@ -112,7 +112,7 @@ class WindowsMedia:
 
     def pause_all(self) -> bool:
         try:
-            import winsdk.windows.media.control as wmc
+            import winsdk.windows.media.control as wmc  # noqa: F401 — optional dep, проверяем наличие
             return False  # TODO: async
         except ImportError:
             return False

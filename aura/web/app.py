@@ -5,6 +5,9 @@ Graceful: если fastapi не установлен — не падаем.
 """
 from __future__ import annotations
 
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
 HTML_HOME = """<!doctype html>
 <html lang="ru"><head><meta charset="utf-8">
 <title>Aura Web</title>

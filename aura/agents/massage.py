@@ -6,6 +6,7 @@ JTBD: таймер + RAG по клиенту + диктовка + отчёт.
 from __future__ import annotations
 
 import time
+from datetime import datetime
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -97,7 +98,6 @@ class AgentMassage(BaseAgent):
     def _rag_save(self, client: str, text: str) -> bool:
         """Сохранить заметку в файл клиента (Bug C: не в RAG)."""
         try:
-            from datetime import datetime
             ts = datetime.now().strftime("%Y-%m-%d %H:%M")
             _client_append(client, f"- [{ts}] {text}")
             return True

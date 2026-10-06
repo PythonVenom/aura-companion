@@ -4,7 +4,7 @@
 graph TB
     Mic[Микрофон] --> ASR[T-one ASR]
     ASR --> FSM[Orchestrator + FSM]
-    FSM --> Reg[Registry 27 агентов]
+    FSM --> Reg[Registry 76 агентов]
     Reg --> A1[Time/Power]
     Reg --> A2[Music/VK]
     Reg --> A3[Messenger/Max]

@@ -66,7 +66,7 @@ aura_project/
 │   ├── status.py                # /tmp/aura_status.json для виджета
 │   └── __init__.py
 ├── aura_main.py                 # точка входа (главный цикл)
-├── tests/                       # 645 тестов
+├── tests/                       # 1523 тестов
 ├── docs/                        # документация
 │   ├── adr/                     # ADR 001–011
 │   ├── manifesto.md
@@ -171,7 +171,7 @@ def error_text(result) -> str
 
 **Default:** модуль включён. Пользователь **явно выключает**.
 
-**Пример:** `[modules]\nvk_music = false\nvision = false` → 24 агента вместо 26.
+**Пример:** `[modules]\nvk_music = false\nvision = false` → 76 агентов вместо 26.
 
 ---
 
@@ -269,7 +269,7 @@ def build_orchestrator() -> Orchestrator:
     modules_config = load_modules_config()
     _try_register(orch, AgentTime, modules_config)
     _try_register(orch, AgentPower, modules_config)
-    # ... 33 агента
+    # ... 76 агентов
     return orch
 ```
 
@@ -297,7 +297,7 @@ vision = false
 
 ## 10. Тесты
 
-**645 тестов** в `tests/`. Покрытие:
+**1523 тестов** в `tests/`. Покрытие:
 - Каждый агент — свой тест.
 - Опасные (`power`, `pactl`, `playerctl`) — mock.
 - Интеграционные — `test_bootstrap.py`.

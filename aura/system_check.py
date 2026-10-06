@@ -12,12 +12,12 @@
 """
 from __future__ import annotations
 
+import contextlib
 import os
 import platform
 import shutil
 import subprocess
 from pathlib import Path
-import contextlib
 
 
 def _run(cmd: list, timeout: int = 3) -> str:

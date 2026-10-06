@@ -1,8 +1,8 @@
 """Linux: PipeWire + systemd + MPRIS."""
 from __future__ import annotations
 
-import subprocess
 import contextlib
+import subprocess
 
 
 class LinuxAudio:

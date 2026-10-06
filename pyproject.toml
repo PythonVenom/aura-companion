@@ -92,6 +92,13 @@ ignore = [
     "RUF001", "RUF002", "RUF003",  # ambiguous unicode: русский текст
     "E701",     # multiple-statements-colon: `if x: return` (defensive)
     "E702",     # multiple-statements-semicolon
+    "E402",     # module-import-not-at-top: sys.path.insert перед imports (осознанно)
+    "E741",     # ambiguous-variable: l/I/O — допустимо в русском коде
+    "SIM102",   # collapsible-if: defensive-стиль читается лучше
+    "SIM115",   # open-without-with: долгоживущие handles (pystray, sqlite)
+    "B904",     # raise-without-from: контекст исключения не нужен
+    "RUF059",   # unused-unpacked-var: распаковка для читаемости
+    "E731",     # lambda-assignment: короткие лямбды в callback
 ]
 
 [tool.ruff.lint.per-file-ignores]

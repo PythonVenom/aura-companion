@@ -13,10 +13,10 @@ Aura может повышать/понижать уровень через pdpl
 """
 from __future__ import annotations
 
+import contextlib
 import shutil
 import subprocess
 from pathlib import Path
-import contextlib
 
 # Уровни MAC Parsec (Astra docs)
 # 0 = несекретно, 1 = ДСП, 2 = секретно, 3 = сов. секретно, 4 = особой важности

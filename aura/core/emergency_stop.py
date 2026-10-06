@@ -13,12 +13,12 @@
 from __future__ import annotations
 
 import atexit
+import contextlib
 import signal
 import sys
 import threading
 import time
 from pathlib import Path
-import contextlib
 
 STOP_FILE = Path.home() / ".local/share/aura/STOP"
 STATE_DIR = Path.home() / ".local/share/aura"

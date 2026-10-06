@@ -4,9 +4,9 @@ Fallback: если PipeWire нет — используем PulseAudio.
 """
 from __future__ import annotations
 
+import contextlib
 import shutil
 import subprocess
-import contextlib
 
 
 class UbuntuAudio:
@@ -65,7 +65,7 @@ class UbuntuAudio:
 
 
 # Linux реализация совместима — наследуем
-from aura.platform.linux import LinuxMedia, LinuxService  # noqa: E402
+from aura.platform.linux import LinuxMedia, LinuxService
 
 
 class UbuntuService(LinuxService):

@@ -6,8 +6,8 @@
 """
 from __future__ import annotations
 
-import subprocess
 import contextlib
+import subprocess
 
 
 class MacOSAudio:

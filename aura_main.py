@@ -597,7 +597,7 @@ class AuraOrchestrator:
                 # Слушаем (timeout 8 секунд)
                 set_status("listening")
                 # Bug 40: AEC force перед слушанием (микрофон = echo-cancel-source)
-                self._ensure_aec()
+                # self._ensure_aec()  # DISABLED: echo-cancel душит микрофон
                 # Bug 38: приглушаем музыку ПОКА слушаем (интеллектуальный duck)
                 self._duck_on()
                 # Bug 73: timeout 2 вместо 8 — ChatBridge голодал до 8 сек

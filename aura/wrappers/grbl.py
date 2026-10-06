@@ -50,8 +50,9 @@ class GRBLWrapper(AppWrapper):
             from pathlib import Path
             return Path(self.port).exists()
         # Автопоиск USB-serial
+        from pathlib import Path
         return any(
-            p.exists() for p in [
+            Path(p).exists() for p in [
                 "/dev/ttyUSB0", "/dev/ttyACM0", "/dev/ttyUSB1",
             ]
         )

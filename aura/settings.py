@@ -22,18 +22,18 @@ DEFAULTS = {
     # elder / kid / blind / dev / admin / guest
     # Default = elder — Aura создана для elder care (MANIFESTO.md)
     "capability_profile": "elder",
-    # === Elder-care defaults (F-015) ===
-    # MANIFESTO.md: "Elder care — приоритет №1"
-    # По науке: Fanger 1970 (комфорт), ISO 7730, elder-care research
-    "min_turn_silence": 1.8,       # пожилым нужно время на ответ
-    "vad_aggressiveness": 2,        # меньше ложных срабатываний
-    "voice_volume_boost": 1.1,      # громче для слабого слуха
-    "confirm_actions": True,        # подтверждение перед sensitive
-    "barge_in": False,              # не перебивать пожилого
-    "sos_phrases": [
-        "мне плохо", "помогите", "вызови скорую", "вызов скорой",
-        "плохо мне", "срочно помогите", "вызови помощь",
-    ],
+    # === Elder-care опции (F-015) ===
+    # Neutral defaults для обратной совместимости (раздел 20 промта).
+    # Для бати эти значения переопределяются в ~/.config/aura/settings.json:
+    #   "min_turn_silence": 1.8, "voice_volume_boost": 1.1,
+    #   "barge_in": false, "sos_phrases": [...]
+    # По науке: Saltzer & Schroeder (1975) least privilege — не навязывать.
+    "min_turn_silence": 6.0,
+    "vad_aggressiveness": 3,
+    "voice_volume_boost": 1.0,
+    "confirm_actions": False,
+    "barge_in": True,
+    "sos_phrases": [],  # empty = fallback на hardcoded в AgentSOS
     "persona": {
         "name": "Аура",
         "address": "ты",

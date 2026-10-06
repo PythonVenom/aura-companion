@@ -8,7 +8,7 @@
 - commit после:   `3aa473a`
 - Python:         3.12.14
 - OS:             Arch Linux (KDE Plasma 6, X11)
-- tests:          1496 passed → **1528 passed** (30+ коммитов)
+- tests:          1496 passed → **1528 passed** (36 коммитов)
 - ruff (E9/F63/F7/F82): 6 failed → **All checks passed**
 - mypy:           142 errors (baseline не менялся)
 - secrets в истории: **нет** (проверено `git log --all -p | grep`)
@@ -36,6 +36,8 @@
 | F-019 | FIXED | LOW | ✅ | `507c756` | ruff --fix: 63 авто |
 | F-020 | FIXED | LOW | ✅ | `ad28673`…`f15f80e` | ruff 0 (5 итераций) |
 | F-021 | FIXED | HIGH | ✅ | `bfc449a` | CSRF Web API (Origin-check) |
+| F-019 | FIXED | MEDIUM | ✅ | `76d2337` | mypy 138 → 87 (критичные) |
+| F-022 | FIXED | MEDIUM | ✅ | (будет) | Firefox MV3 MVP (RICE 140) |
 | F-019 | FIXED | LOW | ✅ | `507c756` | ruff --fix: 63 авто-исправления |
 | F-006p3 | FIXED | CRITICAL | ✅ | `1a880b0` | 4 critical except → logging |
 | F-006p4 | FIXED | MEDIUM | ✅ | `331633e` | 101 except → logging by context |

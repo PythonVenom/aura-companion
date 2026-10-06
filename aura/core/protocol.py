@@ -23,6 +23,7 @@ class AgentStatus(str, Enum):
 
     OK = "ok"
     NOT_HANDLED = "not_handled"
+    DENIED = "denied"  # Capability-check: доступ запрещён
     ERROR = "error"
     PARTIAL = "partial"
 
@@ -60,6 +61,12 @@ class AgentResponse(BaseModel):
     def not_handled(cls, agent_name: str = "") -> "AgentResponse":
         """Агент не умеет обрабатывать этот запрос."""
         return cls(status=AgentStatus.NOT_HANDLED, agent_name=agent_name)
+
+    @classmethod
+    def denied(cls, message: str, agent_name: str = "") -> "AgentResponse":
+        """Доступ запрещён capability-системой (Saltzer & Schroeder 1975)."""
+        return cls(status=AgentStatus.DENIED, text=message,
+                   agent_name=agent_name)
 
     @classmethod
     def error(cls, message: str, agent_name: str = "") -> "AgentResponse":

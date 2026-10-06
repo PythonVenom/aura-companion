@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aura-companion"
-version = "7.2.0"
+version = "8.0.0-rc1"
 description = "Local voice AI companion for elder care. Open source, no cloud."
 readme = "README.md"
 license = {text = "MIT"}

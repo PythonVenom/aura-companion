@@ -32,7 +32,7 @@ input,button{padding:.5rem;font-size:1rem}
 
 def create_app():
     try:
-        from fastapi import FastAPI, Request, Form
+        from fastapi import FastAPI, Form, Request
         from fastapi.responses import HTMLResponse
     except ImportError:
         print("❌ fastapi не установлен: pip install fastapi uvicorn")

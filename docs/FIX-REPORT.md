@@ -8,7 +8,7 @@
 - commit после:   `3aa473a`
 - Python:         3.12.14
 - OS:             Arch Linux (KDE Plasma 6, X11)
-- tests:          1496 passed → **1523 passed** (25+ коммитов)
+- tests:          1496 passed → **1528 passed** (30+ коммитов)
 - ruff (E9/F63/F7/F82): 6 failed → **All checks passed**
 - mypy:           142 errors (baseline не менялся)
 - secrets в истории: **нет** (проверено `git log --all -p | grep`)
@@ -33,6 +33,9 @@
 | F-014 | FIXED | — | ✅ | `08d1b79` | 6 integration tests + DENIED |
 | F-015 | FIXED | CRITICAL | ✅ | `f9fb1eb`, `40a4da5`, `67a9494`, `af3d30e` | elder-care реально применяется |
 | F-016 | FIXED | LOW | ✅ | `3aa473a` | .gitignore: дубликаты + docs |
+| F-019 | FIXED | LOW | ✅ | `507c756` | ruff --fix: 63 авто |
+| F-020 | FIXED | LOW | ✅ | `ad28673`…`f15f80e` | ruff 0 (5 итераций) |
+| F-021 | FIXED | HIGH | ✅ | `bfc449a` | CSRF Web API (Origin-check) |
 | F-019 | FIXED | LOW | ✅ | `507c756` | ruff --fix: 63 авто-исправления |
 | F-006p3 | FIXED | CRITICAL | ✅ | `1a880b0` | 4 critical except → logging |
 | F-006p4 | FIXED | MEDIUM | ✅ | `331633e` | 101 except → logging by context |
@@ -57,6 +60,14 @@
 - **Root cause:** `pytest ... || true` и `pip install -e . || true` — job проходил зелёным при падении тестов.
 - **Fix:** убраны `|| true`, добавлен bootstrap check (обязательные агенты).
 - **Runtime-proof:** `YAML OK`, `pip install -e .` работает без `|| true`.
+
+### F-021: CSRF-защита Web API (HIGH)
+
+- **Threat:** browser на evil.com → `fetch('127.0.0.1:8765/chat')` → Aura выполняет команду.
+- **Fix:** `Origin`-check middleware в `api.py` + `app.py`.
+- **Whitelist:** localhost, 127.0.0.1, moz-extension, chrome-extension.
+- **Runtime-proof:** 5 тестов (блок evil, разрешение localhost/FF/curl/GET).
+- **Наука (Д4):** Saltzer & Schroeder 1975, OWASP CSRF 2024, раздел 10 промта.
 
 ### F-006: 105 `except: pass` → logging (4 части)
 

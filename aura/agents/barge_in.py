@@ -40,20 +40,9 @@ class AgentBargeIn:
     COOLDOWN_SECONDS = 5.0  # Bug 45: 5с между            # Bug 29: не дёргать callback чаще 2с (было 0.5)
 
     def __init__(self):
-        # F-015: barge_in toggle для elder-care (MANIFESTO.md)
-        # Пожилым не нравится, когда Aura перебивает — default False
-        try:
-            from aura import settings
-            if not settings.get("barge_in", False):
-                self.ready = False
-                self.disabled_by_settings = True
-                print("🔇 BargeIn отключён (settings.barge_in=False, elder-care)")
-                return
-        except Exception:
-            pass  # fail-open: без settings работает как раньше
-
-        self.disabled_by_settings = False
+        # Сначала — инициализация всех полей (чтобы не ломать методы)
         self.ready = False
+        self.disabled_by_settings = False
         self.vad = None
         self.sd = None
         self.stream = None
@@ -71,6 +60,16 @@ class AgentBargeIn:
             import webrtcvad
             import sounddevice as sd
             self.sd = sd
+            # F-015: elder-care toggle — проверяем ПОСЛЕ полной инициализации
+            try:
+                from aura import settings
+                if not settings.get("barge_in", True):
+                    self.disabled_by_settings = True
+                    print("🔇 BargeIn отключён (settings.barge_in=False, elder-care)")
+                    return
+            except Exception:
+                pass  # fail-open
+
             self.vad = webrtcvad.Vad(self.VAD_AGGRESSIVENESS)
             self.ready = True
             print("✅ BargeIn загружен (VAD webrtcvad, отдельный поток)")

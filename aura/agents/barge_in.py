@@ -60,16 +60,6 @@ class AgentBargeIn:
             import webrtcvad
             import sounddevice as sd
             self.sd = sd
-            # F-015: elder-care toggle — проверяем ПОСЛЕ полной инициализации
-            try:
-                from aura import settings
-                if not settings.get("barge_in", True):
-                    self.disabled_by_settings = True
-                    print("🔇 BargeIn отключён (settings.barge_in=False, elder-care)")
-                    return
-            except Exception:
-                pass  # fail-open
-
             self.vad = webrtcvad.Vad(self.VAD_AGGRESSIVENESS)
             self.ready = True
             print("✅ BargeIn загружен (VAD webrtcvad, отдельный поток)")

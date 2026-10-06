@@ -18,7 +18,7 @@ Aura нужна бате (Pentium 6405U, 8GB). Требования elder care
 
 ## Решение
 
-1. Отдельный профиль `config/profiles/elder.json`.
+1. Отдельный профиль `docs/examples/elder-profile.example.json (был config/profiles/)`.
 2. Роутинг через env `AURA_PROFILE=elder`.
 3. Параметры профиля переопределяют listener/speaker/orchestrator:
    - MIN_TURN_SILENCE 0.8 → 1.8

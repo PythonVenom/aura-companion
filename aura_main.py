@@ -77,6 +77,16 @@ class AuraOrchestrator:
         self.listener = AgentListener()
         self.speaker = AgentSpeaker()
         self.barge_in = AgentBargeIn()
+
+        # F-015: elder-care toggle на интеграционном слое (Beck 2002 TDD:
+        # component не знает о settings; injection здесь).
+        try:
+            from aura import settings as _s
+            if not _s.get("barge_in", True):
+                self.barge_in.ready = False
+                print("🔇 BargeIn отключён (settings.barge_in=False, elder-care)")
+        except Exception:
+            pass
         self._halted = False  # Bug 29: halt после barge-in
         # Bug 46: _ensure_aec отключён (pactl deadlock при переключении)
         # ADR-050: push-to-stop watcher (thread)

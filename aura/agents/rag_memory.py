@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 import time
 import urllib.request
 from datetime import datetime
@@ -54,8 +55,17 @@ class AgentRAGMemory(BaseAgent):
     STATS_KEYWORDS = ("статистика памяти", "сколько помнишь")
     CLEAR_KEYWORDS = ("очисти память", "забудь всё")
 
-    # Хардкод путей — не меняем при миграции, чтобы не раздвоить базу
-    DB_PATH = "/mnt/aura_hdd/aura/rag_db"
+    # F-009: из settings с fallback (default — user home, не HDD)
+    @classmethod
+    def _get_db_path(cls) -> str:
+        try:
+            from aura import settings
+            custom = settings.get("rag_db_path", "")
+            if custom:
+                return custom
+        except Exception:
+            pass
+        return str(Path.home() / ".local" / "share" / "aura" / "rag_db")
     COLLECTION_NAME = "aura_dialogs"
     EMBED_MODEL = "nomic-embed-text"
     OLLAMA_URL = "http://localhost:11434/api/embeddings"
@@ -71,8 +81,8 @@ class AgentRAGMemory(BaseAgent):
         try:
             import chromadb
 
-            os.makedirs(self.DB_PATH, exist_ok=True)
-            self.client = chromadb.PersistentClient(path=self.DB_PATH)
+            os.makedirs(self._get_db_path(), exist_ok=True)
+            self.client = chromadb.PersistentClient(path=self._get_db_path())
             self.collection = self.client.get_or_create_collection(
                 name=self.COLLECTION_NAME,
                 metadata={"hnsw:space": "cosine"},

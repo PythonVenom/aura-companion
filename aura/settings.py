@@ -33,7 +33,13 @@ DEFAULTS = {
     "voice_volume_boost": 1.0,
     "confirm_actions": False,
     "barge_in": True,
-    "sos_phrases": [],  # empty = fallback на hardcoded в AgentSOS
+    "sos_phrases": [],  # empty = fallback на hardcoded в AgentSOS,
+    # F-009: paths (нейтральные, пользователь переопределяет)
+    # НЕ путать с elder-care (F-015). Здесь infra.
+    "media_dirs": [],       # ["/mnt/aura_hdd/media", ...]
+    "music_dirs": [],       # ["/mnt/aura_hdd/music", ...]
+    "rag_db_path": "",      # "" = ~/.local/share/aura/rag_db
+
     "persona": {
         "name": "Аура",
         "address": "ты",

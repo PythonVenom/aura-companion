@@ -6,8 +6,10 @@ import json
 from PIL import Image, ImageDraw
 import pystray
 
-CTL = "/home/pythonvenom/aura_project/scripts/aura_ctl.py"
-PYTHON = "/home/pythonvenom/aura_project/venv/bin/python"
+from pathlib import Path
+ROOT = Path(__file__).resolve().parent.parent
+CTL = str(ROOT / "scripts" / "aura_ctl.py")
+PYTHON = str(ROOT / "venv" / "bin" / "python")
 API = "http://127.0.0.1:8765"
 
 STATE_COLORS = {

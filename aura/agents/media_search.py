@@ -63,8 +63,23 @@ class AgentMediaSearch(BaseAgent):
         music_dirs: list[str] | None = None,
     ) -> None:
         super().__init__()
-        self.movie_dirs = movie_dirs if movie_dirs is not None else self.DEFAULT_MOVIE_DIRS
-        self.music_dirs = music_dirs if music_dirs is not None else self.DEFAULT_MUSIC_DIRS
+        # F-009: media_dirs/music_dirs из settings с fallback на DEFAULT_*
+        if movie_dirs is not None:
+            self.movie_dirs = movie_dirs
+        elif music_dirs is not None:
+            self.movie_dirs = self.DEFAULT_MOVIE_DIRS
+        else:
+            try:
+                from aura import settings as _s
+                custom_media = _s.get("media_dirs", [])
+                custom_music = _s.get("music_dirs", [])
+                self.movie_dirs = list(custom_media) or self.DEFAULT_MOVIE_DIRS
+                self.music_dirs = list(custom_music) or self.DEFAULT_MUSIC_DIRS
+            except Exception:
+                self.movie_dirs = self.DEFAULT_MOVIE_DIRS
+                self.music_dirs = self.DEFAULT_MUSIC_DIRS
+        if music_dirs is not None:
+            self.music_dirs = music_dirs
         self.video_ext = ('.mp4', '.mkv', '.avi', '.mov', '.webm', '.flv', '.m4v', '.wmv')
         self.audio_ext = ('.mp3', '.flac', '.wav', '.ogg', '.m4a', '.aac', '.opus', '.wma')
         self.media_cache: dict[str, list[dict]] = {"movies": [], "music": []}

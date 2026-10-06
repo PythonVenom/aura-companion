@@ -5,9 +5,10 @@
 - Manakul, P. et al. (2023). SelfCheckGPT. EMNLP.
 """
 from __future__ import annotations
+
 import json
-import urllib.request
 import re
+import urllib.request
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
 MODEL = "qwen2.5:7b-instruct-q4_K_M"

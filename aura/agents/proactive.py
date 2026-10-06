@@ -14,21 +14,22 @@ from __future__ import annotations
 
 import json
 import os
-import time
-from datetime import datetime
-from dataclasses import dataclass
 import re
+import time
+from dataclasses import dataclass
+from datetime import datetime
+
 from aura.agents import checklist
 
 
 def _now_hour() -> int:
     import datetime as _dt
     return _dt.datetime.now().hour
+from collections.abc import Callable
+from pathlib import Path
+
 from aura.agents import chat_sense
 from aura.agents.messenger import is_own_message
-from pathlib import Path
-from typing import Callable
-
 
 # Bug 35: перенос из /tmp (не светить личку на видео)
 _CACHE_DIR = Path.home() / ".cache/aura"
@@ -457,7 +458,7 @@ def upcoming_calendar_trigger(get_agent) -> Trigger:
             parts.append(f"через {m} мин — {chat}: {text}")
         return "Напоминание: " + ". ".join(parts)
 
-    _cache: dict = {}   # noqa: F841 — используется внутри condition/action
+    _cache: dict = {}
 
     # Передаём _cache в condition через closure
     def condition_with_cache(state: dict) -> bool:
@@ -603,10 +604,10 @@ def default_engine(get_agent=None) -> ProactiveEngine:
 
 
 __all__ = [
-    "Trigger",
-    "ProactiveEngine",
-    "morning_briefing_trigger",
-    "default_engine",
-    "STATE_PATH",
     "CHECK_INTERVAL_SEC",
+    "STATE_PATH",
+    "ProactiveEngine",
+    "Trigger",
+    "default_engine",
+    "morning_briefing_trigger",
 ]

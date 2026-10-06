@@ -14,6 +14,7 @@
 - Registry через winreg (Python stdlib)
 """
 from __future__ import annotations
+
 import platform
 import shutil
 import subprocess
@@ -197,6 +198,9 @@ class DefenderAdapter:
 
 
 __all__ = [
-    "SAPIAdapter", "WSRAdapter", "HelloAdapter",
-    "RegistryAdapter", "DefenderAdapter",
+    "DefenderAdapter",
+    "HelloAdapter",
+    "RegistryAdapter",
+    "SAPIAdapter",
+    "WSRAdapter",
 ]

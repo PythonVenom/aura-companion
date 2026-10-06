@@ -11,13 +11,13 @@
 Пишем heartbeat раз в 5 мин, crash при исключении.
 """
 from __future__ import annotations
+
 import json
 import os
 import time
 import traceback
+from datetime import UTC, datetime
 from pathlib import Path
-from datetime import datetime, timezone
-
 
 STATE_DIR = Path.home() / ".local/share/aura/stability"
 HEARTBEAT_FILE = STATE_DIR / "heartbeat.json"
@@ -45,7 +45,7 @@ def _write_heartbeat() -> None:
     hb = {
         "pid": os.getpid(),
         "ts": time.time(),
-        "iso": datetime.now(timezone.utc).isoformat(),
+        "iso": datetime.now(UTC).isoformat(),
         "uptime_sec": time.time() - float(START_FILE.read_text().strip() or 0),
     }
     HEARTBEAT_FILE.write_text(
@@ -64,7 +64,7 @@ def record_crash(exc: BaseException, context: str = "") -> None:
     _ensure()
     entry = {
         "ts": time.time(),
-        "iso": datetime.now(timezone.utc).isoformat(),
+        "iso": datetime.now(UTC).isoformat(),
         "type": type(exc).__name__,
         "message": str(exc)[:500],
         "context": context[:200],
@@ -155,7 +155,14 @@ def reset() -> None:
 
 
 __all__ = [
-    "mark_start", "heartbeat", "record_crash", "install_excepthook",
-    "uptime_days", "last_heartbeat_age_sec", "crash_count", "mtbf_days",
-    "stability_report", "reset",
+    "crash_count",
+    "heartbeat",
+    "install_excepthook",
+    "last_heartbeat_age_sec",
+    "mark_start",
+    "mtbf_days",
+    "record_crash",
+    "reset",
+    "stability_report",
+    "uptime_days",
 ]

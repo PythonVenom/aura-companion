@@ -18,10 +18,10 @@ from aura.core.registry import AgentRegistry
 
 __all__ = [
     "AgentProtocol",
+    "AgentRegistry",
     "AgentRequest",
     "AgentResponse",
     "AgentStatus",
     "BaseAgent",
-    "AgentRegistry",
     "Orchestrator",
 ]

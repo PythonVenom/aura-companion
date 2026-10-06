@@ -1,7 +1,8 @@
 """AgentCapabilities — «что ты умеешь» (ADR-101)."""
 from __future__ import annotations
-from aura.core.protocol import AgentResponse, BaseAgent
+
 from aura.core.capability_graph import get_graph
+from aura.core.protocol import AgentResponse, BaseAgent
 
 
 class AgentCapabilities(BaseAgent):

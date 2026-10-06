@@ -5,9 +5,9 @@
 - Google (2019). MLPerf Inference Benchmark. arXiv:1910.01500.
 """
 from __future__ import annotations
-from dataclasses import dataclass, asdict
+
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -77,7 +77,7 @@ def save(cfg: ModelConfig) -> None:
     p.write_text(json.dumps(asdict(cfg), indent=2, ensure_ascii=False), encoding="utf-8")
 
 
-def load() -> Optional[ModelConfig]:
+def load() -> ModelConfig | None:
     import json
     p = Path.home() / ".cache" / "aura" / "active_profile.json"
     if not p.exists():

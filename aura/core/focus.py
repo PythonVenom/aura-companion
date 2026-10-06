@@ -1,8 +1,8 @@
 """Focus — «не отвлекать N минут» (ADR-097)."""
 from __future__ import annotations
+
 import time
 from pathlib import Path
-
 
 FLAG = Path("/tmp/aura_focus")
 DEFAULT_TIMEOUT = 3600
@@ -40,4 +40,4 @@ def remaining() -> float:
     return max(0.0, until - time.time())
 
 
-__all__ = ["enable", "disable", "is_active", "remaining", "FLAG", "DEFAULT_TIMEOUT"]
+__all__ = ["DEFAULT_TIMEOUT", "FLAG", "disable", "enable", "is_active", "remaining"]

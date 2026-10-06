@@ -12,6 +12,7 @@ Endpoints:
 Production: TLS + token — позже (ADR-079 v2).
 """
 from __future__ import annotations
+
 import json
 import time
 from pathlib import Path
@@ -150,4 +151,4 @@ def create_app(orchestrator=None, bridge=None) -> FastAPI:
     return app
 
 
-__all__ = ["create_app", "ChatRequest", "ChatResponse"]
+__all__ = ["ChatRequest", "ChatResponse", "create_app"]

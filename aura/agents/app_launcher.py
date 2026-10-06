@@ -70,7 +70,7 @@ class AgentAppLauncher(BaseAgent):
                 try:
                     name = None
                     exec_cmd = None
-                    with open(f, "r", encoding="utf-8", errors="ignore") as fh:
+                    with open(f, encoding="utf-8", errors="ignore") as fh:
                         for line in fh:
                             if line.startswith("Name=") and not name:
                                 name = line.split("=", 1)[1].strip()

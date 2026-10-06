@@ -10,12 +10,12 @@
 профиль, и все агенты адаптируются.
 """
 from __future__ import annotations
+
 import json
 from pathlib import Path
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
-
 
 PROFILE_DIR = Path.home() / ".config/aura"
 PROFILE_FILE = PROFILE_DIR / "profile.json"

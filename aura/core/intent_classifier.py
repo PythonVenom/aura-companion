@@ -6,9 +6,9 @@
 - Warden, P. (2018). Speech Commands. arXiv:1804.03209.
 """
 from __future__ import annotations
+
 import re
 from collections import Counter
-from typing import Optional
 
 INTENTS = {
     "music.play":   ["включи музыку", "поставь песню", "музыку хочу", "играй",
@@ -69,7 +69,7 @@ class IntentClassifier:
         return (best, round(conf, 3)) if conf >= 0.15 else (None, round(conf, 3))
 
 
-_SINGLETON: Optional[IntentClassifier] = None
+_SINGLETON: IntentClassifier | None = None
 
 
 def classify(text: str):

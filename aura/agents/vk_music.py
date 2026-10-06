@@ -19,7 +19,6 @@ import subprocess
 from aura.agents import media_state
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
-
 try:
     import requests
     REQUESTS_OK = True
@@ -68,7 +67,7 @@ class AgentVKMusic(BaseAgent):
         for path in paths:
             if path and os.path.exists(path):
                 try:
-                    with open(path, "r") as f:
+                    with open(path) as f:
                         token = f.read().strip()
                     if token and len(token) > 10:
                         self.token = token

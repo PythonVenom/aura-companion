@@ -11,10 +11,10 @@
 3. Priority recall — top-K из memory recall в начало
 """
 from __future__ import annotations
+
 import json
 import urllib.request
 from pathlib import Path
-from typing import Optional
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
 MODEL = "qwen2.5:7b-instruct-q4_K_M"
@@ -90,7 +90,7 @@ class ContextManager:
         self._summary = self._llm_summarize(self._summary, old)
         self._save_summary(self._summary)
 
-    def build_messages(self, user_text: str, recall_hits: Optional[list] = None) -> list[dict]:
+    def build_messages(self, user_text: str, recall_hits: list | None = None) -> list[dict]:
         """Собрать messages для LLM: system + summary + recall + last window + user."""
         messages: list[dict] = []
 
@@ -133,7 +133,7 @@ class ContextManager:
         return messages
 
 
-_SINGLETON: Optional[ContextManager] = None
+_SINGLETON: ContextManager | None = None
 
 
 def get_context_manager() -> ContextManager:

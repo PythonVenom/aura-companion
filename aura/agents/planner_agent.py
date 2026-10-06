@@ -1,7 +1,8 @@
 """AgentPlanner — «как сделать X» через HTN (ADR-102)."""
 from __future__ import annotations
-from aura.core.protocol import AgentResponse, BaseAgent
+
 from aura.core.htn_planner import get_planner
+from aura.core.protocol import AgentResponse, BaseAgent
 
 
 class AgentPlanner(BaseAgent):

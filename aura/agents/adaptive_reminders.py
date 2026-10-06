@@ -12,14 +12,14 @@
 - Учитывает паттерны из routine_learner
 """
 from __future__ import annotations
+
 import sqlite3
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
-
 
 REMINDERS_DB = Path.home() / ".local/share/aura/reminders.db"
 TWIN_DB = Path.home() / ".local/share/aura/health_twin.db"

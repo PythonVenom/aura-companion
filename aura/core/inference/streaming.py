@@ -9,9 +9,10 @@
 Цель: TTFT < 500ms для голосового ответа.
 """
 from __future__ import annotations
+
 import json
 import urllib.request
-from typing import Iterator, Optional
+from collections.abc import Iterator
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
 MODEL = "qwen2.5:7b-instruct-q4_K_M"
@@ -65,7 +66,7 @@ def stream_measure(messages: list[dict]) -> dict:
     """Замерить TTFT и TPS. Для метрик (ADR-127)."""
     import time
     t0 = time.time()
-    ttft: Optional[float] = None
+    ttft: float | None = None
     chunks = 0
     text = ""
     for chunk in stream_chat(messages):

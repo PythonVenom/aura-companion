@@ -5,6 +5,7 @@ Store-and-forward: если нет сети — кладём в SQLite-очер�
 синхронизируемся при появлении связи.
 """
 from __future__ import annotations
+
 import json
 import sqlite3
 import time
@@ -12,7 +13,6 @@ from pathlib import Path
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
-
 
 DB = Path.home() / ".local/share/aura/meds.db"
 QUEUE_DB = Path.home() / ".local/share/aura/dtn_queue.db"

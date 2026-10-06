@@ -6,8 +6,8 @@ SiteAdapter pattern (ADR-018).
 from __future__ import annotations
 
 from aura.agents.base import MicroAgent
-from aura.core.protocol import AgentRequest, AgentResponse
 from aura.core.bridge import send_command
+from aura.core.protocol import AgentRequest, AgentResponse
 
 
 def _err(result) -> str:

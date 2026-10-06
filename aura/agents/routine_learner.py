@@ -11,14 +11,14 @@
 "после завтрака принимает таблетки". Проактивно напоминать.
 """
 from __future__ import annotations
+
 import sqlite3
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
-
 
 TWIN_DB = Path.home() / ".local/share/aura/health_twin.db"
 ROUTINE_DB = Path.home() / ".local/share/aura/routine.db"

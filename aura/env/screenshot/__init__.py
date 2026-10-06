@@ -1,9 +1,9 @@
 """Screenshot adapters."""
 from .cinnamon import CinnamonScreenshot
-from .kde import KDEScreenshot
 from .gnome import GNOMEScreenshot
+from .kde import KDEScreenshot
 
-__all__ = ["CinnamonScreenshot", "KDEScreenshot", "GNOMEScreenshot", "get_screenshot"]
+__all__ = ["CinnamonScreenshot", "GNOMEScreenshot", "KDEScreenshot", "get_screenshot"]
 
 
 def get_screenshot():

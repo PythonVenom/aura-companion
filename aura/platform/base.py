@@ -93,7 +93,7 @@ class UnsupportedPlatformError(NotImplementedError):
 
 
 __all__ = [
-    "WindowInfo",
     "PlatformAdapter",
     "UnsupportedPlatformError",
+    "WindowInfo",
 ]

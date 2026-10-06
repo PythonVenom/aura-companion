@@ -1,8 +1,10 @@
 """AgentOpenResolver — открой X через Cascade (ADR-098/099)."""
 from __future__ import annotations
+
 import subprocess
-from aura.core.protocol import AgentResponse, BaseAgent
+
 from aura.core.cascade_factory import build_app_cascade
+from aura.core.protocol import AgentResponse, BaseAgent
 
 WEB_MAP = {
     "дипсик": "https://chat.deepseek.com",

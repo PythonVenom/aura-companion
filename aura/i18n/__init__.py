@@ -1,7 +1,9 @@
 """Минимальный i18n для Aura (ADR-118)."""
 from __future__ import annotations
-from pathlib import Path
+
 import os
+from pathlib import Path
+
 import yaml
 
 _LOCALES: dict[str, dict] = {}

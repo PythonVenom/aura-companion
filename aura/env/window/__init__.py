@@ -1,9 +1,9 @@
 """Window manager adapters."""
 from .base import WindowManager
-from .x11_generic import X11GenericAdapter
 from .kde_x11 import KDEX11Adapter
+from .x11_generic import X11GenericAdapter
 
-__all__ = ["WindowManager", "X11GenericAdapter", "KDEX11Adapter", "get_window_manager"]
+__all__ = ["KDEX11Adapter", "WindowManager", "X11GenericAdapter", "get_window_manager"]
 
 
 def get_window_manager():

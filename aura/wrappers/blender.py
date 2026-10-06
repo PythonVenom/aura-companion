@@ -6,9 +6,9 @@ Blender 4.2+ имеет встроенный Python. Aura подключаетс
 from __future__ import annotations
 
 import json
+import shutil
 import socket
 import subprocess
-import shutil
 from typing import Any
 
 from aura.wrappers.base import AppWrapper, WrapperError
@@ -53,7 +53,7 @@ class BlenderWrapper(AppWrapper):
             self._sock = socket.create_connection(("127.0.0.1", self.port), timeout=3)
             self._connected = True
             return True
-        except (ConnectionRefusedError, socket.timeout, OSError) as e:
+        except (TimeoutError, ConnectionRefusedError, OSError) as e:
             raise WrapperError(
                 f"Blender TCP сервер не отвечает на порт {self.port}. "
                 f"Запусти: blender --python scripts/aura_server.py"

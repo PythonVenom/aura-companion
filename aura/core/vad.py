@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import webrtcvad
 
-
 VALID_RATES = (8000, 16000, 32000, 48000)
 VALID_FRAME_MS = (10, 20, 30)
 
@@ -54,4 +53,4 @@ class VoiceGate:
         self.window = []
 
 
-__all__ = ["VoiceGate", "VALID_RATES", "VALID_FRAME_MS"]
+__all__ = ["VALID_FRAME_MS", "VALID_RATES", "VoiceGate"]

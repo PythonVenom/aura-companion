@@ -5,9 +5,9 @@
 - Burnham, B. (2019). Latency: The Hidden Cost. ACM Queue.
 """
 from __future__ import annotations
+
 import time
 from collections import deque
-from typing import Optional
 
 
 class Profiler:
@@ -34,7 +34,7 @@ class Profiler:
         thresh = self.THRESHOLDS.get(op)
         return bool(thresh and self.p95(op) > thresh)
 
-    def downgrade_needed(self) -> Optional[str]:
+    def downgrade_needed(self) -> str | None:
         for op, thresh in self.THRESHOLDS.items():
             if self.p95(op) > thresh * 1.5:
                 return op
@@ -47,7 +47,7 @@ class Profiler:
                 for op in self._samples}
 
 
-_SINGLETON: Optional[Profiler] = None
+_SINGLETON: Profiler | None = None
 
 
 def get_profiler() -> Profiler:

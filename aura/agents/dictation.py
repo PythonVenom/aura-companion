@@ -13,7 +13,6 @@ from pathlib import Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
-
 DICTATION_DIR = Path.home() / "aura_private" / "dictation"
 
 
@@ -111,4 +110,4 @@ class AgentDictation(BaseAgent):
         )
 
 
-__all__ = ["AgentDictation", "DICTATION_DIR"]
+__all__ = ["DICTATION_DIR", "AgentDictation"]

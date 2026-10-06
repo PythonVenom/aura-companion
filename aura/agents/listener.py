@@ -21,6 +21,7 @@
 import os
 import queue
 import time
+
 from aura.agents.base import MicroAgent
 from aura.core.vad import VoiceGate
 
@@ -49,9 +50,9 @@ class AgentListener(MicroAgent):
             self.voice_gate = None
 
         try:
+            import numpy as np
             import sherpa_onnx
             import sounddevice as sd
-            import numpy as np
             self.sd = sd
             self.np = np
 

@@ -1,5 +1,6 @@
 """AT-SPI адаптер — accessibility для незрячих."""
 from __future__ import annotations
+
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
 

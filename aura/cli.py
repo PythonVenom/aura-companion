@@ -293,8 +293,8 @@ def cmd_wrappers_hint(args):
 
 def cmd_profile(args):
     """Voice Profiles: list / set / show."""
-    from aura import voice_profiles as vp
     from aura import settings
+    from aura import voice_profiles as vp
     action = getattr(args, "action", "list")
     if action == "list":
         for p in vp.list_profiles():
@@ -358,7 +358,7 @@ def cmd_massage(args):
 
 def cmd_calc(args):
     """Калькулятор стройматериалов."""
-    from aura.agents.construction import calc_material, NORMS
+    from aura.agents.construction import NORMS, calc_material
     if not args.material:
         print("📐 Материалы:", ", ".join(sorted(NORMS.keys())))
         return 0
@@ -384,10 +384,11 @@ def cmd_bpm(args):
 
 def cmd_dictation(args):
     """DictationAgent CLI: text / show / list."""
-    from aura.agents.dictation import AgentDictation, DICTATION_DIR
-    from aura.core.protocol import AgentRequest
     import asyncio
     from datetime import datetime
+
+    from aura.agents.dictation import DICTATION_DIR, AgentDictation
+    from aura.core.protocol import AgentRequest
 
     action = getattr(args, "action", "show")
     if action == "text":

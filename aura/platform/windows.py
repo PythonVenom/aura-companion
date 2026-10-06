@@ -8,7 +8,6 @@
 from __future__ import annotations
 
 
-
 class WindowsAudio:
     """WASAPI через pycaw (если установлен)."""
 
@@ -126,4 +125,4 @@ class WindowsMedia:
         return media_state.get_active()
 
 
-__all__ = ["WindowsAudio", "WindowsService", "WindowsMedia"]
+__all__ = ["WindowsAudio", "WindowsMedia", "WindowsService"]

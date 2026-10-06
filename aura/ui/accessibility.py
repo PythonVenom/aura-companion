@@ -7,8 +7,8 @@
 Профили: default | elder | low_vision | screen_reader.
 """
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -94,7 +94,7 @@ def passes_wcag_aaa(rgb1: tuple, rgb2: tuple, large_text: bool = False) -> bool:
     return ratio >= (4.5 if large_text else 7.0)
 
 
-def trim_response(text: str, max_words: Optional[int] = None) -> str:
+def trim_response(text: str, max_words: int | None = None) -> str:
     """Обрезать ответ по лимиту профиля (elder: 15 слов)."""
     limit = max_words if max_words is not None else get_profile().max_words_response
     if not limit:

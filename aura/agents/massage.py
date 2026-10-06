@@ -6,12 +6,11 @@ JTBD: таймер + RAG по клиенту + диктовка + отчёт.
 from __future__ import annotations
 
 import time
-from datetime import datetime
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
-
 
 CLIENTS_DIR = Path.home() / ".config" / "aura" / "massage_clients"
 
@@ -139,6 +138,7 @@ class AgentMassage(BaseAgent):
 
     def _start(self, text: str) -> AgentResponse:
         import re
+
         # Bug F: ASR слышит "тс" вместо "Тест" + "тридцать" вместо "30"
         from aura.agents.time_agent import _parse_int
         # Ищем "сессия <имя>" затем число (цифрой или словом)

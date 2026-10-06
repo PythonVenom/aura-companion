@@ -1,12 +1,12 @@
 """Tier 0 Orchestrator — без LLM (ADR-152)."""
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
 class Tier0Result:
-    intent: Optional[str]
+    intent: str | None
     confidence: float
     response: str
     source: str
@@ -49,7 +49,7 @@ class Tier0Orchestrator:
         return Tier0Result(intent, conf, self._render(intent), "template")
 
 
-_SINGLETON: Optional[Tier0Orchestrator] = None
+_SINGLETON: Tier0Orchestrator | None = None
 
 
 def get_tier0() -> Tier0Orchestrator:

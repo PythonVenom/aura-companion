@@ -6,6 +6,7 @@
 - Возрастные категории: 2-4 / 5-7 / 8-10
 """
 from __future__ import annotations
+
 import random
 import sqlite3
 import time
@@ -13,7 +14,6 @@ from pathlib import Path
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
-
 
 THERAPY_DB = Path.home() / ".local/share/aura/kid.db"
 

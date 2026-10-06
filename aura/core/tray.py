@@ -10,10 +10,10 @@ Budgie, i3/Sway/Hyprland (через waybar/polybar).
 - Не требует GTK/Qt напрямую (использует backend)
 """
 from __future__ import annotations
+
+import json
 import subprocess
 import urllib.request
-import json
-
 
 MENU_ITEMS = [
     # AURA_SOS_TRAY_V1 — паническая кнопка (T018)
@@ -171,4 +171,4 @@ class TrayIcon:
         icon.run()
 
 
-__all__ = ["TrayIcon", "MENU_ITEMS", "STATE_COLORS", "state_to_color", "make_icon_image"]
+__all__ = ["MENU_ITEMS", "STATE_COLORS", "TrayIcon", "make_icon_image", "state_to_color"]

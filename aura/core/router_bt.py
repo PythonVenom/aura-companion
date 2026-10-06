@@ -4,13 +4,14 @@
 Без LangGraph — 100 строк, ноль зависимостей.
 """
 from __future__ import annotations
-from typing import Callable, Optional
+
+from collections.abc import Callable
 
 
 class Node:
     name = "node"
 
-    def handle(self, text: str, ctx: dict) -> Optional[str]:
+    def handle(self, text: str, ctx: dict) -> str | None:
         raise NotImplementedError
 
 
@@ -58,4 +59,4 @@ class Leaf(Node):
         return None
 
 
-__all__ = ["Node", "Selector", "Sequence", "Leaf"]
+__all__ = ["Leaf", "Node", "Selector", "Sequence"]

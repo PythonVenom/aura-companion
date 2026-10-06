@@ -1,7 +1,8 @@
 """AgentFocus — управление режимом фокуса (ADR-097)."""
 from __future__ import annotations
-from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
+
 from aura.core import focus
+from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 
 class AgentFocusMode(BaseAgent):

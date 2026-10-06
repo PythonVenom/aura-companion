@@ -8,10 +8,10 @@
 Embedding: nomic-embed-text via Ollama.
 """
 from __future__ import annotations
+
 import json
 import math
 import urllib.request
-from typing import Optional
 
 OLLAMA_URL = "http://localhost:11434/api/embeddings"
 MODEL = "nomic-embed-text"
@@ -45,10 +45,10 @@ EXAMPLES = {
 }
 
 _EMB_CACHE: dict = {}
-_CENTROIDS: Optional[dict] = None
+_CENTROIDS: dict | None = None
 
 
-def _embed(text: str) -> Optional[list]:
+def _embed(text: str) -> list | None:
     if text in _EMB_CACHE:
         return _EMB_CACHE[text]
     try:

@@ -4,16 +4,16 @@
 Пароль: keyring (freedesktop Secret Service) — не в plaintext.
 """
 from __future__ import annotations
-import smtplib
-import imaplib
+
 import email as emaillib
-from email.message import EmailMessage
+import imaplib
+import smtplib
 from email.header import decode_header
+from email.message import EmailMessage
 from email.utils import parseaddr
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
-
 
 KEYRING_SERVICE = "aura-email"
 

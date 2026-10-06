@@ -101,7 +101,7 @@ class AgentJournal(BaseAgent):
         if not os.path.exists(self.journal_file):
             return None
 
-        with open(self.journal_file, "r", encoding="utf-8") as f:
+        with open(self.journal_file, encoding="utf-8") as f:
             content = f.read()
 
         dates = re.findall(r"## (\d{4}-\d{2}-\d{2})", content)
@@ -145,7 +145,7 @@ class AgentJournal(BaseAgent):
             return "❌ Журнал не готов"
 
         try:
-            with open(self.journal_file, "r", encoding="utf-8") as f:
+            with open(self.journal_file, encoding="utf-8") as f:
                 content = f.read()
 
             pattern = rf"- \[ \] ({re.escape(task_text)}.*)"
@@ -168,7 +168,7 @@ class AgentJournal(BaseAgent):
         if not os.path.exists(self.journal_file):
             return []
 
-        with open(self.journal_file, "r", encoding="utf-8") as f:
+        with open(self.journal_file, encoding="utf-8") as f:
             content = f.read()
 
         return re.findall(r"- \[ \] (.+)", content)
@@ -178,7 +178,7 @@ class AgentJournal(BaseAgent):
         if not os.path.exists(self.journal_file):
             return []
 
-        with open(self.journal_file, "r", encoding="utf-8") as f:
+        with open(self.journal_file, encoding="utf-8") as f:
             content = f.read()
 
         return re.findall(r"- \[x\] (.+)", content, flags=re.IGNORECASE)
@@ -200,7 +200,7 @@ class AgentJournal(BaseAgent):
         if not os.path.exists(self.journal_file):
             return "📔 Журнал пуст"
 
-        with open(self.journal_file, "r", encoding="utf-8") as f:
+        with open(self.journal_file, encoding="utf-8") as f:
             content = f.read()
 
         parts = re.split(r"\n## ", content)
@@ -302,7 +302,7 @@ class AgentJournal(BaseAgent):
         """Есть ли уже заголовок сегодняшнего дня."""
         if not os.path.exists(self.journal_file):
             return False
-        with open(self.journal_file, "r", encoding="utf-8") as f:
+        with open(self.journal_file, encoding="utf-8") as f:
             content = f.read()
         return self._today_header() in content
 

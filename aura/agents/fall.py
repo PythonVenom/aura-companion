@@ -11,7 +11,6 @@ from pathlib import Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
-
 STATE_FILE = Path.home() / ".cache" / "aura" / "fall_state.json"
 
 # Пороги (стандарт из литературы)

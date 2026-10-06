@@ -28,7 +28,6 @@ import struct
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
-
 # Известные URL для «открой X»
 KNOWN_URLS = {
     "вк": "https://vk.com",
@@ -355,7 +354,7 @@ class AgentBrowserTabs(BaseAgent):
                 return json.loads(body.decode("utf-8"))
         except FileNotFoundError:
             return {"error": "bridge_not_running"}
-        except socket.timeout:
+        except TimeoutError:
             return {"error": "timeout"}
         except Exception as e:
             return {"error": str(e)}

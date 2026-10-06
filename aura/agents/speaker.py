@@ -11,9 +11,10 @@
 
 import os
 import queue
+import subprocess
 import threading
 import time
-import subprocess
+
 from aura.agents.base import MicroAgent
 
 

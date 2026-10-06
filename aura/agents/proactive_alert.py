@@ -6,6 +6,7 @@
 - State: last interaction timestamp в SQLite
 """
 from __future__ import annotations
+
 import json
 import sqlite3
 import time
@@ -13,7 +14,6 @@ from pathlib import Path
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
-
 
 STATE_DB = Path.home() / ".local/share/aura/proactive.db"
 DEFAULT_THRESHOLD_HOURS = 6.0

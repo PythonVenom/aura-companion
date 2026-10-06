@@ -57,8 +57,8 @@ class AgentBargeIn:
         self._consecutive_speech = 0  # счётчик фреймов речи подряд
 
         try:
-            import webrtcvad
             import sounddevice as sd
+            import webrtcvad
             self.sd = sd
             self.vad = webrtcvad.Vad(self.VAD_AGGRESSIVENESS)
             self.ready = True

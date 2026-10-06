@@ -15,10 +15,10 @@
 }
 """
 from __future__ import annotations
+
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -29,7 +29,7 @@ class PluginManifest:
     author: str = "unknown"
     risk_level: str = "local"          # local | cloud | hybrid
     data_leaves_device: bool = False
-    endpoint: Optional[str] = None
+    endpoint: str | None = None
     warns: list = field(default_factory=list)
     requires: list = field(default_factory=list)
     user_consent_required: bool = False

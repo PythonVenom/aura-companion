@@ -16,7 +16,6 @@ import os
 import time
 from pathlib import Path
 
-
 DEFAULT_CACHE = Path(os.environ.get(
     "AURA_CACHE_DIR",
     str(Path.home() / ".cache/aura"),
@@ -39,7 +38,7 @@ class ChatBridge:
             return []
         msgs = []
         try:
-            with open(self.inbox_path, "r", encoding="utf-8") as f:
+            with open(self.inbox_path, encoding="utf-8") as f:
                 f.seek(self._offset)
                 for line in f:
                     line = line.strip()
@@ -70,4 +69,4 @@ class ChatBridge:
                 'chat_bridge error: %s', e)
 
 
-__all__ = ["ChatBridge", "DEFAULT_CACHE"]
+__all__ = ["DEFAULT_CACHE", "ChatBridge"]

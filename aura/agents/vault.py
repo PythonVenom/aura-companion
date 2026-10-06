@@ -88,7 +88,7 @@ class AgentVault(BaseAgent):
     def _load(self) -> None:
         if os.path.exists(self.facts_file):
             try:
-                with open(self.facts_file, "r", encoding="utf-8") as f:
+                with open(self.facts_file, encoding="utf-8") as f:
                     self.facts = json.load(f)
             except Exception:
                 self.facts = {}

@@ -1,10 +1,9 @@
 """EgressBroker — фильтр исходящих (ADR-091)."""
 from __future__ import annotations
+
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 from urllib.parse import urlparse
-
 
 DEFAULT_ALLOWED_FIELDS = frozenset({
     "prompt", "text", "query", "messages", "model",
@@ -27,7 +26,7 @@ class BrokerPolicy:
 
 
 class EgressBroker:
-    def __init__(self, policy: Optional[BrokerPolicy] = None):
+    def __init__(self, policy: BrokerPolicy | None = None):
         self.policy = policy or BrokerPolicy()
         self._spent_today = 0.0
         self._day_start = time.time()
@@ -65,4 +64,4 @@ class EgressBroker:
         return self._spent_today
 
 
-__all__ = ["EgressBroker", "BrokerPolicy", "DEFAULT_ALLOWED_FIELDS"]
+__all__ = ["DEFAULT_ALLOWED_FIELDS", "BrokerPolicy", "EgressBroker"]

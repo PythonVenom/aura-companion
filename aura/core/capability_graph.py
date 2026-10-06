@@ -6,8 +6,9 @@
 YAGNI: 30-50 узлов = 80% покрытия. Не описывать все 44 агента.
 """
 from __future__ import annotations
+
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, Optional
 
 
 @dataclass
@@ -17,7 +18,7 @@ class Capability:
     inputs: list = field(default_factory=list)   # ["query"]
     outputs: list = field(default_factory=list)  # ["bool"]
     tags: list = field(default_factory=list)     # ["media", "safe"]
-    handler: Optional[Callable] = None
+    handler: Callable | None = None
 
 
 class CapabilityGraph:
@@ -27,7 +28,7 @@ class CapabilityGraph:
     def add(self, cap: Capability):
         self.nodes[cap.name] = cap
 
-    def get(self, name: str) -> Optional[Capability]:
+    def get(self, name: str) -> Capability | None:
         return self.nodes.get(name)
 
     def by_tag(self, tag: str) -> list:

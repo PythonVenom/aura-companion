@@ -1,6 +1,6 @@
 """Единые пути проекта (ADR-106)."""
-from pathlib import Path
 import os
+from pathlib import Path
 
 PROJECT_DIR = Path(os.environ.get("AURA_PROJECT_DIR", Path(__file__).parent.parent))
 HOME = Path.home()
@@ -13,4 +13,4 @@ def ensure():
     for d in (CACHE_DIR, CONFIG_DIR):
         d.mkdir(parents=True, exist_ok=True)
 
-__all__ = ["PROJECT_DIR", "HOME", "CACHE_DIR", "CONFIG_DIR", "DATA_DIR", "MODELS_DIR", "ensure"]
+__all__ = ["CACHE_DIR", "CONFIG_DIR", "DATA_DIR", "HOME", "MODELS_DIR", "PROJECT_DIR", "ensure"]

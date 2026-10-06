@@ -13,13 +13,13 @@
   events(id, entity_id, kind, date_iso, payload_json)
 """
 from __future__ import annotations
+
 import json
 import os
 import sqlite3
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 DB_PATH = Path(os.path.expanduser("~/.cache/aura/social.db"))
 
@@ -67,7 +67,7 @@ class Entity:
 @dataclass
 class Relation:
     src: str
-    dst: Optional[str]
+    dst: str | None
     kind: str
     weight: float
     evidence: str
@@ -77,7 +77,7 @@ class SocialMemory:
     def __init__(self, db_path: Path = DB_PATH) -> None:
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
         self._init()
 
     def _init(self) -> None:
@@ -94,7 +94,7 @@ class SocialMemory:
         return self._conn is not None
 
     def upsert_entity(self, name: str, type_: str = "person",
-                      aliases: Optional[list[str]] = None) -> Optional[int]:
+                      aliases: list[str] | None = None) -> int | None:
         if not self._conn:
             return None
         cur = self._conn.execute("SELECT id FROM entities WHERE name = ?", (name,))
@@ -108,7 +108,7 @@ class SocialMemory:
         self._conn.commit()
         return cur.lastrowid
 
-    def add_relation(self, src_name: str, kind: str, dst_name: Optional[str] = None,
+    def add_relation(self, src_name: str, kind: str, dst_name: str | None = None,
                      weight: float = 1.0, evidence: str = "") -> bool:
         if not self._conn:
             return False
@@ -125,7 +125,7 @@ class SocialMemory:
         return True
 
     def add_event(self, entity_name: str, kind: str, date_iso: str = "",
-                  payload: Optional[dict] = None) -> bool:
+                  payload: dict | None = None) -> bool:
         if not self._conn:
             return False
         eid = self.upsert_entity(entity_name)
@@ -138,7 +138,7 @@ class SocialMemory:
         self._conn.commit()
         return True
 
-    def relations_of(self, name: str, kind: Optional[str] = None) -> list[Relation]:
+    def relations_of(self, name: str, kind: str | None = None) -> list[Relation]:
         if not self._conn:
             return []
         sql = ("SELECT e.name AS src, e2.name AS dst, r.kind, r.weight, r.evidence "
@@ -154,7 +154,7 @@ class SocialMemory:
         return [Relation(src=r["src"], dst=r["dst"], kind=r["kind"],
                          weight=r["weight"], evidence=r["evidence"]) for r in cur.fetchall()]
 
-    def events_of(self, name: str, kind: Optional[str] = None) -> list[dict]:
+    def events_of(self, name: str, kind: str | None = None) -> list[dict]:
         if not self._conn:
             return []
         sql = ("SELECT ev.kind, ev.date_iso, ev.payload_json "

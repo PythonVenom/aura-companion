@@ -11,6 +11,7 @@
 только предлагает.
 """
 from __future__ import annotations
+
 from datetime import datetime
 
 from aura.agents.base import MicroAgent

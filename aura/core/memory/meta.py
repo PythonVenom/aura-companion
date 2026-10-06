@@ -7,10 +7,10 @@
 confidence = alpha*extraction + beta*evidence + gamma*recency + delta*consistency
 """
 from __future__ import annotations
+
 import math
 import time
 from dataclasses import dataclass
-
 
 ALPHA = 0.4   # extraction score
 BETA = 0.3    # evidence count

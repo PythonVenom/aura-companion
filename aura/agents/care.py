@@ -1,12 +1,12 @@
 """CareAgent — напоминания (еда, вода, сон) — ADR-085."""
 from __future__ import annotations
+
 import json
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
-
 
 CARE_CONFIG = Path.home() / ".cache/aura/care.json"
 

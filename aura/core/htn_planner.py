@@ -7,8 +7,8 @@ Planner.plan(goal) → list[Operator]
 MVP: реестр методов без LLM. Позже — LLM-декомпозиция.
 """
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass
@@ -33,7 +33,7 @@ class Planner:
     def add_method(self, method: Method) -> None:
         self.methods.append(method)
 
-    def find_method(self, goal: str) -> Optional[Method]:
+    def find_method(self, goal: str) -> Method | None:
         g = goal.lower()
         for m in self.methods:
             if any(t in g for t in m.triggers):
@@ -108,4 +108,4 @@ def get_planner() -> Planner:
     return _planner
 
 
-__all__ = ["Operator", "Method", "Planner", "build_default_methods", "get_planner"]
+__all__ = ["Method", "Operator", "Planner", "build_default_methods", "get_planner"]

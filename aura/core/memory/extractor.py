@@ -9,9 +9,9 @@
 Если LLM недоступен — тихо возвращает пустой результат (не падает).
 """
 from __future__ import annotations
+
 import json
 import urllib.request
-from typing import Optional
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
 MODEL = "qwen2.5:7b-instruct-q4_K_M"
@@ -35,7 +35,7 @@ SOCIAL_PROMPT = (
 )
 
 
-def _ollama_json(system_prompt: str, user_text: str) -> Optional[dict]:
+def _ollama_json(system_prompt: str, user_text: str) -> dict | None:
     try:
         data = json.dumps({
             "model": MODEL,
@@ -83,7 +83,7 @@ def extract_social(text: str) -> dict:
 
 def apply_semantic(text: str) -> int:
     """Извлечь и записать в SemanticMemory. Возврат: сколько записано."""
-    from aura.core.memory.semantic import get_semantic, Fact
+    from aura.core.memory.semantic import Fact, get_semantic
     s = get_semantic()
     if not s.check_ready():
         return 0

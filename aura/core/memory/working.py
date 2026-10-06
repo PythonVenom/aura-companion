@@ -9,16 +9,17 @@
 Не персистится. По умолчанию 20 сообщений (~ Cowan 4 chunks * 5).
 """
 from __future__ import annotations
+
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 
 @dataclass
 class Turn:
     role: str        # "user" | "aura"
     text: str
-    ts: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    ts: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     meta: dict = field(default_factory=dict)
 
 

@@ -10,12 +10,11 @@ Phase 2:
 - Смысловые события
 """
 from __future__ import annotations
-from datetime import datetime, timedelta
 
 import json
 import time
+from datetime import datetime, timedelta
 from pathlib import Path
-
 
 STATE_PATH = Path.home() / ".cache/aura/chat_sense.json"
 RE_MIND_TTL = 4 * 3600   # не напоминать чаще 4 часов про один чат
@@ -539,6 +538,18 @@ def summary(items: list) -> str:
 
 
 __all__ = [
-    "find_unanswered", "filter_by_reminder_ttl", "mark_reminded",
-    "summary", "parse_date_ru", "extract_events", "save_event", "load_calendar", "get_today", "summary_today", "purge_old", "CALENDAR_PATH", "STATE_PATH", "RE_MIND_TTL",
+    "CALENDAR_PATH",
+    "RE_MIND_TTL",
+    "STATE_PATH",
+    "extract_events",
+    "filter_by_reminder_ttl",
+    "find_unanswered",
+    "get_today",
+    "load_calendar",
+    "mark_reminded",
+    "parse_date_ru",
+    "purge_old",
+    "save_event",
+    "summary",
+    "summary_today",
 ]

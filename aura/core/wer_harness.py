@@ -16,11 +16,12 @@ WER = (S + D + I) / N
 Поддерживает нормализацию (lowercase + пунктуация).
 """
 from __future__ import annotations
+
 import json
 import re
 import time
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 RESULTS_DIR = Path.home() / ".local/share/aura/wer"
 RESULTS_FILE = RESULTS_DIR / "results.jsonl"
@@ -177,7 +178,12 @@ def reset() -> None:
 
 
 __all__ = [
-    "normalize", "wer", "corpus_wer", "record",
-    "load_history", "wer_report", "reset",
     "TARGET_WER",
+    "corpus_wer",
+    "load_history",
+    "normalize",
+    "record",
+    "reset",
+    "wer",
+    "wer_report",
 ]

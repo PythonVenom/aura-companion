@@ -1,7 +1,8 @@
 """AgentContextMemory — «что делал?» (ADR-096)."""
 from __future__ import annotations
-from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
+
 from aura.core.context import get_context
+from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 
 class AgentRecentActivity(BaseAgent):

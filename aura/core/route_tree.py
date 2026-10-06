@@ -1,7 +1,9 @@
 """RouteTree — конкретная BT для Aura (ADR-094, ADR-107, ADR-108)."""
 from __future__ import annotations
+
 import re
-from aura.core.router_bt import Selector, Leaf
+
+from aura.core.router_bt import Leaf, Selector
 
 
 def _has(text: str, *keys: str) -> bool:

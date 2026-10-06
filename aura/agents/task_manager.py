@@ -100,7 +100,7 @@ class AgentTaskManager(BaseAgent):
     def _load(self) -> None:
         if os.path.exists(self.tasks_file):
             try:
-                with open(self.tasks_file, "r", encoding="utf-8") as f:
+                with open(self.tasks_file, encoding="utf-8") as f:
                     self.tasks = json.load(f)
             except Exception:
                 self.tasks = {}

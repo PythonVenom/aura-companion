@@ -10,6 +10,7 @@ JSONL dataset → обучение LoRA через llama.cpp.
 Данные НЕ покидают устройство. Обучение локально.
 """
 from __future__ import annotations
+
 import json
 import sqlite3
 import time
@@ -17,7 +18,6 @@ from pathlib import Path
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
-
 
 ADAPTER_DIR = Path.home() / ".local/share/aura/lora"
 JOURNAL_DB = Path.home() / ".local/share/aura/journal.db"

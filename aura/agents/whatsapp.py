@@ -4,8 +4,8 @@ content_whatsapp.js уже готов в extension. Агент — тонкая 
 """
 from __future__ import annotations
 
+from aura.core.bridge import error_text, send_command
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
-from aura.core.bridge import send_command, error_text
 
 
 class AgentWhatsApp(BaseAgent):

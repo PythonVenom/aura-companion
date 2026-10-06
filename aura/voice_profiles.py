@@ -43,4 +43,4 @@ def apply_to_persona(profile_name: str, persona: dict) -> dict:
     return result
 
 
-__all__ = ["VoiceProfile", "PROFILES", "get_profile", "list_profiles", "apply_to_persona"]
+__all__ = ["PROFILES", "VoiceProfile", "apply_to_persona", "get_profile", "list_profiles"]

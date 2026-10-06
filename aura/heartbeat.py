@@ -80,5 +80,5 @@ class Heartbeat:
                 return
 
 
-__all__ = ["Heartbeat", "CHECK_INTERVAL_SEC", "MAX_STALE_SEC"]
+__all__ = ["CHECK_INTERVAL_SEC", "MAX_STALE_SEC", "Heartbeat"]
 

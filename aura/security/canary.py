@@ -1,7 +1,8 @@
 """Canary tokens — файлы-приманки (ADR-115)."""
 from __future__ import annotations
-import os
+
 import json
+import os
 import time
 from pathlib import Path
 

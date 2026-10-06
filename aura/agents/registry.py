@@ -143,7 +143,7 @@ class AgentRegistry(BaseAgent):
         """Загрузить JSON-файл или создать новую сессию."""
         if os.path.exists(self.memory_file):
             try:
-                with open(self.memory_file, "r", encoding="utf-8") as f:
+                with open(self.memory_file, encoding="utf-8") as f:
                     return json.load(f)
             except Exception:
                 return self._new_session()

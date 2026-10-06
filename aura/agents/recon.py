@@ -1,5 +1,6 @@
 """AgentRecon — обзор через aura_recon.py (ADR-068)."""
 from __future__ import annotations
+
 import subprocess
 import sys
 from pathlib import Path

@@ -8,8 +8,8 @@
 Порядок ВАЖЕН: crisis (5) первым, потом medical/legal/financial, потом harm.
 """
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -65,7 +65,7 @@ RULES = [
 ]
 
 
-def classify(text: str) -> Optional[Rule]:
+def classify(text: str) -> Rule | None:
     t = text.lower()
     for rule in RULES:
         for kw in rule.keywords:

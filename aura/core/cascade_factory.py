@@ -1,9 +1,10 @@
 """Factory для Resolution Cascade в конкретных агентах (ADR-098)."""
 from __future__ import annotations
+
 import shutil
 import subprocess
-from aura.core.resolver import make_cascade
 
+from aura.core.resolver import make_cascade
 
 APP_MAP = {
     "vscode": "code", "код": "code",
@@ -46,4 +47,4 @@ def build_app_cascade():
     )
 
 
-__all__ = ["build_app_cascade", "resolve_app", "resolve_window", "APP_MAP"]
+__all__ = ["APP_MAP", "build_app_cascade", "resolve_app", "resolve_window"]

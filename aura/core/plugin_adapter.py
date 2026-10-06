@@ -5,6 +5,7 @@ Orchestrator ждёт BaseAgent с can_handle + async handle().
 Этот adapter склеивает.
 """
 from __future__ import annotations
+
 from typing import Any
 
 
@@ -58,11 +59,11 @@ def register_plugin_agent(orch, agent_cls, plugin_id: str) -> None:
                 logging.getLogger('aura.plugin_adapter').warning(
                     'plugin_adapter error: %s', e)
         # Fallback: _agents dict
-        if hasattr(reg, "_agents") and isinstance(getattr(reg, "_agents"), dict):
+        if hasattr(reg, "_agents") and isinstance(reg._agents, dict):
             reg._agents[name] = wrapper
             return
         # Fallback: _agents list — append
-        if hasattr(reg, "_agents") and isinstance(getattr(reg, "_agents"), list):
+        if hasattr(reg, "_agents") and isinstance(reg._agents, list):
             reg._agents.append(wrapper)
             return
     except Exception as e:

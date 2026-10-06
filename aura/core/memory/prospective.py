@@ -6,7 +6,6 @@
 Aura: напоминания, задачи, ритуалы (что нужно сделать в будущем).
 """
 from __future__ import annotations
-from typing import Optional
 
 
 class ProspectiveMemory:
@@ -51,7 +50,7 @@ class ProspectiveMemory:
         return {"ready": True, "count": len(self._agent.tasks)}
 
 
-_SINGLETON: Optional[ProspectiveMemory] = None
+_SINGLETON: ProspectiveMemory | None = None
 
 
 def get_prospective() -> ProspectiveMemory:

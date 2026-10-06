@@ -15,7 +15,6 @@ from pathlib import Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
-
 CONFIG = Path.home() / ".config" / "aura" / "fin_elder.json"
 CBR_URL = "https://www.cbr-xml-daily.ru/daily_json.js"
 

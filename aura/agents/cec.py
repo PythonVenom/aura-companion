@@ -10,7 +10,6 @@ import subprocess
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
-
 CEC_BIN = "cec-client"
 
 

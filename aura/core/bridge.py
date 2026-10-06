@@ -15,7 +15,6 @@ import json
 import socket
 import struct
 
-
 SOCKET_PATH = "/tmp/aura_firefox.sock"
 DEFAULT_TIMEOUT = 5.0
 
@@ -59,7 +58,7 @@ def send_command(cmd: dict, timeout: float = DEFAULT_TIMEOUT) -> dict | None:
             return json.loads(body.decode("utf-8"))
     except FileNotFoundError:
         return {"error": "bridge_not_running"}
-    except socket.timeout:
+    except TimeoutError:
         return {"error": "timeout"}
     except Exception as e:
         return {"error": str(e)}
@@ -91,4 +90,4 @@ def error_text(result: dict | None) -> str:
     return f"❌ Ошибка bridge: {err}"
 
 
-__all__ = ["send_command", "error_text", "SOCKET_PATH", "DEFAULT_TIMEOUT"]
+__all__ = ["DEFAULT_TIMEOUT", "SOCKET_PATH", "error_text", "send_command"]

@@ -1,5 +1,6 @@
 """WakeWordDetector — openWakeWord обёртка (ADR-083)."""
 from __future__ import annotations
+
 import numpy as np
 
 WAKE_PHRASES = ["aura"]
@@ -47,4 +48,4 @@ class WakeWordDetector:
             return cls(threshold=threshold, model_names=model_names, _model=None)
 
 
-__all__ = ["WakeWordDetector", "WAKE_PHRASES", "SAMPLE_RATE", "CHUNK_SAMPLES"]
+__all__ = ["CHUNK_SAMPLES", "SAMPLE_RATE", "WAKE_PHRASES", "WakeWordDetector"]

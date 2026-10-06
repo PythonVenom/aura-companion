@@ -20,7 +20,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-
 # ═══════════════════════════════════════════════════════════════
 # CLASSES (base profiles) — обязательно ровно один
 # ═══════════════════════════════════════════════════════════════
@@ -224,7 +223,12 @@ AGENT_CAPABILITIES: dict[str, str] = {
 
 
 __all__ = [
-    "CLASSES", "TREES", "CLASS_MODS",
-    "Profile", "AGENT_CAPABILITIES",
-    "set_current", "current", "require",
+    "AGENT_CAPABILITIES",
+    "CLASSES",
+    "CLASS_MODS",
+    "TREES",
+    "Profile",
+    "current",
+    "require",
+    "set_current",
 ]

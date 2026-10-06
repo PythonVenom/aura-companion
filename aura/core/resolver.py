@@ -4,14 +4,15 @@ App → Window → Browser Tab → Web.
 Первая ступень с результатом побеждает.
 """
 from __future__ import annotations
+
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Optional
 
 
 @dataclass
 class ResolutionStep:
     name: str
-    resolve: Callable[[str, dict], Optional[str]]
+    resolve: Callable[[str, dict], str | None]
 
 
 class ResolutionCascade:

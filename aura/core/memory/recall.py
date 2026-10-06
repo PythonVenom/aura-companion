@@ -17,6 +17,7 @@
 7. Social       — граф семьи (ADR-125)
 """
 from __future__ import annotations
+
 import math
 import time
 from dataclasses import dataclass

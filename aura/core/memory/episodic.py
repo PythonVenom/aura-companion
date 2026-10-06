@@ -6,7 +6,6 @@
 Не дублируем ChromaDB — используем существующую коллекцию диалогов.
 """
 from __future__ import annotations
-from typing import Optional
 
 
 class EpisodicMemory:
@@ -51,7 +50,7 @@ class EpisodicMemory:
             return {"ready": True, "error": str(e)}
 
 
-_SINGLETON: Optional[EpisodicMemory] = None
+_SINGLETON: EpisodicMemory | None = None
 
 
 def get_episodic() -> EpisodicMemory:

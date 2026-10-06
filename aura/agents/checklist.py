@@ -10,7 +10,6 @@ from pathlib import Path
 
 from aura.agents.base import MicroAgent
 
-
 CHECKLIST_PATH = Path.home() / "aura_private" / "CHECKLIST.md"
 _UNCHECKED = re.compile(r"^\s*-\s*\[\s*\]\s*(.+?)\s*$")
 _CHECKED = re.compile(r"^\s*-\s*\[[xX]\]\s*(.+?)\s*$")
@@ -139,6 +138,10 @@ class AgentChecklist(MicroAgent):
 
 
 __all__ = [
-    "read_today", "add_item", "complete_item", "summary",
-    "CHECKLIST_PATH", "AgentChecklist",
+    "CHECKLIST_PATH",
+    "AgentChecklist",
+    "add_item",
+    "complete_item",
+    "read_today",
+    "summary",
 ]

@@ -11,11 +11,12 @@
 Триггер T082: p99 < 1000ms для voice→response цикла.
 """
 from __future__ import annotations
+
 import json
 import statistics
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 RESULTS_DIR = Path.home() / ".local/share/aura/latency"
 RESULTS_FILE = RESULTS_DIR / "results.jsonl"
@@ -138,7 +139,13 @@ def reset() -> None:
 
 
 __all__ = [
-    "measure", "run_suite", "percentile", "summarize",
-    "load_history", "latency_report", "reset",
-    "TARGET_P99_MS", "TARGET_P50_MS",
+    "TARGET_P50_MS",
+    "TARGET_P99_MS",
+    "latency_report",
+    "load_history",
+    "measure",
+    "percentile",
+    "reset",
+    "run_suite",
+    "summarize",
 ]

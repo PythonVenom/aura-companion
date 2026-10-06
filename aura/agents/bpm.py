@@ -74,4 +74,4 @@ class AgentBPM(BaseAgent):
         )
 
 
-__all__ = ["AgentBPM", "bpm_to_interval", "Beat"]
+__all__ = ["AgentBPM", "Beat", "bpm_to_interval"]

@@ -13,7 +13,6 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 
-
 TIMEOUT_SEC = 120.0   # 2 минуты на весь сценарий
 
 # Bug 8: слова, которые означают начало ТЕКСТА, не имени чата.
@@ -227,4 +226,4 @@ SCENARIOS = [
 ]
 
 
-__all__ = ["Scenario", "DialogueState", "DialogueManager", "SCENARIOS", "TIMEOUT_SEC"]
+__all__ = ["SCENARIOS", "TIMEOUT_SEC", "DialogueManager", "DialogueState", "Scenario"]

@@ -6,15 +6,15 @@
 - Ответ → NotifyClosed / action callback
 """
 from __future__ import annotations
+
 import json
+import os
 import shutil
 import subprocess
 import tempfile
-import os
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
-
 
 VOSK_MODEL_PATHS = [
     os.path.expanduser("~/.cache/vosk/vosk-model-small-ru"),
@@ -87,8 +87,9 @@ class AgentBlindReply(MicroAgent):
         if not model:
             return None
         try:
-            import vosk
             import wave
+
+            import vosk
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
                 f.write(wav_bytes)
                 path = f.name

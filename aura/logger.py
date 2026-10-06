@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import sys
 
-
 LEVELS = {"debug": 0, "info": 1, "warn": 2, "error": 3}
 _CURRENT = "info"
 
@@ -37,4 +36,4 @@ def warn(msg: str, **kw) -> None: _log("warn", msg, **kw)
 def error(msg: str, **kw) -> None: _log("error", msg, **kw)
 
 
-__all__ = ["set_level", "debug", "info", "warn", "error", "LEVELS"]
+__all__ = ["LEVELS", "debug", "error", "info", "set_level", "warn"]

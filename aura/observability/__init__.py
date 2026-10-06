@@ -1,11 +1,12 @@
 """Structured logging + trace (ADR-112). Без внешних зависимостей."""
 from __future__ import annotations
+
 import json
+import os
 import time
 import uuid
-import os
+from datetime import UTC, datetime, timezone
 from pathlib import Path
-from datetime import datetime, timezone
 
 _LOG_PATH = Path(os.path.expanduser("~/.cache/aura/logs.jsonl"))
 _LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -26,7 +27,7 @@ def new_span(name: str) -> str:
 
 def log(event: str, **fields) -> None:
     rec = {
-        "ts": datetime.now(timezone.utc).isoformat(),
+        "ts": datetime.now(UTC).isoformat(),
         "event": event,
         "trace_id": _current.get("trace_id"),
         "span_id": _current.get("span_id"),

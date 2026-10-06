@@ -47,4 +47,4 @@ def apply_if_changed() -> str | None:
     return None
 
 
-__all__ = ["get_current_profile", "should_switch", "apply_if_changed", "SCHEDULE"]
+__all__ = ["SCHEDULE", "apply_if_changed", "get_current_profile", "should_switch"]

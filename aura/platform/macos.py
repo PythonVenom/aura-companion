@@ -137,4 +137,4 @@ class MacOSMedia:
         return media_state.get_active()
 
 
-__all__ = ["MacOSAudio", "MacOSService", "MacOSMedia"]
+__all__ = ["MacOSAudio", "MacOSMedia", "MacOSService"]

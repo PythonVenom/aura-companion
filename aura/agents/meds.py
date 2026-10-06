@@ -13,7 +13,6 @@ from pathlib import Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
-
 DB = Path.home() / ".config" / "aura" / "meds.db"
 
 

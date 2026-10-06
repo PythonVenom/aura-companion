@@ -18,8 +18,9 @@ Scopes: microphone, emotion_voice, reminiscence, health_twin,
         location, network, telemetry (всегда off).
 """
 from __future__ import annotations
+
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from aura.core import secure_db
@@ -106,7 +107,7 @@ def _log(scope: str, action: str, note: str = "") -> None:
     conn.execute(
         "INSERT INTO audit_log (ts, iso, scope, action, version, note) "
         "VALUES (?, ?, ?, ?, ?, ?)",
-        (time.time(), datetime.now(timezone.utc).isoformat(),
+        (time.time(), datetime.now(UTC).isoformat(),
          scope, action, "1.0", note),
     )
     conn.commit()
@@ -239,6 +240,13 @@ def status() -> dict:
 
 
 __all__ = [
-    "SCOPES", "grant", "revoke", "check", "all_status",
-    "audit_log", "erase_all", "require", "status",
+    "SCOPES",
+    "all_status",
+    "audit_log",
+    "check",
+    "erase_all",
+    "grant",
+    "require",
+    "revoke",
+    "status",
 ]

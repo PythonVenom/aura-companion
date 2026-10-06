@@ -1,7 +1,9 @@
 """MCP адаптер — Model Context Protocol для внешних инструментов."""
 from __future__ import annotations
+
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
+
 
 class AgentMcp(MicroAgent):
     """MCP: подключение к внешним серверам инструментов."""

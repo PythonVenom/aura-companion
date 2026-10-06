@@ -1,7 +1,8 @@
 """AgentHandsFree — управление режимом без активации (ADR-095)."""
 from __future__ import annotations
-from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
+
 from aura.core import hands_free
+from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 
 class AgentHandsFree(BaseAgent):

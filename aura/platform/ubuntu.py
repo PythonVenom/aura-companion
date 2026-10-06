@@ -68,7 +68,7 @@ class UbuntuAudio:
 
 
 # Linux реализация совместима — наследуем
-from aura.platform.linux import LinuxService, LinuxMedia  # noqa: E402
+from aura.platform.linux import LinuxMedia, LinuxService  # noqa: E402
 
 
 class UbuntuService(LinuxService):
@@ -79,4 +79,4 @@ class UbuntuMedia(LinuxMedia):
     pass
 
 
-__all__ = ["UbuntuAudio", "UbuntuService", "UbuntuMedia"]
+__all__ = ["UbuntuAudio", "UbuntuMedia", "UbuntuService"]

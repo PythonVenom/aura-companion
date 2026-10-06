@@ -1,8 +1,8 @@
 """Определение окружения: DE, WM, дистрибутив, sound, session."""
 import os
 import shutil
-from pathlib import Path
 from functools import lru_cache
+from pathlib import Path
 
 
 def _detect_de() -> str:

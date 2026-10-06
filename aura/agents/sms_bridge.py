@@ -6,6 +6,7 @@
 - Fallback: ModemManager (org.freedesktop.ModemManager1) если 4G-модем
 """
 from __future__ import annotations
+
 import shutil
 import subprocess
 

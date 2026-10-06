@@ -5,9 +5,10 @@
   arXiv:2311.04934. (MLSys 2024)
 """
 from __future__ import annotations
+
 import hashlib
 from collections import OrderedDict
-from typing import Any, Optional
+from typing import Any
 
 
 class LRUCache:
@@ -15,7 +16,7 @@ class LRUCache:
         self.maxsize = maxsize
         self._d: OrderedDict = OrderedDict()
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         if key in self._d:
             self._d.move_to_end(key)
             return self._d[key]

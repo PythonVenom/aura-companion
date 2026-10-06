@@ -56,3 +56,52 @@ packages = ["aura"]
 
 [tool.hatch.build.targets.sdist]
 include = ["aura/", "README.md", "LICENSE", "pyproject.toml"]
+
+# ═══════════════════════════════════════════════════════════════
+# Ruff — линтер (F-020)
+# ═══════════════════════════════════════════════════════════════
+# Наука (Д4): раздел 19 промта — конфиг как код, обоснованные ignore.
+# Ruff docs: https://docs.astral.sh/ruff/configuration/
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = ["venv", ".venv", "build", "dist", ".git", "aura-os", "aura-os-standard"]
+
+[tool.ruff.lint]
+# Базовый набор: E (pycodestyle), F (Pyflakes), I (isort),
+# UP (pyupgrade), B (bugbear), SIM (simplify), RUF (ruff), S (bandit)
+select = ["E", "F", "I", "W", "UP", "B", "SIM", "RUF"]
+
+# Осознанные ignore (с обоснованием — раздел 19 промта):
+# E501  — line-too-long: используем 100, но длинные строки-сообщения оставляем
+# BLE001 — blind-except: у нас 458 осознанных `except Exception as e`
+#         с logging (F-006). Строгое правило даёт шум.
+# RUF012 — mutable-class-default: наши агенты — MicroAgent со
+#         class-level TRIGGERS/SOS_PHRASES (это осознанный дизайн)
+# DTZ005/6/7 — datetime without tz: локальное время — норма для elder-care
+# PLW1510 — subprocess without check: используем check=False осознанно
+# S110/S112 — try-except-pass/continue: в swallow-ok (platform_adapters)
+#             + logging (некоторые остались)
+ignore = [
+    "E501",     # long lines: сообщения об ошибках бывают длинными
+    "BLE001",   # blind-except: 458 осознанных с logging (F-006)
+    "RUF012",   # mutable-class-default: MicroAgent TRIGGERS (дизайн)
+    "DTZ005", "DTZ006", "DTZ007", "DTZ001",  # naive datetime для elder-care
+    "PLW1510",  # subprocess check=False осознанно
+    "S110", "S112",  # try-except-pass/continue в swallow-ok + logging
+    "RUF001", "RUF002", "RUF003",  # ambiguous unicode: русский текст
+    "E701",     # multiple-statements-colon: `if x: return` (defensive)
+    "E702",     # multiple-statements-semicolon
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "B", "DTZ", "RUF", "SIM", "UP"]
+"aura/platform_adapters/**" = ["S110", "S112", "BLE001"]
+"aura/platform/**" = ["S110", "S112", "BLE001"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["aura"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

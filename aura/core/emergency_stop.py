@@ -11,6 +11,7 @@
 останавливает всё. Процессы, БД, соединения.
 """
 from __future__ import annotations
+
 import atexit
 import signal
 import sys
@@ -162,7 +163,13 @@ def _on_exit() -> None:
 
 
 __all__ = [
-    "stop", "resume", "is_stopped", "register", "check_and_raise",
-    "install_signal_handlers", "watch_trigger_file", "status",
     "STOP_FILE",
+    "check_and_raise",
+    "install_signal_handlers",
+    "is_stopped",
+    "register",
+    "resume",
+    "status",
+    "stop",
+    "watch_trigger_file",
 ]

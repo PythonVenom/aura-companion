@@ -66,4 +66,4 @@ def clear() -> None:
             'media_state error: %s', e)
 
 
-__all__ = ["set_active", "get_active", "get_active_chat", "clear", "STATE_PATH"]
+__all__ = ["STATE_PATH", "clear", "get_active", "get_active_chat", "set_active"]

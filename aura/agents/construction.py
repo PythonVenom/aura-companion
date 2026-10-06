@@ -6,7 +6,6 @@ from dataclasses import dataclass
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
-
 # Нормы расхода на м² (ГОСТ-приближение)
 NORMS = {
     "плитка": {"norm": 1.10, "unit": "м²", "desc": "плитка с запасом 10%"},
@@ -113,4 +112,4 @@ class AgentConstruction(BaseAgent):
         )
 
 
-__all__ = ["AgentConstruction", "calc_material", "NORMS", "CalcResult"]
+__all__ = ["NORMS", "AgentConstruction", "CalcResult", "calc_material"]

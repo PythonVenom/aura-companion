@@ -6,13 +6,14 @@
 - Классификация: calm / sad / anxious / angry / neutral
 """
 from __future__ import annotations
+
 import math
+import os
 import shutil
+import struct
 import subprocess
 import tempfile
-import os
 import wave
-import struct
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse

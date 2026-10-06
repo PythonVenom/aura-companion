@@ -11,6 +11,7 @@
   3. Spatial: LRU (только последние 100)
 """
 from __future__ import annotations
+
 import json
 import math
 import time

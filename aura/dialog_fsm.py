@@ -25,7 +25,6 @@ import os
 import time
 from pathlib import Path
 
-
 FSM_PATH = Path(os.environ.get("AURA_FSM_PATH", str(Path.home() / ".cache/aura/fsm.json")))
 VALID_STATES = frozenset({"idle", "awaiting_command", "pending_read", "awaiting_reply", "ask_text", "ask_confirm"})
 TIMEOUT_SEC = 30.0
@@ -94,4 +93,4 @@ def clear_state() -> None:
             'dialog_fsm error: %s', e)
 
 
-__all__ = ["set_state", "get_state", "clear_state", "FSM_PATH", "VALID_STATES", "TIMEOUT_SEC"]
+__all__ = ["FSM_PATH", "TIMEOUT_SEC", "VALID_STATES", "clear_state", "get_state", "set_state"]

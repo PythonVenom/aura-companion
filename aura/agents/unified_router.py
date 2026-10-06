@@ -15,7 +15,6 @@ from __future__ import annotations
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
 
-
 # Маппинг: алиас → имя агента
 ALIASES = {
     "tg": "telegram",
@@ -170,4 +169,4 @@ class AgentUnifiedRouter(MicroAgent):
         return dict(ALIASES)
 
 
-__all__ = ["AgentUnifiedRouter", "ALIASES"]
+__all__ = ["ALIASES", "AgentUnifiedRouter"]

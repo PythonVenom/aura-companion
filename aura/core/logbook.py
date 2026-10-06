@@ -12,13 +12,12 @@
 - index.db (SQLite — позже)
 """
 from __future__ import annotations
+
 import json
 import time
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, date
+from dataclasses import asdict, dataclass, field
+from datetime import date, datetime
 from pathlib import Path
-from typing import Optional
-
 
 DEFAULT_ROOT = Path.home() / ".cache/aura/logbook"
 
@@ -32,7 +31,7 @@ class LogEntry:
 
 
 class Logbook:
-    def __init__(self, root: Optional[Path] = None):
+    def __init__(self, root: Path | None = None):
         self.root = Path(root) if root else DEFAULT_ROOT
         self.root.mkdir(parents=True, exist_ok=True)
 
@@ -50,10 +49,10 @@ class Logbook:
         with open(p, "a", encoding="utf-8") as f:
             f.write(json.dumps(asdict(entry), ensure_ascii=False) + "\n")
 
-    def event(self, kind: str, text: str, meta: Optional[dict] = None) -> None:
+    def event(self, kind: str, text: str, meta: dict | None = None) -> None:
         self._append(LogEntry("event", f"[{kind}] {text}", meta or {}))
 
-    def decision(self, key: str, why: str, adr: Optional[str] = None) -> None:
+    def decision(self, key: str, why: str, adr: str | None = None) -> None:
         meta = {"adr": adr} if adr else {}
         self._append(LogEntry("decision", f"{key}: {why}", meta))
 
@@ -83,7 +82,7 @@ class Logbook:
     def read_date(self, d: str) -> list:
         return self._read_jsonl(self.root / f"{d}.jsonl")
 
-    def search(self, tag: Optional[str] = None, kind: Optional[str] = None) -> list:
+    def search(self, tag: str | None = None, kind: str | None = None) -> list:
         out = []
         for p in self.root.glob("*.jsonl"):
             for e in self._read_jsonl(p):
@@ -119,4 +118,4 @@ class Logbook:
         return p
 
 
-__all__ = ["Logbook", "LogEntry", "DEFAULT_ROOT"]
+__all__ = ["DEFAULT_ROOT", "LogEntry", "Logbook"]

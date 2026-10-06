@@ -7,8 +7,9 @@ MVP: 3 итерации макс, рефлексия через простые �
 Позже — LLM-рефлексия.
 """
 from __future__ import annotations
+
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 
 @dataclass
@@ -73,7 +74,7 @@ def format_episode(ep: Episode) -> str:
     return "\n".join(lines)
 
 
-__all__ = ["Step", "Episode", "ReActLoop", "format_episode"]
+__all__ = ["Episode", "ReActLoop", "Step", "format_episode"]
 
 # ============ v4.0 (ADR-123): high-level ReAct ============
 import json as _json

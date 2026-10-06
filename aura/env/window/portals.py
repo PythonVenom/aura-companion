@@ -11,10 +11,10 @@ D-Bus интерфейсы:
 - org.freedesktop.portal.RemoteDesktop
 """
 from __future__ import annotations
-import subprocess
-import shutil
-from pathlib import Path
 
+import shutil
+import subprocess
+from pathlib import Path
 
 DBUS_PORTAL = "org.freedesktop.portal.Desktop"
 DBUS_PATH = "/org/freedesktop/portal/desktop"
@@ -140,6 +140,8 @@ def detect_compositor() -> str:
 
 
 __all__ = [
-    "is_available", "screenshot", "active_window_title",
+    "active_window_title",
     "detect_compositor",
+    "is_available",
+    "screenshot",
 ]

@@ -6,9 +6,9 @@
 """
 
 from aura.agents.app_launcher import AgentAppLauncher
+from aura.agents.at_spi import AgentAtSpi
 from aura.agents.audio_pult import AgentAudioPult
 from aura.agents.audio_router import AgentAudioRouter
-from aura.agents.at_spi import AgentAtSpi
 from aura.agents.brain import AgentBrain
 from aura.agents.browser_tabs import AgentBrowserTabs
 from aura.agents.checklist import AgentChecklist
@@ -16,13 +16,13 @@ from aura.agents.context_memory import AgentContextMemory
 from aura.agents.focus_switch import AgentFocusSwitch
 from aura.agents.functions import AgentFunctions
 from aura.agents.internet import AgentInternet
-from aura.agents.messenger import AgentMessenger
 from aura.agents.journal import AgentJournal
 from aura.agents.mcp import AgentMcp
+from aura.agents.media_pause import AgentMediaPause
 from aura.agents.media_search import AgentMediaSearch
+from aura.agents.messenger import AgentMessenger
 from aura.agents.music_ducker import AgentMusicDucker
 from aura.agents.music_local import AgentMusicLocal
-from aura.agents.media_pause import AgentMediaPause
 from aura.agents.power import AgentPower
 from aura.agents.rag_memory import AgentRAGMemory
 from aura.agents.registry import AgentRegistry
@@ -41,38 +41,38 @@ from aura.agents.window_control import AgentWindowControl
 from aura.agents.window_manager import AgentWindowManager
 
 __all__ = [
-    "AgentTime",
-    "AgentPower",
+    "AgentAppLauncher",
+    "AgentAtSpi",
     "AgentAudioPult",
     "AgentAudioRouter",
-    "AgentJournal",
-    "AgentRAGMemory",
-    "AgentFunctions",
-    "AgentUpdates",
-    "AgentRegistry",
-    "AgentVault",
-    "AgentSecurity",
-    "AgentVision",
-    "AgentFocusSwitch",
+    "AgentBrain",
+    "AgentBrowserTabs",
+    "AgentChecklist",
     "AgentContextMemory",
-    "AgentTextEditor",
+    "AgentFocusSwitch",
+    "AgentFunctions",
+    "AgentInternet",
+    "AgentJournal",
+    "AgentMcp",
+    "AgentMediaPause",
+    "AgentMediaSearch",
+    "AgentMessenger",
     "AgentMusicDucker",
     "AgentMusicLocal",
-    "AgentMediaPause",
-    "AgentWindowManager",
-    "AgentAppLauncher",
-    "AgentInternet",
-    "AgentMessenger",
-    "AgentWindowControl",
+    "AgentPower",
+    "AgentRAGMemory",
+    "AgentRegistry",
     "AgentScreenReader",
-    "AgentBrowserTabs",
-    "AgentMediaSearch",
-    "AgentVKMusic",
-    "AgentBrain",
-    "AgentToolRouter",
-    "AgentChecklist",
-    "AgentAtSpi",
-    "AgentMcp",
+    "AgentSecurity",
     "AgentTelegram",
+    "AgentTextEditor",
+    "AgentTime",
+    "AgentToolRouter",
+    "AgentUpdates",
+    "AgentVKMusic",
     "AgentVKWeb",
+    "AgentVault",
+    "AgentVision",
+    "AgentWindowControl",
+    "AgentWindowManager",
 ]

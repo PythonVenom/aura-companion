@@ -14,11 +14,11 @@ Feature ID: "<os>.<feature>" — напр. "windows.sapi", "macos.keychain",
 "astra.mac_parsec", "linux.systemd", "android.foreground_service".
 """
 from __future__ import annotations
+
 import importlib
 import platform
 from pathlib import Path
 from typing import Any
-
 
 # Реестр: feature_id → (module_path, class_name)
 REGISTRY: dict[str, tuple[str, str]] = {
@@ -169,6 +169,12 @@ def status() -> dict:
 
 
 __all__ = [
-    "REGISTRY", "current_os", "detect", "get",
-    "list_available", "list_all", "safe_call", "status",
+    "REGISTRY",
+    "current_os",
+    "detect",
+    "get",
+    "list_all",
+    "list_available",
+    "safe_call",
+    "status",
 ]

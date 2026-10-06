@@ -1,7 +1,9 @@
 """Factory — выбрать адаптер по текущей ОС."""
 from __future__ import annotations
+
 import os
 import platform as _plat
+
 from aura.platform_adapters.base import BasePlatform
 
 

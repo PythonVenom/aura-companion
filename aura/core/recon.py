@@ -8,7 +8,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-
 _BLOCK_RE = re.compile(r"^##\s+id=(\S+)\s+name=(\S+)\s*$")
 _ENTRY_RE = re.compile(r"^(cmd|file|heredoc):\s*(.*)$")
 

@@ -8,6 +8,7 @@
 Цель: один код Aura → работает везде, где Python.
 """
 from __future__ import annotations
+
 import platform
 import sys
 from pathlib import Path

@@ -6,7 +6,6 @@
 Aura: где сейчас пользователь — окна, приложения, медиа-источники (X11).
 """
 from __future__ import annotations
-from typing import Optional
 
 
 class SpatialMemory:
@@ -34,7 +33,7 @@ class SpatialMemory:
         except Exception:
             return False
 
-    def last_media(self) -> Optional[dict]:
+    def last_media(self) -> dict | None:
         if not self._ready:
             return None
         try:
@@ -48,7 +47,7 @@ class SpatialMemory:
         return {"ready": True}
 
 
-_SINGLETON: Optional[SpatialMemory] = None
+_SINGLETON: SpatialMemory | None = None
 
 
 def get_spatial() -> SpatialMemory:

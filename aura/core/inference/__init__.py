@@ -1,3 +1,4 @@
 """Inference backends (ADR-127)."""
-from aura.core.inference.streaming import stream_chat, generate
-__all__ = ["stream_chat", "generate"]
+from aura.core.inference.streaming import generate, stream_chat
+
+__all__ = ["generate", "stream_chat"]

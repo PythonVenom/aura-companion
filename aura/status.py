@@ -26,7 +26,6 @@ import os
 import time
 from pathlib import Path
 
-
 STATUS_PATH = Path(os.environ.get("AURA_STATUS_PATH", str(Path.home() / ".cache/aura/aura_status.json")))
 
 VALID_STATES = frozenset({"idle", "listening", "thinking", "speaking", "paused", "error"})
@@ -67,4 +66,4 @@ def clear_status() -> None:
             'status error: %s', e)
 
 
-__all__ = ["set_status", "clear_status", "STATUS_PATH", "VALID_STATES"]
+__all__ = ["STATUS_PATH", "VALID_STATES", "clear_status", "set_status"]

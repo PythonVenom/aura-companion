@@ -4,7 +4,6 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-
 NL = chr(10)
 TOKEN_ENV = "AURA_TG_TOKEN"
 TOKEN_FILE = Path.home() / ".config" / "aura" / "telegram_token"

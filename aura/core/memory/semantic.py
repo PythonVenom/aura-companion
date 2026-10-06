@@ -11,13 +11,13 @@
 Embedding: Ollama (nomic-embed-text или mxbai-embed-large).
 """
 from __future__ import annotations
+
 import json
 import os
 import time
 import urllib.request
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Optional
 
 DB_PATH = Path(os.path.expanduser("~/.cache/aura/chroma"))
 COLLECTION = "semantic_facts"
@@ -58,7 +58,7 @@ class SemanticMemory:
     def check_ready(self) -> bool:
         return self._ready
 
-    def _embed(self, text: str) -> Optional[list[float]]:
+    def _embed(self, text: str) -> list[float] | None:
         # CACHE_V7 (ADR-153): LRU
         try:
             from aura.core.caches import emb_get, emb_put

@@ -9,9 +9,10 @@
 интерфейс. Aura ядро знает только BasePlatform — не платформу.
 """
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 
 class BasePlatform(ABC):

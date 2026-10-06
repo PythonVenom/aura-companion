@@ -1,7 +1,9 @@
 """Tarpit — фейковые action'ы, имитирующие уязвимость (ADR-115)."""
 from __future__ import annotations
-import time
+
 import hashlib
+import time
+
 from aura.security.canary import record_hit
 
 # Заманиваем взломщика

@@ -5,7 +5,6 @@ import copy
 import json
 from pathlib import Path
 
-
 SETTINGS_PATH = Path.home() / ".config" / "aura" / "settings.json"
 
 DEFAULTS = {
@@ -100,5 +99,12 @@ def get_activation_words() -> list:
     return [w.lower() for w in words if w]
 
 
-__all__ = ["load", "save", "get", "set_value", "get_activation_words",
-           "DEFAULTS", "SETTINGS_PATH"]
+__all__ = [
+    "DEFAULTS",
+    "SETTINGS_PATH",
+    "get",
+    "get_activation_words",
+    "load",
+    "save",
+    "set_value",
+]

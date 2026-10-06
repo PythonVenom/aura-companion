@@ -1,5 +1,6 @@
 """Универсальный X11 адаптер (для бати на Mint + Cinnamon)."""
 import subprocess
+
 from .base import WindowManager
 
 

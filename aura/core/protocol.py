@@ -53,23 +53,23 @@ class AgentResponse(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
     @classmethod
-    def ok(cls, text: str, agent_name: str = "", silent: bool = False, **data: Any) -> "AgentResponse":
+    def ok(cls, text: str, agent_name: str = "", silent: bool = False, **data: Any) -> AgentResponse:
         """Быстрый конструктор успешного ответа. silent=True — не озвучивать (ADR-048)."""
         return cls(status=AgentStatus.OK, text=text, silent=silent, data=data, agent_name=agent_name)
 
     @classmethod
-    def not_handled(cls, agent_name: str = "") -> "AgentResponse":
+    def not_handled(cls, agent_name: str = "") -> AgentResponse:
         """Агент не умеет обрабатывать этот запрос."""
         return cls(status=AgentStatus.NOT_HANDLED, agent_name=agent_name)
 
     @classmethod
-    def denied(cls, message: str, agent_name: str = "") -> "AgentResponse":
+    def denied(cls, message: str, agent_name: str = "") -> AgentResponse:
         """Доступ запрещён capability-системой (Saltzer & Schroeder 1975)."""
         return cls(status=AgentStatus.DENIED, text=message,
                    agent_name=agent_name)
 
     @classmethod
-    def error(cls, message: str, agent_name: str = "") -> "AgentResponse":
+    def error(cls, message: str, agent_name: str = "") -> AgentResponse:
         """Ошибка обработки."""
         return cls(status=AgentStatus.ERROR, error=message, agent_name=agent_name)
 
@@ -130,9 +130,9 @@ class BaseAgent:
 
 
 __all__ = [
-    "AgentStatus",
+    "AgentProtocol",
     "AgentRequest",
     "AgentResponse",
-    "AgentProtocol",
+    "AgentStatus",
     "BaseAgent",
 ]

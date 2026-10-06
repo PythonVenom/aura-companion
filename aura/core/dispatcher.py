@@ -3,8 +3,8 @@
 Связывает capability name → handler (агент + метод).
 """
 from __future__ import annotations
-from typing import Callable, Optional
 
+from collections.abc import Callable
 
 # Реестр handlers: capability → callable(args) → (ok, result)
 _HANDLERS: dict = {}
@@ -14,7 +14,7 @@ def register(capability: str, handler: Callable) -> None:
     _HANDLERS[capability] = handler
 
 
-def get_handler(capability: str) -> Optional[Callable]:
+def get_handler(capability: str) -> Callable | None:
     return _HANDLERS.get(capability)
 
 
@@ -232,4 +232,4 @@ if not _HANDLERS:
     _register_defaults()
 
 
-__all__ = ["register", "get_handler", "dispatch", "list_registered"]
+__all__ = ["dispatch", "get_handler", "list_registered", "register"]

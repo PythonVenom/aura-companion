@@ -26,9 +26,8 @@ import subprocess
 from difflib import get_close_matches
 from pathlib import Path
 
-from aura.platform import get_media
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
-
+from aura.platform import get_media
 
 MUSIC_DIR = Path.home() / "Музыка"
 AUDIO_EXTS = (".mp3", ".flac", ".wav", ".ogg", ".m4a", ".opus", ".wma")
@@ -276,4 +275,4 @@ class AgentMusicLocal(BaseAgent):
         return ""
 
 
-__all__ = ["AgentMusicLocal", "MUSIC_DIR", "AUDIO_EXTS"]
+__all__ = ["AUDIO_EXTS", "MUSIC_DIR", "AgentMusicLocal"]

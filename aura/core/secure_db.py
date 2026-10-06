@@ -15,6 +15,7 @@ Fallback:
 - Если нет → warning + обычный SQLite (graceful degradation).
 """
 from __future__ import annotations
+
 import sqlite3
 import warnings
 from pathlib import Path
@@ -39,8 +40,8 @@ def _get_or_create_key() -> str | None:
         if key:
             return key
         # Генерируем 32 байта, base64
-        import secrets
         import base64
+        import secrets
         key = base64.b64encode(secrets.token_bytes(32)).decode()
         keyring.set_password(KEYRING_SERVICE, KEYRING_USER, key)
         return key
@@ -212,6 +213,10 @@ def status() -> dict:
 
 
 __all__ = [
-    "connect", "encrypt_legacy", "verify", "status", "is_available",
     "HAS_SQLCIPHER",
+    "connect",
+    "encrypt_legacy",
+    "is_available",
+    "status",
+    "verify",
 ]

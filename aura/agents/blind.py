@@ -6,10 +6,11 @@
 - dbus-monitor подпроцессом, парсинг Notify
 """
 from __future__ import annotations
+
+import re
+import shutil
 import subprocess
 import threading
-import shutil
-import re
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse

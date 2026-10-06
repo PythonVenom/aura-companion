@@ -14,7 +14,6 @@ from pathlib import Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
-
 CONFIG = Path.home() / ".config" / "aura" / "homeassistant.json"
 
 

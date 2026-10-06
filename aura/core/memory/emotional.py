@@ -6,7 +6,6 @@
 Aura: эмоциональная валентность диалога, настроение пользователя за период.
 """
 from __future__ import annotations
-from typing import Optional
 
 
 class EmotionalMemory:
@@ -26,7 +25,7 @@ class EmotionalMemory:
     def check_ready(self) -> bool:
         return self._ready
 
-    def add(self, text: str, mood: Optional[float] = None) -> bool:
+    def add(self, text: str, mood: float | None = None) -> bool:
         if not self._ready:
             return False
         try:
@@ -45,7 +44,7 @@ class EmotionalMemory:
             return {"ready": True, "error": str(e)}
 
 
-_SINGLETON: Optional[EmotionalMemory] = None
+_SINGLETON: EmotionalMemory | None = None
 
 
 def get_emotional() -> EmotionalMemory:

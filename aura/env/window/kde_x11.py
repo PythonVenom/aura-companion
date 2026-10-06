@@ -1,5 +1,6 @@
 """KDE X11 адаптер (для тебя)."""
 import subprocess
+
 from .base import WindowManager
 
 

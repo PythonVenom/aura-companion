@@ -115,4 +115,4 @@ class LinuxMedia:
         return media_state.get_active()
 
 
-__all__ = ["LinuxAudio", "LinuxService", "LinuxMedia"]
+__all__ = ["LinuxAudio", "LinuxMedia", "LinuxService"]

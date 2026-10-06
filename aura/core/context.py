@@ -1,9 +1,9 @@
 """ContextMemory — ring buffer событий (ADR-096)."""
 from __future__ import annotations
+
 import time
 from collections import deque
 from dataclasses import dataclass, field
-
 
 DEFAULT_MAX = 100
 
@@ -45,4 +45,4 @@ def get_context() -> ContextMemory:
     return _context
 
 
-__all__ = ["ContextMemory", "ContextEvent", "get_context"]
+__all__ = ["ContextEvent", "ContextMemory", "get_context"]

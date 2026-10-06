@@ -23,9 +23,9 @@ from __future__ import annotations
 
 import asyncio
 
-
 from aura.core.protocol import AgentRequest, AgentResponse, AgentStatus
 from aura.core.registry import AgentRegistry
+
 
 # CONSTITUTION_HOOK + MEMORY_HOOK_V4 — v4.0 orchestrator integration (ADR-122, 123, 124)
 def _mem_read(text: str):
@@ -121,7 +121,7 @@ class Orchestrator:
 
         # observability (ADR-112)
         try:
-            from aura.observability import new_trace, log
+            from aura.observability import log, new_trace
             new_trace("process")
             log("input", text=text[:120])
         except Exception as e:
@@ -153,7 +153,7 @@ class Orchestrator:
 
         # ReAct ветка (ADR-123) — для многошаговых запросов
         try:
-            from aura.core.react_loop import should_use_react, react_loop
+            from aura.core.react_loop import react_loop, should_use_react
             if should_use_react(text):
                 r = await asyncio.to_thread(react_loop, text)
                 answer = r.get("answer") or self.fallback_text
@@ -351,7 +351,9 @@ class Orchestrator:
         # Capability-check
         try:
             from aura.core.capabilities import (
-                AGENT_CAPABILITIES, current, require,
+                AGENT_CAPABILITIES,
+                current,
+                require,
             )
             agent_name = getattr(agent, "name", None)
             if agent_name:

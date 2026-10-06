@@ -16,78 +16,31 @@ from __future__ import annotations
 import tomllib
 from pathlib import Path
 
-from aura.agents.time_agent import AgentTimeAgent
-from aura.agents.sos import AgentSOS
-from aura.agents.meds import AgentMeds
-from aura.agents.fall import AgentFall
-from aura.agents.call import AgentCall
-from aura.agents.fin_elder import AgentFinElder
-from aura.agents.cec import AgentCEC
-from aura.agents.homeassistant import AgentHomeAssistant
-from aura.agents.sensors import AgentSensors
-from aura.agents.matter import AgentMatter
-from aura.agents.whatsapp import AgentWhatsApp
-from aura.agents.email_agent import AgentEmail
-from aura.agents.blind import AgentBlind
-from aura.agents.blind_reply import AgentBlindReply
-from aura.agents.sms_bridge import AgentSMS
-from aura.agents.meds_offline import AgentMedsOffline
-from aura.agents.proactive_alert import AgentProactiveAlert
-from aura.agents.emotion_voice import AgentEmotionVoice
-from aura.agents.soul_talk import AgentSoulTalk
-from aura.agents.reminiscence import AgentReminiscence
-from aura.agents.kid_structure import AgentKidStructure
-from aura.agents.kid_therapy import AgentKidTherapy
-from aura.agents.health_twin import AgentHealthTwin
-from aura.agents.federated_adapter import AgentFederatedAdapter
-from aura.agents.routine_learner import AgentRoutineLearner
-from aura.agents.onboarding import AgentOnboarding
-from aura.agents.predictor import AgentPredictor
-from aura.agents.adaptive_reminders import AgentAdaptiveReminders
-from aura.agents.unified_router import AgentUnifiedRouter
-from aura.agents.health import AgentHealth
-from aura.agents.care import CareAgent
-from aura.agents.hands_free import AgentHandsFree
-from aura.agents.open_resolver import AgentOpenResolver
-from aura.agents.context_agent import AgentRecentActivity
-from aura.agents.focus_agent import AgentFocusMode
-from aura.agents.recon import AgentRecon
-from aura.agents.journal_mood import VoiceJournal
-from aura.agents.capability_agent import AgentCapabilities
-from aura.agents.planner_agent import AgentPlanner
-from aura.agents.react_agent import AgentReact
-
-from aura.agents.massage import AgentMassage
-from aura.agents.dictation import AgentDictation
-from aura.agents.construction import AgentConstruction
-from aura.agents.bpm import AgentBPM
-
 from aura.agents import (
     AgentAppLauncher,
+    AgentAtSpi,
     AgentAudioPult,
     AgentAudioRouter,
     AgentBrain,
-    AgentAtSpi,
-    AgentMcp,
-    AgentTelegram,
-    AgentVKWeb,
     AgentBrowserTabs,
     AgentChecklist,
     AgentContextMemory,
     AgentFocusSwitch,
     AgentFunctions,
     AgentInternet,
-    AgentMessenger,
     AgentJournal,
-    AgentMediaSearch,
-    AgentMusicDucker,
+    AgentMcp,
     AgentMediaPause,
+    AgentMediaSearch,
+    AgentMessenger,
+    AgentMusicDucker,
     AgentMusicLocal,
     AgentPower,
     AgentRAGMemory,
     AgentRegistry,
     AgentScreenReader,
     AgentSecurity,
+    AgentTelegram,
     AgentTextEditor,
     AgentTime,
     AgentToolRouter,
@@ -95,11 +48,55 @@ from aura.agents import (
     AgentVault,
     AgentVision,
     AgentVKMusic,
+    AgentVKWeb,
     AgentWindowControl,
     AgentWindowManager,
 )
+from aura.agents.adaptive_reminders import AgentAdaptiveReminders
+from aura.agents.blind import AgentBlind
+from aura.agents.blind_reply import AgentBlindReply
+from aura.agents.bpm import AgentBPM
+from aura.agents.call import AgentCall
+from aura.agents.capability_agent import AgentCapabilities
+from aura.agents.care import CareAgent
+from aura.agents.cec import AgentCEC
+from aura.agents.construction import AgentConstruction
+from aura.agents.context_agent import AgentRecentActivity
+from aura.agents.dictation import AgentDictation
+from aura.agents.email_agent import AgentEmail
+from aura.agents.emotion_voice import AgentEmotionVoice
+from aura.agents.fall import AgentFall
+from aura.agents.federated_adapter import AgentFederatedAdapter
+from aura.agents.fin_elder import AgentFinElder
+from aura.agents.focus_agent import AgentFocusMode
+from aura.agents.hands_free import AgentHandsFree
+from aura.agents.health import AgentHealth
+from aura.agents.health_twin import AgentHealthTwin
+from aura.agents.homeassistant import AgentHomeAssistant
+from aura.agents.journal_mood import VoiceJournal
+from aura.agents.kid_structure import AgentKidStructure
+from aura.agents.kid_therapy import AgentKidTherapy
+from aura.agents.massage import AgentMassage
+from aura.agents.matter import AgentMatter
+from aura.agents.meds import AgentMeds
+from aura.agents.meds_offline import AgentMedsOffline
+from aura.agents.onboarding import AgentOnboarding
+from aura.agents.open_resolver import AgentOpenResolver
+from aura.agents.planner_agent import AgentPlanner
+from aura.agents.predictor import AgentPredictor
+from aura.agents.proactive_alert import AgentProactiveAlert
+from aura.agents.react_agent import AgentReact
+from aura.agents.recon import AgentRecon
+from aura.agents.reminiscence import AgentReminiscence
+from aura.agents.routine_learner import AgentRoutineLearner
+from aura.agents.sensors import AgentSensors
+from aura.agents.sms_bridge import AgentSMS
+from aura.agents.sos import AgentSOS
+from aura.agents.soul_talk import AgentSoulTalk
+from aura.agents.time_agent import AgentTimeAgent
+from aura.agents.unified_router import AgentUnifiedRouter
+from aura.agents.whatsapp import AgentWhatsApp
 from aura.core.orchestrator import Orchestrator
-
 
 MODULES_CONFIG_PATH = Path.home() / ".config" / "aura" / "modules.toml"
 
@@ -142,8 +139,8 @@ def _try_register(orch, agent_class, config: dict) -> bool:
 def _load_plugins(orch) -> int:
     """Загрузить плагины и зарегистрировать их агентов в оркестраторе (ADR-090)."""
     try:
-        from aura.core.plugin_manager import PluginManager
         from aura.core.plugin_adapter import register_plugin_agent
+        from aura.core.plugin_manager import PluginManager
         pm = PluginManager()
         plugins = pm.list_plugins()
         loaded = 0
@@ -212,8 +209,10 @@ def build_orchestrator() -> Orchestrator:
         from pathlib import Path as _P
         _root = _P(__file__).resolve().parents[1]
         _sys.path.insert(0, str(_root))
-        from scripts.hardware_detect import detect, save as _hw_save
-        from aura.inference.model_selector import select as _ms_select, save as _ms_save
+        from aura.inference.model_selector import save as _ms_save
+        from aura.inference.model_selector import select as _ms_select
+        from scripts.hardware_detect import detect
+        from scripts.hardware_detect import save as _hw_save
         _hw = detect()
         _cfg = _ms_select(_hw)
         _hw_save(_hw)

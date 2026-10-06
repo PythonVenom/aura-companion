@@ -5,18 +5,17 @@
 Эфемерные агенты (subprocess) — позже (Phase 7).
 """
 from __future__ import annotations
+
 import shutil
 from pathlib import Path
-from typing import Optional
 
 from aura.core.plugin_manifest import PluginManifest, load_manifest
-
 
 DEFAULT_PLUGINS_DIR = Path.home() / ".local/share/aura/plugins"
 
 
 class PluginManager:
-    def __init__(self, root: Optional[Path] = None):
+    def __init__(self, root: Path | None = None):
         self.root = Path(root) if root else DEFAULT_PLUGINS_DIR
         self.root.mkdir(parents=True, exist_ok=True)
 
@@ -32,7 +31,7 @@ class PluginManager:
                 continue
         return out
 
-    def get(self, plugin_id: str) -> Optional[PluginManifest]:
+    def get(self, plugin_id: str) -> PluginManifest | None:
         d = self.root / plugin_id
         if not d.is_dir():
             return None
@@ -66,4 +65,4 @@ class PluginManager:
         return self.get(plugin_id) is not None
 
 
-__all__ = ["PluginManager", "DEFAULT_PLUGINS_DIR"]
+__all__ = ["DEFAULT_PLUGINS_DIR", "PluginManager"]

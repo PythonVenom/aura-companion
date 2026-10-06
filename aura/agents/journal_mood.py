@@ -1,13 +1,12 @@
 """VoiceJournal — дневник настроения (ADR-086)."""
 from __future__ import annotations
+
 import json
 import re
 import time
 from pathlib import Path
-from typing import Optional
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
-
 
 DEFAULT_ROOT = Path.home() / ".cache/aura/journal"
 
@@ -15,7 +14,7 @@ POSITIVE = {"отлично","хорошо","супер","класс","бодр�
 NEGATIVE = {"плохо","паршиво","ужасно","тяжело","грустно","тревожно","устал","разбит"}
 
 
-def parse_mood(text: str) -> Optional[int]:
+def parse_mood(text: str) -> int | None:
     t = text.lower()
     # Число: "настроение 7", "7 из 10"
     m = re.search(r"\b(\d{1,2})\b", t)
@@ -39,12 +38,12 @@ class VoiceJournal(BaseAgent):
     KEYWORDS = ("дневник", "настроение", "занеси", "как я себя",
                 "как настроение", "запиши")
 
-    def __init__(self, root: Optional[Path] = None):
+    def __init__(self, root: Path | None = None):
         self.root = Path(root) if root else DEFAULT_ROOT
         self.root.mkdir(parents=True, exist_ok=True)
         self._file = self.root / "mood.jsonl"
 
-    def add(self, text: str, mood: Optional[int] = None):
+    def add(self, text: str, mood: int | None = None):
         if mood is None:
             mood = parse_mood(text)
         entry = {"text": text, "mood": mood, "ts": time.time()}
@@ -105,4 +104,4 @@ class VoiceJournal(BaseAgent):
         )
 
 
-__all__ = ["VoiceJournal", "parse_mood", "DEFAULT_ROOT"]
+__all__ = ["DEFAULT_ROOT", "VoiceJournal", "parse_mood"]

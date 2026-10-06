@@ -9,7 +9,6 @@ import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 
-
 LOG_DIR = Path.home() / "aura_private" / "logs"
 KEEP_DAYS = 7
 

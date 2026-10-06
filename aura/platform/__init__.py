@@ -37,10 +37,10 @@ def get_audio():
         from aura.platform.linux import LinuxAudio
         return LinuxAudio()
     elif sys.platform == "win32":
-        from aura.platform.windows import WindowsAudio  # noqa
+        from aura.platform.windows import WindowsAudio
         return WindowsAudio()
     elif sys.platform == "darwin":
-        from aura.platform.macos import MacOSAudio  # noqa
+        from aura.platform.macos import MacOSAudio
         return MacOSAudio()
     raise NotImplementedError(f"Platform {sys.platform} not supported yet")
 
@@ -67,4 +67,4 @@ def get_media():
     raise NotImplementedError(f"Platform {sys.platform} not supported yet")
 
 
-__all__ = ["get_audio", "get_service", "get_media"]
+__all__ = ["get_audio", "get_media", "get_service"]

@@ -19,12 +19,12 @@
 """
 
 from __future__ import annotations
+
 import time
 
-from aura.core.bridge import send_command, error_text
-from aura.dialog_fsm import set_state as fsm_set
+from aura.core.bridge import error_text, send_command
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
-
+from aura.dialog_fsm import set_state as fsm_set
 
 # --- Bug 13: помним свои отправленные сообщения ---
 _sent_recent: list = []   # [(chat, text, ts)]

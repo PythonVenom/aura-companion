@@ -1,15 +1,12 @@
 """WrapperRegistry — реестр доступных wrappers (ADR-037)."""
 from __future__ import annotations
 
-from typing import Type
-
 from aura.wrappers.base import AppWrapper, WrapperError
 
+_REGISTRY: dict[str, type[AppWrapper]] = {}
 
-_REGISTRY: dict[str, Type[AppWrapper]] = {}
 
-
-def register(cls: Type[AppWrapper]) -> Type[AppWrapper]:
+def register(cls: type[AppWrapper]) -> type[AppWrapper]:
     """Декоратор регистрации wrapper'а."""
     if not cls.name:
         raise WrapperError(f"{cls.__name__} без .name")

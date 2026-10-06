@@ -11,6 +11,7 @@
 Запросы: временной срез, путь между событиями, поиск паттернов.
 """
 from __future__ import annotations
+
 import json
 import sqlite3
 import time
@@ -18,7 +19,6 @@ from pathlib import Path
 
 from aura.agents.base import MicroAgent
 from aura.core.protocol import AgentRequest, AgentResponse
-
 
 TWIN_DB = Path.home() / ".local/share/aura/health_twin.db"
 

@@ -136,7 +136,14 @@ class AgentListener(MicroAgent):
             return ""
         return result
 
-    def _listen_impl(self, timeout=6):
+    def _listen_impl(self, timeout=None):
+        # F-015: elder-care читает min_turn_silence из settings
+        if timeout is None:
+            try:
+                from aura import settings
+                timeout = float(settings.get("min_turn_silence", 6))
+            except Exception:
+                timeout = 6
         """
         Слушать микрофон до endpoint, тишины или таймаута.
 

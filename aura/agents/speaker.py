@@ -111,10 +111,14 @@ class AgentSpeaker(MicroAgent):
         """Получить настройки голоса из settings."""
         try:
             from aura import settings as _s
+            # F-015: voice_volume_boost для elder-care (MANIFESTO.md)
+            base_vol = int(_s.get("volume", 100))
+            boost = float(_s.get("voice_volume_boost", 1.0))
+            boosted = min(100, int(base_vol * boost))
             return {
                 "voice": _s.get("tts_voice", "ru_RU-irina-medium"),
                 "speed": float(_s.get("tts_speed", 1.0)),
-                "volume": int(_s.get("volume", 100)),
+                "volume": boosted,
             }
         except Exception:
             return {"voice": "ru_RU-irina-medium", "speed": 1.0, "volume": 100}

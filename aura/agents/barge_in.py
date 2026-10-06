@@ -40,6 +40,19 @@ class AgentBargeIn:
     COOLDOWN_SECONDS = 5.0  # Bug 45: 5с между            # Bug 29: не дёргать callback чаще 2с (было 0.5)
 
     def __init__(self):
+        # F-015: barge_in toggle для elder-care (MANIFESTO.md)
+        # Пожилым не нравится, когда Aura перебивает — default False
+        try:
+            from aura import settings
+            if not settings.get("barge_in", False):
+                self.ready = False
+                self.disabled_by_settings = True
+                print("🔇 BargeIn отключён (settings.barge_in=False, elder-care)")
+                return
+        except Exception:
+            pass  # fail-open: без settings работает как раньше
+
+        self.disabled_by_settings = False
         self.ready = False
         self.vad = None
         self.sd = None

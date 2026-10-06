@@ -24,12 +24,28 @@ class AgentSOS(BaseAgent):
         "тревога", "плохо с сердцем", "вызови сына", "вызови дочь",
     )
 
+    @classmethod
+    def _get_phrases(cls) -> tuple:
+        """F-015: sos_phrases из settings с fallback на hardcoded.
+
+        MANIFESTO.md: elder care — приоритет №1.
+        Пользователь может расширить список фраз через settings.json.
+        """
+        try:
+            from aura import settings
+            custom = settings.get("sos_phrases", [])
+            if custom:
+                return tuple(custom)
+        except Exception:
+            pass
+        return cls.SOS_PHRASES
+
     def can_handle(self, request: AgentRequest) -> bool:
         t = request.text.lower().strip()
         # AURA_SOS_CONTACT_V1 — установка контакта
         if "установи sos" in t or "sos контакт" in t:
             return True
-        return any(p in t for p in self.SOS_PHRASES)
+        return any(p in t for p in self._get_phrases())
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         cfg = self._load_config()

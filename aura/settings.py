@@ -22,6 +22,18 @@ DEFAULTS = {
     # elder / kid / blind / dev / admin / guest
     # Default = elder — Aura создана для elder care (MANIFESTO.md)
     "capability_profile": "elder",
+    # === Elder-care defaults (F-015) ===
+    # MANIFESTO.md: "Elder care — приоритет №1"
+    # По науке: Fanger 1970 (комфорт), ISO 7730, elder-care research
+    "min_turn_silence": 1.8,       # пожилым нужно время на ответ
+    "vad_aggressiveness": 2,        # меньше ложных срабатываний
+    "voice_volume_boost": 1.1,      # громче для слабого слуха
+    "confirm_actions": True,        # подтверждение перед sensitive
+    "barge_in": False,              # не перебивать пожилого
+    "sos_phrases": [
+        "мне плохо", "помогите", "вызови скорую", "вызов скорой",
+        "плохо мне", "срочно помогите", "вызови помощь",
+    ],
     "persona": {
         "name": "Аура",
         "address": "ты",

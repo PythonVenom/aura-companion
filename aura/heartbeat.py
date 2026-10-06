@@ -71,13 +71,12 @@ class Heartbeat:
                 try:
                     self._on_stale()
                 except Exception as e:
+                    # F-006: не глотаем, но и не крэшим процесс.
+                    # Контракт (test_callback_exception_does_not_crash):
+                    # callback — best-effort. Упал → логируем.
+                    # Watchdog сам Aura не убивает — это работа systemd.
                     log.critical("Heartbeat._on_stale() failed: %s", e,
                                  exc_info=True)
-                    # Пробуем emergency-путь напрямую (раздел 17: не глотать)
-                    try:
-                        os._exit(1)
-                    except SystemExit:
-                        raise
                 return
 
 

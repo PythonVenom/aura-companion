@@ -50,6 +50,26 @@ CLASSES: dict[str, set[str]] = {
 # TREES (modifiers) — 0..N, накладываются
 # ═══════════════════════════════════════════════════════════════
 TREES: dict[str, set[str]] = {
+    # === F-030: Veteran-specific (Borderlands trees) ===
+    "ptsd": {
+        # Van der Kolk (2014) — Body Keeps the Score
+        "night:monitor", "trigger:detect", "calm:mode",
+        "no_log", "no_history", "no_telemetry",  # приватность
+    },
+    "tbi": {
+        # ТБИ: структура, память, когнитивная поддержка
+        "structure", "reminders:strict", "cognitive:support",
+    },
+    "amputation": {
+        # Ампутация/протез: фантомные боли, интеграция
+        "phantom:track", "prosthetic:integrate",
+        "voice:only", "handsfree",
+    },
+    "family-veteran": {
+        # Для матерей/жён СВО
+        "family:connect", "share:read", "reports:read",
+        "sos:priority", "call:priority",
+    },
     "medical": {
         "medical:read", "bpm:read", "health:read",
         "fall:notify", "meds:manage", "sos:priority",
@@ -84,6 +104,22 @@ TREES: dict[str, set[str]] = {
 # CLASS MODS (overrides) — точечно, на конкретный билд
 # ═══════════════════════════════════════════════════════════════
 CLASS_MODS: dict[str, dict[str, set[str]]] = {
+    # === F-030: Veteran class mods ===
+    "veteran-ptsd-night": {
+        # Ночь для ветерана с ПТСР
+        "add": {"night_mode", "calm:priority", "no_audio_cue"},
+        "disable": {"music", "sos:loud"},
+    },
+    "veteran-tbi-simple": {
+        # ТБИ: упрощённый интерфейс
+        "add": {"ui:minimal", "reminders:frequent"},
+        "disable": {"multi_step_commands"},
+    },
+    "veteran-family": {
+        # Для семьи СВО
+        "add": {"family:notification", "sos:share"},
+        "disable": {"psych:support"},  # только для самого ветерана
+    },
     "elder-night": {
         "add": {"night_mode", "only_critical"},
         "disable": {"music_ducker", "handsfree"},
@@ -219,6 +255,12 @@ AGENT_CAPABILITIES: dict[str, str] = {
     "construction": "construction",
     "massage": "massage",
     "dictation": "dictation",
+    # === F-030: Veteran-specific ===
+    "reminiscence": "reminiscence",  # уже есть в elder
+    "emotion_voice": "psych:support",
+    "health_twin": "health:read",
+    "sleep_monitor": "sleep:monitor",  # TODO: новый агент
+    "phantom_tracker": "phantom:track",  # TODO
 }
 
 

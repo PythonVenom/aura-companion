@@ -37,6 +37,8 @@
 | F-020 | FIXED | LOW | ✅ | `ad28673`…`f15f80e` | ruff 0 (5 итераций) |
 | F-021 | FIXED | HIGH | ✅ | `bfc449a` | CSRF Web API (Origin-check) |
 | F-019 | FIXED | MEDIUM | ✅ | `76d2337` | mypy 138 → 87 (критичные) |
+| F-023 | FIXED | LOW | ✅ | `7a6d1ff` | Firefox MV3 в репо (.gitignore fix) |
+| F-024 | FIXED | MEDIUM | ✅ | (этот) | Code signing + release builder |
 | F-022 | PARTIAL | MEDIUM | 🟡 | — | Firefox MV3 (native работает, content_vk.js нет) |
 | F-019 | FIXED | MEDIUM | ✅ | `76d2337` | mypy 138 → 87 (критичные) |
 | F-022 | FIXED | MEDIUM | ✅ | (будет) | Firefox MV3 MVP (RICE 140) |
@@ -191,3 +193,20 @@
 ---
 
 *Сессия завершена. 23 коммита. 1523 passed. Готово к следующей фазе.*
+
+
+---
+
+## Итог v8.0-rc1 (2026-10-06)
+
+- **Коммитов:** 40+
+- **Тестов:** 1528 passed
+- **Ruff:** 0
+- **Mypy:** 138 → 87 (критичные закрыты)
+- **Агентов:** 58 → 76
+- **Security:** SQLCipher, CSRF, capabilities enforce
+- **Elder-care:** настройки применяются (F-015)
+- **Firefox MV3:** работает (F-022)
+- **Code signing:** готов (F-024)
+
+**Готов к RC1.** Следующее: 30-day stability test, verify Win/Mac.

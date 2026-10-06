@@ -6,8 +6,11 @@ import pytest
 from aura.core.wake_word import WakeWordDetector, WAKE_PHRASES
 
 
-def test_wake_phrases_nonempty():
-    assert len(WAKE_PHRASES) >= 2
+def test_wake_phrases_contains_aura():
+    """Контракт (RICE 150): одна кастомная модель openWakeWord, обученная на 'aura'.
+    Раньше было 2 фразы (aura + hey_aura), после обучения кастомной модели — 1.
+    Проверяем не количество, а наличие ключевой фразы."""
+    assert "aura" in WAKE_PHRASES
 
 
 def test_detector_init():

@@ -14,6 +14,16 @@ from aura.agents.media_pause import AgentMediaPause
 from aura.core.protocol import AgentRequest, AgentStatus
 
 @pytest.fixture(autouse=True)
+def _no_pal():
+    """ADR-017: PAL (get_media) — основной путь, playerctl — fallback.
+    В тестах мы проверяем fallback, поэтому PAL должен упасть.
+    """
+    with patch("aura.agents.media_pause.get_media",
+               side_effect=Exception("PAL disabled in tests")):
+        yield
+
+
+@pytest.fixture(autouse=True)
 def _set_vk_active():
     """Bug 14 ph.3: media_pause ловит только при last_active=vk/mpris."""
     from aura.agents import media_state as ms

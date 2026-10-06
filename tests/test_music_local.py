@@ -140,15 +140,19 @@ async def test_handle_empty_dir(tmp_path):
 def test_pause_ok(tmp_path):
     a = _make(tmp_path)
     mock = MagicMock(returncode=0, stdout="", stderr="")
-    with patch("aura.agents.music_local.subprocess.run", return_value=mock):
-        assert "Пауза" in a.pause()
+    with patch("aura.agents.music_local.get_media",
+               side_effect=Exception("PAL disabled")):
+        with patch("aura.agents.music_local.subprocess.run", return_value=mock):
+            assert "Пауза" in a.pause()
 
 
 def test_pause_fail(tmp_path):
     a = _make(tmp_path)
     mock = MagicMock(returncode=1, stdout="", stderr="")
-    with patch("aura.agents.music_local.subprocess.run", return_value=mock):
-        assert "не отвечает" in a.pause()
+    with patch("aura.agents.music_local.get_media",
+               side_effect=Exception("PAL disabled")):
+        with patch("aura.agents.music_local.subprocess.run", return_value=mock):
+            assert "не отвечает" in a.pause()
 
 
 def test_vlc_active_playing(tmp_path):

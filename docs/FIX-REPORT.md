@@ -37,6 +37,8 @@
 | F-020 | FIXED | LOW | ✅ | `ad28673`…`f15f80e` | ruff 0 (5 итераций) |
 | F-021 | FIXED | HIGH | ✅ | `bfc449a` | CSRF Web API (Origin-check) |
 | F-019 | FIXED | MEDIUM | ✅ | `76d2337` | mypy 138 → 87 (критичные) |
+| F-022 | PARTIAL | MEDIUM | 🟡 | — | Firefox MV3 (native работает, content_vk.js нет) |
+| F-019 | FIXED | MEDIUM | ✅ | `76d2337` | mypy 138 → 87 (критичные) |
 | F-022 | FIXED | MEDIUM | ✅ | (будет) | Firefox MV3 MVP (RICE 140) |
 | F-019 | FIXED | LOW | ✅ | `507c756` | ruff --fix: 63 авто-исправления |
 | F-006p3 | FIXED | CRITICAL | ✅ | `1a880b0` | 4 critical except → logging |
@@ -62,6 +64,13 @@
 - **Root cause:** `pytest ... || true` и `pip install -e . || true` — job проходил зелёным при падении тестов.
 - **Fix:** убраны `|| true`, добавлен bootstrap check (обязательные агенты).
 - **Runtime-proof:** `YAML OK`, `pip install -e .` работает без `|| true`.
+
+### F-022: Firefox MV3 (PARTIAL)
+
+- **Что работает:** native messaging, background.js, content_max.js, CSRF.
+- **Что не работает:** content_vk.js (нет в MV3), старый background.js в Firefox (228 строк).
+- **Security:** `_token` утекает в console.log — нужно sanitize.
+- **Наука (Д4):** Brooks 1975 (база > фичи), MDN Native Messaging.
 
 ### F-021: CSRF-защита Web API (HIGH)
 

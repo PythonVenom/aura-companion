@@ -11,9 +11,9 @@
 
 
 class MicroAgent:
-    def __init__(self, name, description):
-        self.name = name
-        self.description = description
+    def __init__(self, name=None, description=None):
+        self.name = name or getattr(self.__class__, "name", self.__class__.__name__)
+        self.description = description or getattr(self.__class__, "description", "")
         self.active = False
 
     def activate(self):

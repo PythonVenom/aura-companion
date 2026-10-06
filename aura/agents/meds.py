@@ -232,6 +232,9 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
                 for mid, name in rows:
                     print(f"⏰ MEDS: пора принять {name}", flush=True)
                     # TODO: say() голосом
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: молчаливый swallow → батя не получит напоминание
+                import logging
+                logging.getLogger("aura.meds").error(
+                    "Meds monitor loop failed: %s", e, exc_info=True)
             time.sleep(30)

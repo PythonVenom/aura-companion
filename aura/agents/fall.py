@@ -52,5 +52,8 @@ class AgentFall(BaseAgent):
                 lines = STATE_FILE.read_text(encoding="utf-8").splitlines()
             lines.append(json.dumps(entry, ensure_ascii=False))
             STATE_FILE.write_text("\n".join(lines[-20:]), encoding="utf-8")
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не записалось событие падения — важно для аудита.
+            import logging
+            logging.getLogger("aura.fall").error(
+                "Fall event log failed: %s", e, exc_info=True)

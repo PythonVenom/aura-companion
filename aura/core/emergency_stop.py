@@ -72,8 +72,13 @@ def stop(reason: str = "", *, save_flag: bool = True) -> dict:
                 f"{time.time()}\n{reason}\n",
                 encoding="utf-8",
             )
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: если STOP_FILE не записан — система НЕ остановится
+            # при следующем рестарте. Это критично — не глотать.
+            import logging
+            logging.getLogger("aura.emergency").critical(
+                "STOP_FILE write failed: %s — stop flag NOT persisted",
+                e, exc_info=True)
 
     return {
         "stopped": True,

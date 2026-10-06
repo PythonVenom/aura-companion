@@ -65,8 +65,12 @@ class AgentSOS(BaseAgent):
         try:
             if CONFIG.exists():
                 return json.loads(CONFIG.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: SOS не может прочитать контакты — warning,
+            # fallback на пустой config (дальше сработает manual).
+            import logging
+            logging.getLogger("aura.sos").warning(
+                "SOS config load failed: %s — fallback to manual", e)
         return {}
 
     def _log_sos(self, text: str) -> None:

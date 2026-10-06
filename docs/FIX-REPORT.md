@@ -8,7 +8,7 @@
 - commit после:   `3aa473a`
 - Python:         3.12.14
 - OS:             Arch Linux (KDE Plasma 6, X11)
-- tests:          1496 passed → **1523 passed**
+- tests:          1496 passed → **1523 passed** (25+ коммитов)
 - ruff (E9/F63/F7/F82): 6 failed → **All checks passed**
 - mypy:           142 errors (baseline не менялся)
 - secrets в истории: **нет** (проверено `git log --all -p | grep`)
@@ -33,6 +33,9 @@
 | F-014 | FIXED | — | ✅ | `08d1b79` | 6 integration tests + DENIED |
 | F-015 | FIXED | CRITICAL | ✅ | `f9fb1eb`, `40a4da5`, `67a9494`, `af3d30e` | elder-care реально применяется |
 | F-016 | FIXED | LOW | ✅ | `3aa473a` | .gitignore: дубликаты + docs |
+| F-019 | FIXED | LOW | ✅ | `507c756` | ruff --fix: 63 авто-исправления |
+| F-006p3 | FIXED | CRITICAL | ✅ | `1a880b0` | 4 critical except → logging |
+| F-006p4 | FIXED | MEDIUM | ✅ | `331633e` | 101 except → logging by context |
 
 ## Fixed issues
 
@@ -54,6 +57,16 @@
 - **Root cause:** `pytest ... || true` и `pip install -e . || true` — job проходил зелёным при падении тестов.
 - **Fix:** убраны `|| true`, добавлен bootstrap check (обязательные агенты).
 - **Runtime-proof:** `YAML OK`, `pip install -e .` работает без `|| true`.
+
+### F-006: 105 `except: pass` → logging (4 части)
+
+- **part1** (`8be022c`): 4 critical elder-care (sos/fall/meds/emergency)
+- **part2** (`60a3423`): heartbeat — убран `os._exit`, оставлен `log.critical`
+- **part3** (`1a880b0`): 4 critical security/web (vault, secure_db, api)
+- **part4** (`331633e`): 101 batch — logging by context:
+  - `agents/*` → `debug` (best-effort)
+  - `core/*` → `warning` (важно)
+  - swallow-ok (20 в platform_adapters) — оставлены
 
 ### F-006: 5 critical `except: pass` в elder-care
 

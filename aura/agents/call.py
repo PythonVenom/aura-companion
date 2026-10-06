@@ -84,15 +84,6 @@ class AgentCall(BaseAgent):
                 text=f"⚠️ Telegram: send_message error",
                 agent_name=self.name,
             )
-            if result and not result.get("error"):
-                return AgentResponse.ok(
-                    text=f"📞 Позвала {target} в Telegram",
-                    agent_name=self.name,
-                )
-            return AgentResponse.ok(
-                text=f"⚠️ Telegram bridge недоступен",
-                agent_name=self.name,
-            )
         except Exception as e:
             return AgentResponse.ok(
                 text=f"📞 Не смогла позвонить {target}: {e}",

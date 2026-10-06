@@ -26,6 +26,7 @@ import subprocess
 from difflib import get_close_matches
 from pathlib import Path
 
+from aura.platform import get_media
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 

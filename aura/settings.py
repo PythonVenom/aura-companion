@@ -18,6 +18,10 @@ DEFAULTS = {
     "proactive_enabled": True,
     "language": "ru",
     "voice_profile": "default",
+    # Capability-профиль (Borderlands-style, Saltzer & Schroeder 1975):
+    # elder / kid / blind / dev / admin / guest
+    # Default = elder — Aura создана для elder care (MANIFESTO.md)
+    "capability_profile": "elder",
     "persona": {
         "name": "Аура",
         "address": "ты",

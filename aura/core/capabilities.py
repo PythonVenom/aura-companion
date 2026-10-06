@@ -162,8 +162,69 @@ def require(capability: str) -> bool:
     return _CURRENT.has(capability)
 
 
+# ═══════════════════════════════════════════════════════════════
+# AGENT → CAPABILITY mapping (централизованно)
+# ═══════════════════════════════════════════════════════════════
+# Агент, отсутствующий в карте — fail-open с warning
+# (раздел 20 промта: постепенный переход, не сломать elder-care).
+#
+# Через 2-3 итерации все агенты должны быть в карте → fail-closed.
+AGENT_CAPABILITIES: dict[str, str] = {
+    # elder-care core
+    "sos": "sos",
+    "meds": "meds",
+    "fall": "fall",
+    "call": "call",
+    "care": "care",
+    "fin_elder": "fin_elder",
+    "reminders": "reminders",
+    # voice / TTS
+    "voice": "voice",
+    "speaker": "voice",
+    "listener": "voice",
+    "barge_in": "voice",
+    "handsfree": "handsfree",
+    # music / media
+    "music_local": "music",
+    "music_ducker": "music",
+    "media_pause": "music",
+    "media_search": "music",
+    "media_state": "music",
+    # time / weather
+    "time": "time",
+    "time_agent": "time",
+    "weather": "weather",
+    # calendar / notes
+    "calendar": "calendar",
+    "checklist": "calendar",
+    "text_editor": "text_editor",
+    # security / vault
+    "vault": "vault:read",
+    "security": "security",
+    "recon": "recon",
+    # dev (для будущих)
+    "shell": "shell:safe",
+    "git": "git:read",
+    "ruff": "ruff",
+    "pytest": "pytest",
+    "mcp": "mcp",
+    # medical (trees)
+    "bpm": "bpm:read",
+    "health": "health:read",
+    "health_twin": "health:read",
+    # messenger / social
+    "messenger": "messenger",
+    "telegram": "telegram",
+    "vk_web": "vk_web",
+    # construction / massage
+    "construction": "construction",
+    "massage": "massage",
+    "dictation": "dictation",
+}
+
+
 __all__ = [
     "CLASSES", "TREES", "CLASS_MODS",
-    "Profile",
+    "Profile", "AGENT_CAPABILITIES",
     "set_current", "current", "require",
 ]

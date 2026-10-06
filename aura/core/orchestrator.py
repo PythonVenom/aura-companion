@@ -308,10 +308,40 @@ class Orchestrator:
         return bool(self._last_response and self._last_response.silent)
 
     async def process_request(self, request: AgentRequest) -> AgentResponse:
-        """Обработать AgentRequest напрямую (для тестов)."""
+        """Обработать AgentRequest напрямую (для тестов).
+
+        Capability-check (Saltzer & Schroeder 1975, least privilege):
+        перед вызовом агента проверяем, разрешена ли операция
+        для текущего capability-профиля.
+
+        Fail-open для unmapped агентов (раздел 20 промта: backward compat).
+        TODO: через 2-3 итерации → fail-closed.
+        """
         agent = self.registry.find(request)
         if agent is None:
             return AgentResponse.not_handled()
+
+        # Capability-check
+        try:
+            from aura.core.capabilities import (
+                AGENT_CAPABILITIES, current, require,
+            )
+            agent_name = getattr(agent, "name", None)
+            if agent_name:
+                cap = AGENT_CAPABILITIES.get(agent_name)
+                if cap and not require(cap):
+                    prof_name = current().name if current() else "none"
+                    import logging
+                    logging.getLogger("aura.orchestrator").warning(
+                        "Capability denied: agent=%s cap=%s profile=%s",
+                        agent_name, cap, prof_name,
+                    )
+                    return AgentResponse.denied(
+                        f"Профиль {prof_name!r} не имеет доступа к {agent_name!r}"
+                    )
+        except ImportError:
+            pass  # capabilities не установлен — fail-open
+
         return await agent.handle(request)
 
     def __len__(self) -> int:

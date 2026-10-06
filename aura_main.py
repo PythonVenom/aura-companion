@@ -88,6 +88,34 @@ class AuraOrchestrator:
         print("✅ Push-to-stop: /tmp/aura.stop watcher запущен")
         self.heartbeat = Heartbeat()
         self.orch = build_orchestrator()
+
+        # Capability-профиль (Saltzer & Schroeder 1975, least privilege).
+        # Borderlands-style: base_class + trees + class_mods.
+        try:
+            from aura import settings
+            from aura.core.capabilities import Profile, set_current
+            prof_name = settings.get("capability_profile", "elder")
+            # Разбор: "elder-medical" → base=elder, trees=[medical]
+            parts = prof_name.split("-")
+            base_class = parts[0]
+            trees = tuple(parts[1:]) if len(parts) > 1 else ()
+            set_current(Profile(
+                name=prof_name,
+                base_class=base_class,
+                trees=trees,
+            ))
+            import logging
+            logging.getLogger("aura").info(
+                "Capability profile: %s (caps=%d)",
+                prof_name, len(Profile(name=prof_name,
+                                       base_class=base_class,
+                                       trees=trees).capabilities()),
+            )
+        except Exception as e:
+            import logging
+            logging.getLogger("aura").warning(
+                "Capability profile setup failed: %s — fail-open", e,
+            )
         self.running = True
         self.chat_bridge = ChatBridge()
         self.chat_queue: _queue.Queue = _queue.Queue()

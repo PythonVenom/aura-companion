@@ -29,6 +29,10 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f pyproject.toml ]; then pip install -e .; fi
           pip install pytest pytest-asyncio pytest-cov
+      - name: Ruff lint (только E/F — критические)
+        run: |
+          ruff check aura/ --select E9,F63,F7,F82 --no-fix
+
       - name: Run tests
         run: |
           pytest tests/ -q --tb=short --cov=aura --cov-report=term-missing \

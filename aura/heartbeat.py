@@ -14,9 +14,12 @@ os._exit(1). Systemd (Restart=on-failure) поднимает Ауру.
 
 from __future__ import annotations
 
+import logging
 import os
 import threading
 import time
+
+log = logging.getLogger("aura.heartbeat")
 
 
 CHECK_INTERVAL_SEC = 30     # как часто проверяем
@@ -67,8 +70,14 @@ class Heartbeat:
             if stale > MAX_STALE_SEC:
                 try:
                     self._on_stale()
-                except Exception:
-                    pass
+                except Exception as e:
+                    log.critical("Heartbeat._on_stale() failed: %s", e,
+                                 exc_info=True)
+                    # Пробуем emergency-путь напрямую (раздел 17: не глотать)
+                    try:
+                        os._exit(1)
+                    except SystemExit:
+                        raise
                 return
 
 

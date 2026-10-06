@@ -64,11 +64,9 @@ TODO.md
 docs/context-for-new-chat.md
 docs/dead-code.txt
 docs/vision-archive-*.md
-logs/
 gigaam_model
 sherpa-onnx*
 vosk_model*
-voices/
 aura.tar.gz
 vm_script.sh
 nohup.out
@@ -80,8 +78,6 @@ firefox_extension_mv3/
 # Aura runtime config
 settings.json
 .config/aura/
-sys
-sys.*
 sys
 sys.*
 
@@ -110,37 +106,21 @@ docs/strategy-2026.md
 docs/CHECKPOINT-*.md
 
 # Internal (public face)
-docs/internal/
-docs/roadmap/
-docs/strategy-2026.md
-docs/CHECKPOINT-*.md
-docs/habr-guide.md
 docs/reviews/
 
-# Internal (public face)
-docs/internal/
-docs/roadmap/
-docs/strategy-2026.md
-docs/CHECKPOINT-*.md
-docs/habr-guide.md
-docs/reviews/
 
 # Docs internal
 docs/axes/
-docs/reviews/
 docs/recipes/
 docs/face/
 docs/screenshots/
 docs/demo.mp4
 docs/craft-onboarding.md
-docs/DEMO-CHECKLIST.md
-docs/release-checklist.md
 docs/elder_care_profile.md
 docs/voice-test-script.md
 *.bak
 
 # ==== СЕКРЕТЫ (добавлено 06.10) ====
-.env
 .env.*
 *.env
 secrets.json
@@ -154,12 +134,6 @@ credentials.py
 *_key.txt
 *_token.txt
 api_keys.*
-aura-local/
-*.bak
 *.old
-.DS_Store
-__pycache__/
 *.pyc
 log/
-logs/
-*.log

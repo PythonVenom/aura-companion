@@ -74,8 +74,11 @@ def _configure_concurrency(conn) -> None:
         conn.execute("PRAGMA synchronous = NORMAL")
         conn.execute("PRAGMA foreign_keys = ON")
         conn.execute("PRAGMA cache_size = -2000")  # 2 MB кэш
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.secure_db').warning(
+            'secure_db error: %s', e, exc_info=True)
 
 
 def _configure_cipher(conn) -> None:
@@ -88,8 +91,11 @@ def _configure_cipher(conn) -> None:
         conn.execute("PRAGMA kdf_iter = 256000")
         conn.execute("PRAGMA cipher_hmac_algorithm = HMAC_SHA512")
         conn.execute("PRAGMA cipher_kdf_algorithm = PBKDF2_HMAC_SHA512")
-    except Exception:
-        pass
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.secure_db').warning(
+            'secure_db error: %s', e, exc_info=True)
 
 
 def connect(path: Path | str, *, encrypt: bool = True):

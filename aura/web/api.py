@@ -111,8 +111,11 @@ def create_app(orchestrator=None, bridge=None) -> FastAPI:
         if _orch is not None and hasattr(_orch, "registry"):
             try:
                 names = _orch.registry.list_names()
-            except Exception:
-                pass
+            except Exception as e:
+                # F-006: web API не глотает — важно для debug
+                import logging
+                logging.getLogger("aura.web").warning(
+                    "registry.list_names failed: %s", e, exc_info=True)
         return {"agents": names, "count": len(names)}
 
     @app.get("/chat/history")

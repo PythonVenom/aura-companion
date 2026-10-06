@@ -97,8 +97,11 @@ class AgentVault(BaseAgent):
         try:
             with open(self.facts_file, "w", encoding="utf-8") as f:
                 json.dump(self.facts, f, ensure_ascii=False, indent=2)
-        except Exception:
-            pass
+        except Exception as e:
+            # F-006: не глотать (раздел 17 промта)
+            import logging
+            logging.getLogger('aura.vault').warning(
+                'vault error: %s', e, exc_info=True)
 
 
 __all__ = ["AgentVault"]

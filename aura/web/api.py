@@ -17,7 +17,8 @@ import json
 import time
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 # DEDUP (Bug 74): защита от API-loop
@@ -83,6 +84,27 @@ def create_app(orchestrator=None, bridge=None) -> FastAPI:
     app = FastAPI(title="Aura API", version="0.1.0")
     _orch = orchestrator
 
+
+    # F-021: CSRF-защита (раздел 10 промта, Saltzer & Schroeder 1975).
+    # Localhost API без auth: любой browser-origin мог fetch() → выполнить команды.
+    # Whitelist: localhost, 127.0.0.1, moz-extension://, chrome-extension://,
+    # пустой Origin (curl, native clients).
+    _ALLOWED_ORIGIN_PREFIXES = (
+        "http://localhost", "http://127.0.0.1",
+        "moz-extension://", "chrome-extension://", "safari-extension://",
+    )
+
+    @app.middleware("http")
+    async def _csrf_check(request: Request, call_next):
+        # Проверяем только мутирующие методы
+        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+            origin = request.headers.get("origin", "")
+            if origin and not origin.startswith(_ALLOWED_ORIGIN_PREFIXES):
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": f"CSRF: origin {origin!r} not allowed"},
+                )
+        return await call_next(request)
 
     @app.get("/ui", response_class=None)
     def ui():

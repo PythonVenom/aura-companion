@@ -29,13 +29,29 @@ input,button{padding:.5rem;font-size:1rem}
 
 def create_app():
     try:
-        from fastapi import FastAPI, Form
+        from fastapi import FastAPI, Request, Form
         from fastapi.responses import HTMLResponse
     except ImportError:
         print("❌ fastapi не установлен: pip install fastapi uvicorn")
         return None
 
     app = FastAPI(title="Aura Web")
+
+    _ALLOWED_ORIGIN_PREFIXES = (
+        "http://localhost", "http://127.0.0.1",
+        "moz-extension://", "chrome-extension://", "safari-extension://",
+    )
+
+    @app.middleware("http")
+    async def _csrf_check(request: Request, call_next):
+        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+            origin = request.headers.get("origin", "")
+            if origin and not origin.startswith(_ALLOWED_ORIGIN_PREFIXES):
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": f"CSRF: origin {origin!r} not allowed"},
+                )
+        return await call_next(request)
 
     @app.get("/", response_class=HTMLResponse)
     def home():

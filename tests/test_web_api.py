@@ -58,3 +58,53 @@ def test_version(client):
     r = client.get("/version")
     assert r.status_code == 200
     assert "version" in r.json()
+
+
+# ═══════════════════════════════════════════════════════════════
+# F-021: CSRF-защита (раздел 10 промта, Saltzer & Schroeder 1975)
+# ═══════════════════════════════════════════════════════════════
+
+def test_csrf_blocks_evil_origin(client):
+    """evil.com не может POST /chat (CSRF)."""
+    r = client.post(
+        "/chat",
+        json={"user": "test"},
+        headers={"Origin": "https://evil.com"},
+    )
+    assert r.status_code == 403
+    assert "CSRF" in r.json().get("detail", "")
+
+
+def test_csrf_allows_localhost_origin(client):
+    """localhost origin — разрешён."""
+    r = client.post(
+        "/chat",
+        json={"user": "test"},
+        headers={"Origin": "http://localhost:8765"},
+    )
+    assert r.status_code != 403
+
+
+def test_csrf_allows_firefox_extension(client):
+    """moz-extension:// — разрешён (WebExtension Firefox)."""
+    r = client.post(
+        "/chat",
+        json={"user": "test"},
+        headers={"Origin": "moz-extension://abc-123"},
+    )
+    assert r.status_code != 403
+
+
+def test_csrf_allows_no_origin(client):
+    """Пустой Origin (curl, native) — разрешён."""
+    r = client.post("/chat", json={"user": "test"})
+    assert r.status_code != 403
+
+
+def test_csrf_get_not_blocked(client):
+    """GET не проверяется (только мутирующие)."""
+    r = client.get(
+        "/health",
+        headers={"Origin": "https://evil.com"},
+    )
+    assert r.status_code == 200

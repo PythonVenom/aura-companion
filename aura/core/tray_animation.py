@@ -15,7 +15,6 @@ import math
 import threading
 import time
 
-
 STATE_COLORS_ANIM = {
     "idle":      (90, 122, 154),
     "listening": (245, 197, 66),
@@ -84,4 +83,4 @@ class TrayAnimator:
             time.sleep(interval)
 
 
-__all__ = ["TrayAnimator", "interpolate_color", "to_hex", "STATE_COLORS_ANIM"]
+__all__ = ["STATE_COLORS_ANIM", "TrayAnimator", "interpolate_color", "to_hex"]

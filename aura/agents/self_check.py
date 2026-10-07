@@ -69,11 +69,8 @@ class AgentSelfCheck(MicroAgent):
         ).exists()
 
     def _check_sqlcipher(self) -> bool:
-        try:
-            import sqlcipher3
-            return True
-        except ImportError:
-            return False
+        import importlib.util
+        return importlib.util.find_spec("sqlcipher3") is not None
 
     def _check_ollama(self) -> bool:
         try:
@@ -114,10 +111,8 @@ class AgentSelfCheck(MicroAgent):
     def _format_report(self, results: dict) -> str:
         ok = sum(1 for v in results.values() if v)
         total = len(results)
-        if ok == total:
-            head = "✅ Все системы в норме."
-        else:
-            head = f"⚠️ Проверено: {ok}/{total}."
+        head = ("✅ Все системы в норме." if ok == total
+                else f"⚠️ Проверено: {ok}/{total}.")
         lines = [head]
         for k, v in results.items():
             mark = "🟢" if v else "🔴"

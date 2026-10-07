@@ -71,20 +71,41 @@ def get_last_commit() -> tuple:
 
 
 def say(text: str) -> None:
-    """Голосом через spd-say / espeak-ng."""
+    """Говорим ГОЛОСОМ АУРЫ (Piper + Ирина), не чужим.
+    
+    Наука: раздел 23 промта — не подменять Ауру. 
+           Раздел 25 — минимальное изменение.
+    """
+    # Способ 1: через speaker агента Ауры (Piper + Ирина)
+    try:
+        from aura.agents.speaker import AgentSpeaker
+        sp = AgentSpeaker()
+        sp.say(text)
+        return
+    except Exception as e:
+        print(f"⚠️ [Speaker] {e}")
+    
+    # Fallback: Piper напрямую
     import shutil
-    for cmd in [
-        ["spd-say", "-l", "ru", "-w", text],
-        ["espeak-ng", "-v", "ru", text],
-    ]:
-        if shutil.which(cmd[0]):
-            try:
-                subprocess.run(cmd, timeout=15,
-                               stdout=subprocess.DEVNULL,
-                               stderr=subprocess.DEVNULL)
+    voice = Path(REPO) / "voices" / "ru_RU-irina-medium.onnx"
+    if shutil.which("piper") and voice.exists():
+        try:
+            r = subprocess.run(
+                ["piper", "--model", str(voice),
+                 "--output_file", "/tmp/aura_say.wav"],
+                input=text, text=True, capture_output=True,
+                timeout=30, cwd=REPO,
+            )
+            if r.returncode == 0:
+                subprocess.run(
+                    ["aplay", "-q", "/tmp/aura_say.wav"],
+                    timeout=30, stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
                 return
-            except Exception:
-                continue
+        except Exception:
+            pass
+    
     print(f"🔊 [TTS fallback] {text}")
 
 

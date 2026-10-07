@@ -1,6 +1,5 @@
 """Тесты словаря и персоны."""
 
-import pytest
 
 from aura.lore import LINES, PHRASES, speak_line, translate
 from aura.lore.terminology import TERMS

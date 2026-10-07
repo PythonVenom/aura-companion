@@ -276,7 +276,6 @@ AGENT_CAPABILITIES: dict[str, str] = {
     # === F-030: Veteran-specific ===
     "reminiscence": "reminiscence",  # уже есть в elder
     "emotion_voice": "psych:support",
-    "health_twin": "health:read",
     "sleep_monitor": "sleep:monitor",  # TODO: новый агент
     "phantom_tracker": "phantom:track",  # TODO
 }

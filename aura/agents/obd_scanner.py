@@ -1,6 +1,8 @@
 """AgentOBDScanner — OBD-II через ELM327 (F-060)."""
 from __future__ import annotations
+
 import logging
+
 log = logging.getLogger("aura.obd")
 
 DTC_HINTS = {

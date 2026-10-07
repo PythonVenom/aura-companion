@@ -80,4 +80,4 @@ def play(name: str) -> bool:
     return False
 
 
-__all__ = ["play", "TONES", "SOUNDS_DIR"]
+__all__ = ["SOUNDS_DIR", "TONES", "play"]

@@ -47,6 +47,20 @@ class AgentSpeaker(MicroAgent):
 
         return f"🗣️ Сказала: {text[:50]}..."
 
+    def wait(self, timeout=10.0):
+        """Блокирует, пока очередь не опустеет и paplay не доиграет."""
+        import time as _t
+        deadline = _t.monotonic() + timeout
+        while _t.monotonic() < deadline:
+            if self.speech_queue.empty() and not self.is_speaking:
+                break
+            _t.sleep(0.1)
+        if self.aplay_process and self.aplay_process.poll() is None:
+            try:
+                self.aplay_process.wait(timeout=5)
+            except Exception:
+                pass
+
     def _speak_worker(self):
         """Вечный воркер: блокирующий get(timeout). Не выходит сам.
 

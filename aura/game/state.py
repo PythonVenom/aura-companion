@@ -14,7 +14,7 @@ import os
 import secrets
 import sqlite3
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -75,7 +75,7 @@ class GameState:
     landing_date: str = ""
 
     def __post_init__(self) -> None:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         if not self.last_seen:
             self.last_seen = now
         if not self.landing_date:
@@ -93,7 +93,7 @@ class GameState:
     def days_on_planet(self) -> int:
         try:
             start = datetime.fromisoformat(self.landing_date)
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             return max(0, (now - start).days) + 1
         except Exception:
             return 1

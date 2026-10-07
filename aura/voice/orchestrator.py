@@ -8,7 +8,8 @@ ruff, pytest, git status, состояние модулей. Голос = экр
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from aura.agents.speaker import AgentSpeaker
 from aura.lore.persona import speak_line

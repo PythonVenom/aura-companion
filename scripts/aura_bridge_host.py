@@ -8,7 +8,6 @@ import struct
 import sys
 import threading
 
-
 SOCK = "/tmp/aura_firefox.sock"
 
 

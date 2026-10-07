@@ -81,6 +81,7 @@ def say(text: str) -> None:
         from aura.agents.speaker import AgentSpeaker
         sp = AgentSpeaker()
         sp.say(text)
+        sp.wait()   # ← дождаться, пока Аура договорит
         return
     except Exception as e:
         print(f"⚠️ [Speaker] {e}")

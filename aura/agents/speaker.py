@@ -9,6 +9,7 @@
 при быстром опустошении очереди) НЕ чинятся здесь — отдельная задача.
 """
 
+import contextlib
 import os
 import queue
 import subprocess
@@ -56,10 +57,8 @@ class AgentSpeaker(MicroAgent):
                 break
             _t.sleep(0.1)
         if self.aplay_process and self.aplay_process.poll() is None:
-            try:
+            with contextlib.suppress(Exception):
                 self.aplay_process.wait(timeout=5)
-            except Exception:
-                pass
 
     def _speak_worker(self):
         """Вечный воркер: блокирующий get(timeout). Не выходит сам.

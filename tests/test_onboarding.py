@@ -35,9 +35,10 @@ def test_agent_name():
 
 
 def test_triggers():
+    """Стемминг (Porter 1980): триггеры — основы слов."""
     a = AgentOnboarding()
-    assert "анкета" in a.TRIGGERS
-    assert "профиль" in a.TRIGGERS
+    assert "анкет" in a.TRIGGERS
+    assert "профил" in a.TRIGGERS
 
 
 # === can_handle ===

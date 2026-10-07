@@ -134,6 +134,7 @@ class StateStore:
             warnings.warn(
                 "sqlcipher3 недоступен — используем обычный sqlite (НЕ для прода)",
                 RuntimeWarning,
+                stacklevel=2,
             )
             conn = sqlite3.connect(str(self.db_path))
         else:

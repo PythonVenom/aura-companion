@@ -89,6 +89,7 @@ from aura.agents.react_agent import AgentReact
 from aura.agents.recon import AgentRecon
 from aura.agents.reminiscence import AgentReminiscence
 from aura.agents.routine_learner import AgentRoutineLearner
+from aura.agents.self_check import AgentSelfCheck
 from aura.agents.sensors import AgentSensors
 from aura.agents.sms_bridge import AgentSMS
 from aura.agents.sos import AgentSOS
@@ -264,6 +265,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentRoutineLearner, modules_config)  # T-user-1
     _try_register(orch, AgentOnboarding, modules_config)  # T-user-2
     _try_register(orch, AgentTutorial, modules_config)  # F-036
+    _try_register(orch, AgentSelfCheck, modules_config)  # F-037
     _try_register(orch, AgentPredictor, modules_config)  # T-user-3
     _try_register(orch, AgentAdaptiveReminders, modules_config)  # T-user-4
     _try_register(orch, AgentUnifiedRouter, modules_config)  # T-msg-6

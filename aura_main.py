@@ -99,6 +99,19 @@ class AuraOrchestrator:
         self.heartbeat = Heartbeat()
         self.orch = build_orchestrator()
 
+        # F-037: самопроверка при старте (говорит голосом)
+        try:
+            import asyncio as _aio
+            from aura.agents.self_check import AgentSelfCheck
+            _check = AgentSelfCheck()
+            _report = _aio.run(_check.handle(
+                __import__("aura.core.protocol", fromlist=["AgentRequest"])
+                .AgentRequest(text="проверь себя")
+            ))
+            print(f"🛸 Самопроверка: {_report.text}")
+        except Exception as _e:
+            print(f"⚠️ Самопроверка не удалась: {_e}")
+
         # Capability-профиль (Saltzer & Schroeder 1975, least privilege).
         # Borderlands-style: base_class + trees + class_mods.
         try:

@@ -144,4 +144,4 @@ class AgentTutorial(MicroAgent):
         return AgentResponse.ok(text="🗑️ Туториал сброшен.", agent_name=self.name)
 
 
-__all__ = ["AgentTutorial", "LESSONS"]
+__all__ = ["LESSONS", "AgentTutorial"]

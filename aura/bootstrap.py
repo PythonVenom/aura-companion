@@ -81,7 +81,6 @@ from aura.agents.matter import AgentMatter
 from aura.agents.meds import AgentMeds
 from aura.agents.meds_offline import AgentMedsOffline
 from aura.agents.onboarding import AgentOnboarding
-from aura.agents.tutorial import AgentTutorial
 from aura.agents.open_resolver import AgentOpenResolver
 from aura.agents.planner_agent import AgentPlanner
 from aura.agents.predictor import AgentPredictor
@@ -95,6 +94,7 @@ from aura.agents.sms_bridge import AgentSMS
 from aura.agents.sos import AgentSOS
 from aura.agents.soul_talk import AgentSoulTalk
 from aura.agents.time_agent import AgentTimeAgent
+from aura.agents.tutorial import AgentTutorial
 from aura.agents.unified_router import AgentUnifiedRouter
 from aura.agents.whatsapp import AgentWhatsApp
 from aura.core.orchestrator import Orchestrator

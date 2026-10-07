@@ -65,8 +65,8 @@ QUESTIONS = [
 class AgentOnboarding(MicroAgent):
     name = "onboarding"
 
-    TRIGGERS = ("анкета", "настройка", "первый запуск", "onboarding",
-                "профиль", "начало", "setup")
+    TRIGGERS = ("анкет", "настрой", "первый запуск", "onboarding",
+                "профил", "нача", "setup")
 
     def can_handle(self, request: AgentRequest) -> bool:
         t = request.text.lower()

@@ -81,6 +81,7 @@ from aura.agents.matter import AgentMatter
 from aura.agents.meds import AgentMeds
 from aura.agents.meds_offline import AgentMedsOffline
 from aura.agents.onboarding import AgentOnboarding
+from aura.agents.tutorial import AgentTutorial
 from aura.agents.open_resolver import AgentOpenResolver
 from aura.agents.planner_agent import AgentPlanner
 from aura.agents.predictor import AgentPredictor
@@ -262,6 +263,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentFederatedAdapter, modules_config)  # T-fed-1
     _try_register(orch, AgentRoutineLearner, modules_config)  # T-user-1
     _try_register(orch, AgentOnboarding, modules_config)  # T-user-2
+    _try_register(orch, AgentTutorial, modules_config)  # F-036
     _try_register(orch, AgentPredictor, modules_config)  # T-user-3
     _try_register(orch, AgentAdaptiveReminders, modules_config)  # T-user-4
     _try_register(orch, AgentUnifiedRouter, modules_config)  # T-msg-6

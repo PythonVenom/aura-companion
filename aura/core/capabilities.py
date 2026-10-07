@@ -274,6 +274,7 @@ AGENT_CAPABILITIES: dict[str, str] = {
     "massage": "massage",
     "dictation": "dictation",
     "onboarding": "onboarding:setup",
+    "tutorial": "tutorial:learn",
     # === F-030: Veteran-specific ===
     "reminiscence": "reminiscence",  # уже есть в elder
     "emotion_voice": "psych:support",

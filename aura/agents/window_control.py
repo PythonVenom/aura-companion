@@ -33,7 +33,10 @@ class AgentWindowControl(BaseAgent):
     MODULE_ALWAYS = True
 
     FOCUS_KEYWORDS = ("фокус", "переключись", "активируй", "на передний план")
-    FULLSCREEN_KEYWORDS = ("разверни", "на весь экран", "fullscreen", "во весь экран")
+    # F-103b: "на весь экран" / "во весь экран" отдано media_search
+    # Оставляем только про ОКНА
+    FULLSCREEN_KEYWORDS = ("разверни окно", "разверни приложение",
+                           "окно на весь экран", "fullscreen окно")
     MINIMIZE_KEYWORDS = ("сверни", "минимизируй", "minimize")
     CLOSE_KEYWORDS = ("закрой окно", "закрыть окно")
     LIST_KEYWORDS = ("список окон", "какие окна", "открытые окна")

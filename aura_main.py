@@ -449,6 +449,16 @@ class AuraOrchestrator:
 
         # Bug 15: awaiting_reply — контекст ответа в чат
         if state == "awaiting_reply":
+            # FIX: новая активация «аура» — СНАЧАЛА сброс FSM
+            if "аура" in text or "aura" in text:
+                print("🔔 Активация — сброс FSM (awaiting_reply)")
+                fsm_clear()
+                return False
+            # Отказ
+            if any(w in text for w in ("нет", "не надо", "отмена", "отменить", "стоп", "пока")):
+                fsm_clear()
+                self._say_with_duck("Хорошо")
+                return True
             # «ответь», «напиши», «скажи» + текст
             for kw in ("ответь ей", "ответь ему", "ответь", "напиши ей", "напиши ему", "напиши", "скажи ей", "скажи ему", "скажи"):
                 if kw in text:

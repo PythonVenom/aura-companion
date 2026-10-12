@@ -71,7 +71,7 @@ class AgentRAGMemory(BaseAgent):
         return str(Path.home() / ".local" / "share" / "aura" / "rag_db")
     COLLECTION_NAME = "aura_dialogs"
     EMBED_MODEL = "nomic-embed-text"
-    OLLAMA_URL = "http://localhost:11434/api/embeddings"
+    OLLAMA_URL = "http://localhost:11434/api/embed"
 
     def __init__(self) -> None:
         self.ready = False

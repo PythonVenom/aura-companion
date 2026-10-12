@@ -50,6 +50,11 @@ class VoiceOrchestrator:
         self.speaker.wait()
         return result
 
+    def say_text(self, text: str) -> None:
+        """Сказать произвольный текст (не по шаблону). F-074."""
+        self.speaker.say(text)
+        self.speaker.wait()
+
     def say(self, event: str, **ctx: Any) -> None:
         """Просто говорит фразу, без сканирования."""
         line = speak_line(event, **ctx)

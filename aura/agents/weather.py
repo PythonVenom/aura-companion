@@ -53,20 +53,36 @@ class WeatherAgent(MicroAgent):
         return CITY_COORDS.get(key, CITY_COORDS["москва"])
 
     def _fetch(self, city: str, days: int = 1):
-        lat, lon = self._coords(city)
-        params = {
-            "latitude": lat,
-            "longitude": lon,
-            "current": "temperature_2m,apparent_temperature,weather_code,"
-                       "wind_speed_10m,relative_humidity_2m",
-            "daily": "temperature_2m_max,temperature_2m_min,uv_index_max,"
-                     "weather_code",
-            "timezone": "Europe/Moscow",
-            "forecast_days": max(2, days + 1),
-        }
-        url = "https://api.open-meteo.com/v1/forecast?" + urllib.parse.urlencode(params)
+        """F-085c: wttr.in вместо open-meteo (у РФ провайдера отрезан)."""
+        # Формат: %t — температура, %f — ощущается, %C — описание,
+        # %w — ветер, %h — влажность, %u — UV-индекс
+        url = (
+            "https://wttr.in/"
+            + urllib.parse.quote(city)
+            + "?format=j1&lang=ru"
+        )
         with urllib.request.urlopen(url, timeout=8) as r:
-            return json.load(r)
+            data = json.load(r)
+        # Адаптируем под старый интерфейс
+        cur = data["current_condition"][0]
+        result = {
+            "current": {
+                "temperature_2m": float(cur["temp_C"]),
+                "apparent_temperature": float(cur["FeelsLikeC"]),
+                "weather_code": 0,  # маппинг кодов — ниже в _weather_ru
+                "wind_speed_10m": float(cur["windspeedKmph"]),
+                "relative_humidity_2m": float(cur["humidity"]),
+            },
+            "daily": {
+                "temperature_2m_max": [float(d["maxtempC"]) for d in data["weather"][:3]],
+                "temperature_2m_min": [float(d["mintempC"]) for d in data["weather"][:3]],
+                "weather_code": [0, 0, 0],
+                "uv_index_max": [float(cur.get("uvIndex", 0))] * 3,
+            },
+        }
+        # Описание сохраняем отдельно для _format_current
+        result["current"]["_desc_ru"] = cur["lang_ru"][0]["value"] if "lang_ru" in cur else cur["weatherDesc"][0]["value"]
+        return result
 
     @staticmethod
     def _weather_ru(code: int) -> str:

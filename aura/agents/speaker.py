@@ -77,6 +77,7 @@ class AgentSpeaker(MicroAgent):
             self.is_speaking = True
             try:
                 text = self._make_text_smart(text)
+                # FIX: сброс флага после речи
                 if os.path.exists(self.piper_cmd) and os.path.exists(self.voice_path):
                     import tempfile
                     with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as f:
@@ -88,7 +89,7 @@ class AgentSpeaker(MicroAgent):
                     _cmd = [self.piper_cmd, '-m', self.voice_path, '-i', text_file, '-f', wav_file]
                     if _speed != 1.0:
                         _cmd.extend(["--length_scale", str(1.0 / _speed)])
-                    subprocess.run(_cmd, capture_output=True)
+                    subprocess.run(_cmd, capture_output=True, timeout=15)
                     self.aplay_process = subprocess.Popen(
                         ['paplay', wav_file],
                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

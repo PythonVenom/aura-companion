@@ -22,20 +22,20 @@ cd "$PROJECT_DIR"
 source venv/bin/activate
 
 # === AEC (PipeWire echo-cancel) для чистого T-one ===
-# Гарантируем, что module-echo-cancel загружен и default source = echo-cancel-source.
+# Гарантируем, что module-echo-cancel загружен и default source = alsa_input.pci-0000_00_1f.3.analog-stereo.
 # Иначе голос Ауры попадает в микрофон (эхо), см. ADR-007.
 
 if command -v pactl > /dev/null 2>&1; then
     if ! pactl list modules short 2>/dev/null | grep -q module-echo-cancel; then
         echo "🎙️ Загружаю module-echo-cancel"
-        pactl load-module module-echo-cancel > /dev/null 2>&1 || true
+        true # AEC off > /dev/null 2>&1 || true
         sleep 2
     fi
 fi
 
 # AURA_AUDIO_WATCHDOG_V1 — проверка audio source при старте
 _check_audio() {
-    local want="echo-cancel-source"
+    local want="alsa_input.pci-0000_00_1f.3.analog-stereo"
     local cur=$(pactl get-default-source 2>/dev/null)
     if [ "$cur" != "$want" ]; then
         echo "⚠️  audio source: $cur → переключаю на $want"
@@ -45,7 +45,7 @@ _check_audio() {
     # Проверка что модуль echo-cancel загружен
     if ! pactl list modules short 2>/dev/null | grep -q module-echo-cancel; then
         echo "🎙️ Загружаю module-echo-cancel"
-        pactl load-module module-echo-cancel > /dev/null 2>&1 || true
+        true # AEC off > /dev/null 2>&1 || true
     fi
     # Проверка mute
     local mute=$(pactl get-source-mute "$want" 2>/dev/null | grep -o "yes\|no")

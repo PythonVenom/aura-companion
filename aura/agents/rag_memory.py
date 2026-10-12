@@ -232,7 +232,7 @@ class AgentRAGMemory(BaseAgent):
         try:
             data = json.dumps({
                 "model": self.EMBED_MODEL,
-                "prompt": text,
+                "input": text,
             }).encode("utf-8")
 
             req = urllib.request.Request(
@@ -242,7 +242,8 @@ class AgentRAGMemory(BaseAgent):
             )
             with urllib.request.urlopen(req, timeout=10) as response:
                 result = json.loads(response.read().decode("utf-8"))
-                return result.get("embedding")
+                _embs = result.get("embeddings") or result.get("embedding")
+                return _embs[0] if isinstance(_embs, list) else _embs
         except Exception as e:
             print(f"⚠️ Ошибка эмбеддинга: {e}")
             return None

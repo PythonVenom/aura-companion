@@ -769,14 +769,29 @@ class AuraOrchestrator:
                     except Exception as e:
                         print(f"⚠️ Журнал не сохранил: {e}")
 
-                # Ждём окончания речи — по is_speaking, не aplay_process
-                # >>> AURA_HANG_FIX_V1
+                # Ждём окончания речи — по is_speaking И aplay_process
+                # >>> AURA_HANG_FIX_V2
+                # Не форсируем, пока paplay играет (длинные ответы 20-30с).
+                # Форсируем только если is_speaking=True, а aplay мёртв (hang).
                 _speak_deadline = time.monotonic() + 30.0
-                while self.speaker.is_speaking and time.monotonic() < _speak_deadline:
+                while time.monotonic() < _speak_deadline:
+                    if not self.speaker.is_speaking:
+                        break
+                    _ap = getattr(self.speaker, 'aplay_process', None)
+                    if _ap is not None and _ap.poll() is None:
+                        # paplay жив → реально играем, продлеваем дедлайн
+                        _speak_deadline = time.monotonic() + 30.0
                     time.sleep(0.05)
                 if self.speaker.is_speaking:
-                    print('⚠️ speaker.is_speaking не сброшен за 30s — форсирую')
-                    self.speaker.is_speaking = False
+                    _ap = getattr(self.speaker, 'aplay_process', None)
+                    if _ap is None or _ap.poll() is not None:
+                        print('⚠️ speaker.is_speaking завис (aplay мёртв) — форсирую')
+                        self.speaker.is_speaking = False
+                        if _ap is not None:
+                            try:
+                                _ap.kill()
+                            except Exception:
+                                pass
                 self._set_barge_speaking(False)
                 self._duck_off()
                 # >>> AURA_ECHO_FIX_V2

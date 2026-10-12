@@ -268,7 +268,9 @@ class BriefingAgent(BaseAgent):
             "| ADR-индекс | `~/aura-companion/docs/adr/README.md` |",
             "| Роадмап | `~/aura_project/docs/ROADMAP_NEXT.md` |",
             "| Заморозка | `~/aura_private/plans/FROZEN.md` |",
-            "| Голосовые команды | `~/aura_private/plans/voice_commands.md` |",
+            "| Голосовые команды | `~/aura_private/plans/voice_commands.md` |
+| 🔴 RAG-INDEX (что Aura помнит) | `~/aura_private/docs/RAG-INDEX.md` |
+| FROZEN (до денег) | `~/aura_private/plans/FROZEN.md` |",
             "",
         ]
 

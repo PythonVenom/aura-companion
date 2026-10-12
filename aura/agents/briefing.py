@@ -276,7 +276,7 @@ class BriefingAgent(BaseAgent):
     # 10. ДИРЕКТИВЫ
     def _s10_directives(self) -> list[str]:
         path = HOME / "aura-companion/DIRECTIVES.md"
-        L = ["## 10. ДИРЕКТИВЫ (Д1-Д34)", ""]
+        L = ["## 10. ДИРЕКТИВЫ (Д1-Д42)", ""]
         if path.exists():
             L.append("```")
             L += path.read_text(encoding="utf-8").strip().splitlines()

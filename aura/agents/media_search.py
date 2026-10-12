@@ -34,9 +34,23 @@ class AgentMediaSearch(BaseAgent):
 
     name = "media_search"
 
+    RESUME_KEYWORDS = ("продолжить фильм", "продолжи фильм",
+                       "продолжить видео", "продолжи видео",
+                       "смотреть дальше", "продолжить смотреть")
+    FULLSCREEN_KEYWORDS = ("на весь экран", "разверни фильм",
+                           "разверни видео", "полноэкранный",
+                           "fullscreen фильм", "разверни плеер")
+
     FIND_KEYWORDS = ("найди музыку", "найди песню", "найди фильм",
                      "включи музыку", "включи песню", "включи фильм",
                      "поставь музыку", "поставь песню", "поставь фильм",
+                     # F-103: продолжение фильма
+                     "продолжить фильм", "продолжи фильм",
+                     "продолжить видео", "продолжи видео",
+                     "смотреть дальше", "смотреть фильм",
+                     # F-103: fullscreen
+                     "на весь экран", "разверни фильм",
+                     "разверни видео", "полноэкранный",
                      "включи трек", "поставь трек")
     LIST_MUSIC_KEYWORDS = ("список музыки", "какая музыка", "вся музыка", "список треков")
     LIST_MOVIE_KEYWORDS = ("список фильмов", "какие фильмы", "все фильмы")
@@ -88,7 +102,9 @@ class AgentMediaSearch(BaseAgent):
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
         keywords = (
-            self.FIND_KEYWORDS
+            self.RESUME_KEYWORDS
+            + self.FULLSCREEN_KEYWORDS
+            + self.FIND_KEYWORDS
             + self.LIST_MUSIC_KEYWORDS
             + self.LIST_MOVIE_KEYWORDS
             + self.RESCAN_KEYWORDS
@@ -110,6 +126,14 @@ class AgentMediaSearch(BaseAgent):
 
         if any(kw in text for kw in self.LIST_MOVIE_KEYWORDS):
             return AgentResponse.ok(self.list_movies(), self.name)
+
+        # F-103: resume последнего фильма
+        if any(kw in text for kw in self.RESUME_KEYWORDS):
+            return AgentResponse.ok(self.resume_last_movie(), self.name)
+
+        # F-103: fullscreen плеера
+        if any(kw in text for kw in self.FULLSCREEN_KEYWORDS):
+            return AgentResponse.ok(self.fullscreen_player(), self.name)
 
         if any(kw in text for kw in self.FIND_KEYWORDS):
             query = self._extract_query(text)

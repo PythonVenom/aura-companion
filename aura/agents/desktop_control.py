@@ -26,8 +26,33 @@ def _has(cmd: str) -> bool:
 
 
 # ── Backend: KDE Plasma 6 ────────────────────────────────
+def _desktop_count() -> int:
+    """Bug 29: в Plasma 6 count×rows = всего столов (было count в P5)."""
+    if not _has("qdbus6"):
+        return 0
+    with contextlib.suppress(Exception):
+        c = subprocess.run(
+            ["qdbus6", "org.kde.KWin", "/VirtualDesktopManager",
+             "org.kde.KWin.VirtualDesktopManager.count"],
+            capture_output=True, text=True, timeout=3,
+        )
+        r = subprocess.run(
+            ["qdbus6", "org.kde.KWin", "/VirtualDesktopManager",
+             "org.kde.KWin.VirtualDesktopManager.rows"],
+            capture_output=True, text=True, timeout=3,
+        )
+        if c.returncode == 0 and r.returncode == 0:
+            cnt = c.stdout.strip()
+            rows = r.stdout.strip()
+            if cnt.isdigit() and rows.isdigit():
+                return int(cnt) * int(rows)
+    return 0
+
+
 def next_desktop() -> bool:
-    """Следующий рабочий стол."""
+    """Следующий рабочий стол. False если столов < 2."""
+    if _desktop_count() == 1:
+        return False
     # KDE Plasma 6 через qdbus
     if _has("qdbus6"):
         with contextlib.suppress(Exception):
@@ -64,7 +89,9 @@ def next_desktop() -> bool:
 
 
 def prev_desktop() -> bool:
-    """Предыдущий рабочий стол."""
+    """Предыдущий рабочий стол. False если столов < 2."""
+    if _desktop_count() == 1:
+        return False
     if _has("qdbus6"):
         with contextlib.suppress(Exception):
             r = subprocess.run(

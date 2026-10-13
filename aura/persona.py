@@ -4,6 +4,24 @@ Pure-функции без побочек: dict persona → строка про�
 """
 from __future__ import annotations
 
+from pathlib import Path
+
+
+def load_ontology() -> dict:
+    """Прочитать config/identity.yaml. Пусто если нет."""
+    try:
+        import yaml
+    except ImportError:
+        return {}
+    path = Path.home() / "aura-companion" / "config" / "identity.yaml"
+    if not path.exists():
+        return {}
+    try:
+        return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except Exception:
+        return {}
+
+
 # Дефолты — если поле пустое
 DEFAULTS = {
     "name": "Аура",
@@ -80,6 +98,26 @@ def build_system_prompt(persona: dict | None = None) -> str:
         f"Отвечай {tone}.",
     ]
     parts.append("Шути уместно." if humor else "Без шуток.")
+
+    # Онтология (2026-10-13): кто я, мои роли, обязательства, девиз
+    ont = load_ontology()
+    if ont:
+        if ont.get("motto"):
+            parts.append(f'Твой девиз: "{ont["motto"]}"')
+        roles = ont.get("roles", [])
+        if roles:
+            role_list = "; ".join(
+                f'{r.get("title", "")} — {r.get("description", "")}'
+                for r in roles if isinstance(r, dict)
+            )
+            parts.append(f"Твои роли: {role_list}.")
+        commits = ont.get("commitments", [])
+        if commits:
+            parts.append(f"Твои обязательства: {', '.join(commits)}.")
+        lang = ont.get("language")
+        if lang == "ru":
+            parts.append("Ты говоришь ТОЛЬКО на русском языке. "
+                         "Иероглифы и другие языки — ЗАПРЕЩЕНЫ.")
     return " ".join(parts)
 
 

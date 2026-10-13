@@ -21,6 +21,16 @@ def cmd_check(args):
     print(format_report())
 
 
+def cmd_serve(args):
+    """Запустить MCP stdio сервер (для Claude Desktop, Cursor, etc)."""
+    if getattr(args, "mcp", False):
+        from aura.mcp_server import main as mcp_main
+        mcp_main()
+    else:
+        print("Usage: aura serve --mcp", file=sys.stderr)
+        sys.exit(1)
+
+
 def cmd_health(args):
     """Health check: JSON для мониторинга."""
     out = {"status": "ok", "components": {}}
@@ -486,6 +496,9 @@ def main():
     p_rem.add_argument("every_minutes", nargs="?", type=int, default=60)
     p_rem.set_defaults(func=cmd_reminder)
 
+    p_serve = sub.add_parser("serve", help="MCP server (stdio)")
+    p_serve.add_argument("--mcp", action="store_true", help="MCP stdio режим")
+    p_serve.set_defaults(func=cmd_serve)
     sub.add_parser("timers", help="список активных таймеров").set_defaults(func=cmd_timers)
     sub.add_parser("reminders", help="список напоминаний").set_defaults(func=cmd_reminders)
 

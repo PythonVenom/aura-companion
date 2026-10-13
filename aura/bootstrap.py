@@ -18,6 +18,8 @@ from pathlib import Path
 
 from aura.agents import (
     AgentAppLauncher,
+    AgentTuyaBLE,
+    AgentWineLauncher,
     AgentAtSpi,
     AgentAudioPult,
     AgentAudioRouter,
@@ -404,6 +406,10 @@ def build_orchestrator() -> Orchestrator:
 
     # --- Уровень 9: медиа (перехватывает "включи") ---
     _try_register(orch, AgentMediaSearch, modules_config)
+
+    # Наши новые агенты (13.10.2026) — до Internet, чтобы Internet остался последним
+    _try_register(orch, AgentWineLauncher, modules_config)   # #34
+    _try_register(orch, AgentTuyaBLE, modules_config)        # #29
 
     # --- Уровень 10: Internet — последним (общий "найди") ---
     _try_register(orch, AgentInternet, modules_config)

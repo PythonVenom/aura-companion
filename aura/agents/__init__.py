@@ -44,6 +44,8 @@ from aura.agents.vk_music import AgentVKMusic
 from aura.agents.vk_web import AgentVKWeb
 from aura.agents.window_control import AgentWindowControl
 from aura.agents.window_manager import AgentWindowManager
+from aura.agents.wine_launcher import AgentWineLauncher
+from aura.agents.tuya_ble import AgentTuyaBLE
 
 __all__ = [
     "AgentAppLauncher",
@@ -84,5 +86,7 @@ __all__ = [
     "AgentVision",
     "AgentWindowControl",
     "AgentWindowManager",
+    "AgentWineLauncher",
+    "AgentTuyaBLE",
     "VoiceJournal",
 ]

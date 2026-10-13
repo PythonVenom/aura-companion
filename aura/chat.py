@@ -46,8 +46,8 @@ def _split_sentences(buffer: str) -> list[str]:
     return parts
 
 
-async def _stream_and_speak(orch, text: str, speaker) -> str:
-    """#103: streaming ответа LLM + озвучка по предложениям.
+async def _stream_and_speak(orch, text: str, speaker, barge_in=None) -> tuple[str, bool]:
+    """#103 + Bug 33a: streaming + barge-in совместимость.
 
     Perceived latency: 1.2с → 0.3с (первое предложение говорится
     пока модель дописывает остаток).
@@ -56,6 +56,14 @@ async def _stream_and_speak(orch, text: str, speaker) -> str:
     if brain is None or not hasattr(brain, "stream"):
         # Fallback: старый путь — НЕ озвучиваем тут
         return await orch.process(text), False
+
+    # Bug 33a: включить VAD barge-in на время речи
+    if barge_in is not None:
+        try:
+            barge_in.clear_buffer()
+            barge_in.set_aura_speaking(True)
+        except Exception:
+            pass
 
     buffer = ""
     spoken = ""
@@ -80,7 +88,6 @@ async def _stream_and_speak(orch, text: str, speaker) -> str:
             buffer = buffer[len("".join(sentences)):].lstrip()
 
     try:
-        loop = asyncio.get_event_loop()
         for chunk in brain.stream(text):
             buffer += chunk
             full.append(chunk)
@@ -90,6 +97,13 @@ async def _stream_and_speak(orch, text: str, speaker) -> str:
         _flush(force=True)
     except Exception as e:
         return f"❌ {e}", False
+    finally:
+        # Bug 33a: выключить barge-in
+        if barge_in is not None:
+            try:
+                barge_in.set_aura_speaking(False)
+            except Exception:
+                pass
 
     return "".join(full), spoke_any
 
@@ -111,6 +125,29 @@ async def _main_loop() -> int:
         print("🔊 Speaker активен")
     except Exception as e:
         print(f"⚠️ Speaker недоступен: {e}")
+
+    # Bug 33a: barge_in + stop_command («Аура стоп»)
+    barge_in = None
+    try:
+        from aura.agents.barge_in import AgentBargeIn
+        from aura.core.stop_command import recognize_stop
+        barge_in = AgentBargeIn()
+        if barge_in.ready:
+            def _on_barge_in():
+                if speaker is None or barge_in is None:
+                    return
+                try:
+                    pcm = barge_in.get_recent_pcm()
+                    if recognize_stop(pcm):
+                        speaker.stop_speaking()
+                        barge_in.clear_buffer()
+                        print("🛑 Стоп по голосу")
+                except Exception as e:
+                    print(f"⚠️ barge-in: {e}")
+            barge_in.start(on_speech=_on_barge_in)
+            print("🎙️ Barge-in активен (Bug 33a)")
+    except Exception as e:
+        print(f"⚠️ Barge-in не подключён: {e}")
 
     while True:
         try:
@@ -144,21 +181,32 @@ async def _main_loop() -> int:
                 text = getattr(resp, "text", None) or str(resp)
             else:
                 # #103: streaming через brain + озвучка по предложениям
-                text, spoke = await _stream_and_speak(orch, raw, speaker)
+                text, spoke = await _stream_and_speak(orch, raw, speaker, barge_in)
 
             print(f"🤖 {text}")
 
             # Озвучить (если стриминг уже не озвучил)
             if speaker is not None and text and not spoke:
                 try:
+                    if barge_in is not None:
+                        barge_in.clear_buffer()
+                        barge_in.set_aura_speaking(True)
                     speaker.say(text)
                     speaker.wait(timeout=30)
                 except Exception as e:
                     print(f"⚠️ speaker: {e}")
+                finally:
+                    if barge_in is not None:
+                        barge_in.set_aura_speaking(False)
 
         except Exception as e:
             print(f"❌ Ошибка: {e}")
 
+    if barge_in is not None:
+        try:
+            barge_in.stop()
+        except Exception:
+            pass
     print("🦾 До связи.")
     return 0
 

@@ -144,3 +144,6 @@ htmlcov/
 profiles/*/db.key
 *.key
 !config/*.key
+
+# Разрешить SVG-скриншоты для README
+!docs/screenshots/*.svg

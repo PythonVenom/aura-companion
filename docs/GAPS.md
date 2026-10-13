@@ -421,3 +421,21 @@
 ### Открыт новый долг
 - get_profile() не переключает state_db на profiles/<name>/state.db
 - Все профили используют ~/.config/aura/state.db (общая БД)
+
+## ЗАПИСЬ 2026-10-13 (15:50): Captain + Evening Ritual
+
+### Сделано
+- aura/agents/captain.py (134 строки) — статус, приоритеты, итоги дня
+- aura/agents/evening_ritual.py (137 строк) — итоги дня (22:00)
+- aura-evening.timer — systemd таймер 22:00
+- Агентов: 89 → 91
+
+### Наука
+- Campbell 1949 (monomyth) — капитан как архетип
+- Duhigg 2012 (habit loop) — ритуалы
+- Lally 2010 — привычка за 66 дней
+- Seligman 2011 — маленькие победы
+
+### Закрыт долг
+- GAPS #9 Captain agent — ЗАКРЫТО
+- GAPS #10 Rituals (утро/вечер) — ЗАКРЫТО (вечерний)

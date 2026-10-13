@@ -28,6 +28,7 @@ Fallback:
 from __future__ import annotations
 
 import json
+import subprocess
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -47,6 +48,55 @@ def _http_get(url: str, timeout: float = TIMEOUT) -> dict | list | None:
             return json.loads(r.read().decode("utf-8"))
     except Exception:
         return None
+
+
+def check_binding(port: int = DEFAULT_PORT) -> dict:
+    """Проверить, что CDP слушает ТОЛЬКО на localhost.
+
+    Наука: OWASP A05:2021 (Security Misconfiguration).
+    Chrome CDP не имеет auth (by design). Единственная защита —
+    network isolation. Если слушает 0.0.0.0 — любой в сети управляет
+    браузером.
+
+    Returns:
+        {"binding": "localhost"|"public"|"unknown",
+         "safe": bool,
+         "raw": "<строка из ss>"}
+    """
+    result = {"binding": "unknown", "safe": False, "raw": ""}
+    try:
+        r = subprocess.run(
+            ["ss", "-tuln"],
+            capture_output=True, text=True, timeout=2,
+        )
+        for line in r.stdout.splitlines():
+            # Ищем строку с ":<port>"
+            if f":{port}" in line:
+                result["raw"] = line.strip()
+                # localhost: 127.0.0.1:<port> или [::1]:<port>
+                if f"127.0.0.1:{port}" in line or f"[::1]:{port}" in line:
+                    result["binding"] = "localhost"
+                    result["safe"] = True
+                # public: 0.0.0.0:<port> или *:<port>
+                elif f"0.0.0.0:{port}" in line or f"*:{port}" in line:
+                    result["binding"] = "public"
+                    result["safe"] = False
+                break
+    except Exception:
+        pass
+    return result
+
+
+def warn_if_exposed(port: int = DEFAULT_PORT) -> str | None:
+    """Вернуть warning-строку если CDP открыт наружу. None если OK."""
+    check = check_binding(port)
+    if check["binding"] == "public":
+        return (
+            f"⚠️ CDP порт {port} открыт для ВСЕЙ сети! "
+            f"Любой может управлять браузером. "
+            f"Запусти: chromium --remote-debugging-address=127.0.0.1"
+        )
+    return None
 
 
 def is_available(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> bool:
@@ -149,5 +199,6 @@ def get_active_tab(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> dict |
 __all__ = [
     "is_available", "discover", "list_tabs",
     "close_tab", "new_tab", "navigate", "get_active_tab",
+    "check_binding", "warn_if_exposed",
     "DEFAULT_HOST", "DEFAULT_PORT",
 ]

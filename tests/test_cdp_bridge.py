@@ -166,3 +166,62 @@ def test_default_port():
 
 def test_default_host():
     assert CDP.DEFAULT_HOST == "127.0.0.1"
+
+
+# === Bug 110: check_binding / warn_if_exposed ===
+
+def test_check_binding_localhost():
+    """CDP на 127.0.0.1 → safe."""
+    fake = "tcp LISTEN 0 128 127.0.0.1:9222 0.0.0.0:*\n"
+    with patch("aura.core.cdp_bridge.subprocess.run") as m:
+        m.return_value = MagicMock(returncode=0, stdout=fake)
+        result = CDP.check_binding()
+    assert result["binding"] == "localhost"
+    assert result["safe"] is True
+
+
+def test_check_binding_public():
+    """CDP на 0.0.0.0 → не safe."""
+    fake = "tcp LISTEN 0 128 0.0.0.0:9222 0.0.0.0:*\n"
+    with patch("aura.core.cdp_bridge.subprocess.run") as m:
+        m.return_value = MagicMock(returncode=0, stdout=fake)
+        result = CDP.check_binding()
+    assert result["binding"] == "public"
+    assert result["safe"] is False
+
+
+def test_check_binding_unknown_when_not_listening():
+    """Порт не слушает → unknown."""
+    with patch("aura.core.cdp_bridge.subprocess.run") as m:
+        m.return_value = MagicMock(returncode=0, stdout="")
+        result = CDP.check_binding()
+    assert result["binding"] == "unknown"
+    assert result["safe"] is False
+
+
+def test_check_binding_handles_ss_exception():
+    """ss упал → unknown, не краш."""
+    with patch("aura.core.cdp_bridge.subprocess.run",
+               side_effect=OSError("ss not found")):
+        result = CDP.check_binding()
+    assert result["binding"] == "unknown"
+
+
+def test_warn_if_exposed_public():
+    """При public → warning строка."""
+    fake = "tcp LISTEN 0 128 0.0.0.0:9222 0.0.0.0:*\n"
+    with patch("aura.core.cdp_bridge.subprocess.run") as m:
+        m.return_value = MagicMock(returncode=0, stdout=fake)
+        w = CDP.warn_if_exposed()
+    assert w is not None
+    assert "открыт" in w
+    assert "127.0.0.1" in w
+
+
+def test_warn_if_exposed_localhost():
+    """При localhost → None (OK)."""
+    fake = "tcp LISTEN 0 128 127.0.0.1:9222 0.0.0.0:*\n"
+    with patch("aura.core.cdp_bridge.subprocess.run") as m:
+        m.return_value = MagicMock(returncode=0, stdout=fake)
+        w = CDP.warn_if_exposed()
+    assert w is None

@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 
 from aura.agents.base import MicroAgent
+from aura.core.notifications import NotifLevel, notify
 from aura.core.protocol import AgentRequest, AgentResponse
 
 STATE_DB = Path.home() / ".local/share/aura/proactive.db"
@@ -135,6 +136,13 @@ class AgentProactiveAlert(MicroAgent):
         """Публичный API: проверить, нужна ли эскалация. True = тревога."""
         if self._since_last() >= self._threshold() and not self._get("alert_active", False):
             self._set("alert_active", True)
+            since = self._since_last()
+            notify(
+                NotifLevel.P0,
+                "Aura: тревога по тишине",
+                f"Нет контакта {since:.1f}ч (порог {self._threshold():.1f}ч).",
+                agent=self.name,
+            )
             return True
         return False
 

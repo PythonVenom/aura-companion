@@ -56,19 +56,23 @@ from aura.agents.adaptive_reminders import AgentAdaptiveReminders
 from aura.agents.blind import AgentBlind
 from aura.agents.blind_reply import AgentBlindReply
 from aura.agents.bpm import AgentBPM
+from aura.agents.briefing import BriefingAgent
+from aura.agents.calendar import AgentCalendar
 from aura.agents.call import AgentCall
 from aura.agents.capability_agent import AgentCapabilities
 from aura.agents.care import CareAgent
 from aura.agents.cec import AgentCEC
 from aura.agents.construction import AgentConstruction
-from aura.agents.context_agent import AgentRecentActivity
+from aura.agents.deep_check_agent import AgentDeepCheck
+from aura.agents.deepseek_web import AgentDeepSeekWeb
+from aura.agents.desktop_control import AgentDesktopControl
 from aura.agents.dictation import AgentDictation
 from aura.agents.email_agent import AgentEmail
 from aura.agents.emotion_voice import AgentEmotionVoice
 from aura.agents.fall import AgentFall
 from aura.agents.federated_adapter import AgentFederatedAdapter
 from aura.agents.fin_elder import AgentFinElder
-from aura.agents.focus_agent import AgentFocusMode
+from aura.agents.greeting import AgentGreeting
 from aura.agents.hands_free import AgentHandsFree
 from aura.agents.health import AgentHealth
 from aura.agents.health_twin import AgentHealthTwin
@@ -76,12 +80,17 @@ from aura.agents.homeassistant import AgentHomeAssistant
 from aura.agents.journal_mood import VoiceJournal
 from aura.agents.kid_structure import AgentKidStructure
 from aura.agents.kid_therapy import AgentKidTherapy
+from aura.agents.knowledge import AgentKnowledge
 from aura.agents.massage import AgentMassage
 from aura.agents.matter import AgentMatter
+from aura.agents.media_pult import AgentMediaPult
 from aura.agents.meds import AgentMeds
 from aura.agents.meds_offline import AgentMedsOffline
+from aura.agents.mouse import AgentMouse
 from aura.agents.onboarding import AgentOnboarding
 from aura.agents.open_resolver import AgentOpenResolver
+from aura.agents.parallel_universe import AgentParallelUniverse
+from aura.agents.pc_control import AgentPCControl
 from aura.agents.planner_agent import AgentPlanner
 from aura.agents.predictor import AgentPredictor
 from aura.agents.proactive_alert import AgentProactiveAlert
@@ -94,6 +103,7 @@ from aura.agents.sensors import AgentSensors
 from aura.agents.sms_bridge import AgentSMS
 from aura.agents.sos import AgentSOS
 from aura.agents.soul_talk import AgentSoulTalk
+from aura.agents.task_manager import AgentTaskManager
 from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.tutorial import AgentTutorial
 from aura.agents.unified_router import AgentUnifiedRouter
@@ -279,6 +289,21 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentHealth, modules_config)
     _try_register(orch, AgentVault, modules_config)
 
+    # --- Уровень 1.5: агенты из project (merge 2026-10-13) ---
+    # Порядок: специфичные → общие. greeting последним (перехватывает «привет»).
+    _try_register(orch, AgentDeepCheck, modules_config)       # проверь ауру
+    _try_register(orch, BriefingAgent, modules_config)        # брифинг/рапорт
+    _try_register(orch, AgentDeepSeekWeb, modules_config)     # дядя р2
+    _try_register(orch, AgentKnowledge, modules_config)       # зачитай файл
+    _try_register(orch, AgentTaskManager, modules_config)     # задачи
+    _try_register(orch, AgentCalendar, modules_config)        # запиши/напомни
+    _try_register(orch, AgentParallelUniverse, modules_config)
+    _try_register(orch, AgentDesktopControl, modules_config)  # рабочие столы
+    _try_register(orch, AgentMouse, modules_config)
+    _try_register(orch, AgentPCControl, modules_config)       # яркость/громкость
+    _try_register(orch, AgentMediaPult, modules_config)       # включи ютуб
+    _try_register(orch, AgentGreeting, modules_config)        # привет (широкий)
+
     # --- Уровень 2: узкий ducking — ДО audio_pult ---
     _try_register(orch, AgentMusicDucker, modules_config)
     _try_register(orch, AgentMusicLocal, modules_config)
@@ -334,10 +359,6 @@ def build_orchestrator() -> Orchestrator:
     # v2.5: приоритет для автора
     orch.registry.register(CareAgent())
     orch.registry.register(AgentHandsFree())
-    orch.registry.register(AgentRecentActivity())
-    orch.registry.register(AgentFocusMode())
-    orch.registry.register(AgentRecon())
-    orch.registry.register(VoiceJournal())
     _load_plugins(orch)
     return orch
 

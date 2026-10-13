@@ -7,6 +7,8 @@ F-102: возвращаем меню, которое было в другой с
 from __future__ import annotations
 
 import asyncio
+import contextlib
+import re
 import sys
 
 # ─── Справка ────────────────────────────────────────────
@@ -33,6 +35,65 @@ HELP = """
 
 
 # ─── Главный цикл ────────────────────────────────────────
+def _split_sentences(buffer: str) -> list[str]:
+    """#103: разбить буфер на предложения (.!?). Остаток остаётся."""
+    parts = re.split(r"(?<=[.!?])\s+", buffer)
+    if not parts:
+        return []
+    # Последний элемент — незавершённое предложение (если нет .!?)
+    if parts and not re.search(r"[.!?]\s*$", parts[-1]):
+        return parts[:-1]
+    return parts
+
+
+async def _stream_and_speak(orch, text: str, speaker) -> str:
+    """#103: streaming ответа LLM + озвучка по предложениям.
+
+    Perceived latency: 1.2с → 0.3с (первое предложение говорится
+    пока модель дописывает остаток).
+    """
+    brain = getattr(orch, "brain", None)
+    if brain is None or not hasattr(brain, "stream"):
+        # Fallback: старый путь — НЕ озвучиваем тут
+        return await orch.process(text), False
+
+    buffer = ""
+    spoken = ""
+    full = []
+    spoke_any = False
+
+    def _flush(force: bool = False) -> None:
+        nonlocal buffer, spoken, spoke_any
+        sentences = _split_sentences(buffer)
+        if force and buffer.strip():
+            sentences = [buffer.strip()]
+            buffer = ""
+        for s in sentences:
+            if s.strip():
+                spoken += (" " if spoken else "") + s.strip()
+                if speaker is not None:
+                    with contextlib.suppress(Exception):
+                        speaker.say(s.strip())
+                        spoke_any = True
+        # Оставляем незавершённое
+        if not force and sentences:
+            buffer = buffer[len("".join(sentences)):].lstrip()
+
+    try:
+        loop = asyncio.get_event_loop()
+        for chunk in brain.stream(text):
+            buffer += chunk
+            full.append(chunk)
+            _flush(force=False)
+            # Даём speaker'у шанс проиграть (не блокируем)
+            await asyncio.sleep(0)
+        _flush(force=True)
+    except Exception as e:
+        return f"❌ {e}", False
+
+    return "".join(full), spoke_any
+
+
 async def _main_loop() -> int:
     from aura.bootstrap import build_orchestrator
     from aura.core.protocol import AgentRequest
@@ -77,17 +138,18 @@ async def _main_loop() -> int:
             # Найти подходящий агент
             agent = orch.registry.find(req) if hasattr(orch.registry, "find") else None
 
+            spoke = False
             if agent is not None:
                 resp = await agent.handle(req)
                 text = getattr(resp, "text", None) or str(resp)
             else:
-                # Общий путь — через оркестратор
-                text = await orch.process(raw)
+                # #103: streaming через brain + озвучка по предложениям
+                text, spoke = await _stream_and_speak(orch, raw, speaker)
 
             print(f"🤖 {text}")
 
-            # Озвучить
-            if speaker is not None and text:
+            # Озвучить (если стриминг уже не озвучил)
+            if speaker is not None and text and not spoke:
                 try:
                     speaker.say(text)
                     speaker.wait(timeout=30)

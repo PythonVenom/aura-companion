@@ -41,6 +41,7 @@ from aura.agents.tool_router import AgentToolRouter
 from aura.agents.updates import AgentUpdates
 from aura.agents.vault import AgentVault
 from aura.agents.vision import AgentVision
+from aura.agents.wellness import AgentWellness
 from aura.agents.vk_music import AgentVKMusic
 from aura.agents.vk_web import AgentVKWeb
 from aura.agents.window_control import AgentWindowControl
@@ -86,6 +87,7 @@ __all__ = [
     "AgentVKWeb",
     "AgentVault",
     "AgentVision",
+    "AgentWellness",
     "AgentWindowControl",
     "AgentWindowManager",
     "AgentWineLauncher",

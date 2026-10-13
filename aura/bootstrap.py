@@ -50,6 +50,7 @@ from aura.agents import (
     AgentUpdates,
     AgentVault,
     AgentVision,
+    AgentWellness,
     AgentVKMusic,
     AgentVKWeb,
     AgentWindowControl,
@@ -413,6 +414,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentTuyaBLE, modules_config)        # #29
 
     _try_register(orch, AgentModules, modules_config)       # Блок 6
+    _try_register(orch, AgentWellness, modules_config)     # Блок 7
     # --- Уровень 10: Internet — последним (общий "найди") ---
     _try_register(orch, AgentInternet, modules_config)
     # v2.5: приоритет для автора

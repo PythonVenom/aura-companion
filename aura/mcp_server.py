@@ -138,7 +138,7 @@ def tool_doctor() -> str:
 
 def _handle(msg: dict):
     method = msg.get("method")
-    id_ = msg.get("id")
+    msg.get("id")
     params = msg.get("params", {})
 
     if method == "initialize":

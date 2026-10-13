@@ -139,3 +139,16 @@
 - `~/aura-companion` — master ядра и логики
 - `~/aura_project` — build-цех ISO + legacy архив
 - Никаких копий между проектами — только перенос в companion
+
+## ЗАПИСЬ 2026-10-13 (12:00): Свой venv для companion
+
+### Сделано
+- venv.symlink_bak (симлинк на aura_project/venv) — удалён
+- Создан свой venv: `/home/pythonvenom/aura-companion/venv`
+- Установлено 172 пакета из старого freeze
+- `pip install -e .` → aura-companion 8.0.0-rc1, editable location = companion
+- Демон перезапущен, PID 26317 из нового venv
+- Проверка: import aura → companion, ошибок нет
+
+### Закрыт долг
+- "venv companion — симлинк на aura_project/venv (нужен свой)" — ЗАКРЫТО

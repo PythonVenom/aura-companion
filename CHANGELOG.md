@@ -1,5 +1,36 @@
 # Changelog
 
+## v8.2.0 — 2026-10-13
+
+### Added
+- AppImage (Блок 3) — автономная упаковка (pydantic, webrtcvad, numpy<2)
+- Notifications P0-P3 — notify-send + SQLite history (17 тестов)
+- Profile Ledger Ed25519 — подпись профилей (17 тестов)
+- User Profile — агрегатор 5 файлов (22 теста)
+- Security Agent — ClamAV + auditd + signed reports (22 теста)
+- Curiosity Engine — information gap theory (26 тестов)
+- AgentCANBus — pub/sub шина агентов (34 теста)
+- WineLauncher — запуск .exe через wine (18 тестов)
+- Configurator TUI — 4 вкладки (8 тестов)
+- AgentWellness — 4-7-8, Box, Deep (20 тестов)
+- AgentModules — категории агентов (16 тестов)
+- AgentTuyaBLE — Bluetooth (20 тестов)
+- Distro-порты: Astra, Эльбрус E2K, ARM, Fedora (28 тестов)
+- GPU-тесты + 2 bugfix (20 тестов)
+- Stress-test 24/7 — soak-тест (12 тестов)
+- Скриншоты README (Studio + Configurator SVG)
+
+### Changed
+- Агентов: 92 → 96
+- Тестов: 1656 → 1944+
+- Модулей в ядре: +10
+
+### Fixed
+- detect_gpu: `ati` в `compATIble` → Intel определялся как AMD
+- model_selector.select: мутация глобального PROFILES (deepcopy)
+
+## v8.1.0 — (см. ниже)
+
 ## v2.5.0 — 2026-10-02 (Опора)
 
 ### Added

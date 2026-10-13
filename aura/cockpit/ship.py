@@ -9,7 +9,7 @@ import contextlib
 import subprocess
 from pathlib import Path
 
-REPO = Path("/home/pythonvenom/aura-companion")
+REPO = Path.home() / "aura-companion"
 
 
 def render_ship() -> str:

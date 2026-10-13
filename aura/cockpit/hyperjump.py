@@ -13,7 +13,7 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-REPO = Path("/home/pythonvenom/aura-companion")
+REPO = Path.home() / "aura-companion"
 
 
 def current_commit() -> str:

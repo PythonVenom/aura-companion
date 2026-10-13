@@ -13,7 +13,7 @@ from pathlib import Path
 
 from aura.game.combat import Enemy
 
-REPO = Path("/home/pythonvenom/aura-companion")
+REPO = Path.home() / "aura-companion"
 VENV_PY = str(REPO / "venv" / "bin" / "python3")
 
 # Ruff код → (тип врага, угроза, hp)

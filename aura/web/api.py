@@ -25,6 +25,33 @@ from pydantic import BaseModel
 _LAST_CHAT: dict = {}  # {user_text: ts}
 _DEDUP_SEC = 2.0
 
+# F-021b: rate-limit (token bucket, sliding window)
+# Защита от флуда: не более 30 запросов / 60 сек с одного IP.
+# Наука: Turner 1986 (New Directions in Communications) — token bucket.
+_RATE_MAX = 30
+_RATE_WINDOW = 60.0
+_RATE_BUCKETS: dict = {}  # {ip: [timestamp, ...]}
+
+
+def _check_rate_limit(ip: str) -> bool:
+    """True если можно, False если превышен лимит."""
+    import time as _t
+    now = _t.time()
+    cutoff = now - _RATE_WINDOW
+    bucket = _RATE_BUCKETS.get(ip, [])
+    # Скользящее окно
+    bucket = [t for t in bucket if t > cutoff]
+    if len(bucket) >= _RATE_MAX:
+        _RATE_BUCKETS[ip] = bucket
+        return False
+    bucket.append(now)
+    _RATE_BUCKETS[ip] = bucket
+    # Чистка старых IP (раз в N вызовов)
+    if len(_RATE_BUCKETS) > 50:
+        _RATE_BUCKETS.clear()
+        _RATE_BUCKETS[ip] = bucket
+    return True
+
 
 class ChatRequest(BaseModel):
     user: str
@@ -146,10 +173,17 @@ def create_app(orchestrator=None, bridge=None) -> FastAPI:
         return _read_chat_history(limit=limit)
 
     @app.post("/chat", response_model=ChatResponse)
-    def chat(req: ChatRequest):
+    def chat(request: Request, req: ChatRequest):
         text = (req.user or "").strip()
         if not text:
             raise HTTPException(status_code=400, detail="empty user message")
+        # F-021b: rate-limit по IP
+        ip = request.client.host if request.client else "unknown"
+        if not _check_rate_limit(ip):
+            raise HTTPException(
+                status_code=429,
+                detail=f"rate limit: {_RATE_MAX} req / {int(_RATE_WINDOW)}s",
+            )
         # DEDUP (Bug 74): не принимать тот же текст < 2 сек
         import time as _t
         now = _t.time()

@@ -402,3 +402,22 @@
 - Разделы: что умеет, цифры, установка, документация, тесты, безопасность, философия
 - Ссылки на tutorial (6 файлов, 1194 строки)
 - MCP, онтология, elder-care — в первый план
+
+## ЗАПИСЬ 2026-10-13 (15:40): Plaintext в профиле (AUDIT #3b)
+
+### Проблема
+- profiles/batya/db.key существовал в plaintext (не мигрирован)
+- Миграция смотрит только на ~/.config/aura/db.key
+
+### Сделано
+- profiles/batya/db.key удалён (ключ тот же, что в keyring)
+- .gitignore: profiles/*/db.key, *.key
+- Бэкап в /tmp/batya_db.key.bak
+
+### Проверка
+- AURA_PROFILE=batya load OK (xp=2515)
+- keyring: aura-game-state/master-key
+
+### Открыт новый долг
+- get_profile() не переключает state_db на profiles/<name>/state.db
+- Все профили используют ~/.config/aura/state.db (общая БД)

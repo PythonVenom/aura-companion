@@ -288,3 +288,27 @@
 
 ### Закрыт долг
 - AUDIT #3 "Ключ SQLCipher в plaintext" — ЗАКРЫТО
+
+## ЗАПИСЬ 2026-10-13 (15:10): Backup 3-2-1
+
+### Сделано
+- aura_backup.py V2: расширены TARGETS
+  - RAG (chroma)
+  - state.db (игра)
+  - logs.jsonl, JOURNAL.md
+  - memory_registry.json
+  - modules.toml, identity.yaml
+- Offsite: /mnt/aura_hdd/backups/aura/ (другой носитель, 30 копий)
+- Локально: ~/.config/aura/backups/ (7 копий)
+
+### Krogh 2009 (3-2-1)
+- ✅ 3 копии: оригинал + local + offsite
+- ✅ 2 носителя: nvme0n1p2 + sdb2
+- ⚠️ offsite = тот же комп (TODO: rclone → облако)
+
+### Проверка
+- Backup: 121 KB → 545 KB (RAG включён)
+- Offsite работает
+
+### Закрыт долг
+- AUDIT #4 "Один бэкап" — ЗАКРЫТО (частично, offsite на другом диске)

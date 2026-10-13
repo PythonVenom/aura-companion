@@ -323,3 +323,13 @@
 
 ### Покрытие
 - weather.py: 0% → ~70%
+
+## ЗАПИСЬ 2026-10-13 (15:30): bugmap покрыт
+
+### Сделано
+- tests/test_bugmap.py: 11 тестов
+- Проверка Bug dataclass, BugMap.add, build_bugmap, render_bugmap
+- AUDIT #2 регрессия: нет хардкода путей
+
+### Покрытие
+- bugmap.py: 0% → ~65%

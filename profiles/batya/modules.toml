@@ -1,0 +1,51 @@
+# F-079: modules.toml для бати (elder-care профиль)
+
+# Всё elder-care включено по дефолту.
+# Здесь — только ВЫКЛЮЧЕНИЯ (модуль = false).
+
+[modules]
+agentatspi = false
+agentchecklist = false
+agentdesktopcontrol = false
+agentemail = false
+agentkidstructure = false
+agentkidtherapy = false
+agentonboarding = false
+agentpccontrol = false
+agentpredictor = false
+agentroutinelearner = false
+agenttelegram = false
+agenttutorial = false
+agentvkweb = false
+app_launcher = false
+browser_tabs = false
+capabilities = false
+cec = false
+construction = false
+context_memory = false
+context_recent = false
+federated_adapter = false
+focus_mode = false
+focus_switch = false
+functions = false
+handsfree = false
+internet = false
+mcp = false
+media_pause = false
+media_search = false
+music_ducker = false
+music_local = false
+open_resolver = false
+planner = false
+react_agent = false
+recon = false
+registry = false
+screen_reader = false
+self_check = false
+text_editor = false
+unified_router = false
+updates = false
+whatsapp = false
+window_control = false
+window_manager = false
+agentweather = false

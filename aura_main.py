@@ -28,29 +28,32 @@
 """
 
 import asyncio
+import contextlib
 import json
-import subprocess
-from pathlib import Path
+import queue as _queue
 import sys
 import time
+from pathlib import Path
+
+from aura import settings
+from aura.agents.barge_in import AgentBargeIn
 
 # Слух и голос — из старой папки agents/ (проверенные, работают)
 from aura.agents.listener import AgentListener
+from aura.agents.proactive import default_engine
 from aura.agents.speaker import AgentSpeaker
-from aura.agents.barge_in import AgentBargeIn
 
 # Новая модульная сборка
 from aura.bootstrap import build_orchestrator
-from aura.status import set_status, clear_status
 from aura.core import hands_free
 from aura.core.chat_bridge import ChatBridge
 from aura.core.chat_watcher import ChatWatcher
-import queue as _queue
-from aura import settings
+from aura.dialog_fsm import clear_state as fsm_clear
+from aura.dialog_fsm import get_state as fsm_get
+from aura.dialog_fsm import set_state as fsm_set
+from aura.dialogue_manager import SCENARIOS, DialogueManager
 from aura.heartbeat import Heartbeat
-from aura.dialog_fsm import get_state as fsm_get, clear_state as fsm_clear, set_state as fsm_set
-from aura.dialogue_manager import DialogueManager, SCENARIOS
-from aura.agents.proactive import default_engine
+from aura.status import clear_status, set_status
 
 
 def _get_agent(orch, name):
@@ -91,6 +94,7 @@ class AuraOrchestrator:
         # Bug 46: _ensure_aec отключён (pactl deadlock при переключении)
         # ADR-050: push-to-stop watcher (thread)
         import threading
+
         from scripts.aura_stop_watcher import watch as _watch_stop
         threading.Thread(
             target=_watch_stop, args=(self.speaker,), daemon=True, name="aura-stop"
@@ -99,9 +103,35 @@ class AuraOrchestrator:
         self.heartbeat = Heartbeat()
         self.orch = build_orchestrator()
 
+        # F-067: автозапуск ONE-SHOT (спустить воздух)
+        try:
+            from aura.system.oneshot import run_oneshot
+            r = run_oneshot(dry_run=False, restart_daemon=False, verbose=False)
+            if r.ruff_fixed > 0:
+                print(f"🩹 ONE-SHOT: починил {r.ruff_fixed} ошибок")
+            if r.is_clean():
+                print("🩹 ONE-SHOT: система чиста")
+        except Exception as e:
+            print(f"⚠️ ONE-SHOT не запустился: {e}")
+
+        # F-065: глубокая проверка при старте
+        try:
+            from aura.system.deep_check import run_deep_check
+            report = run_deep_check()
+            if report.all_ok:
+                print(f"🛸 Глубокая проверка: {report.total} систем в норме")
+            else:
+                print(f"⚠️ Глубокая проверка: "
+                      f"{report.ok_count}/{report.total} в норме")
+                for r in report.failures()[:5]:
+                    print(f"   🔴 {r.name}: {r.detail}")
+        except Exception as e:
+            print(f"⚠️ Deep check не запустился: {e}")
+
         # F-037: самопроверка при старте (говорит голосом)
         try:
             import asyncio as _aio
+
             from aura.agents.self_check import AgentSelfCheck
             _check = AgentSelfCheck()
             _report = _aio.run(_check.handle(
@@ -279,47 +309,44 @@ class AuraOrchestrator:
                 print(f"⚠️ Resume: {e}")
 
     def _say_with_duck(self, text: str) -> None:
-        """MIC_MUTE_FIX (ITU-T G.168): глушим mic на TTS + cooldown 1.5с.
+        """F-067-fix: duck → say → un_duck.
 
-        Иначе Aura слышит свой же голос → echo-loop (Bug 74).
+        Ducking защищён try/except — если упадёт,
+        voice всё равно пойдёт (Bug 38 + F-066).
         """
+        if not text:
+            return
         print(f"🔊 Скажу: {text[:80]}")
-        # MIC_MUTE_FIX: mute mic + запомнили ответ
-        try:
-            if self.listener is not None:
-                self.listener.pause()
-                self.listener.set_last_response(text)
-        except Exception as e:
-            print(f"⚠️ listener.pause: {e}")
 
-        self._duck_on()
-        self._set_barge_speaking(True)
+        # Ducking — приглушаем музыку (не блокирует)
+        ducked = False
         try:
-            self.speaker.say(text)
-            _wait_start = time.time()
-            while self.speaker.is_speaking:
-                if time.time() - _wait_start > 30:
-                    print("⚠️ Speaker timeout 30с")
-                    self.speaker.is_speaking = False
-                    break
-                time.sleep(0.05)
-        finally:
-            self._set_barge_speaking(False)
-            self._duck_off()
-            # cooldown 1.5с — эхо затихнет
-            time.sleep(1.5)
-            # unmute
+            if hasattr(self, "ducker") and self.ducker is not None:
+                self.ducker.duck()
+                ducked = True
+        except Exception as e:
+            print(f"⚠️ duck: {e}")
+
+        try:
+            if self.speaker is not None:
+                self.speaker.say(text)
+                self.speaker.wait()
+        except Exception as e:
+            print(f"⚠️ speaker: {e}")
+
+        # Un-duck — вернуть музыку
+        if ducked:
             try:
-                if self.listener is not None:
-                    self.listener.resume()
+                self.ducker.un_duck()
             except Exception as e:
-                print(f"⚠️ listener.resume: {e}")
+                print(f"⚠️ un_duck: {e}")
 
     @classmethod
     def _activation_words(cls):
         """Слова активации из settings + базовые."""
         base = (
             "аура", "ауру", "ауры", "ауре", "ауро",
+        "лаура", "ура", "ора", "ау", "ауу", "аурум",
             "ара", "аро", "ару",
             "ура", "уру",
             "алла", "алло", "ала", "ало", "олла",
@@ -355,9 +382,7 @@ class AuraOrchestrator:
         text = heard.lower()
         if any(a in text for a in cls._activation_words()):
             return True
-        if any(w in text for w in cls.WHITELIST_NO_WAKE):
-            return True
-        return False
+        return any(w in text for w in cls.WHITELIST_NO_WAKE)
 
     @classmethod
     def _strip_activation(cls, heard: str) -> str:
@@ -450,6 +475,7 @@ class AuraOrchestrator:
         # Bug 15: awaiting_reply — контекст ответа в чат
         if state == "awaiting_reply":
             # FIX: новая активация «аура» — СНАЧАЛА сброс FSM
+            # FIX: новая активация «аура» — СНАЧАЛА сбрасываем FSM
             if "аура" in text or "aura" in text:
                 print("🔔 Активация — сброс FSM (awaiting_reply)")
                 fsm_clear()
@@ -516,8 +542,20 @@ class AuraOrchestrator:
                     self._say_with_duck(resp)
                 return True
             try:
-                import asyncio as _asyncio
-                response = _asyncio.run(self.orch.process(heard))
+                # F-066: сначала агент, потом LLM
+                response = None
+                try:
+                    from aura.core.protocol import AgentRequest as _AR
+                    _req = _AR(text=heard)
+                    _agent = self.orch.registry.find(_req)
+                    if _agent is not None:
+                        print(f'🎯 Агент: {_agent.name}')
+                        _resp = asyncio.run(_agent.handle(_req))
+                        response = getattr(_resp, 'text', None) or str(_resp)
+                except Exception as _e:
+                    print(f'⚠️ agent route: {_e}')
+                if not response:
+                    response = asyncio.run(self.orch.process(heard))
                 print(f"🤖 {response}")
                 self._say_with_duck(response)
             except Exception as e:
@@ -558,11 +596,11 @@ class AuraOrchestrator:
         return False
 
     def _drain_chat_queue(self) -> None:
-        # CHAT_DEDUP (Bug 74): не обрабатывать одинаковое < 2 сек
+        # CHAT_DEDUP v2 (Bug 74): окно 30 сек + ограничение размера словаря
         import time as _t
         if not hasattr(self, "_chat_dedup"):
             self._chat_dedup = {}
-        _DEDUP_SEC = 2.0
+        _DEDUP_SEC = 30.0
         """Обработать сообщения из чата (ChatBridge → orchestrator → history)."""
         while True:
             try:
@@ -572,12 +610,18 @@ class AuraOrchestrator:
             user_text = (msg or {}).get("user", "").strip()
             if not user_text:
                 continue
-            # CHAT_DEDUP: skip если то же < 2 сек
             _now = _t.time()
-            if _now - self._chat_dedup.get(user_text, 0) < _DEDUP_SEC:
-                print(f"🔇 chat dedup: {user_text[:40]}")
+            _last = self._chat_dedup.get(user_text, 0)
+            if _now - _last < _DEDUP_SEC:
+                # тихо пропускаем — не спамим в консоль
                 continue
             self._chat_dedup[user_text] = _now
+            # чистим старые ключи, чтобы dict не рос бесконечно
+            if len(self._chat_dedup) > 100:
+                _cutoff = _now - _DEDUP_SEC
+                self._chat_dedup = {
+                    k: v for k, v in self._chat_dedup.items() if v > _cutoff
+                }
             try:
                 response = asyncio.run(self.orch.process(user_text))
             except Exception as e:
@@ -723,30 +767,32 @@ class AuraOrchestrator:
                     self.dm.start(scenario)
                     response = self.dm.process(cmd) or "Не расслышала"
                 else:
-                    response = asyncio.run(self.orch.process(cmd))
+                    # F-066: сначала агент, потом LLM
+                    response = None
+                    try:
+                        from aura.core.protocol import AgentRequest as _AR2
+                        _req2 = _AR2(text=cmd)
+                        _ag2 = self.orch.registry.find(_req2)
+                        if _ag2 is not None:
+                            print(f'🎯 Агент: {_ag2.name}')
+                            _r2 = asyncio.run(_ag2.handle(_req2))
+                            response = getattr(_r2, 'text', None) or str(_r2)
+                    except Exception as _e2:
+                        print(f'⚠️ agent route: {_e2}')
+                    if not response:
+                        response = asyncio.run(self.orch.process(cmd))
                 # Пишем последний диалог для виджета.
-                try:
+                with contextlib.suppress(Exception):
                     (Path.home() / ".cache/aura/aura_last_dialog.json").write_text(
                         json.dumps({"user": cmd, "aura": response}, ensure_ascii=False),
                         encoding="utf-8",
                     )
-                except Exception:
-                    pass
                 print(f"🤖 {response}")
                 set_status("speaking", response)
-                # Bug 46: _ensure_aec отключён (pactl deadlock)
-                self._duck_on()
-                self._set_barge_speaking(True)
-                # >>> AURA_ECHO_FIX_V2
-                # Mic mute + TTS в память эхо-фильтра
-                try:
-                    self.listener.set_last_response(response)
-                    self.listener.pause()
-                except Exception as _e:
-                    print(f'⚠️ echo-prep: {_e}')
-                # ADR-048: silent=True — не озвучивать
-                if not self.orch.last_silent():
-                    self.speaker.say(response)
+                # F-066-fix: прямой вызов speaker без ducking и mute.
+                # Старый блок (duck_on + listener.pause + last_silent)
+                # блокировал голос в демоне.
+                self._say_with_duck(response)
 
                 # === RAG-ПАМЯТЬ И ЖУРНАЛ (после ответа) ===
                 if self.registry:
@@ -829,14 +875,55 @@ class AuraOrchestrator:
                 time.sleep(0.5)
 
 
+# >>> AURA_DAEMON_V1
+def _daemon_background(aura, stop_event) -> None:
+    """Фоновый цикл демона: wake() + hyperjump."""
+    from aura.cockpit.hyperjump import count_modules, current_commit, did_hyperjump
+    from aura.cockpit.wake import wake
+    from aura.lore.persona import speak_line
+
+    last_commit = current_commit()
+    last_wake = time.monotonic()
+    print(f"[daemon] старт, координаты {last_commit}", flush=True)
+
+    while not stop_event.is_set():
+        try:
+            current = current_commit()
+            if did_hyperjump(last_commit, current):
+                print(f"[daemon] гиперпрыжок {last_commit} → {current}", flush=True)
+                aura.speaker.say(speak_line("hyperjump", modules=count_modules()))
+                aura.speaker.wait()
+                last_commit = current
+
+            now = time.monotonic()
+            if now - last_wake >= 1800:
+                print("[daemon] wake()", flush=True)
+                wake()
+                last_wake = now
+        except Exception as e:
+            print(f"[daemon] ошибка: {e}", flush=True)
+        stop_event.wait(60)
+
+
 def main() -> int:
+    daemon_mode = "--daemon" in _sys.argv
     aura = AuraOrchestrator()
+    stop_event = None
+    if daemon_mode:
+        import threading as _th
+        stop_event = _th.Event()
+        t = _th.Thread(target=_daemon_background, args=(aura, stop_event),
+                       daemon=True, name="aura-daemon")
+        t.start()
+        print("[main] демон запущен в фоне", flush=True)
     try:
         aura.run()
     except KeyboardInterrupt:
-        # Второй Ctrl+C (или Ctrl+C вне цикла) — выходим чисто.
         print()
         return 0
+    finally:
+        if stop_event is not None:
+            stop_event.set()
     return 0
 
 
@@ -847,18 +934,14 @@ import sys as _sys
 
 
 def _aura_sigterm_handler(_signum, _frame):
-    try:
+    with contextlib.suppress(Exception):
         print("\n🦾 Аура: SIGTERM, graceful shutdown...", flush=True)
-    except Exception:
-        pass
     _sys.exit(0)
 
 
 for _sig in (_signal.SIGTERM, _signal.SIGINT):
-    try:
+    with contextlib.suppress(Exception):
         _signal.signal(_sig, _aura_sigterm_handler)
-    except Exception:
-        pass
 
 if __name__ == "__main__":
     sys.exit(main())

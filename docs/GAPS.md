@@ -333,3 +333,26 @@
 
 ### Покрытие
 - bugmap.py: 0% → ~65%
+
+## ЗАПИСЬ 2026-10-13 (15:15): Wake-word fuzzy (AUDIT #5)
+
+### Сделано
+- aura/wake_detector.py (167 строк) — fuzzy-детектор
+- Levenshtein 1965, Jaro-Winkler 1990 (наука)
+- MIN_TOKEN_LEN=3, MAX_LEN_DIFF_SHORT=0, MAX_LEN_DIFF_LONG=1
+- CANONICAL (аура, ауру, aura), KNOWN_VARIANTS (алло, алла, аула, лаура)
+- aura_main._is_activated → wake_detector.is_wake_word
+- aura_main._strip_activation → wake_detector.strip_wake_word
+- tests/test_wake_detector.py: 38 тестов
+
+### Проверка
+- «Аура» → True
+- «алло» → True (T-one)
+- «аула» → True
+- «ураган» → False ✅
+- «арахис» → False ✅
+- «пауза» → False ✅
+- «мне плохо» → True (elder whitelist)
+
+### Закрыт долг
+- AUDIT #5 "Wake-word «Аура»→«Алло»" — ЗАКРЫТО

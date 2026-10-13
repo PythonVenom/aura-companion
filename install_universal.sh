@@ -48,12 +48,20 @@ log "ОС: $OS, пакетный менеджер: $PKG"
 log "RAM: ${AURA_RAM_GB:-?} ГБ, CPU: ${AURA_CPU_CORES:-?} ядер, профиль: ${AURA_PROFILE:-medium}"
 
 # === 3. Choose LLM model by profile ===
-case "${AURA_PROFILE:-medium}" in
-    minimal) LLM_MODEL=""; log "Профиль minimal: LLM отключён (AURA_BRAIN=0)" ;;
-    low)     LLM_MODEL="qwen2.5:3b" ;;
-    medium)  LLM_MODEL="qwen2.5:7b-instruct-q4_K_M" ;;
-    full)    LLM_MODEL="qwen2.5:7b-instruct-q4_K_M" ;;
-esac
+# ADR-025 + ADR-139: elder-care на слабом железе → без LLM
+# Профиль elder (из AURA_PROFILE) → minimal всегда
+if [ "${AURA_PROFILE:-medium}" = "elder" ]; then
+    LLM_MODEL=""
+    log "Профиль elder: LLM отключён (Pentium 6405U — ADR-139)"
+    AURA_BRAIN=0
+else
+    case "${AURA_PROFILE:-medium}" in
+        minimal) LLM_MODEL=""; log "Профиль minimal: LLM отключён" ;;
+        low)     LLM_MODEL="qwen2.5:3b" ;;
+        medium)  LLM_MODEL="qwen2.5:7b-instruct-q4_K_M" ;;
+        full)    LLM_MODEL="qwen2.5:7b-instruct-q4_K_M" ;;
+    esac
+fi
 
 # === 4. System packages ===
 install_pkgs() {
@@ -109,8 +117,18 @@ fi
 # === 8. Ollama ===
 if [ -n "${LLM_MODEL:-}" ]; then
     if ! command -v ollama >/dev/null; then
-        warn "Ollama не установлен. Установи вручную: https://ollama.com/download"
-    else
+        if [ "$(uname -s)" = "Linux" ]; then
+            log "Устанавливаю Ollama (curl | sh)..."
+            if $DRY_RUN; then
+                echo "[dry-run] curl -fsSL https://ollama.com/install.sh | sh"
+            else
+                curl -fsSL https://ollama.com/install.sh | sh || warn "Ollama не установился — https://ollama.com/download"
+            fi
+        else
+            warn "Ollama не установлен. Скачай: https://ollama.com/download"
+        fi
+    fi
+    if command -v ollama >/dev/null; then
         log "Загружаю модель: $LLM_MODEL"
         run ollama pull "$LLM_MODEL" || warn "ollama pull failed — сделай вручную"
         run ollama pull nomic-embed-text || true
@@ -131,7 +149,7 @@ if [ "$(uname -s)" = "Linux" ] && [ -f "$PROJECT_DIR/contrib/aura.service.in" ];
 Environment="AURA_PROFILE=${AURA_PROFILE:-medium}"
 Environment="AURA_RAM_GB=${AURA_RAM_GB:-8}"
 CONF
-        if [ "${AURA_PROFILE:-}" = "minimal" ]; then
+        if [ "${AURA_BRAIN:-}" = "0" ] || [ "${AURA_PROFILE:-}" = "minimal" ] || [ "${AURA_PROFILE:-}" = "elder" ]; then
             cat > "$HOME/.config/systemd/user/aura.service.d/brain-off.conf" <<CONF
 [Service]
 Environment="AURA_BRAIN=0"

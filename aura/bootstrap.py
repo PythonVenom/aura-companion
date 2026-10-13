@@ -411,6 +411,14 @@ def build_orchestrator() -> Orchestrator:
     orch.registry.register(CareAgent())
     orch.registry.register(AgentHandsFree())
     _load_plugins(orch)
+
+    # #36: прикрепляем CANBus к оркестратору (skeleton)
+    try:
+        from aura.core.canbus import get_bus
+        orch.bus = get_bus()
+    except Exception as e:
+        print(f"⚠️ CANBus: {e}")
+
     return orch
 
 

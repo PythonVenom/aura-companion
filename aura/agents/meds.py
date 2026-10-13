@@ -19,46 +19,78 @@ DB = Path.home() / ".config" / "aura" / "meds.db"
 class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
     name = "meds"
     MODULE_ALWAYS = True
+    DB = DB  # class attribute (для тестов)
 
     TRIGGERS = (
         "лекарств", "таблетк", "пилюл", "напомни про", "принять",
         "пора пить", "лекарство", "препарат",
+        # AURA_MED_VISITS_V1 + interactions
+        "к врачу", "визит", "запис", "стоматолог", "терапевт",
+        "окулист", "кардиолог", "невролог", "хирург", "эндокринолог",
+        "взаимодейств", "совмест", "вместе приним",
     )
 
-    def __init__(self):
+    # AURA_MED_SCHEDULER_V1: scheduler запускается опционально
+    def __init__(self, start_scheduler: bool = True):
         super().__init__()
         self._init_db()
-        self._scheduler = threading.Thread(target=self._loop, daemon=True)
-        self._scheduler.start()
+        self._scheduler = None
+        if start_scheduler:
+            self._scheduler = threading.Thread(target=self._loop, daemon=True)
+            self._scheduler.start()
 
     def can_handle(self, request: AgentRequest) -> bool:
         t = request.text.lower().strip()
         return any(p in t for p in self.TRIGGERS)
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
+        # BUG-FIX: проверка can_handle (как в fall/sos)
+        if not self.can_handle(request):
+            return AgentResponse.not_handled(self.name)
+
         t = request.text.lower()
 
+        # ВАЖНО: порядок важен! Сначала специфичные ветки.
+
+        # 1. Взаимодействия
+        if "взаимодейств" in t or "совмест" in t:
+            return self._check_interactions()
+
+        # 2. Визиты (показ)
+        VISIT_VIEW = ("покажи визит", "какие визит", "список визит",
+                      "мои визит", "записи к врач")
+        if any(k in t for k in VISIT_VIEW):
+            return self._list_visits()
+
+        # 3. Визиты (добавление)
+        DOCTORS = ("терапевт", "стоматолог", "окулист", "кардиолог",
+                   "невролог", "хирург", "эндокринолог", "врач")
+        if ("к врачу" in t or "визит" in t or "запис" in t
+                or any(d in t for d in DOCTORS)):
+            # Не показ → добавление
+            if "добавь" not in t and "запиши" not in t and "покажи" not in t:
+                return self._add_visit(request.text)
+            if "покажи" not in t and "какие" not in t and "список" not in t:
+                return self._add_visit(request.text)
+
+        # 4. Лекарства — добавление
         if "добавь" in t or "запиши" in t or "напомни" in t:
             return self._add(request.text)
 
+        # 5. Лекарства — список
         if "список" in t or "какие" in t or "покажи" in t:
             return self._list()
 
+        # 6. Принял
         if "принял" in t or "выпил" in t:
             return self._mark_taken()
-        # AURA_MED_VISITS_V1 — визиты и взаимодействие
-        if "к врачу" in t or "визит" in t or "запис" in t:
-            if "покажи" in t or "какие" in t or "список" in t:
-                return self._list_visits()
-            return self._add_visit(request.text)
-        if "взаимодейств" in t or "совмест" in t or "вместе" in t:
-            return self._check_interactions()
 
+        # 7. Статус
         return self._status()
 
     def _init_db(self):
-        DB.parent.mkdir(parents=True, exist_ok=True)
-        conn = sqlite3.connect(DB)
+        self.DB.parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(self.DB)
         conn.executescript("""
             CREATE TABLE IF NOT EXISTS meds (
                 id INTEGER PRIMARY KEY,
@@ -99,12 +131,24 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
         conn.close()
 
     def _add(self, text: str) -> AgentResponse:
-        # Упрощённый парсинг: "аура, добавь лекарство X в HH:MM"
+        """Парсинг: «добавь лекарство X в HH:MM»."""
         import re
+        # 1. Время
         m = re.search(r"(\d{1,2}:\d{2})", text)
         time_str = m.group(1) if m else "08:00"
-        name = text.replace("аура", "").replace("добавь", "").strip()[:50]
-        conn = sqlite3.connect(DB)
+        # 2. Имя: убираем «аура», «добавь», «лекарство», время
+        name = text.lower()
+        for w in ("аура", "добавь", "запиши", "напомни", "лекарство",
+                  "таблетки", "таблетку", "препарат"):
+            name = name.replace(w, "")
+        name = re.sub(r"\d{1,2}:\d{2}", "", name)
+        name = re.sub(r"\s+", " ", name).strip(" ,:.-")[:50]
+        if not name:
+            return AgentResponse.ok(
+                text="💊 Что за лекарство? Скажи: «добавь <название> в 08:00»",
+                agent_name=self.name,
+            )
+        conn = sqlite3.connect(self.DB)
         conn.execute(
             "INSERT INTO meds (name, time_str) VALUES (?, ?)",
             (name, time_str),
@@ -117,7 +161,7 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
         )
 
     def _list(self) -> AgentResponse:
-        conn = sqlite3.connect(DB)
+        conn = sqlite3.connect(self.DB)
         rows = conn.execute("SELECT name, time_str, taken FROM meds").fetchall()
         conn.close()
         if not rows:
@@ -126,14 +170,14 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
         return AgentResponse.ok(text="💊 " + "; ".join(lines), agent_name=self.name)
 
     def _mark_taken(self) -> AgentResponse:
-        conn = sqlite3.connect(DB)
+        conn = sqlite3.connect(self.DB)
         conn.execute("UPDATE meds SET taken=1, last_taken=? WHERE taken=0", (int(time.time()),))
         conn.commit()
         conn.close()
         return AgentResponse.ok(text="💊 Отмечено как принято", agent_name=self.name)
 
     def _status(self) -> AgentResponse:
-        conn = sqlite3.connect(DB)
+        conn = sqlite3.connect(self.DB)
         datetime.now().strftime("%H:%M")
         rows = conn.execute(
             "SELECT name, time_str FROM meds WHERE taken=0 ORDER BY time_str"
@@ -154,7 +198,7 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
         time_str = m.group(1) if m else "10:00"
         when = "завтра" if "завтра" in text.lower() else "сегодня"
         doctor = self._extract_doctor(text)
-        conn = sqlite3.connect(DB)
+        conn = sqlite3.connect(self.DB)
         conn.execute(
             "INSERT INTO visits (doctor, when_text, time_str) VALUES (?, ?, ?)",
             (doctor, when, time_str),
@@ -175,7 +219,7 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
         return "врач"
 
     def _list_visits(self) -> AgentResponse:
-        conn = sqlite3.connect(DB)
+        conn = sqlite3.connect(self.DB)
         rows = conn.execute(
             "SELECT doctor, when_text, time_str FROM visits ORDER BY id DESC LIMIT 5"
         ).fetchall()
@@ -198,7 +242,7 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
     }
 
     def _check_interactions(self) -> AgentResponse:
-        conn = sqlite3.connect(DB)
+        conn = sqlite3.connect(self.DB)
         rows = conn.execute("SELECT name FROM meds WHERE taken=0").fetchall()
         conn.close()
         names = [r[0].lower() for r in rows]
@@ -221,7 +265,7 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
         while True:
             try:
                 now = datetime.now().strftime("%H:%M")
-                conn = sqlite3.connect(DB)
+                conn = sqlite3.connect(self.DB)
                 rows = conn.execute(
                     "SELECT id, name FROM meds WHERE time_str=? AND taken=0 AND last_taken<?",
                     (now, int(time.time()) - 3600),

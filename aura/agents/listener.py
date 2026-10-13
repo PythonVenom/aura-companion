@@ -158,6 +158,16 @@ class AgentListener(MicroAgent):
         """
         if not self.ready or not self.active:
             return None
+
+        # Bug 31: во время звонка (MAX/TG/Zoom) — не активировать
+        # wake-word. Aura молчит, только слушает.
+        try:
+            from aura.core.call_detector import is_call_active
+            if is_call_active():
+                return None
+        except Exception:
+            pass
+
         try:
             stream = self.get_stream()
             if not stream:

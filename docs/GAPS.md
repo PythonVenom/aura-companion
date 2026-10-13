@@ -464,3 +464,19 @@
 ### Готово к бате
 - Тест: Docker Ubuntu 24.04 (проведён)
 - Следующий шаг: реальная установка на Mint бати
+
+## ЗАПИСЬ 2026-10-13 (17:00): Fall → SOS — 3 бага исправлено
+
+### Найдено тестами
+1. AgentSOS.handle НЕ проверял can_handle → «привет» → SOS
+2. AgentFall.handle НЕ проверял can_handle → любой текст → fall
+3. sos_phrases (settings) ЗАМЕНЯЛИ дефолт → теряли «упал», «тревога»
+
+### Фиксы
+- can_handle в handle() — fail-safe defaults (Saltzer 1975)
+- _get_phrases → MERGE (default + custom)
+- STATE_FILE class attribute
+- 22 теста: fall, sos, цепочка
+
+### Закрыт долг
+- GAPS #92 "Падение → SOS (не тестировано)" — ЗАКРЫТО

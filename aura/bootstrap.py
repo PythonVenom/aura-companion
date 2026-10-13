@@ -108,6 +108,7 @@ from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.tutorial import AgentTutorial
 from aura.agents.unified_router import AgentUnifiedRouter
 from aura.agents.captain import AgentCaptain
+from aura.agents.evening_ritual import AgentEveningRitual
 from aura.agents.whatsapp import AgentWhatsApp
 from aura.core.orchestrator import Orchestrator
 
@@ -350,6 +351,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, VoiceJournal, modules_config)
 
     _try_register(orch, AgentCaptain, modules_config)
+    _try_register(orch, AgentEveningRitual, modules_config)
 
     # --- Уровень 2: узкий ducking — ДО audio_pult ---
     _try_register(orch, AgentMusicDucker, modules_config)

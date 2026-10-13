@@ -39,6 +39,7 @@ from aura.agents.vault import AgentVault
 from aura.agents.vision import AgentVision
 from aura.agents.vk_music import AgentVKMusic
 from aura.agents.captain import AgentCaptain
+from aura.agents.evening_ritual import AgentEveningRitual
 from aura.agents.vk_web import AgentVKWeb
 from aura.agents.window_control import AgentWindowControl
 from aura.agents.window_manager import AgentWindowManager
@@ -75,6 +76,7 @@ __all__ = [
     "AgentUpdates",
     "AgentVKMusic",
     "AgentCaptain",
+    "AgentEveningRitual",
     "AgentVKWeb",
     "AgentVault",
     "AgentVision",

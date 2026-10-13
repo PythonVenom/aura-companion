@@ -161,16 +161,63 @@ class StateStore:
         self.key = key or self._load_or_make_key(cfg)
         self._conn: sqlite3.Connection | None = None
 
+    KEYRING_SERVICE = "aura-game-state"
+    KEYRING_USER = "master-key"
+
     def _load_or_make_key(self, cfg: Path) -> str:
+        """Получить ключ SQLCipher.
+
+        Приоритет (миграция 2026-10-13, AUDIT #3):
+        1. env AURA_DB_KEY — для контейнеров/CI
+        2. keyring — системное шифрованное хранилище (freedesktop Secret Service)
+        3. Миграция: если есть ~/.config/aura/db.key — переносим в keyring,
+           файл удаляем.
+
+        Наука: Saltzer & Schroeder 1975 (least privilege, fail-safe defaults).
+        """
+        # 1. env
         env = os.environ.get("AURA_DB_KEY")
         if env:
             return env
+
+        # 2. keyring
+        try:
+            import keyring
+            key = keyring.get_password(self.KEYRING_SERVICE, self.KEYRING_USER)
+            if key:
+                return key
+        except Exception:
+            keyring = None  # type: ignore
+
+        # 3. Миграция с plaintext
         key_file = cfg / "db.key"
         if key_file.exists():
-            return key_file.read_text(encoding="utf-8").strip()
+            key = key_file.read_text(encoding="utf-8").strip()
+            try:
+                import keyring
+                keyring.set_password(self.KEYRING_SERVICE, self.KEYRING_USER, key)
+                key_file.unlink()
+                import logging
+                logging.getLogger("aura.game.state").info(
+                    "Ключ SQLCipher мигрирован в keyring, plaintext удалён"
+                )
+            except Exception:
+                pass  # keyring недоступен — остаёмся на файле
+            return key
+
+        # 4. Новый ключ — только в keyring
         key = secrets.token_hex(32)
-        key_file.write_text(key, encoding="utf-8")
-        os.chmod(key_file, 0o600)
+        try:
+            import keyring
+            keyring.set_password(self.KEYRING_SERVICE, self.KEYRING_USER, key)
+        except Exception:
+            # Fallback: файл (last resort)
+            key_file.write_text(key, encoding="utf-8")
+            os.chmod(key_file, 0o600)
+            import logging
+            logging.getLogger("aura.game.state").warning(
+                "keyring недоступен — ключ в plaintext файле %s", key_file
+            )
         return key
 
     def _connect(self) -> sqlite3.Connection:

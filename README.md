@@ -6,7 +6,7 @@
 
 [![Tests](https://img.shields.io/badge/tests-1694_passed-green)](tests/)
 [![ADR](https://img.shields.io/badge/ADR-131-blue)](docs/adr/)
-[![Agents](https://img.shields.io/badge/agents-89-orange)](aura/agents/)
+[![Agents](https://img.shields.io/badge/agents-91-orange)](aura/agents/)
 [![Python](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -83,7 +83,7 @@ Aura — **не «Алиса» и не «Siri»**. Это **продолжени
 
 | Параметр | Значение |
 |---|---|
-| **Агентов** | 89 |
+| **Агентов** | 91 |
 | **Тестов** | 1694 (1 skipped) |
 | **ADR** | 131 |
 | **Директив** | Д1-Д97 |
@@ -114,7 +114,7 @@ ollama pull qwen2.5:7b-instruct-q4_K_M
 **Профили:**
 
 ~~~bash
-AURA_PROFILE=captain ./run_aura.sh         # полный (89 агентов)
+AURA_PROFILE=captain ./run_aura.sh         # полный (91 агент)
 AURA_PROFILE=batya ./run_aura.sh           # elder-care (53 агента)
 AURA_PROFILE=brat_electric ./run_aura.sh   # автоэлектрик
 ~~~
@@ -128,7 +128,7 @@ AURA_PROFILE=brat_electric ./run_aura.sh   # автоэлектрик
 2. 01-first-step.md — установка за 10 минут
 3. 02-voice.md — голосовые команды
 4. 03-game.md — космическая игра
-5. 04-agents.md — все 89 агентов
+5. 04-agents.md — все 91 агент
 6. 05-your-first-agent.md — напиши своего агента
 
 **Для разработчика:**

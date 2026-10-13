@@ -50,6 +50,8 @@ PROFILES = {
 
 
 def select(hw_info) -> ModelConfig:
+    """Выбрать профиль под железо. НЕ мутирует глобальный PROFILES."""
+    import copy
     ram = hw_info.ram_total_gb
     threads = hw_info.cpu_threads
     has_gpu = hw_info.has_gpu
@@ -63,7 +65,8 @@ def select(hw_info) -> ModelConfig:
         base = "standard"
     else:
         base = "powerful"
-    cfg = PROFILES[base]
+    # Копия — защита от мутации PROFILES
+    cfg = copy.deepcopy(PROFILES[base])
     cfg.num_threads = max(1, min(threads, 8))
     if has_gpu and base in ("edge", "standard"):
         cfg.profile = "powerful" if ram >= 16 else "standard"

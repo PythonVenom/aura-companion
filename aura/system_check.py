@@ -95,7 +95,7 @@ def detect_gpu() -> list:
             if "vga" in low or "3d controller" in low or "display controller" in low:
                 if "nvidia" in low:
                     gpus.append({"vendor": "nvidia", "raw": line})
-                elif "amd" in low or "ati" in low or "radeon" in low:
+                elif "amd" in low or "radeon" in low:
                     gpus.append({"vendor": "amd", "raw": line})
                 elif "intel" in low:
                     gpus.append({"vendor": "intel", "raw": line})

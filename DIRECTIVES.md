@@ -125,3 +125,36 @@
 Запрет: не начинать новое пока РФРИТ не отправлен.
 Правило: каждое утро 1 РФРИТ-блок (2ч), после — техдолги.
 Наука: Eisenhower 1954, Goldratt 1984.
+
+## Д42 — Aura Portable: флешка → любое железо
+
+**Дата:** 2026-10-13
+**Приоритет:** P0 (продуктовая стратегия)
+
+### Цель
+1. Флешка с Aura → вставил в ЛЮБОЙ ПК → работает (auto-detect + auto-pull)
+2. Подарки: дарить людям до рекламы
+3. После рекламы: продавать софт + установку
+
+### Научная база
+- Zero-touch provisioning (Microsoft 2020)
+- Live USB + persistence (Knoppix 2000)
+- Immutable infrastructure (CoreOS 2013)
+- Hardware auto-detect (DMI/SMBIOS 1995)
+- Freemium (Dropbox 2008) + services (Red Hat 1993)
+
+### Фазы
+1. Portable mode (всё на флешке)
+2. Auto-detect + auto-pull (GPU → ollama)
+3. Live USB builder
+4. Installer на ПК (persistent)
+5. Secure Boot (EFI)
+
+### Метрика успеха
+Флешка → чужой ПК → Aura запустилась → батя/друг говорят «работает»
+
+### Связь с существующим
+- install_universal.sh (есть, 8440 байт)
+- system_check.py (auto-detect hardware)
+- aura-os / aura-os-standard (ISO?)
+- MANIFEST-APPIMAGE.txt (зависимости)

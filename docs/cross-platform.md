@@ -58,6 +58,35 @@
 - CoreAudio через sounddevice
 - AppleScript уведомления
 
+## Astra Linux (ОС из реестра РФ)
+
+Установщик: `./install_astra.sh`
+
+Astra Linux — DEB-based ОС, используется в гос-секторе РФ.
+ADR-152 Tier0: Aura должна работать на Astra для соответствия требованиям.
+
+Пакеты: python3, python3-venv, portaudio19-dev, libasound2-dev, espeak-ng,
+libgtk-3-0, sqlcipher.
+
+Особенности:
+- Проверка `/etc/astra_version` для детекции Astra
+- Совместимость с Ubuntu/Debian пакетами
+- Соответствует требованиям ФСТЭК (при использовании сертифицированной версии)
+
+## Эльбрус (E2K архитектура, ОС из реестра РФ)
+
+Установщик: `./install_elbrus.sh`
+
+Эльбрус — российская архитектура E2K, ОС из реестра РФ.
+ADR-152 Tier0: Aura должна работать на Эльбрусе для гос-оборонзаказа.
+
+Пакеты: python3, python3-venv, portaudio19-dev, libasound2-dev, espeak-ng.
+
+Особенности:
+- Детекция архитектуры через `uname -m` (e2k)
+- Многие wheel'ы отсутствуют → сборка из исходников (`--no-binary :all:`)
+- Ollama может работать на CPU (без CUDA)
+
 ## Fedora / RHEL / CentOS
 
 Установщик: `./install_fedora.sh`

@@ -427,7 +427,14 @@ def cmd_dictation(args):
 
 
 def main():
+    try:
+        from importlib.metadata import version as _v
+        _version = _v("aura-companion")
+    except Exception:
+        _version = "unknown"
+
     parser = argparse.ArgumentParser(prog="aura", description="Aura CLI")
+    parser.add_argument("--version", action="version", version=f"aura {_version}")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("check", help="system_check").set_defaults(func=cmd_check)

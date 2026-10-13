@@ -1,3 +1,10 @@
+from importlib.metadata import version, PackageNotFoundError
+
+try:
+    __version__ = version("aura-companion")
+except PackageNotFoundError:
+    __version__ = "unknown"
+
 """
 Аура — семейный ИИ-компаньон.
 
@@ -8,4 +15,4 @@
 - memory — память (RAG, журнал)
 """
 
-__version__ = "0.8.0"
+

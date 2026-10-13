@@ -31,6 +31,17 @@ class AgentSpeaker(MicroAgent):
         self.is_speaking = False
         self._worker = None
         self._worker_lock = threading.Lock()
+        self._ducker = None   # Bug 32: lazy ducker (ducking при речи)
+
+    def _get_ducker(self):
+        """Bug 32: lazy-инициализация ducking (приглушение всего кроме Aura)."""
+        if self._ducker is None:
+            try:
+                from aura.agents.music_ducker import AgentMusicDucker
+                self._ducker = AgentMusicDucker()
+            except Exception:
+                self._ducker = False  # не смог — отключаем
+        return self._ducker
 
     def say(self, text):
         if not self.active:
@@ -75,8 +86,19 @@ class AgentSpeaker(MicroAgent):
             if text is None:
                 break
             self.is_speaking = True
+            ducked = False
             try:
                 text = self._make_text_smart(text)
+                # Bug 32: приглушить всё (музыка, браузер) кроме Aura
+                ducker = self._get_ducker()
+                if ducker:
+                    try:
+                        ducker.duck()
+                        ducked = True
+                    except Exception as e:
+                        import logging
+                        logging.getLogger('aura.speaker').debug(
+                            'duck error: %s', e)
                 # FIX: сброс флага после речи
                 if os.path.exists(self.piper_cmd) and os.path.exists(self.voice_path):
                     import tempfile
@@ -128,6 +150,14 @@ class AgentSpeaker(MicroAgent):
             except Exception as e:
                 print(f"❌ Ошибка озвучивания: {e}")
             finally:
+                # Bug 32: восстановить громкость
+                if ducked and ducker:
+                    try:
+                        ducker.un_duck()
+                    except Exception as e:
+                        import logging
+                        logging.getLogger('aura.speaker').debug(
+                            'un_duck error: %s', e)
                 self.is_speaking = False  # >>> AURA_HANG_FIX_V1
 
     def _get_voice_settings(self):

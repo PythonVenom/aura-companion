@@ -497,3 +497,20 @@
 
 ### Закрыт долг
 - GAPS #93 "Лекарства — настроить" — ЗАКРЫТО
+
+
+## ЗАПИСЬ 2026-10-13 (17:45): DBus API (GAPS #38)
+
+### Сделано
+- aura/core/dbus_service.py (251 строка) — DBus сервис
+- Интерфейс: org.aura.Companion
+- Методы: Chat, Status, Agents, Command, Ping
+- systemd unit: aura-dbus.service
+- Агентов: 92
+
+### Наука
+- freedesktop.org DBus Spec (2003)
+- jeepney 0.9.0 (чистый Python)
+
+### Закрыт долг
+- GAPS #38 "DBus API" — ЗАКРЫТО

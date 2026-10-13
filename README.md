@@ -190,3 +190,12 @@ MIT — делай что хочешь, только не ври.
 - **Наука:** Clark, Licklider, Engelbart, Varela, Nussbaum, Tronto, Papert
 
 🛸
+
+## Скриншоты
+
+### Aura Studio — визуальный секвенсор-кабинет
+![Aura Studio](docs/screenshots/studio.svg)
+
+### Configurator — управление профилем, уведомлениями, ключами
+![Configurator](docs/screenshots/configurator.svg)
+

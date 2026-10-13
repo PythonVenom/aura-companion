@@ -77,6 +77,7 @@ from aura.agents.hands_free import AgentHandsFree
 from aura.agents.health import AgentHealth
 from aura.agents.health_twin import AgentHealthTwin
 from aura.agents.homeassistant import AgentHomeAssistant
+from aura.agents.journal_mood import VoiceJournal
 from aura.agents.kid_structure import AgentKidStructure
 from aura.agents.kid_therapy import AgentKidTherapy
 from aura.agents.knowledge import AgentKnowledge
@@ -94,6 +95,7 @@ from aura.agents.planner_agent import AgentPlanner
 from aura.agents.predictor import AgentPredictor
 from aura.agents.proactive_alert import AgentProactiveAlert
 from aura.agents.react_agent import AgentReact
+from aura.agents.recon import AgentRecon
 from aura.agents.reminiscence import AgentReminiscence
 from aura.agents.routine_learner import AgentRoutineLearner
 from aura.agents.self_check import AgentSelfCheck
@@ -105,8 +107,6 @@ from aura.agents.task_manager import AgentTaskManager
 from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.tutorial import AgentTutorial
 from aura.agents.unified_router import AgentUnifiedRouter
-from aura.agents.recon import AgentRecon
-from aura.agents.journal_mood import VoiceJournal
 from aura.agents.whatsapp import AgentWhatsApp
 from aura.core.orchestrator import Orchestrator
 

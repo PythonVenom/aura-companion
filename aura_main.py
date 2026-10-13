@@ -379,17 +379,33 @@ class AuraOrchestrator:
 
     @classmethod
     def _is_activated(cls, heard: str) -> bool:
-        text = heard.lower()
-        if any(a in text for a in cls._activation_words()):
-            return True
-        return any(w in text for w in cls.WHITELIST_NO_WAKE)
+        """Wake-word через fuzzy (Levenshtein 1965).
+
+        F-021d: «Аура» → «алло», «аула», «алла» — всё ловится.
+        «ураган», «арахис», «пауза» — НЕ ловятся.
+        Elder-care whitelist — приоритет.
+        """
+        try:
+            from aura.wake_detector import is_wake_word
+            return is_wake_word(heard)
+        except Exception:
+            # Fallback: старая логика
+            text = heard.lower()
+            if any(a in text for a in cls._activation_words()):
+                return True
+            return any(w in text for w in cls.WHITELIST_NO_WAKE)
 
     @classmethod
     def _strip_activation(cls, heard: str) -> str:
-        result = heard.lower()
-        for a in cls.ACTIVATION:
-            result = result.replace(a, "")
-        return " ".join(result.split()).strip(".,!? ")
+        """Убрать wake-word через fuzzy (F-021d)."""
+        try:
+            from aura.wake_detector import strip_wake_word
+            return strip_wake_word(heard)
+        except Exception:
+            result = heard.lower()
+            for a in cls.ACTIVATION:
+                result = result.replace(a, "")
+            return " ".join(result.split()).strip(".,!? ")
 
     def _handle_dialog(self) -> bool:
         """DialogueManager активен — слушаем без активации (ADR-013)."""

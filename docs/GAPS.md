@@ -439,3 +439,28 @@
 ### Закрыт долг
 - GAPS #9 Captain agent — ЗАКРЫТО
 - GAPS #10 Rituals (утро/вечер) — ЗАКРЫТО (вечерний)
+
+## ЗАПИСЬ 2026-10-13 (16:35): Installer для бати протестирован
+
+### Сделано
+- aura-detect.sh: AURA_PROFILE env override > auto-detect
+- install_universal.sh: elder → LLM off (ADR-025, ADR-139)
+- Docker-тест (ubuntu:24.04) пройден
+- 4 уникальных tools из project → companion
+- Mentor TUI: add/edit/delete custom skills
+- Mentor PathTracker: читает все 47 skills
+
+### Проверка в Docker
+- ОС: ubuntu ✅
+- apt update/install ✅
+- T-one + Piper download ✅
+- Ollama авто-установка ✅
+- Elder-профиль: 0 ollama pull ✅
+
+### Закрыты долги
+- GAPS #31 Mentor TUI add/edit — ЗАКРЫТО
+- GAPS #43 Live-USB бати — installer готов (ISO как резерв)
+
+### Готово к бате
+- Тест: Docker Ubuntu 24.04 (проведён)
+- Следующий шаг: реальная установка на Mint бати

@@ -120,3 +120,22 @@
 ---
 *Создано: 13.10.2026*
 *Всего: 95 пунктов*
+
+## ЗАПИСЬ 2026-10-13: Разбор клонов project/companion
+
+### Сделано
+- Перенесено из project в companion: `aura/system/` (6 модулей), `aura/lore/` (полный), `aura/kernel/`, `aura/contracts/`, `profiles/`, `tools/mentor_tui.py`, `aura/cockpit/`, `aura/game/`, 7 агентов
+- 3-way merge `aura_main.py` (project F-065/F-066/F-067/F-070 + companion v0.5.2)
+- Фикс путей `aura_project` → `aura-companion` в 13 боевых файлах
+- systemd units переключены на companion: aura.service, aura-tray.service, aura-backup.service
+- Демон работает: PID из companion, отвечает через ChatBridge
+
+### Известные проблемы
+- `aura-kernel.service` — отключён. Конфликт архитектур: kernel-адаптеры ждут legacy `AgentWeather`, а companion использует новый `WeatherAgent(MicroAgent)`. Требует переписывания адаптеров.
+- `venv` в companion — симлинк на `aura_project/venv`. Нужен свой venv (долг).
+- qwen2.5 иногда отвечает на китайском. Нужен system prompt с явным указанием языка.
+
+### Принцип (Д95)
+- `~/aura-companion` — master ядра и логики
+- `~/aura_project` — build-цех ISO + legacy архив
+- Никаких копий между проектами — только перенос в companion

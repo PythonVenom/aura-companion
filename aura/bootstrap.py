@@ -60,8 +60,10 @@ from aura.agents.briefing import BriefingAgent
 from aura.agents.calendar import AgentCalendar
 from aura.agents.call import AgentCall
 from aura.agents.capability_agent import AgentCapabilities
+from aura.agents.captain import AgentCaptain
 from aura.agents.care import CareAgent
 from aura.agents.cec import AgentCEC
+from aura.agents.clipboard import AgentClipboard
 from aura.agents.construction import AgentConstruction
 from aura.agents.deep_check_agent import AgentDeepCheck
 from aura.agents.deepseek_web import AgentDeepSeekWeb
@@ -69,6 +71,7 @@ from aura.agents.desktop_control import AgentDesktopControl
 from aura.agents.dictation import AgentDictation
 from aura.agents.email_agent import AgentEmail
 from aura.agents.emotion_voice import AgentEmotionVoice
+from aura.agents.evening_ritual import AgentEveningRitual
 from aura.agents.fall import AgentFall
 from aura.agents.federated_adapter import AgentFederatedAdapter
 from aura.agents.fin_elder import AgentFinElder
@@ -107,9 +110,6 @@ from aura.agents.task_manager import AgentTaskManager
 from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.tutorial import AgentTutorial
 from aura.agents.unified_router import AgentUnifiedRouter
-from aura.agents.captain import AgentCaptain
-from aura.agents.clipboard import AgentClipboard
-from aura.agents.evening_ritual import AgentEveningRitual
 from aura.agents.whatsapp import AgentWhatsApp
 from aura.core.orchestrator import Orchestrator
 

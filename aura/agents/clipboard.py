@@ -18,11 +18,9 @@ import os
 import re
 import shutil
 import subprocess
-import time
 from pathlib import Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
-
 
 # Паттерны секретов (OWASP 2021)
 SECRET_PATTERNS = [
@@ -40,10 +38,7 @@ def _looks_like_secret(text: str) -> bool:
     """True если текст похож на пароль/токен/ключ."""
     if not text:
         return False
-    for pat in SECRET_PATTERNS:
-        if pat.search(text):
-            return True
-    return False
+    return any(pat.search(text) for pat in SECRET_PATTERNS)
 
 
 def _detect_session() -> str:

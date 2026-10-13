@@ -11,8 +11,11 @@ from aura.agents.audio_pult import AgentAudioPult
 from aura.agents.audio_router import AgentAudioRouter
 from aura.agents.brain import AgentBrain
 from aura.agents.browser_tabs import AgentBrowserTabs
+from aura.agents.captain import AgentCaptain
 from aura.agents.checklist import AgentChecklist
+from aura.agents.clipboard import AgentClipboard
 from aura.agents.context_memory import AgentContextMemory
+from aura.agents.evening_ritual import AgentEveningRitual
 from aura.agents.focus_switch import AgentFocusSwitch
 from aura.agents.functions import AgentFunctions
 from aura.agents.internet import AgentInternet
@@ -38,9 +41,6 @@ from aura.agents.updates import AgentUpdates
 from aura.agents.vault import AgentVault
 from aura.agents.vision import AgentVision
 from aura.agents.vk_music import AgentVKMusic
-from aura.agents.captain import AgentCaptain
-from aura.agents.clipboard import AgentClipboard
-from aura.agents.evening_ritual import AgentEveningRitual
 from aura.agents.vk_web import AgentVKWeb
 from aura.agents.window_control import AgentWindowControl
 from aura.agents.window_manager import AgentWindowManager
@@ -52,8 +52,11 @@ __all__ = [
     "AgentAudioRouter",
     "AgentBrain",
     "AgentBrowserTabs",
+    "AgentCaptain",
     "AgentChecklist",
+    "AgentClipboard",
     "AgentContextMemory",
+    "AgentEveningRitual",
     "AgentFocusSwitch",
     "AgentFunctions",
     "AgentInternet",
@@ -76,9 +79,6 @@ __all__ = [
     "AgentToolRouter",
     "AgentUpdates",
     "AgentVKMusic",
-    "AgentCaptain",
-    "AgentClipboard",
-    "AgentEveningRitual",
     "AgentVKWeb",
     "AgentVault",
     "AgentVision",

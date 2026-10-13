@@ -8,8 +8,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from aura.kernel.agents.mentor.schema import SKILLS_SEED, Skill
-from aura.kernel.agents.mentor.schema_extra import ALL_EXTRA
 from aura.kernel.agents.mentor.schema_branches import ALL_BRANCHES
+from aura.kernel.agents.mentor.schema_extra import ALL_EXTRA
 
 CUSTOM_SKILLS_FILE = Path.home() / ".local/share/aura/mentor/custom_skills.json"
 

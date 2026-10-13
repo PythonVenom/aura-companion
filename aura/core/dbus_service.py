@@ -32,7 +32,10 @@ from pathlib import Path
 
 try:
     from jeepney import (
-        DBusAddress, new_method_call, new_method_return, MessageType,
+        DBusAddress,
+        MessageType,
+        new_method_call,
+        new_method_return,
     )
     from jeepney.bus_messages import message_bus
     from jeepney.io.asyncio import open_dbus_connection
@@ -82,12 +85,12 @@ class AuraDBusService:
             await self._conn.send(req)
             # Читаем reply (ждём до 2 сек)
             try:
-                reply = await asyncio.wait_for(
+                await asyncio.wait_for(
                     self._conn.receive(), timeout=2.0,
                 )
                 print(f"✅ DBus: {BUS_NAME} зарегистрирован", flush=True)
-            except asyncio.TimeoutError:
-                print(f"⚠️ DBus: RequestName timeout, продолжаю", flush=True)
+            except TimeoutError:
+                print("⚠️ DBus: RequestName timeout, продолжаю", flush=True)
         except Exception as e:
             print(f"⚠️ RequestName: {e}", file=sys.stderr)
 
@@ -102,7 +105,7 @@ class AuraDBusService:
                 msg = await asyncio.wait_for(
                     self._conn.receive(), timeout=1.0,
                 )
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 continue
             except Exception as e:
                 print(f"⚠️ DBus receive: {e}", file=sys.stderr)

@@ -30,11 +30,23 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
         "взаимодейств", "совмест", "вместе приним",
     )
 
-    # AURA_MED_SCHEDULER_V1: scheduler запускается опционально
-    def __init__(self, start_scheduler: bool = True):
+    # AURA_MED_SCHEDULER_V2: scheduler по умолчанию ВЫКЛ.
+    #
+    # Причина: фоновый _loop + chromadb (Rust FFI) = segfault.
+    # SQLite в daemon-потоке конфликтует с Rust-расширениями (GIL).
+    #
+    # Включается ТОЛЬКО если AURA_MED_SCHEDULER=1 (прод).
+    # В тестах и bootstrap — выключен.
+    def __init__(self, start_scheduler: bool | None = None):
         super().__init__()
         self._init_db()
         self._scheduler = None
+
+        # Дефолт из env (prod: 1, тесты: 0)
+        if start_scheduler is None:
+            import os
+            start_scheduler = os.environ.get("AURA_MED_SCHEDULER", "0") == "1"
+
         if start_scheduler:
             self._scheduler = threading.Thread(target=self._loop, daemon=True)
             self._scheduler.start()

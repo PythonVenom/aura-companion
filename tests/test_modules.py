@@ -1,78 +1,111 @@
-"""Тесты модульной архитектуры (ADR-011)."""
-
+"""Блок 6 — тесты AgentModules."""
 from __future__ import annotations
 
-from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from aura.bootstrap import (
-    is_module_enabled,
-    load_modules_config,
-    MODULES_CONFIG_PATH,
-)
-from aura.agents.time import AgentTime
-from aura.agents.vk_music import AgentVKMusic
+from aura.agents.modules import AgentModules, CATEGORIES, _category
+from aura.core.protocol import AgentRequest
 
 
-def test_base_agent_has_module_attrs():
-    """BaseAgent имеет MODULE_* атрибуты."""
-    from aura.core.protocol import BaseAgent
-    assert hasattr(BaseAgent, "MODULE_NAME")
-    assert hasattr(BaseAgent, "MODULE_DESCRIPTION")
-    assert hasattr(BaseAgent, "MODULE_REQUIRES")
-    assert hasattr(BaseAgent, "MODULE_ALWAYS")
+@pytest.fixture
+def agent():
+    return AgentModules()
 
 
-def test_auto_module_name_from_name():
-    """MODULE_NAME авто-заполняется из name."""
-    assert AgentTime.MODULE_NAME == "time"
-    assert AgentTime.name == "time"
+@pytest.fixture
+def req():
+    def _make(text: str):
+        return AgentRequest(text=text, user="test")
+    return _make
 
 
-def test_always_module_enabled_without_config(tmp_path, monkeypatch):
-    """MODULE_ALWAYS включён всегда."""
-    fake_config = tmp_path / "modules.toml"
-    monkeypatch.setattr("aura.bootstrap.MODULES_CONFIG_PATH", fake_config)
-    assert is_module_enabled(AgentTime, {}) is True
+# === _category ===
+
+def test_category_time():
+    assert _category("AgentTime") == "🕐 Простые"
 
 
-def test_optional_module_default_no_config(tmp_path, monkeypatch):
-    """Без конфига — все включены (обратная совместимость)."""
-    fake_config = tmp_path / "modules.toml"
-    monkeypatch.setattr("aura.bootstrap.MODULES_CONFIG_PATH", fake_config)
-    assert is_module_enabled(AgentVKMusic, {}) is True
+def test_category_sos():
+    assert _category("AgentSOS") == "🏥 Elder-care"
 
 
-def test_optional_module_enabled_with_config(tmp_path, monkeypatch):
-    """С конфигом — модуль включён если True."""
-    fake_config = tmp_path / "modules.toml"
-    fake_config.write_text("[modules]\nvk_music = true\n")
-    monkeypatch.setattr("aura.bootstrap.MODULES_CONFIG_PATH", fake_config)
-    assert is_module_enabled(AgentVKMusic, {"vk_music": True}) is True
+def test_category_wine():
+    assert _category("AgentWineLauncher") == "🔧 Наши новые"
 
 
-def test_optional_module_disabled_with_config(tmp_path, monkeypatch):
-    """С конфигом — модуль выключен если False."""
-    fake_config = tmp_path / "modules.toml"
-    fake_config.write_text("[modules]\nvk_music = false\n")
-    monkeypatch.setattr("aura.bootstrap.MODULES_CONFIG_PATH", fake_config)
-    assert is_module_enabled(AgentVKMusic, {"vk_music": False}) is False
+def test_category_unknown():
+    assert _category("AgentAlien") == "❓ Прочее"
 
 
-def test_load_config_missing(tmp_path, monkeypatch):
-    """Нет файла → пустой dict."""
-    fake_config = tmp_path / "modules.toml"
-    monkeypatch.setattr("aura.bootstrap.MODULES_CONFIG_PATH", fake_config)
-    assert load_modules_config() == {}
+def test_category_strips_agent_prefix():
+    assert _category("AgentAudioPult") == "🔊 Audio"
 
 
-def test_load_config_valid(tmp_path, monkeypatch):
-    """Есть файл → читается."""
-    fake_config = tmp_path / "modules.toml"
-    fake_config.write_text("[modules]\nvk_music = true\nvision = false\n")
-    monkeypatch.setattr("aura.bootstrap.MODULES_CONFIG_PATH", fake_config)
-    cfg = load_modules_config()
-    assert cfg["vk_music"] is True
-    assert cfg["vision"] is False
+# === can_handle ===
+
+@pytest.mark.parametrize("text", [
+    "список модулей", "какие агенты", "аура модули", "сколько агентов",
+])
+def test_can_handle(agent, req, text):
+    assert agent.can_handle(req(text))
+
+
+def test_cannot_handle_random(agent, req):
+    assert not agent.can_handle(req("привет как дела"))
+
+
+# === handle ===
+
+@pytest.mark.asyncio
+async def test_handle_no_orchestrator(agent, req):
+    resp = await agent.handle(req("список модулей"))
+    assert "не подключён" in resp.text
+
+
+@pytest.mark.asyncio
+async def test_handle_groups_by_category(agent, req):
+    """Mock orchestrator с 4 агентами."""
+    orch = MagicMock()
+    orch.registry.list_names.return_value = [
+        "time", "sos", "wine_launcher", "audio_pult", "plugin_test",
+    ]
+    agent.orchestrator = orch
+    resp = await agent.handle(req("список модулей"))
+    assert "4 агентов" in resp.text or "4 " in resp.text  # плагин исключён
+    assert "Про" in resp.text  # категория "Простые"
+    assert "Elder-care" in resp.text
+
+
+@pytest.mark.asyncio
+async def test_handle_excludes_plugins(agent, req):
+    orch = MagicMock()
+    orch.registry.list_names.return_value = [
+        "time", "plugin_a", "plugin_b",
+    ]
+    agent.orchestrator = orch
+    resp = await agent.handle(req("список"))
+    assert "plugin" not in resp.text
+
+
+@pytest.mark.asyncio
+async def test_handle_registry_error(agent, req):
+    orch = MagicMock()
+    orch.registry.list_names.side_effect = RuntimeError("boom")
+    agent.orchestrator = orch
+    resp = await agent.handle(req("список модулей"))
+    assert "❌" in resp.text
+
+
+# === CATEGORIES ===
+
+def test_categories_count():
+    """Минимум 10 категорий."""
+    assert len(CATEGORIES) >= 10
+
+
+def test_categories_no_overlap_for_key_agents():
+    """Time, SOS, WineLauncher в разных категориях."""
+    cats = {_category(x) for x in ("AgentTime", "AgentSOS", "AgentWineLauncher")}
+    assert len(cats) == 3

@@ -32,6 +32,7 @@ from aura.agents import (
     AgentInternet,
     AgentJournal,
     AgentMcp,
+    AgentModules,
     AgentMediaPause,
     AgentMediaSearch,
     AgentMessenger,
@@ -411,6 +412,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentWineLauncher, modules_config)   # #34
     _try_register(orch, AgentTuyaBLE, modules_config)        # #29
 
+    _try_register(orch, AgentModules, modules_config)       # Блок 6
     # --- Уровень 10: Internet — последним (общий "найди") ---
     _try_register(orch, AgentInternet, modules_config)
     # v2.5: приоритет для автора

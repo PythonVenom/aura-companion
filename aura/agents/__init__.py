@@ -22,6 +22,7 @@ from aura.agents.internet import AgentInternet
 from aura.agents.journal import AgentJournal
 from aura.agents.journal_mood import VoiceJournal
 from aura.agents.mcp import AgentMcp
+from aura.agents.modules import AgentModules
 from aura.agents.media_pause import AgentMediaPause
 from aura.agents.media_search import AgentMediaSearch
 from aura.agents.messenger import AgentMessenger
@@ -64,6 +65,7 @@ __all__ = [
     "AgentInternet",
     "AgentJournal",
     "AgentMcp",
+    "AgentModules",
     "AgentMediaPause",
     "AgentMediaSearch",
     "AgentMessenger",

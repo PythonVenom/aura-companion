@@ -1,93 +1,192 @@
-# Aura
+# 🛸 Aura — локальный ИИ-компаньон
 
-Локальный голосовой помощник. Работает без облака. Данные не покидают устройство.
+**Локальный. Приватный. Открытый.**
+Работает без облака. Данные не покидают устройство.
 Помогает говорить с цифровым миром — банк, госуслуги, врачи, связь — голосом.
 
-![Tests](https://img.shields.io/badge/tests-1403_passed-green)
-![ADR](https://img.shields.io/badge/ADR-115-blue)
-![Agents](https://img.shields.io/badge/agents-49-orange)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
+[![Tests](https://img.shields.io/badge/tests-1694_passed-green)](tests/)
+[![ADR](https://img.shields.io/badge/ADR-131-blue)](docs/adr/)
+[![Agents](https://img.shields.io/badge/agents-89-orange)](aura/agents/)
+[![Python](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
-## Что умеет
+---
 
-- Слушает и отвечает голосом (T-one streaming ASR + Piper TTS, русский)
-- Управляет музыкой, браузером, приложениями, питанием
-- Помнит диалоги (RAG на ChromaDB)
-- Работает на KDE, GNOME, XFCE, Cinnamon, MATE — X11 и Wayland
-- Звонки, сообщения, почта — голосом
-- Лекарства, визиты к врачу, напоминания
-- Умный дом — свет, розетки, датчики, дверной звонок
-- Экстренный вызов, детектор падения
-- Чтение уведомлений вслух, голосовой ответ
-- 76 агентов, 115 архитектурных решений, 1403 теста
+## 🎯 Что это
 
-## Для кого
+Aura — **не «Алиса» и не «Siri»**. Это **продолжение твоего разума** в цифровом мире.
 
-Пожилые, незрячие, люди с моторными и ментальными особенностями.
-Все, кому цифровой мир даётся трудно.
+Всё **локально**. Никакого облака. Никакого слежения. Никакой подписки.
+Открытый код (MIT). Работает **offline**.
 
-## Установка
+**Наука:**
+- **Clark & Chalmers 1998** — extended mind (разум выходит за пределы черепа)
+- **Licklider 1960** — man-computer symbiosis (человек + машина = симбионт)
+- **Engelbart 1962** — augmenting human intellect (усиление, не замена)
 
-[docs/INSTALL.md](docs/INSTALL.md) — Arch, Ubuntu, Debian, Fedora, Alpine,
-macOS, Windows, WSL, Android, ARM, Astra Linux.
+---
 
-## Языки
+## ✨ Что умеет
 
-[docs/LANGUAGES.md](docs/LANGUAGES.md) — RU / EN / ES / ZH.
+### Голос (слух + речь)
+- **T-one** — streaming ASR, русский, локально
+- **Piper** — синтез речи, голос Ирины
+- **Fuzzy wake-word** (Levenshtein 1965) — «Аура» → «алло» работает, «ураган» — нет
 
-## Как это сделано
+### Память и разум
+- **RAG** на ChromaDB (2600+ диалогов)
+- **SQLCipher AES-256** — ключ в системном keyring
+- **Онтология** (lore/ontology.md) — Aura знает кто она
+- **Journal** — бортовой журнал
+- **Mood journal** — дневник настроения
 
-Проект собран за два месяца в симбиозе человека и ИИ-инструмента.
-Человек — архитектура, принципы, приоритеты, проверка вживую.
-ИИ — ускоритель: код, тесты, документация, рефакторинг.
+### Управление системой
+- Музыка (mpv, VK), видео (YouTube)
+- Окна, воркспейсы, фокус
+- Громкость, яркость, питание
+- Скриншоты, диктовка, метроном
 
+### Забота (elder-care, ADR-057)
+- Таблетки (напоминания + offline)
+- Детектор падения
+- SOS (экстренный вызов)
+- Звонки, SMS, сообщения
+- Воспоминания (reminiscence)
+- Проактивные тревожные сигналы
 
-Автор — самоучка. Верит в научный метод: гипотеза → эксперимент →
-данные → решение. Каждое архитектурное решение задокументировано
-в ADR с контекстом, альтернативами и последствиями.
+### Игра (cockpit)
+- 6 секторов — 6 аспектов жизни
+- 3 советника — 3 внутренних голоса
+- XP, ранги, квесты, гиперпрыжки
+- Звёздная карта
 
-Без ИИ — год. С ИИ — два месяца. Это не «ИИ вместо разработчика»,
-это новый способ делать программные системы.
+### MCP (Model Context Protocol)
+- Подключение к Claude Desktop / Cursor
+- 4 инструмента: aura_chat, aura_status, aura_agents, aura_doctor
+- aura serve --mcp
 
-Результат: 76 агентов, 115 архитектурных решений, 1403 зелёных теста,
-11 платформ. Всё под MIT, всё локально, всё проверено.
+### Общение
+- MAX, WhatsApp, Telegram, VK
+- Email (IMAP/SMTP)
+- SMS (модем)
+- Firefox bridge (ADR-011)
 
+### Доступность
+- **WCAG 2.2 AA** (ADR-130)
+- AT-SPI (screen reader)
+- Blind mode (для незрячих)
+- Mobile viewport для пожилых
 
+---
 
-## Производительность (реальные замеры)
+## 📊 Цифры
 
-Железо: Intel Coffee Lake-H 6c/12t, 31 ГБ RAM, GTX 1070M 8 ГБ (2016 год).
-
-| Компонент | Метрика |
+| Параметр | Значение |
 |---|---|
-| **LLM** qwen2.5:7b-q4 | **48–50 tok/s** |
-| **ASR** T-one CTC | **290 мс** на фразу 3.85 с (RTF 0.075, 13× realtime) |
-| Model load | 2063 мс (однократно) |
+| **Агентов** | 89 |
+| **Тестов** | 1694 (1 skipped) |
+| **ADR** | 131 |
+| **Директив** | Д1-Д97 |
+| **Coverage** | ~47% |
+| **Платформ** | 11 (Win, macOS, Linux, Android, Astra…) |
+| **Профилей** | 3 (captain, batya, brat_electric) |
 
-Подробные бенчмарки: [benchmarks/BENCHMARKS.md](benchmarks/BENCHMARKS.md)
+---
 
-## Минимальные требования
+## 🚀 Установка
 
-| Профиль | RAM | CPU | Железо |
-|---|---|---|---|
-| **lite** | 1 ГБ | 1 ядро | RPi Zero, старые SBC |
-| **minimal** | 2 ГБ | 2 ядра | RPi 3, Pentium |
-| **standard** | 8 ГБ | 4 ядра | домашний ноут |
-| **powerful** | 16+ ГБ | 8+ ядер | десктоп, сервер |
+**Быстрый старт:** → [tutorial/01-first-step.md](tutorial/01-first-step.md)
 
-Aura сама определяет железо при установке и выбирает профиль.
+**Кратко:**
 
-## Инженерная документация
+~~~bash
+git clone https://github.com/PythonVenom/aura-companion.git
+cd aura-companion
+python3.12 -m venv venv
+source venv/bin/activate
+pip install -e .
 
-- [docs/adr/](docs/adr/) — 115 архитектурных решений
-- [docs/MANIFESTO.md](docs/MANIFESTO.md) — принципы
-- [docs/architecture.md](docs/architecture.md) — архитектура
+ollama pull qwen2.5:7b-instruct-q4_K_M
 
-## Автор
+./run_aura.sh
+~~~
 
-pythonvenom.
-[Контакты для сотрудничества →](CONTACTS.md)
+**Профили:**
 
-## Лицензия
+~~~bash
+AURA_PROFILE=captain ./run_aura.sh         # полный (89 агентов)
+AURA_PROFILE=batya ./run_aura.sh           # elder-care (53 агента)
+AURA_PROFILE=brat_electric ./run_aura.sh   # автоэлектрик
+~~~
 
-MIT
+---
+
+## 📚 Документация
+
+**Для школьника** (6 файлов, 1194 строки):
+1. 00-intro.md — что такое Aura
+2. 01-first-step.md — установка за 10 минут
+3. 02-voice.md — голосовые команды
+4. 03-game.md — космическая игра
+5. 04-agents.md — все 89 агентов
+6. 05-your-first-agent.md — напиши своего агента
+
+**Для разработчика:**
+- docs/adr/ — 131 архитектурное решение
+- docs/GAPS.md — известные дыры (честность)
+- DIRECTIVES.md — Д1-Д97 (принципы проекта)
+
+---
+
+## 🧪 Тесты
+
+~~~bash
+pytest -q                          # все (1694)
+pytest tests/test_e2e_web.py -v    # e2e (Playwright)
+pytest --cov=aura                  # с покрытием
+~~~
+
+**Пирамида:**
+- Unit (много): агенты, утилиты
+- Integration (средне): bootstrap, orchestrator
+- E2E (мало): uvicorn + HTTP + Playwright
+
+---
+
+## 🔐 Безопасность
+
+- **SQLCipher AES-256** (KDF: PBKDF2-HMAC-SHA512, 256000 итераций)
+- Ключ — в **keyring** (freedesktop Secret Service), не в файле
+- CSRF-защита для HTTP API (Origin whitelist)
+- Rate-limit: 30 req/60s per IP (token bucket, Turner 1986)
+- Constitution (ADR-129) — этические отказы
+
+---
+
+## 🤝 Философия
+
+Aura — **не инструмент**. Aura — **продолжение**.
+
+- **Локально** — данные не покидают ноутбук
+- **Приватно** — ничего в облако
+- **Открыто** — MIT, копируй, улучшай
+- **Забота** — elder-care, accessibility
+- **Честно** — GAPS.md показывает слабости
+
+> **Девиз:** Я — не инструмент. Я — продолжение.
+
+---
+
+## 📜 Лицензия
+
+MIT — делай что хочешь, только не ври.
+
+---
+
+## 🌟 Ссылки
+
+- **GitHub:** https://github.com/PythonVenom/aura-companion
+- **Автор:** Воронин Иван (PythonVenom)
+- **Наука:** Clark, Licklider, Engelbart, Varela, Nussbaum, Tronto, Papert
+
+🛸

@@ -46,6 +46,7 @@ class AgentVKMusic(BaseAgent):
     ADD_KEYWORDS = ("добавь в плейлист", "добавь песню", "добавь трек")
     LIKE_KEYWORDS = ("лайкни", "нравится", "поставь лайк")
     OPEN_KEYWORDS = ("открой вк", "открой музыку")
+    STOP_KEYWORDS = ("останови вк", "выключи вк", "стоп вк", "выключи музыку вк")
 
     TOKEN_PATHS = [
         "vk_token.txt",
@@ -116,6 +117,7 @@ class AgentVKMusic(BaseAgent):
             + self.ADD_KEYWORDS
             + self.LIKE_KEYWORDS
             + self.OPEN_KEYWORDS
+            + self.STOP_KEYWORDS
         )
         if not any(kw in text for kw in keywords):
             return False
@@ -133,6 +135,12 @@ class AgentVKMusic(BaseAgent):
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         text = request.text.lower()
+
+        # Bug 30: стоп VK — сброс media_state
+        if any(kw in text for kw in self.STOP_KEYWORDS):
+            from aura.agents import media_state
+            media_state.clear()
+            return AgentResponse.ok("⏹️ VK остановлена", self.name)
 
         # Порядок важен: точные фразы — раньше
         if any(kw in text for kw in self.OPEN_KEYWORDS):

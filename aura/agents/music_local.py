@@ -204,6 +204,9 @@ class AgentMusicLocal(BaseAgent):
         return self._playerctl("previous", "⏮️ Предыдущий трек")
 
     def stop(self) -> str:
+        # Bug 30: сброс media_state — иначе VK включится сам
+        from aura.agents import media_state
+        media_state.clear()
         return self._playerctl("stop", "⏹️ Музыка остановлена")
 
     def list_tracks(self) -> str:

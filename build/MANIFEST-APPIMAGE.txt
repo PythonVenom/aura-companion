@@ -1,0 +1,7 @@
+# Зависимости AppImage Aura v8.1.0 (проверено 2026-10-13)
+pydantic>=2.0
+pydantic-settings>=2.0
+webrtcvad
+setuptools<81
+numpy<2
+chromadb==0.5.23

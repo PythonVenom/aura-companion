@@ -210,3 +210,20 @@
 
 ### Закрыт долг
 - AUDIT #11 "23 агента не подключены" — частично (8 из 14)
+
+## ЗАПИСЬ 2026-10-13 (14:10): Онтология Aura + stopwords
+
+### Сделано
+- aura/lore/ontology.md — манифест Aura (85 строк): кто я, роли, обязательства, девиз
+- config/identity.yaml — обновлён: 5 ролей, 5 обязательств, refusals, science
+- aura/persona.py: load_ontology() + build_system_prompt() тянет онтологию
+- aura/agents/brain.py: SYSTEM_PROMPT → property, читает persona при каждом вызове
+- aura/core/intent_classifier.py: STOPWORDS (кто, что, ты...) — «кто ты» больше не матчит vk.messages
+
+### Результат
+- Aura знает кто она (девиз, роли, обязательства)
+- Ложные срабатывания tier0 убиты (F-021c)
+- Тесты: 1609 passed
+
+### Закрыт долг
+- AUDIT #10 «Наука не в коде» — частично (онтология + refusals)

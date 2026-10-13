@@ -5,3 +5,9 @@ setuptools<81  # pkg_resources for webrtcvad
 
 python-multipart>=0.0.9  # FastAPI Form
 sqlcipher3-binary>=0.5.0
+
+# === Критичные пины (совместимость) ===
+chromadb==0.5.23  # БЕЗ Rust FFI (segfault при 1.5.9)
+numpy>=1.26,<2.0  # совместим с chromadb 0.5.23
+scipy<1.13
+opencv-python<4.11

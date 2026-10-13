@@ -6,15 +6,10 @@
 #   ./install_universal.sh --help
 set -euo pipefail
 
-PROJECT_DIR="${AURA_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
-VENV_DIR="$PROJECT_DIR/venv"
-TONE_DIR="$PROJECT_DIR/sherpa-onnx-streaming-t-one-russian-2025-09-08"
-VOICES_DIR="$PROJECT_DIR/voices"
-
-TONE_URL="https://huggingface.co/csukuangfj/sherpa-onnx-streaming-t-one-russian-2025-09-08/resolve/main"
-PIPER_URL="https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/irina/medium"
-
+# Дефолт до парсинга аргументов (set -u)
 DRY_RUN=false
+
+# Парсинг аргументов ДО любых действий
 for arg in "$@"; do
     case "$arg" in
         --dry-run) DRY_RUN=true ;;
@@ -23,10 +18,44 @@ for arg in "$@"; do
     esac
 done
 
+
 log()  { printf "\033[1;34m[install]\033[0m %s\n" "$*"; }
 warn() { printf "\033[1;33m[warn]\033[0m %s\n" "$*" >&2; }
 die()  { printf "\033[1;31m[error]\033[0m %s\n" "$*" >&2; exit 1; }
 run()  { if $DRY_RUN; then echo "[dry-run] $*"; else "$@"; fi; }
+
+# PROJECT_DIR — куда ставим Aura
+# Приоритет:
+# 1. $AURA_PROJECT_DIR (env override)
+# 2. Если запущен из репо (есть aura_main.py рядом) — эта папка
+# 3. $HOME/aura-companion (для curl | bash)
+if [ -n "${AURA_PROJECT_DIR:-}" ]; then
+    PROJECT_DIR="$AURA_PROJECT_DIR"
+elif [ -f "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/aura_main.py" ]; then
+    PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+    PROJECT_DIR="$HOME/aura-companion"
+fi
+
+# Если проект не найден — клонируем
+if [ ! -f "$PROJECT_DIR/aura_main.py" ]; then
+    log "Клонирую Aura в $PROJECT_DIR..."
+    if $DRY_RUN; then
+        echo "[dry-run] git clone https://github.com/PythonVenom/aura-companion.git $PROJECT_DIR"
+    else
+        git clone https://github.com/PythonVenom/aura-companion.git "$PROJECT_DIR" || die "git clone failed"
+    fi
+fi
+
+VENV_DIR="$PROJECT_DIR/venv"
+TONE_DIR="$PROJECT_DIR/sherpa-onnx-streaming-t-one-russian-2025-09-08"
+VOICES_DIR="$PROJECT_DIR/voices"
+
+TONE_URL="https://huggingface.co/csukuangfj/sherpa-onnx-streaming-t-one-russian-2025-09-08/resolve/main"
+PIPER_URL="https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/irina/medium"
+
+
+
 
 # === 1. Determine OS ===
 if [ -f /etc/os-release ]; then . /etc/os-release; fi

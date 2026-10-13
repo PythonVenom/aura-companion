@@ -25,16 +25,24 @@ class AgentSOS(BaseAgent):
 
     @classmethod
     def _get_phrases(cls) -> tuple:
-        """F-015: sos_phrases из settings с fallback на hardcoded.
+        """F-015: sos_phrases из settings + MERGE с SOS_PHRASES.
 
         MANIFESTO.md: elder care — приоритет №1.
-        Пользователь может расширить список фраз через settings.json.
+
+        ВАЖНО: custom фразы ДОПОЛНЯЮТ дефолт, не заменяют (безопасность).
+        Иначе user может потерять критические фразы («упал», «тревога»).
+
+        Наука: Saltzer & Schroeder 1975 (fail-safe defaults).
         """
         try:
             from aura import settings
-            custom = settings.get("sos_phrases", [])
-            if custom:
-                return tuple(custom)
+            custom = settings.get("sos_phrases", []) or []
+            # merge: default + custom (dedup, сохраняем порядок)
+            merged = list(cls.SOS_PHRASES)
+            for phrase in custom:
+                if phrase and phrase not in merged:
+                    merged.append(phrase)
+            return tuple(merged)
         except Exception as e:
             # F-006: не глотать (раздел 17 промта)
             import logging
@@ -50,6 +58,10 @@ class AgentSOS(BaseAgent):
         return any(p in t for p in self._get_phrases())
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
+        # BUG-FIX: проверка can_handle (без неё — «привет» → SOS!)
+        if not self.can_handle(request):
+            return AgentResponse.not_handled(self.name)
+
         cfg = self._load_config()
         contact = cfg.get("contact", "")
 

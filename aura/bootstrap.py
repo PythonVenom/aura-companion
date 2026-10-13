@@ -107,6 +107,7 @@ from aura.agents.task_manager import AgentTaskManager
 from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.tutorial import AgentTutorial
 from aura.agents.unified_router import AgentUnifiedRouter
+from aura.agents.captain import AgentCaptain
 from aura.agents.whatsapp import AgentWhatsApp
 from aura.core.orchestrator import Orchestrator
 
@@ -347,6 +348,8 @@ def build_orchestrator() -> Orchestrator:
     # v2.5: приоритетные агенты автора (recon, voice journal)
     _try_register(orch, AgentRecon, modules_config)
     _try_register(orch, VoiceJournal, modules_config)
+
+    _try_register(orch, AgentCaptain, modules_config)
 
     # --- Уровень 2: узкий ducking — ДО audio_pult ---
     _try_register(orch, AgentMusicDucker, modules_config)

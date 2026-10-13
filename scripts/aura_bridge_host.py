@@ -10,12 +10,18 @@ import threading
 
 SOCK = "/tmp/aura_firefox.sock"
 
+# Bug 121: защита от OOM через поддельную длину
+MAX_MSG_SIZE = 10 * 1024 * 1024  # 10 МБ
+
 
 def read_msg(stream):
     raw = stream.read(4)
     if len(raw) < 4:
         return None
     length = struct.unpack("<I", raw)[0]
+    # Bug 121: защита от OOM (4GB length → hang/OOM)
+    if length > MAX_MSG_SIZE or length == 0:
+        return None
     body = stream.read(length)
     return json.loads(body.decode("utf-8"))
 
@@ -43,6 +49,10 @@ def socket_server(in_q: queue.Queue):
                 conn.close()
                 continue
             length = struct.unpack("<I", header)[0]
+            # Bug 121: защита от OOM
+            if length > MAX_MSG_SIZE or length == 0:
+                conn.close()
+                continue
             body = b""
             while len(body) < length:
                 chunk = conn.recv(length - len(body))

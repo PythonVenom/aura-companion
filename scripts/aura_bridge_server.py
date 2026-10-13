@@ -13,6 +13,9 @@ from pathlib import Path
 
 SOCK = "/tmp/aura_firefox.sock"
 
+# Bug 121: защита от OOM
+MAX_MSG_SIZE = 10 * 1024 * 1024  # 10 МБ
+
 
 def main():
     if os.path.exists(SOCK):
@@ -29,6 +32,9 @@ def main():
                 if not header:
                     continue
                 length = struct.unpack("@I", header)[0]
+                # Bug 121: защита от OOM
+                if length > MAX_MSG_SIZE or length == 0:
+                    continue
                 body = b""
                 while len(body) < length:
                     chunk = conn.recv(length - len(body))

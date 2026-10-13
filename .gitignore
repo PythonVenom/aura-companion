@@ -72,7 +72,6 @@ vm_script.sh
 nohup.out
 
 # Разрешаем скриншоты для README
-!docs/screenshots/*.png
 
 # Aura runtime config
 settings.json
@@ -112,7 +111,6 @@ docs/reviews/
 docs/axes/
 docs/recipes/
 docs/face/
-docs/screenshots/
 docs/demo.mp4
 docs/craft-onboarding.md
 docs/elder_care_profile.md
@@ -146,4 +144,8 @@ profiles/*/db.key
 !config/*.key
 
 # Разрешить SVG-скриншоты для README
+
+# Скриншоты для README (только SVG)
+!docs/screenshots/
+docs/screenshots/*.png
 !docs/screenshots/*.svg

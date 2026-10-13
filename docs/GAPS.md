@@ -174,3 +174,15 @@
 
 ### Закрыт долг
 - "2 упавших теста (ADR index, window_control)" — ЗАКРЫТО
+
+## ЗАПИСЬ 2026-10-13 (12:25): Хардкод путей побеждён
+
+### Сделано
+- 8 файлов: Path("/home/pythonvenom/aura-companion") → Path.home() / "aura-companion"
+- aura/system/{doctor,bugmap,deep_check,oneshot}.py
+- aura/game/spawner.py
+- aura/cockpit/{hyperjump,studio,ship}.py
+- Проверка: grep "/home/pythonvenom/" → 0
+
+### Закрыт долг
+- AUDIT #2 "Хардкод путей" — ЗАКРЫТО

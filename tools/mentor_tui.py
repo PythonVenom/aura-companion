@@ -95,10 +95,10 @@ class MentorTUI:
 
     def skills_list(self):
         print(f"{BOLD}📚 НАВЫКИ (все ветки):{RESET}")
-        all_skills = {s.id: s for s in all_skills()}
+        skills_dict = {s.id: s for s in all_skills()}
         by_branch = {}
         for sid, p in self.tracker.progress.items():
-            skill = all_skills.get(sid) or self.tracker.skills.get(sid)
+            skill = skills_dict.get(sid) or self.tracker.skills.get(sid)
             if not skill:
                 continue
             by_branch.setdefault(skill.branch, []).append((skill, p))

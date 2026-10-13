@@ -371,3 +371,25 @@
 
 ### Вывод
 Миграция успешна. Ошибка в логе — исторический след, не баг.
+
+## ЗАПИСЬ 2026-10-13 (15:25): E2E тесты (AUDIT #6)
+
+### Сделано
+- tests/test_e2e_web.py: 10 тестов
+- HTTP e2e: health, status, agents, version, chat, csrf
+- Playwright: загрузка UI, наличие формы, mobile viewport
+- Фикстура aura_server: uvicorn + health-check, clean shutdown
+- Установлен playwright 1.63.0 + chromium
+
+### Наука
+- Fowler 2003 (Test Pyramid) — e2e дорогие, но ловят реальные регрессии
+- Cohn 2009 — UI через Playwright
+- Humble & Farley 2010 — e2e как gate
+
+### Проверка
+- 10 passed in 2.57s
+- HTTP работает от uvicorn
+- Playwright реально открывает браузер
+
+### Закрыт долг
+- AUDIT #6 "Нет e2e тестов" — ЗАКРЫТО

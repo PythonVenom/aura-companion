@@ -38,7 +38,11 @@ detect_profile() {
 AURA_RAM_GB=$(detect_ram)
 AURA_CPU_CORES=$(detect_cores)
 AURA_GPU=$(detect_gpu)
-AURA_PROFILE=$(detect_profile "$AURA_RAM_GB")
+
+# AURA_PROFILE: env override > auto-detect (12-factor, factor 3)
+if [ -z "${AURA_PROFILE:-}" ]; then
+    AURA_PROFILE=$(detect_profile "$AURA_RAM_GB")
+fi
 
 export AURA_RAM_GB AURA_CPU_CORES AURA_GPU AURA_PROFILE
 

@@ -78,7 +78,7 @@ log "RAM: ${AURA_RAM_GB:-?} ГБ, CPU: ${AURA_CPU_CORES:-?} ядер, профи
 
 # === 3. Choose LLM model by profile ===
 # ADR-025 + ADR-139: elder-care на слабом железе → без LLM
-# Профиль elder (из AURA_PROFILE) → minimal всегда
+# ВАЖНО: AURA_PROFILE=elder задаётся пользователем, не auto
 if [ "${AURA_PROFILE:-medium}" = "elder" ]; then
     LLM_MODEL=""
     log "Профиль elder: LLM отключён (Pentium 6405U — ADR-139)"

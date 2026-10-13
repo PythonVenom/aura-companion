@@ -106,7 +106,7 @@ class AgentBrain:
                 "stream": False,
                 "options": {
                     "temperature": 0.7,
-                    "num_predict": 700,
+                    "num_predict": 400,  # Bug 28: 700 → 400 (быстрее)
                     "num_ctx": 4096,
                 },
             }).encode("utf-8")
@@ -141,7 +141,11 @@ class AgentBrain:
         messages = [{"role": "system", "content": self.SYSTEM_PROMPT}]
         messages.extend(self.context_history)
 
-        timeouts = (20, 15, 10)
+        # Bug 28: 20/15/10 → 8/6/4 (было до 45с, стало до 18с)
+        # Env-override: AURA_LLM_TIMEOUT=10 → (10, 8, 6)
+        import os as _os
+        _base = int(_os.environ.get("AURA_LLM_TIMEOUT", "8"))
+        timeouts = (_base, max(2, _base - 2), max(2, _base - 4))
         last_error = None
         empty_seen = False
         for model, t in zip(self.FALLBACK_MODELS, timeouts, strict=False):

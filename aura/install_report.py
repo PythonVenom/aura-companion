@@ -11,7 +11,7 @@ from pathlib import Path
 def check_installed() -> dict:
     """Проверить что реально установлено."""
     home = Path.home()
-    project = home / "aura_project"
+    project = home / "aura-companion"
 
     result = {
         "venv": (project / "venv").exists(),
@@ -70,7 +70,7 @@ def format_post_report() -> str:
         lines.append("  ✓ Логи: journalctl --user -u aura.service -f")
 
     lines.append("")
-    lines.append("  Документация: ~/aura_project/README.md")
+    lines.append("  Документация: ~/aura-companion/README.md")
     lines.append("  Проверка готовности: docs/adr/010-definition-of-done-beta.md")
     lines.append("")
 

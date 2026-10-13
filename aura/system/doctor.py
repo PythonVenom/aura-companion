@@ -13,7 +13,7 @@ import contextlib
 import subprocess
 from pathlib import Path
 
-REPO = Path("/home/pythonvenom/aura_project")
+REPO = Path("/home/pythonvenom/aura-companion")
 PROFILES = REPO / "profiles"
 OLD_STATE = Path.home() / ".config" / "aura" / "state.db"
 

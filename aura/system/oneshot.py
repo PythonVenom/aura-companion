@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
-REPO = Path("/home/pythonvenom/aura_project")
+REPO = Path("/home/pythonvenom/aura-companion")
 VENV_PY = str(REPO / "venv" / "bin" / "python3")
 SNAPSHOT_PATH = Path.home() / ".config" / "aura" / "health.snapshot.json"
 

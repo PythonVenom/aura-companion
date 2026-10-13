@@ -22,7 +22,7 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
-REPO = Path("/home/pythonvenom/aura_project")
+REPO = Path("/home/pythonvenom/aura-companion")
 VENV_PY = str(REPO / "venv" / "bin" / "python3")
 
 

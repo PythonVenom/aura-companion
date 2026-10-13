@@ -14,6 +14,7 @@ Barge-in: перебивание Ауры.
 
 from __future__ import annotations
 
+import collections
 import queue
 import threading
 import time
@@ -55,6 +56,8 @@ class AgentBargeIn:
         self._cooldown = self.COOLDOWN_SECONDS  # Bug 29: 2.0с
         self._speaking_started = 0.0  # когда Аура начала говорить
         self._consecutive_speech = 0  # счётчик фреймов речи подряд
+        # Bug 33: ring-buffer фреймов для Vosk (1.5с = 50 фреймов по 30мс)
+        self._frame_buffer = collections.deque(maxlen=50)
 
         try:
             import sounddevice as sd
@@ -103,6 +106,14 @@ class AgentBargeIn:
         self.thread.start()
         return True
 
+    def get_recent_pcm(self) -> bytes:
+        """Bug 33: последние ~1.5с PCM (для Vosk)."""
+        return b"".join(self._frame_buffer)
+
+    def clear_buffer(self) -> None:
+        """Bug 33: очистить буфер после обработки."""
+        self._frame_buffer.clear()
+
     def stop(self) -> None:
         """Остановить VAD и закрыть поток."""
         self.running = False
@@ -149,6 +160,9 @@ class AgentBargeIn:
 
             if len(frame) != self.FRAME_SIZE * 2:
                 continue
+
+            # Bug 33: пишем в ring-buffer для Vosk (независимо от VAD)
+            self._frame_buffer.append(frame)
 
             # Bug 45: RMS-гейт — эхо от колонок тише речи пользователя
             import numpy as _np

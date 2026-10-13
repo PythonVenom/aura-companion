@@ -254,3 +254,20 @@
 
 ### Закрыт долг
 - AUDIT #8 "Нет README для школьника" — ЗАКРЫТО
+
+## ЗАПИСЬ 2026-10-13 (14:50): Elder-care готов
+
+### Сделано
+- profiles/batya/modules.toml — авто-генерация (38 модулей off)
+- bootstrap.is_module_enabled — умный матчинг MODULE_NAME (Convention over Configuration)
+- bootstrap.load_modules_config — читает profiles/$AURA_PROFILE/modules.toml
+- tests/test_elder_scenarios.py — 17 тестов (15 сценариев)
+- aura_private/docs/ELDER-SCENARIOS.md — 168 строк
+
+### Проверка
+- AURA_PROFILE=batya → 53 агента (было 89)
+- default → 89
+- 17/17 elder-care тестов passed
+
+### Закрыт долг
+- AUDIT #9 "Данные для бати не ушли" — частично (профиль готов)

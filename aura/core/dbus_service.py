@@ -31,14 +31,15 @@ import time
 from pathlib import Path
 
 try:
-    from jeepney import DBusAddress, new_method_call, MessageType
-    from jeepney.bus_messages import message_bus
-    from jeepney.io.asyncio import (
-        open_dbus_connection,
-        Proxy,
+    from jeepney import (
+        DBusAddress, new_method_call, new_method_return, MessageType,
     )
+    from jeepney.bus_messages import message_bus
+    from jeepney.io.asyncio import open_dbus_connection
     JEEPNEY_OK = True
-except ImportError:
+except ImportError as _e:
+    import sys
+    print(f"❌ jeepney import: {_e}", file=sys.stderr)
     JEEPNEY_OK = False
 
 
@@ -114,10 +115,11 @@ class AuraDBusService:
 
     async def _handle_method(self, msg):
         """Обработать method_call."""
-        iface = msg.header.fields.get(3)  # INTERFACE
-        member = msg.header.fields.get(4)  # MEMBER
-        # В jeepney field 3 — INTERFACE, 4 — MEMBER
-        # Не будем строго проверять — отвечаем на всё
+        # В jeepney fields — dict-like
+        try:
+            member = msg.header.fields[3]  # MEMBER (3)
+        except (KeyError, IndexError):
+            return  # Не наш метод
 
         try:
             body = msg.body
@@ -143,14 +145,9 @@ class AuraDBusService:
             await self._error(msg, str(e))
 
     async def _reply(self, msg, signature: str, body: tuple):
-        """Ответить на method_call."""
+        """Ответить на method_call (jeepney new_reply)."""
         try:
-            reply = new_method_call(
-                msg.header.fields[1],  # destination (sender)
-                member=msg.header.fields[4] + "Reply",
-                signature=signature,
-                body=body,
-            )
+            reply = new_method_return(msg, signature=signature, body=body)
             await self._conn.send(reply)
         except Exception as e:
             print(f"⚠️ reply: {e}", file=sys.stderr)

@@ -8,15 +8,34 @@ set -euo pipefail
 
 # Дефолт до парсинга аргументов (set -u)
 DRY_RUN=false
+PORTABLE_PATH=""
 
 # Парсинг аргументов ДО любых действий
-for arg in "$@"; do
-    case "$arg" in
+while [ $# -gt 0 ]; do
+    case "$1" in
         --dry-run) DRY_RUN=true ;;
+        --portable)
+            shift
+            PORTABLE_PATH="${1:-}"
+            [ -z "$PORTABLE_PATH" ] && { echo "❌ --portable требует путь" >&2; exit 1; }
+            ;;
         --help|-h) sed -n '2,10p' "$0" | sed 's/^# \?//'; exit 0 ;;
-        *) echo "Неизвестный аргумент: $arg" >&2; exit 1 ;;
+        *) echo "Неизвестный аргумент: $1" >&2; exit 1 ;;
     esac
+    shift
 done
+
+# === Portable mode (Д42) ===
+if [ -n "$PORTABLE_PATH" ]; then
+    PORTABLE_PATH="$(cd "$PORTABLE_PATH" 2>/dev/null && pwd || echo "$PORTABLE_PATH")"
+    export AURA_PROJECT_DIR="$PORTABLE_PATH/aura-project"
+    export AURA_CACHE_DIR="$PORTABLE_PATH/aura-cache"
+    export AURA_CONFIG_DIR="$PORTABLE_PATH/aura-config"
+    mkdir -p "$AURA_CACHE_DIR" "$AURA_CONFIG_DIR"
+    echo "[portable] PROJECT=$AURA_PROJECT_DIR"
+    echo "[portable] CACHE=$AURA_CACHE_DIR"
+    echo "[portable] CONFIG=$AURA_CONFIG_DIR"
+fi
 
 
 log()  { printf "\033[1;34m[install]\033[0m %s\n" "$*"; }

@@ -136,3 +136,6 @@ api_keys.*
 *.old
 *.pyc
 log/
+.coverage
+htmlcov/
+.pytest_cache/

@@ -22,6 +22,7 @@ Ollama, модель qwen2.5:7b-instruct-q4_K_M.
 from __future__ import annotations
 
 import json
+import os
 import urllib.request
 
 
@@ -104,10 +105,12 @@ class AgentBrain:
                 "model": model,
                 "messages": messages,
                 "stream": False,
+                "keep_alive": "30m",   # #103: модель не выгружается 30 мин
                 "options": {
                     "temperature": 0.7,
                     "num_predict": 400,  # Bug 28: 700 → 400 (быстрее)
-                    "num_ctx": 4096,
+                    "num_ctx": 2048,     # #103: 4096 → 2048 (быстрее prompt)
+                    "num_thread": os.cpu_count() or 4,  # #103: все CPU ядра
                 },
             }).encode("utf-8")
             req = urllib.request.Request(

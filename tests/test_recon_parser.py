@@ -81,3 +81,26 @@ cmd: echo x
 """
     blocks = parse_tasks(text)
     assert blocks == []
+
+
+# === Bug 27 regression: «обзор» не перехватывается Recon ===
+
+def test_recon_does_not_steal_overview():
+    """«обзор» должен идти в WindowManager, а не в Recon."""
+    from aura.agents.recon import AgentRecon
+    from aura.core.protocol import AgentRequest
+    a = AgentRecon()
+    # Просто «обзор» — НЕ должно обрабатываться
+    assert not a.can_handle(AgentRequest(text="обзор", user="test"))
+    # «обзор окон» — тоже не Recon
+    assert not a.can_handle(AgentRequest(text="обзор окон", user="test"))
+
+
+def test_recon_handles_system_overview():
+    """«обзор системы» — обрабатывается Recon."""
+    from aura.agents.recon import AgentRecon
+    from aura.core.protocol import AgentRequest
+    a = AgentRecon()
+    assert a.can_handle(AgentRequest(text="обзор системы", user="test"))
+    assert a.can_handle(AgentRequest(text="recon", user="test"))
+    assert a.can_handle(AgentRequest(text="диагностика", user="test"))

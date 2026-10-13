@@ -12,7 +12,8 @@ PROJECT = Path(__file__).parent.parent.parent
 class AgentRecon(BaseAgent):
     name = "recon"
     MODULE_ALWAYS = True
-    KEYWORDS = ("обзор", "recon", "диагностика", "статус системы", "покажи состояние")
+    # Bug 27: убран "обзор" — конфликт с AgentWindowManager (Plasma Overview)
+    KEYWORDS = ("обзор системы", "recon", "диагностика", "статус системы", "покажи состояние")
     def can_handle(self, request):
         text = request.text.lower().strip()
         return any(kw in text for kw in self.KEYWORDS)

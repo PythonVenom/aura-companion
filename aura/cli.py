@@ -209,6 +209,12 @@ def cmd_reminders(args):
     return 0
 
 
+def cmd_first_run(args):
+    """Запуск first-run wizard."""
+    from aura.wizard import main as wizard_main
+    wizard_main()
+
+
 def cmd_doctor(args):
     from aura.doctor import main as doctor_main
     return doctor_main()
@@ -462,6 +468,7 @@ def main():
 
     sub.add_parser("reload-extension", help="Firefox extension").set_defaults(func=cmd_reload_extension)
     sub.add_parser("doctor", help="диагностика одной командой").set_defaults(func=cmd_doctor)
+    sub.add_parser("first-run", help="первый запуск — настройка профиля").set_defaults(func=cmd_first_run)
     sub.add_parser("adr", help="список ADR").set_defaults(func=cmd_adr)
     sub.add_parser("agents", help="список агентов").set_defaults(func=cmd_agents)
     sub.add_parser("professions", help="каталог профессий").set_defaults(func=cmd_professions)

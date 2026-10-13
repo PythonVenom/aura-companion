@@ -1,0 +1,11 @@
+#!/bin/bash
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV="$HERE/usr/lib/aura-venv"
+AURA_DIR="$HERE/usr/lib/aura"
+
+# ЖЁСТКО заменяем PYTHONPATH — родительская папка для пакета aura
+export PYTHONPATH="$(dirname "$AURA_DIR")"
+export AURA_PROJECT_DIR="$AURA_DIR"
+unset AURA_CACHE_DIR
+
+exec "$VENV/bin/python" "$AURA_DIR/aura_main.py" "$@"

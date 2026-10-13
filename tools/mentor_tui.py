@@ -4,13 +4,44 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path.home() / "aura_project"))
+sys.path.insert(0, str(Path.home() / "aura-companion"))
 
 from aura.kernel.agents.mentor.path import PathTracker
 from aura.kernel.agents.mentor.ledger import ProfileLedger
-from aura.kernel.agents.mentor.schema import SKILLS_SEED
+from aura.kernel.agents.mentor.schema import SKILLS_SEED, Skill
 from aura.kernel.agents.mentor.schema_extra import ALL_EXTRA
 from aura.kernel.agents.mentor.schema_branches import ALL_BRANCHES
+
+CUSTOM_SKILLS_FILE = Path.home() / ".local/share/aura/mentor/custom_skills.json"
+
+
+def load_custom_skills() -> list:
+    """Загрузить user-defined skills (Open-Closed: seed не трогаем)."""
+    import json
+    if not CUSTOM_SKILLS_FILE.exists():
+        return []
+    try:
+        data = json.loads(CUSTOM_SKILLS_FILE.read_text(encoding="utf-8"))
+        return [Skill(**s) for s in data.get("skills", [])]
+    except Exception:
+        return []
+
+
+def save_custom_skills(skills: list) -> None:
+    """Сохранить custom skills."""
+    import json
+    from dataclasses import asdict
+    CUSTOM_SKILLS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    CUSTOM_SKILLS_FILE.write_text(
+        json.dumps({"skills": [asdict(s) for s in skills]},
+                   ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+def all_skills() -> list:
+    """Все skills: seed + extra + branches + custom."""
+    return SKILLS_SEED + ALL_EXTRA + ALL_BRANCHES + load_custom_skills()
 
 
 # ANSI-цвета (без зависимостей)
@@ -64,7 +95,7 @@ class MentorTUI:
 
     def skills_list(self):
         print(f"{BOLD}📚 НАВЫКИ (все ветки):{RESET}")
-        all_skills = {s.id: s for s in SKILLS_SEED + ALL_EXTRA + ALL_BRANCHES}
+        all_skills = {s.id: s for s in all_skills()}
         by_branch = {}
         for sid, p in self.tracker.progress.items():
             skill = all_skills.get(sid) or self.tracker.skills.get(sid)
@@ -97,8 +128,9 @@ class MentorTUI:
 
     def menu(self):
         print(f"{BOLD}КОМАНДЫ:{RESET}")
-        print(f"  {GREEN}[s]{RESET} старт  · {GREEN}[d]{RESET} готово (done)")
-        print(f"  {GREEN}[r]{RESET} refresh · {GREEN}[q]{RESET} выход")
+        print(f"  {GREEN}[s]{RESET} старт  · {GREEN}[d]{RESET} готово  · {GREEN}[r]{RESET} refresh")
+        print(f"  {YELLOW}[a]{RESET} добавить  · {YELLOW}[e]{RESET} изменить  · {YELLOW}[x]{RESET} удалить")
+        print(f"  {GREEN}[q]{RESET} выход")
         print()
 
     def render(self):
@@ -107,6 +139,90 @@ class MentorTUI:
         self.skills_list()
         self.next_task()
         self.menu()
+
+    def add_skill(self):
+        """Добавить custom skill (Open-Closed: seed не трогаем)."""
+        print(f"{BOLD}➕ НОВЫЙ НАВЫК{RESET}")
+        try:
+            sid = input(f"{DIM}ID (латиница, дефисы) [{RESET}").strip()
+            if not sid:
+                return
+            name = input(f"{DIM}Название: {RESET}").strip()
+            if not name:
+                return
+            level = input(f"{DIM}Уровень (1-5) [1]: {RESET}").strip()
+            level = int(level) if level else 1
+            branch = input(f"{DIM}Ветка (it/art/medicine/business/lang) [it]: {RESET}").strip() or "it"
+            prereq = input(f"{DIM}Пререквизиты (через запятую, пусто): {RESET}").strip()
+            prereqs = [p.strip() for p in prereq.split(",") if p.strip()] if prereq else []
+
+            from aura.kernel.agents.mentor.schema import Skill
+            new_skill = Skill(sid, name, level, branch, prereqs, 10.0, [])
+
+            customs = load_custom_skills()
+            customs.append(new_skill)
+            save_custom_skills(customs)
+            print(f"{GREEN}✅ Добавлен: {name}{RESET}")
+        except (EOFError, KeyboardInterrupt):
+            print()
+        except Exception as e:
+            print(f"{RED}❌ Ошибка: {e}{RESET}")
+        input(f"{DIM}Enter...{RESET}")
+
+    def edit_skill(self):
+        """Изменить custom skill."""
+        customs = load_custom_skills()
+        if not customs:
+            print(f"{YELLOW}Нет custom skills для редактирования{RESET}")
+            input(f"{DIM}Enter...{RESET}")
+            return
+
+        print(f"{BOLD}✏️  CUSTOM SKILLS:{RESET}")
+        for i, s in enumerate(customs, 1):
+            print(f"  [{i}] {s.name} ({s.id})")
+
+        try:
+            idx = input(f"{DIM}Номер для редактирования: {RESET}").strip()
+            if not idx.isdigit() or not (1 <= int(idx) <= len(customs)):
+                return
+            skill = customs[int(idx) - 1]
+
+            name = input(f"{DIM}Название [{skill.name}]: {RESET}").strip()
+            if name:
+                skill.name = name
+
+            level = input(f"{DIM}Уровень [{skill.level}]: {RESET}").strip()
+            if level.isdigit():
+                skill.level = int(level)
+
+            save_custom_skills(customs)
+            print(f"{GREEN}✅ Сохранено{RESET}")
+        except (EOFError, KeyboardInterrupt):
+            print()
+        input(f"{DIM}Enter...{RESET}")
+
+    def delete_skill(self):
+        """Удалить custom skill."""
+        customs = load_custom_skills()
+        if not customs:
+            print(f"{YELLOW}Нет custom skills{RESET}")
+            input(f"{DIM}Enter...{RESET}")
+            return
+
+        print(f"{BOLD}🗑  CUSTOM SKILLS:{RESET}")
+        for i, s in enumerate(customs, 1):
+            print(f"  [{i}] {s.name} ({s.id})")
+
+        try:
+            idx = input(f"{DIM}Номер для удаления: {RESET}").strip()
+            if not idx.isdigit() or not (1 <= int(idx) <= len(customs)):
+                return
+            removed = customs.pop(int(idx) - 1)
+            save_custom_skills(customs)
+            print(f"{GREEN}✅ Удалён: {removed.name}{RESET}")
+        except (EOFError, KeyboardInterrupt):
+            print()
+        input(f"{DIM}Enter...{RESET}")
 
     def run(self):
         while True:
@@ -123,6 +239,15 @@ class MentorTUI:
 
             elif cmd in ("r", "refresh", ""):
                 continue
+
+            elif cmd == "a":
+                self.add_skill()
+
+            elif cmd == "e":
+                self.edit_skill()
+
+            elif cmd == "x":
+                self.delete_skill()
 
             elif cmd == "s":
                 task = self.tracker.next_task()

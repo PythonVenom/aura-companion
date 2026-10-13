@@ -8,6 +8,22 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from aura.kernel.agents.mentor.schema import SKILLS_SEED, Skill
+from aura.kernel.agents.mentor.schema_extra import ALL_EXTRA
+from aura.kernel.agents.mentor.schema_branches import ALL_BRANCHES
+
+CUSTOM_SKILLS_FILE = Path.home() / ".local/share/aura/mentor/custom_skills.json"
+
+
+def _load_custom() -> list:
+    """Загрузить custom skills (Open-Closed)."""
+    import json
+    if not CUSTOM_SKILLS_FILE.exists():
+        return []
+    try:
+        data = json.loads(CUSTOM_SKILLS_FILE.read_text(encoding="utf-8"))
+        return [Skill(**s) for s in data.get("skills", [])]
+    except Exception:
+        return []
 
 STORE = Path.home() / ".local/share/aura/mentor/profile.json"
 
@@ -24,18 +40,39 @@ class Progress:
 class PathTracker:
     def __init__(self, user: str = "batya"):
         self.user = user
-        self.skills = {s.id: s for s in SKILLS_SEED}
+        all_skills = SKILLS_SEED + ALL_EXTRA + ALL_BRANCHES + _load_custom()
+        self.skills = {s.id: s for s in all_skills}
         self.progress: dict[str, Progress] = {}
         self._load()
 
     def _load(self):
+        """Загрузить прогресс + синхронизировать новые skills."""
         STORE.parent.mkdir(parents=True, exist_ok=True)
         if STORE.exists():
             data = json.loads(STORE.read_text())
             for p in data.get("progress", []):
                 self.progress[p["skill_id"]] = Progress(**p)
-        if not self.progress:
-            self._init()
+
+        # Синхронизация: добавить новые skills (Open-Closed)
+        added = 0
+        for sid, s in self.skills.items():
+            if sid in self.progress:
+                continue
+            if not s.prerequisites:
+                self.progress[sid] = Progress(sid, "available")
+            else:
+                # Проверяем: все prereq done?
+                if all(
+                    self.progress.get(pid) and self.progress[pid].status == "done"
+                    for pid in s.prerequisites
+                ):
+                    self.progress[sid] = Progress(sid, "available")
+                else:
+                    self.progress[sid] = Progress(sid, "locked")
+            added += 1
+
+        if added or not self.progress:
+            self._save()
 
     def _init(self):
         """?????? locked, ???????????????? ???????????? ????, ?? ???????? ?????? prereq."""

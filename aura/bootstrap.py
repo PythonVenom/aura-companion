@@ -114,26 +114,66 @@ MODULES_CONFIG_PATH = Path.home() / ".config" / "aura" / "modules.toml"
 
 
 def load_modules_config() -> dict:
-    """Прочитать ~/.config/aura/modules.toml. Пусто если нет."""
-    if not MODULES_CONFIG_PATH.exists():
-        return {}
-    try:
-        with open(MODULES_CONFIG_PATH, "rb") as f:
-            data = tomllib.load(f)
-        return data.get("modules", {})
-    except Exception:
-        return {}
+    """Прочитать modules.toml.
+
+    Приоритет:
+    1. profiles/$AURA_PROFILE/modules.toml (если env AURA_PROFILE)
+    2. ~/.config/aura/modules.toml
+
+    Наука: 12-factor app, factor 3 (Config in env).
+    """
+    import os
+    profile = os.environ.get("AURA_PROFILE", "").strip()
+    paths = []
+    if profile:
+        repo = Path(__file__).parent.parent
+        paths.append(repo / "profiles" / profile / "modules.toml")
+    paths.append(MODULES_CONFIG_PATH)
+
+    for cfg_path in paths:
+        if not cfg_path.exists():
+            continue
+        try:
+            with open(cfg_path, "rb") as f:
+                data = tomllib.load(f)
+            return data.get("modules", {})
+        except Exception:
+            continue
+    return {}
 
 
 def is_module_enabled(agent_class, config: dict) -> bool:
-    """Включён ли модуль (ADR-011)."""
+    """Включён ли модуль (ADR-011).
+
+    Ищем по нескольким формам имени:
+    1. agent_class.MODULE_NAME (явное)
+    2. agent_class.__name__.lower()  — AgentBrowserTabs -> agentbrowsertabs
+    3. snake_case — AgentBrowserTabs -> agent_browser_tabs
+    4. snake_case без agent_ — browser_tabs
+
+    Наука: Convention over Configuration (Rails, 2004).
+    """
+    import re
+
     if getattr(agent_class, "MODULE_ALWAYS", False):
         return True
-    if not MODULES_CONFIG_PATH.exists():
+    if not config:
         return True
-    module_name = getattr(agent_class, "MODULE_NAME", agent_class.__name__.lower())
-    # Default — включён. Пользователь явно выключает (ADR-011).
-    return bool(config.get(module_name, True))
+
+    cls_name = agent_class.__name__
+    snake = re.sub(r"(?<!^)(?=[A-Z])", "_", cls_name).lower()
+
+    candidates = [
+        getattr(agent_class, "MODULE_NAME", None),
+        cls_name.lower(),
+        snake,
+        snake[6:] if snake.startswith("agent_") else None,
+    ]
+
+    for name in candidates:
+        if name and name in config:
+            return bool(config[name])
+    return True
 
 
 def _try_register(orch, agent_class, config: dict) -> bool:

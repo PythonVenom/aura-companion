@@ -1,51 +1,42 @@
-# F-079: modules.toml для бати (elder-care профиль)
-
-# Всё elder-care включено по дефолту.
-# Здесь — только ВЫКЛЮЧЕНИЯ (модуль = false).
+# F-079: modules.toml для бати (elder-care профиль, авто-генерация 2026-10-13)
+# Всё elder-care включено. Остальное — выключено.
 
 [modules]
-agentatspi = false
-agentchecklist = false
-agentdesktopcontrol = false
-agentemail = false
-agentkidstructure = false
-agentkidtherapy = false
-agentonboarding = false
-agentpccontrol = false
-agentpredictor = false
-agentroutinelearner = false
-agenttelegram = false
-agenttutorial = false
-agentvkweb = false
-app_launcher = false
-browser_tabs = false
-capabilities = false
-cec = false
-construction = false
+at_spi = false
+brain = false
+checklist = false
 context_memory = false
-context_recent = false
+deep_check = false
+deep_seek_web = false
+desktop_control = false
+email = false
 federated_adapter = false
-focus_mode = false
 focus_switch = false
-functions = false
-handsfree = false
-internet = false
+greeting = false
+kid_structure = false
+kid_therapy = false
 mcp = false
-media_pause = false
+media_pult = false
 media_search = false
+messenger = false
+mouse = false
 music_ducker = false
 music_local = false
-open_resolver = false
-planner = false
-react_agent = false
-recon = false
-registry = false
-screen_reader = false
+onboarding = false
+p_c_control = false
+parallel_universe = false
+predictor = false
+routine_learner = false
+s_m_s = false
 self_check = false
+task_manager = false
+telegram = false
 text_editor = false
+tool_router = false
+tutorial = false
 unified_router = false
 updates = false
-whatsapp = false
-window_control = false
-window_manager = false
-agentweather = false
+v_k_music = false
+v_k_web = false
+vault = false
+vision = false

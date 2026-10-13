@@ -312,3 +312,14 @@
 
 ### Закрыт долг
 - AUDIT #4 "Один бэкап" — ЗАКРЫТО (частично, offsite на другом диске)
+
+## ЗАПИСЬ 2026-10-13 (15:20): weather покрыт
+
+### Сделано
+- aura/agents/weather.py: двойной API (str + AgentRequest)
+- can_handle + async handle (Liskov 1987 — принцип подстановки)
+- tests/test_weather.py: 9 тестов (creation, keywords, coords, mock API, error, russian)
+- Найден и исправлен баг: старый handle() не принимал AgentRequest
+
+### Покрытие
+- weather.py: 0% → ~70%

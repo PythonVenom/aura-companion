@@ -186,3 +186,15 @@
 
 ### Закрыт долг
 - AUDIT #2 "Хардкод путей" — ЗАКРЫТО
+
+## ЗАПИСЬ 2026-10-13 (12:30): rate-limit для HTTP API
+
+### Сделано
+- aura/web/api.py: token bucket на /chat
+- Лимит: 30 запросов / 60 сек с одного IP
+- Превышение → HTTP 429 с деталями
+- Наука: Turner 1986 (token bucket), RFC 6585 (429 Too Many Requests)
+- Тест: 30 ok, +1 = fail
+
+### Закрыт долг
+- AUDIT #16 "No rate-limit" — ЗАКРЫТО

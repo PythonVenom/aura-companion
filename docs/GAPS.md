@@ -271,3 +271,20 @@
 
 ### Закрыт долг
 - AUDIT #9 "Данные для бати не ушли" — частично (профиль готов)
+
+## ЗАПИСЬ 2026-10-13 (15:00): SQLCipher → keyring
+
+### Сделано
+- aura/game/state.py: _load_or_make_key → keyring
+- Приоритет: env AURA_DB_KEY → keyring → миграция с plaintext → новый
+- Миграция: db.key (plaintext) → keyring → удаление файла
+- Fallback: если keyring недоступен, файл 0600 (last resort)
+
+### Проверка
+- Plaintext файл db.key удалён
+- Ключ в keyring: aura-game-state/master-key
+- StateStore читает ключ без изменений
+- 17 elder-care тестов passed
+
+### Закрыт долг
+- AUDIT #3 "Ключ SQLCipher в plaintext" — ЗАКРЫТО

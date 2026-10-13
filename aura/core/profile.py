@@ -71,6 +71,7 @@ class UserProfile:
                 fin_elder=data.get("fin_elder", {}),
                 safety=data.get("safety", {}),
                 created_at=data.get("created_at", datetime.now().isoformat()),
+                signature=bytes.fromhex(data["signature"]) if data.get("signature") else None,
             )
 
         # Legacy: агрегируем из разрозненных файлов
@@ -102,6 +103,25 @@ class UserProfile:
         )
 
     # --- Сериализация ---
+    def _payload(self) -> dict[str, Any]:
+        """Данные БЕЗ signature — то, что подписывается."""
+        d = asdict(self)
+        d.pop("signature", None)
+        return d
+
+    def sign(self) -> bytes:
+        """Подписать профиль через ledger. Возвращает 64-байтную подпись."""
+        from aura.core.ledger import sign as ledger_sign
+        self.signature = ledger_sign(self._payload(), agent="profile")
+        return self.signature
+
+    def verify(self) -> bool:
+        """Проверить подпись профиля. False если signature отсутствует."""
+        if not self.signature:
+            return False
+        from aura.core.ledger import verify as ledger_verify
+        return ledger_verify(self._payload(), self.signature)
+
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
         d["signature"] = self.signature.hex() if self.signature else None

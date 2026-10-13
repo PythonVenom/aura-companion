@@ -141,3 +141,89 @@ def test_load_broken_profile_json_falls_back():
     # name станет default "captain"
     p = P.UserProfile.load()
     assert p.name == "captain"
+
+
+# === Интеграция с ledger (#32) ===
+
+def test_sign_returns_64_bytes(tmp_path, monkeypatch):
+    """sign() вызывает ledger.sign() и возвращает 64 байта."""
+    from aura.core import ledger as L
+    monkeypatch.setattr(L, "CONFIG_DIR", tmp_path)
+    monkeypatch.setattr(L, "KEY_DIR", tmp_path / "keys")
+    monkeypatch.setattr(L, "PRIV_PATH", tmp_path / "keys/ed25519.key")
+    monkeypatch.setattr(L, "PUB_PATH", tmp_path / "keys/ed25519.pub")
+    monkeypatch.setattr(L, "LEDGER_DB", tmp_path / "ledger.db")
+    L.generate_keypair()
+
+    p = P.UserProfile(name="batya", age=78)
+    sig = p.sign()
+    assert isinstance(sig, bytes)
+    assert len(sig) == 64
+    assert p.signature == sig
+
+
+def test_verify_true_after_sign(tmp_path, monkeypatch):
+    """После sign() verify() возвращает True."""
+    from aura.core import ledger as L
+    monkeypatch.setattr(L, "CONFIG_DIR", tmp_path)
+    monkeypatch.setattr(L, "KEY_DIR", tmp_path / "keys")
+    monkeypatch.setattr(L, "PRIV_PATH", tmp_path / "keys/ed25519.key")
+    monkeypatch.setattr(L, "PUB_PATH", tmp_path / "keys/ed25519.pub")
+    monkeypatch.setattr(L, "LEDGER_DB", tmp_path / "ledger.db")
+    L.generate_keypair()
+
+    p = P.UserProfile(name="batya", age=78, city="Москва")
+    p.sign()
+    assert p.verify() is True
+
+
+def test_verify_false_without_signature():
+    """Без signature verify() → False."""
+    p = P.UserProfile(name="test")
+    assert p.verify() is False
+
+
+def test_verify_false_after_tamper(tmp_path, monkeypatch):
+    """Если данные изменили после подписи — verify() → False."""
+    from aura.core import ledger as L
+    monkeypatch.setattr(L, "CONFIG_DIR", tmp_path)
+    monkeypatch.setattr(L, "KEY_DIR", tmp_path / "keys")
+    monkeypatch.setattr(L, "PRIV_PATH", tmp_path / "keys/ed25519.key")
+    monkeypatch.setattr(L, "PUB_PATH", tmp_path / "keys/ed25519.pub")
+    monkeypatch.setattr(L, "LEDGER_DB", tmp_path / "ledger.db")
+    L.generate_keypair()
+
+    p = P.UserProfile(name="batya", age=78)
+    p.sign()
+    p.name = "Хакер"  # tamper
+    assert p.verify() is False
+
+
+def test_sign_save_load_verify_roundtrip(tmp_path, monkeypatch):
+    """sign → save → load → verify сохраняет валидность."""
+    from aura.core import ledger as L
+    monkeypatch.setattr(L, "CONFIG_DIR", tmp_path)
+    monkeypatch.setattr(P, "CONFIG_DIR", tmp_path)
+    monkeypatch.setattr(P, "PROFILE_JSON", tmp_path / "profile.json")
+    monkeypatch.setattr(L, "KEY_DIR", tmp_path / "keys")
+    monkeypatch.setattr(L, "PRIV_PATH", tmp_path / "keys/ed25519.key")
+    monkeypatch.setattr(L, "PUB_PATH", tmp_path / "keys/ed25519.pub")
+    monkeypatch.setattr(L, "LEDGER_DB", tmp_path / "ledger.db")
+    L.generate_keypair()
+
+    p1 = P.UserProfile(name="batya", age=78, city="Москва")
+    p1.sign()
+    p1.save()
+
+    p2 = P.UserProfile.load()
+    assert p2.signature == p1.signature
+    assert p2.verify() is True
+
+
+def test_payload_excludes_signature():
+    """_payload() не содержит поля signature (иначе рекурсия)."""
+    p = P.UserProfile(name="test")
+    p.signature = b"\x01" * 64
+    payload = p._payload()
+    assert "signature" not in payload
+    assert payload["name"] == "test"

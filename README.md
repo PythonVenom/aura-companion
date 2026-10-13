@@ -183,6 +183,29 @@ MIT — делай что хочешь, только не ври.
 
 ---
 
+## 💛 Поддержать проект
+
+Aura — свободный проект (MIT). Всё локально, без облаков и подписок.
+Если Aura помогает тебе или твоим близким:
+
+- ☕ **CloudTips:** https://pay.cloudtips.ru/p/9ce9959c
+- 🚀 **Boosty:** https://boosty.to/aura_companion
+- 💬 **Telegram:** [@Pyth0nVen0m](https://t.me/Pyth0nVen0m)
+
+**Полный список контактов и партнёрство:** [CONTACTS.md](CONTACTS.md)
+
+## 🖥️ Ищу топ-железо для разработки
+
+Для дальнейшего развития Aura (локальный LLM, elder-care тесты, ISO):
+
+- **GPU:** NVIDIA RTX 4090 (24 ГБ) — 7B-13B модели, обучение
+- **CPU:** AMD Ryzen 9 7950X / Intel i9-14900K
+- **RAM:** 128 ГБ DDR5 — крупные RAG-индексы
+- **SSD:** 4 ТБ NVMe Gen4 — модели (сейчас ollama 13 ГБ на HDD)
+- **NPU:** AMD Strix Halo / Intel Lunar Lake / Qualcomm X Elite / NVIDIA Jetson
+
+**Партнёрам:** см. [PARTNERSHIP.md](PARTNERSHIP.md) · [docs/sponsorship.md](docs/sponsorship.md)
+
 ## 🌟 Ссылки
 
 - **GitHub:** https://github.com/PythonVenom/aura-companion

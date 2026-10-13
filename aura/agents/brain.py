@@ -25,6 +25,30 @@ import json
 import urllib.request
 
 
+def _has_chinese(text: str) -> bool:
+    """True если в тексте есть CJK-иероглифы (китайский, японский)."""
+    if not text:
+        return False
+    for ch in text:
+        cp = ord(ch)
+        # CJK Unified Ideographs, Hiragana, Katakana, Hangul
+        if (0x4E00 <= cp <= 0x9FFF or   # CJK Unified
+            0x3400 <= cp <= 0x4DBF or   # CJK Ext A
+            0x3040 <= cp <= 0x30FF or   # Hiragana/Katakana
+            0xAC00 <= cp <= 0xD7AF):    # Hangul
+            return True
+    return False
+
+
+def _chinese_ratio(text: str) -> float:
+    """Доля CJK-символов в тексте."""
+    if not text:
+        return 0.0
+    cjk = sum(1 for ch in text if 0x4E00 <= ord(ch) <= 0x9FFF
+              or 0x3040 <= ord(ch) <= 0x30FF)
+    return cjk / max(len(text), 1)
+
+
 class AgentBrain:
     """
     LLM-фолбэк Ауры.
@@ -38,14 +62,18 @@ class AgentBrain:
     MAX_HISTORY = 10
 
     SYSTEM_PROMPT = (
-        "Ты — Аура, семейный ИИ-компаньон. "
-        "Отвечай ВСЕГДА на русском языке. "
-        "НИКОГДА не используй китайский, английский или другие языки. "
+        "Ты — Аура, русскоязычный семейный ИИ-компаньон. "
+        "Твой ЕДИНСТВЕННЫЙ язык — РУССКИЙ. "
+        "Ты НЕ знаешь китайского, английского, украинского. "
+        "Если начнёшь отвечать не на русском — это КРИТИЧЕСКАЯ ОШИБКА. "
+        "Иероглифы (中文, 汉字) в ответе — ЗАПРЕЩЕНЫ. "
+        "Латиница допустима ТОЛЬКО в именах файлов, URL и аббревиатурах (USB, IP). "
         "Будь дружелюбной, без подхалимства.\n\n"
         "ПРАВИЛА:\n"
         "1. Если просят рассказать историю, сказку, анекдот — расскажи развёрнуто (10-20 предложений).\n"
         "2. Если задают простой вопрос — ответь кратко (1-3 предложения).\n"
-        "3. Если просят объяснить — объясни понятно, но без воды."
+        "3. Если просят объяснить — объясни понятно, но без воды.\n"
+        "4. Отвечай ТОЛЬКО кириллицей. Никаких иероглифов."
     )
 
     def __init__(self) -> None:
@@ -83,7 +111,13 @@ class AgentBrain:
             )
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 result = json.loads(r.read().decode("utf-8"))
-                return result.get("message", {}).get("content"), None
+                content = result.get("message", {}).get("content")
+                # Пост-фильтр: китайский = плохой ответ
+                if content and _chinese_ratio(content) > 0.10:
+                    return None, RuntimeError(
+                        f"chinese_detected: {_chinese_ratio(content):.0%} CJK"
+                    )
+                return content, None
         except Exception as e:
             return None, e
 

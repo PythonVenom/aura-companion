@@ -4,10 +4,11 @@
 Работает без облака. Данные не покидают устройство.
 Помогает говорить с цифровым миром — банк, госуслуги, врачи, связь — голосом.
 
-[![Tests](https://img.shields.io/badge/tests-1694_passed-green)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1944_passed-green)](tests/)
 [![ADR](https://img.shields.io/badge/ADR-131-blue)](docs/adr/)
-[![Agents](https://img.shields.io/badge/agents-91-orange)](aura/agents/)
+[![Agents](https://img.shields.io/badge/agents-96-orange)](aura/agents/)
 [![Python](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/)
+[![Version](https://img.shields.io/badge/version-8.2.0-blue)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
 ---
@@ -194,15 +195,26 @@ Aura — свободный проект (MIT). Всё локально, без 
 
 **Полный список контактов и партнёрство:** [CONTACTS.md](CONTACTS.md)
 
-## 🖥️ Ищу топ-железо для разработки
+## 🖥️ Ищу железо для разработки
 
-Для дальнейшего развития Aura (локальный LLM, elder-care тесты, ISO):
+**ПРИОРИТЕТ 1 — Мобильная станция (ноутбук):**
+Для мобильной работы (батя, встречи, партнёры, тесты в полях):
 
-- **GPU:** NVIDIA RTX 4090 (24 ГБ) — 7B-13B модели, обучение
+- **Ноутбук:** Lenovo ThinkPad P1 Gen 7 / Dell XPS 16 / Framework 16
+- **CPU:** AMD Ryzen AI 9 HX 370 / Intel Core Ultra 9 185H
+- **GPU:** NVIDIA RTX 4070 Mobile (8 ГБ) / RTX 4080 Mobile
+- **RAM:** 64 ГБ DDR5
+- **SSD:** 2 ТБ NVMe Gen4
+- **NPU:** AMD XDNA 2 / Intel NPU — для локального AI
+- **Автономность:** 8+ часов (батя, выезды)
+
+**ПРИОРИТЕТ 2 — Стационар (для тяжёлых задач):**
+
+- **GPU:** NVIDIA RTX 4090 (24 ГБ) — 13B модели, обучение
 - **CPU:** AMD Ryzen 9 7950X / Intel i9-14900K
-- **RAM:** 128 ГБ DDR5 — крупные RAG-индексы
-- **SSD:** 4 ТБ NVMe Gen4 — модели (сейчас ollama 13 ГБ на HDD)
-- **NPU:** AMD Strix Halo / Intel Lunar Lake / Qualcomm X Elite / NVIDIA Jetson
+- **RAM:** 128 ГБ DDR5
+- **SSD:** 4 ТБ NVMe Gen4
+- **NPU:** AMD Strix Halo / NVIDIA Jetson
 
 **Партнёрам:** см. [PARTNERSHIP.md](PARTNERSHIP.md) · [docs/sponsorship.md](docs/sponsorship.md)
 

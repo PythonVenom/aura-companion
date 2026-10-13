@@ -185,7 +185,44 @@ class WeatherAgent(MicroAgent):
         except Exception as e:
             return f"Не могу получить прогноз для дачи: {e}"
 
-    def handle(self, text: str) -> str:
+    KEYWORDS = (
+        "погода", "погоду", "погоде", "дождь", "снег", "жарко", "холодно",
+        "тепло", "ветер", "температура", "прогноз", "градус", "на улице",
+        "завтра", "послезавтра", "дача", "выходные",
+    )
+
+    def can_handle(self, request) -> bool:
+        """Ловит запросы про погоду.
+
+        Двойной API (Liskov 1987): принимает и str, и AgentRequest.
+        """
+        text = request if isinstance(request, str) else getattr(request, "text", "")
+        t = text.lower()
+        return any(kw in t for kw in self.KEYWORDS)
+
+    async def handle(self, request):
+        """Async handle для Orchestrator (AgentRequest → AgentResponse).
+
+        Backward-compat: если передана строка — вернуть строку.
+        """
+        # Старый API: строка
+        if isinstance(request, str):
+            return self._handle_text(request)
+
+        # Новый API: AgentRequest → AgentResponse
+        try:
+            from aura.core.protocol import AgentResponse
+        except Exception:
+            return self._handle_text(getattr(request, "text", ""))
+
+        if not self.can_handle(request):
+            return AgentResponse.not_handled(self.name)
+
+        text = getattr(request, "text", "")
+        return AgentResponse.ok(self._handle_text(text), self.name)
+
+    def _handle_text(self, text: str) -> str:
+        """Внутренняя логика — принимает строку."""
         t = text.lower()
         if "дач" in t or "3 дня" in t or "три дня" in t or "выходные" in t:
             return self.rural_forecast()

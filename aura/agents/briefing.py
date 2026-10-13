@@ -291,7 +291,7 @@ class BriefingAgent(BaseAgent):
         adr_dir = HOME / "aura-companion/docs/adr"
         L = ["## 11. ADR — ИНДЕКС", ""]
         if not adr_dir.exists():
-            return L + ["(нет docs/adr/)", ""]
+            return [*L, "(нет docs/adr/)", ""]
         adrs = sorted(adr_dir.glob("*.md"))
         L.append(f"Всего ADR: {len(adrs)}")
         L.append("")
@@ -377,7 +377,7 @@ class BriefingAgent(BaseAgent):
     def _git(self, repo: Path, args: list[str]) -> str:
         with contextlib.suppress(Exception):
             r = subprocess.run(
-                ["git"] + args, cwd=str(repo),
+                ["git", *args], cwd=str(repo),
                 capture_output=True, text=True, timeout=5,
             )
             return r.stdout.strip()

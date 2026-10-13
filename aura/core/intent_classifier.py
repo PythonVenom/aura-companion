@@ -38,6 +38,16 @@ INTENTS = {
 }
 
 
+# F-021c: стоп-слова — не считаем их в классификации
+# «кто ты» → «кто» не должно матчить «кто написал»
+STOPWORDS = frozenset({
+    "кто", "что", "как", "где", "когда", "почему", "зачем", "какой", "какая",
+    "ты", "я", "вы", "мы", "он", "она", "они", "мне", "тебе", "вам", "нам",
+    "это", "то", "вот", "ну", "же", "ли", "бы", "или", "и", "а", "но", "да",
+    "ещё", "уже", "только", "очень",
+})
+
+
 def _tokens(text: str):
     return re.findall(r"[а-яёa-z0-9]+", text.lower())
 
@@ -55,6 +65,8 @@ class IntentClassifier:
 
     def classify(self, text: str):
         toks = _tokens(text)
+        # F-021c: убираем стоп-слова (кто, что, ты...)
+        toks = [t for t in toks if t not in STOPWORDS]
         if not toks:
             return None, 0.0
         scores = {}

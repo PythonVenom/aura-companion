@@ -66,6 +66,14 @@ class GameState:
     hull: int = 1570
     reactor: int = 100
     sector: str = "STABILIZE"
+    # Прогресс корабля (сборка)
+    progress: float = 0.0
+    tests_passing: int = 0
+    modules_working: int = 0
+    modules_broken: int = 0
+    # F-101: какие сектора видел капитан (для отката)
+    visited_sectors: list[str] = field(default_factory=list)
+    max_chapter_reached: int = 0
     modules_active: list[str] = field(default_factory=list)
     modules_total: int = 10
     quests_done: list[str] = field(default_factory=list)
@@ -98,6 +106,39 @@ class GameState:
         except Exception:
             return 1
 
+
+
+    def mark_visited(self, sector: str, chapter: int = 0) -> None:
+        """Отметить сектор как посещённый. Обновляет max_chapter."""
+        if sector and sector not in self.visited_sectors:
+            self.visited_sectors.append(sector)
+        if chapter > self.max_chapter_reached:
+            self.max_chapter_reached = chapter
+
+    def can_return_to(self, sector: str) -> bool:
+        """Можно ли вернуться в сектор (его видели)."""
+        return sector in self.visited_sectors or sector == self.sector
+
+    def recalc_progress(self) -> float:
+        """Пересчёт сборки корабля (0-100%).
+
+        Формула:
+          корпус (тесты) 50%  → tests_passing / 2000
+          модули (агенты) 30% → modules_working / 100
+          щиты (чистота) 20%  → 0 багов = 20, каждый баг -2
+        """
+        # Корпус — 50%
+        hull_pct = min(1.0, self.tests_passing / 2000) * 50.0
+
+        # Модули — 30%
+        mod_pct = min(1.0, self.modules_working / 100) * 30.0
+
+        # Щиты — 20%
+        shield_pct = max(0.0, 20.0 - self.modules_broken * 2.0)
+
+        self.progress = round(hull_pct + mod_pct + shield_pct, 1)
+        return self.progress
+
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
@@ -108,7 +149,15 @@ class StateStore:
     def __init__(self, db_path: Path | None = None, key: str | None = None):
         cfg = _default_config_dir()
         cfg.mkdir(parents=True, exist_ok=True)
-        self.db_path = Path(db_path) if db_path else cfg / "state.db"
+        if db_path:
+            self.db_path = Path(db_path)
+        else:
+            # F-068: профиль
+            try:
+                from aura.profiles import get_profile
+                self.db_path = get_profile().state_db
+            except Exception:
+                self.db_path = cfg / "state.db"
         self.key = key or self._load_or_make_key(cfg)
         self._conn: sqlite3.Connection | None = None
 

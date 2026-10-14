@@ -3,11 +3,12 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from typing import Any
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 # Нормы расхода на м² (ГОСТ-приближение)
-NORMS = {
+NORMS: dict[str, dict[str, Any]] = {
     "плитка": {"norm": 1.10, "unit": "м²", "desc": "плитка с запасом 10%"},
     "штукатурка": {"norm": 15.0, "unit": "кг", "desc": "15 кг/м² при слое 10мм"},
     "шпаклевка": {"norm": 1.2, "unit": "кг", "desc": "1.2 кг/м² финишная"},

@@ -157,13 +157,13 @@ class AgentKnowledge(MicroAgent):
         m = re.search(r"найди\s+(?:в\s+файлах\s+)?(.+)", text)
         if m:
             query = m.group(1).strip(" :,.-")
-            found = search_lines(query)
+            found_lines = search_lines(query)
             if not found:
                 return AgentResponse.ok(
                     f"🔍 «{query}» — не найдено",
                     self.name,
                 )
-            lines = [f"🔍 Найдено {len(found)} строк:"]
+            lines = [f"🔍 Найдено {len(found_lines)} строк:"]
             for f in found[:5]:
                 rel = f.path.name
                 lines.append(f"  {rel}:{f.line}  {f.text[:60]}")

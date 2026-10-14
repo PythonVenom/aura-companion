@@ -13,6 +13,7 @@ API: https://open-meteo.com — free, no key, UV + apparent_temperature.
 import json
 import urllib.parse
 import urllib.request
+from typing import Any
 
 try:
     from aura.agents.base import MicroAgent
@@ -65,7 +66,7 @@ class WeatherAgent(MicroAgent):
             data = json.load(r)
         # Адаптируем под старый интерфейс
         cur = data["current_condition"][0]
-        result = {
+        result: dict[str, Any] = {
             "current": {
                 "temperature_2m": float(cur["temp_C"]),
                 "apparent_temperature": float(cur["FeelsLikeC"]),

@@ -244,6 +244,16 @@ class Orchestrator:
             return response.text
 
         if response.status == AgentStatus.NOT_HANDLED:
+            # AURA_NOT_HANDLED_TO_BRAIN_V1: агент не взял → отдаём brain
+            if self.brain is not None:
+                try:
+                    result = await asyncio.to_thread(self.brain.ask, text)
+                    if result and not result.startswith("❌"):
+                        self._last_response = response
+                        _mem_write(text, result)
+                        return result
+                except Exception as e:
+                    print(f"⚠️ Brain fallback: {e}")
             return self.fallback_text
 
         if response.status == AgentStatus.ERROR:

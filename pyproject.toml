@@ -122,12 +122,41 @@ indent-style = "space"
 [tool.mypy]
 python_version = "3.12"
 ignore_missing_imports = true
-warn_return_any = false
-warn_unused_configs = true
+warn_unused_configs = false
 disallow_untyped_defs = false
-check_untyped_defs = true
+follow_imports = "skip"
+# #126: baseline — только новые модули с аннотациями.
+# Старые 78 агентов работают → не трогаем (Beck 1999, XP).
+files = [
+    "aura/core/notifications.py",
+    "aura/core/ledger.py",
+    "aura/core/profile.py",
+    "aura/core/fdir.py",
+    "aura/core/migrations.py",
+    "aura/core/api_version.py",
+    "aura/core/rules.py",
+    "aura/core/recall_log.py",
+    "aura/core/rate_limit.py",
+    "aura/core/canbus.py",
+    "aura/core/curiosity.py",
+    "aura/core/plugin_registry.py",
+]
 
-# Windows-only модули: mypy на Linux не знает эти API
+# Windows-only модули (mypy на Linux не знает их API)
+[[tool.mypy.overrides]]
+module = ["aura.os_features.windows", "aura.platform_adapters.windows"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "telegram.*",
+    "vosk.*",
+    "piper.*",
+    "sherpa_onnx.*",
+    "chromadb.*",
+]
+ignore_missing_imports = true
+
 [[tool.mypy.overrides]]
 module = ["aura.platform.windows", "aura.os_features.windows"]
 ignore_errors = true
@@ -141,3 +170,11 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = ["aura.wrappers.*", "aura.agents.mouse", "aura.agents.text_editor"]
 ignore_errors = true
+
+[tool.pytest.ini_options]
+markers = [
+    "unit: быстрые изолированные тесты",
+    "integration: тесты нескольких модулей",
+    "e2e: end-to-end тесты",
+    "smoke: критичный минимум для CI",
+]

@@ -19,6 +19,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 from aura.core import fdir as F
 from aura.core import ledger as L
 from aura.core import notifications as N

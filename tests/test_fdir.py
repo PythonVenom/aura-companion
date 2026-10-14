@@ -5,6 +5,8 @@ from unittest.mock import patch
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 from aura.core import fdir as F
 
 

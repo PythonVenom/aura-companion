@@ -116,7 +116,7 @@ def run_soak(
         with contextlib.redirect_stderr(io.StringIO()):
             orch = build_orchestrator()
         agents_attr = "agents" if hasattr(orch, "agents") else "_agents"
-        n_agents = len(getattr(orch, agents_attr, {})) if orch else 0
+        n_agents = len(orch) if orch else 0
         print(f"  orchestrator готов, агентов: {n_agents}", flush=True)
     except Exception as e:
         print(f"  ⚠️ orchestrator не собран: {e}", flush=True)
@@ -135,7 +135,7 @@ def run_soak(
             if orch is not None:
                 latency = asyncio.run(_sanity_ping(orch))
                 attr = "agents" if hasattr(orch, "agents") else "_agents"
-                agents_count = len(getattr(orch, attr, {}))
+                agents_count = len(orch) if orch else 0
 
             sample = Sample(time.time(), rss, agents_count, latency)
             samples.append(sample)

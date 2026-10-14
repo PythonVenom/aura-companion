@@ -57,18 +57,18 @@ class AgentGreeting(BaseAgent):
         # Приветствие — по времени суток
         hour = datetime.now().hour
         if 5 <= hour < 12:
-            key = "morning_greeting"
+            key = "morning"
         elif 12 <= hour < 18:
-            key = "afternoon_greeting"
+            key = "day"
         elif 18 <= hour < 23:
-            key = "evening_greeting"
+            key = "evening"
         else:
-            key = "good_night"
+            key = "night"
 
         # afternoon_greeting может не быть — fallback на evening
         try:
             text = speak_line(key)
         except Exception:
-            text = speak_line("morning_greeting")
+            text = speak_line("morning")
 
         return AgentResponse.ok(text=text, agent_name=self.name)

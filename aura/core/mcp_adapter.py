@@ -18,7 +18,7 @@ class MCPServer:
     name: str
     command: list[str]
     tools: list[dict] = field(default_factory=list)
-    _proc: object = None
+    _proc: subprocess.Popen | None = None
 
     def start(self) -> bool:
         try:
@@ -72,4 +72,4 @@ def load_servers() -> list[MCPServer]:
     return []
 
 
-__all__ = ["MCPServer", "load_servers", "CONFIG_PATH"]
+__all__ = ["CONFIG_PATH", "MCPServer", "load_servers"]

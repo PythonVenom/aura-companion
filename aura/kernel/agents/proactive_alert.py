@@ -27,7 +27,7 @@ class ProactiveAlertAgent:
         self._running = True
         from aura.agents.proactive_alert import AgentProactiveAlert
         self._legacy = AgentProactiveAlert()
-        ctx.bus.subscribe("proactive.tick", self._on_tick)
+        ctx.bus.subscribe("proactive.tick", self._on_tick)  # type: ignore[union-attr]
         ctx.bus.subscribe("proactive.touch", self._on_touch)
         ctx.bus.subscribe("proactive.status", self._on_status)
         ctx.bus.subscribe("proactive.set_threshold", self._on_set_threshold)

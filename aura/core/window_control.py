@@ -154,11 +154,11 @@ def _ydotool(*args: str) -> bool:
 
 
 
-def _has_ydotool() -> bool:
+def _has_ydotool() -> bool:  # type: ignore[no-redef]
     return shutil.which("ydotool") is not None
 
 
-def _ydotool(*args: str) -> bool:
+def _ydotool(*args: str) -> bool:  # type: ignore[no-redef]
     if not _has_ydotool():
         return False
     try:

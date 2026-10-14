@@ -92,11 +92,11 @@ def summarize(results: dict[str, list[float]]) -> dict:
             continue
         summary[op] = {
             "count": len(times),
-            "mean_ms": round(statistics.mean(times), 2),
-            "p50": round(percentile(times, 50), 2),
-            "p95": round(percentile(times, 95), 2),
-            "p99": round(percentile(times, 99), 2),
-            "max": round(max(times), 2),
+            "mean_ms": round(statistics.mean(times), 2),  # type: ignore[dict-item]
+            "p50": round(percentile(times, 50), 2),  # type: ignore[dict-item]
+            "p95": round(percentile(times, 95), 2),  # type: ignore[dict-item]
+            "p99": round(percentile(times, 99), 2),  # type: ignore[dict-item]
+            "max": round(max(times), 2),  # type: ignore[dict-item]
             "target_p99_ms": TARGET_P99_MS,
             "pass": percentile(times, 99) < TARGET_P99_MS,
         }

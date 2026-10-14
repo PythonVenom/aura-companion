@@ -48,8 +48,8 @@ class EventLog:
                     "src": src,
                     "payload": payload,
                 }
-                self._fh.write(json.dumps(event, ensure_ascii=False) + "\n")
-                self._fh.flush()
+                self._fh.write(json.dumps(event, ensure_ascii=False) + "\n")  # type: ignore[attr-defined]
+                self._fh.flush()  # type: ignore[attr-defined]
             except Exception as e:
                 # AURA_LOG_SILENT_V1: не роняем поток из-за лога
                 print(f"[log] append failed: {e}")

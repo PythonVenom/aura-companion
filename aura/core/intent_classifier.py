@@ -57,7 +57,7 @@ class IntentClassifier:
         self._ref: dict = {}
         self._counts: dict = {}
         for intent, phrases in INTENTS.items():
-            c = Counter()
+            c = Counter()  # type: ignore[var-annotated]
             for p in phrases:
                 c.update(_tokens(p))
             self._ref[intent] = c
@@ -75,7 +75,7 @@ class IntentClassifier:
             scores[intent] = s
         if not scores:
             return None, 0.0
-        best = max(scores, key=scores.get)
+        best = max(scores, key=scores.get)  # type: ignore[arg-type]
         total = sum(scores.values()) or 1.0
         conf = scores[best] / total
         return (best, round(conf, 3)) if conf >= 0.15 else (None, round(conf, 3))

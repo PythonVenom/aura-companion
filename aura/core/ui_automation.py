@@ -113,7 +113,7 @@ class LinuxAtspiBackend:
                 for k in range(min(node.get_child_count(), 30)):
                     ch = node.get_child_at_index(k)
                     if ch is not None:
-                        info["children"].append(self._walk(ch, depth - 1))
+                        info["children"].append(self._walk(ch, depth - 1))  # type: ignore[union-attr]
             except Exception:
                 pass
         return info

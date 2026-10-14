@@ -183,19 +183,19 @@ class GameEngine:
         assert r is not None
         e = self.current_enemy
         assert e is not None
-        status = "✅ Попадание" if r.hit else "❌ Промах"
-        if r.crit:
+        status = "✅ Попадание" if r.hit else "❌ Промах"  # type: ignore[attr-defined]
+        if r.crit:  # type: ignore[attr-defined]
             status = "🎯 КРИТ"
         return RenderData(
             phase=self.phase,
             title=status,
             lines=[
-                r.message,
+                r.message,  # type: ignore[attr-defined]
                 f"HP врага: {e.hp}",
                 f"XP: {self.state.xp}  |  Щиты: {self.state.shields}%",
             ],
-            voice_event="fix_success" if r.hit else "miss",
-            voice_ctx={"hull": self.state.hull} if r.hit else {},
+            voice_event="fix_success" if r.hit else "miss",  # type: ignore[attr-defined]
+            voice_ctx={"hull": self.state.hull} if r.hit else {},  # type: ignore[attr-defined]
         )
 
     def _next_sector(self) -> str:

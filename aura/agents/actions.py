@@ -38,11 +38,15 @@ class AgentActions(BaseAgent):
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         text = request.text
+        t = text.lower()
 
-        if "найди" in text.lower():
+        # Сначала пробуем извлечь имя — если нет, help
+        name = self._extract_file_name(text)
+
+        if "найди" in t and name:
             return self._find_file(text)
 
-        if "отправь" in text.lower():
+        if "отправь" in t and name:
             return await self._send_file(text)
 
         return AgentResponse.ok(

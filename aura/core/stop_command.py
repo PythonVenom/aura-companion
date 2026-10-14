@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Any
 
 # Ключевые слова прерывания (RU)
 STOP_WORDS: tuple[str, ...] = (
@@ -64,11 +65,24 @@ def is_stop(text: str) -> bool:
     return any(word in STOP_WORDS for word in words)
 
 
+_MODEL_CACHE: dict[str, Any] = {}
+
+
+def _get_model(model_path: str) -> Any:
+    """Кэш Vosk-модели (загрузка ~1-2с, держать в памяти)."""
+    if model_path not in _MODEL_CACHE:
+        import vosk
+        _MODEL_CACHE[model_path] = vosk.Model(model_path)
+    return _MODEL_CACHE[model_path]
+
+
 def recognize_stop(frames_pcm16: bytes, sample_rate: int = 16000) -> bool:
     """Распознать фреймы через Vosk → матч STOP_WORDS.
 
     frames_pcm16: сырые int16 PCM (mono).
     Возвращает True если в речи есть стоп-слово.
+
+    Vosk-модель кэшируется (singleton), чтобы не грузить 1-2с каждый раз.
     """
     try:
         import vosk
@@ -80,7 +94,8 @@ def recognize_stop(frames_pcm16: bytes, sample_rate: int = 16000) -> bool:
         return False
 
     try:
-        rec = vosk.KaldiRecognizer(vosk.Model(model_path), sample_rate)
+        model = _get_model(model_path)
+        rec = vosk.KaldiRecognizer(model, sample_rate)
         rec.AcceptWaveform(frames_pcm16)
         result = rec.FinalResult()
         import json

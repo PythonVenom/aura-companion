@@ -149,9 +149,9 @@ class AgentPCControl(MicroAgent):
         # ── Яркость: точное число 0-10 ──
         m = re.search(r"яркость\s+(\d+)", text)
         if m:
-            level = int(m.group(1))
-            level = max(0, min(10, level))
-            pct = level * 10
+            raw = int(m.group(1))
+            pct = raw * 10 if raw <= 10 else raw
+            pct = max(0, min(100, pct))
             if brightness_set(pct):
                 return AgentResponse.ok(f"🔆 Яркость: {pct}%", self.name)
             return AgentResponse.ok("❌ brightnessctl недоступен", self.name)
@@ -171,9 +171,9 @@ class AgentPCControl(MicroAgent):
         # ── Громкость: точное число 0-10 ──
         m = re.search(r"(громкость|звук)\s+(\d+)", text)
         if m:
-            level = int(m.group(2))
-            level = max(0, min(10, level))
-            pct = level * 10
+            raw = int(m.group(2))
+            pct = raw * 10 if raw <= 10 else raw
+            pct = max(0, min(100, pct))
             if volume_set(pct):
                 return AgentResponse.ok(f"🔊 Громкость: {pct}%", self.name)
             return AgentResponse.ok("❌ wpctl/pactl недоступен", self.name)

@@ -19,6 +19,7 @@ import sqlite3
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal
 from textual.widgets import (
+    Select,
     Button,
     DataTable,
     Footer,
@@ -137,6 +138,61 @@ class AgentsTab(Container):
         self.query_one("#agents-list", ListView).extend(items)
 
 
+class VoiceTab(Container):
+    """#144: выбор голоса + скорость."""
+
+    VOICES = [
+        ("ru_RU-irina-medium", "Ирина (медиум)"),
+        ("ru_RU-dmitri-medium", "Дмитрий (медиум)"),
+        ("ru_RU-irina-low", "Ирина (low, быстрее)"),
+    ]
+    SPEEDS = [0.8, 0.9, 1.0, 1.1, 1.2, 1.5]
+
+    def compose(self) -> ComposeResult:
+        from aura import settings
+        cur_voice = settings.get("tts_voice", "ru_RU-irina-medium")
+        cur_speed = float(settings.get("tts_speed", 1.0))
+        yield Label("🎤 Голос Ауры", classes="field-label")
+        yield Label("Голос:")
+        yield Select(
+            [(name, val) for val, name in self.VOICES],
+            value=cur_voice,
+            id="select-voice",
+        )
+        yield Label("Скорость:")
+        yield Select(
+            [(f"{s}×", s) for s in self.SPEEDS],
+            value=cur_speed if cur_speed in self.SPEEDS else 1.0,
+            id="select-speed",
+        )
+        yield Horizontal(
+            Button("💾 Сохранить", id="btn-voice-save", variant="success"),
+            Button("🔊 Тест", id="btn-voice-test", variant="default"),
+        )
+        yield Static("", id="voice-status")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        from aura import settings
+        if event.button.id == "btn-voice-save":
+            voice = self.query_one("#select-voice", Select).value
+            speed = self.query_one("#select-speed", Select).value
+            settings.set_value("tts_voice", voice)
+            settings.set_value("tts_speed", speed)
+            self.query_one("#voice-status", Static).update(
+                f"✅ Сохранено: {voice} @ {speed}×"
+            )
+        elif event.button.id == "btn-voice-test":
+            self.query_one("#voice-status", Static).update(
+                "🔊 Тест запущен (см. консоль)"
+            )
+            import subprocess
+            subprocess.Popen(
+                ["python", "-c",
+                 "from aura.agents.speaker import AgentSpeaker; "
+                 "s=AgentSpeaker(); s.say('Привет, я Аура'); s.wait(5)"],
+            )
+
+
 class ConfiguratorApp(App):
     """Главное приложение конфигуратора."""
 
@@ -163,6 +219,8 @@ class ConfiguratorApp(App):
                 yield NotificationsTab()
             with TabPane("🔑 Ключи", id="tab-keys"):
                 yield KeysTab()
+            with TabPane("🎤 Голос", id="tab-voice"):
+                yield VoiceTab()
             with TabPane("🤖 Агенты", id="tab-agents"):
                 yield AgentsTab()
         yield Footer()

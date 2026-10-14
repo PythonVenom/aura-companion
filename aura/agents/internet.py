@@ -50,6 +50,9 @@ class AgentInternet(BaseAgent):
     }
 
     def can_handle(self, request: AgentRequest) -> bool:
+        t = request.text.lower()
+        if "новост" in t:
+            return True
         text = request.text.lower()
         keywords = self.WEATHER_KEYWORDS + self.CURRENCY_KEYWORDS + self.WIKI_KEYWORDS
         return any(kw in text for kw in keywords)

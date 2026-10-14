@@ -62,9 +62,9 @@ class AgentMediaPause(BaseAgent):
         text = request.text.lower()
         if not any(kw in text for kw in self.KEYWORDS):
             return False
-        # Bug 14 ph.3: только если last_active=vk или mpris.
-        # Если local — music_local обработает первым.
-        return media_state.get_active() in ("vk", "mpris")
+        # Bug-fix 2026-10-15 v2: пауза/продолжить — всегда наши,
+        # независимо от active (music_local ловит только «включи музыку»).
+        return True
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         text = request.text.lower()

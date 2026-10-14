@@ -185,7 +185,11 @@ async def _main_loop() -> int:
 
             # Озвучить (если стриминг уже не озвучил)
             if speaker is not None and text and not spoke:
+                _ducker = None
                 try:
+                    # AURA_DUCK_V1: приглушить музыку/видео пока Aura говорит
+                    _ducker = AgentMusicDucker()
+                    _ducker.duck()
                     if barge_in is not None:
                         barge_in.clear_buffer()
                         barge_in.set_aura_speaking(True)
@@ -196,6 +200,11 @@ async def _main_loop() -> int:
                 finally:
                     if barge_in is not None:
                         barge_in.set_aura_speaking(False)
+                    if _ducker is not None:
+                        try:
+                            _ducker.un_duck()
+                        except Exception:
+                            pass
 
         except Exception as e:
             print(f"❌ Ошибка: {e}")

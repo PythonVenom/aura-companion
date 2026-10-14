@@ -25,6 +25,8 @@ from __future__ import annotations
 import subprocess
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
+import json
+from pathlib import Path as _Path
 
 
 class AgentMusicDucker(BaseAgent):
@@ -61,6 +63,23 @@ class AgentMusicDucker(BaseAgent):
 
         return AgentResponse.not_handled(agent_name=self.name)
 
+    DUCK_STATE = _Path.home() / ".cache" / "aura" / "duck_state.json"
+
+    def _save_state(self, state: dict) -> None:
+        try:
+            self.DUCK_STATE.parent.mkdir(parents=True, exist_ok=True)
+            self.DUCK_STATE.write_text(json.dumps(state))
+        except Exception:
+            pass
+
+    def _load_state(self) -> dict:
+        try:
+            if self.DUCK_STATE.exists():
+                return json.loads(self.DUCK_STATE.read_text())
+        except Exception:
+            pass
+        return {}
+
     def duck(self) -> str:
         sink_inputs = self._get_all_active_sink_inputs()
         if not sink_inputs:
@@ -73,9 +92,11 @@ class AgentMusicDucker(BaseAgent):
                 ["pactl", "set-sink-input-volume", sid, self.DUCK_VOLUME],
                 check=False,
             )
+        self._save_state(self.active_sink_inputs)
         return f"🔉 Приглушила {len(sink_inputs)} источников до 20%."
 
     def un_duck(self) -> str:
+        self.active_sink_inputs = self._load_state()
         if not self.active_sink_inputs:
             return "🔇 Нет сохранённых источников для восстановления."
         for sid, vol in self.active_sink_inputs.items():
@@ -90,6 +111,7 @@ class AgentMusicDucker(BaseAgent):
                 logging.getLogger('aura.music_ducker').debug(
                     'music_ducker error: %s', e)
         self.active_sink_inputs = {}
+        self._save_state({})
         return "🔊 Восстановила фоновый звук."
 
     def _get_all_active_sink_inputs(self) -> list[str]:

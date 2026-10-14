@@ -37,6 +37,7 @@ from aura.agents import (
     AgentMQTT,
     AgentNaptime,
     AgentContextRecall,
+    AgentRules,
     AgentMusicDucker,
     AgentMusicLocal,
     AgentPower,
@@ -424,6 +425,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentMQTT, modules_config)        # #133
     _try_register(orch, AgentNaptime, modules_config)      # #142
     _try_register(orch, AgentContextRecall, modules_config)  # #141
+    _try_register(orch, AgentRules, modules_config)        # #143
     _try_register(orch, AgentVisualAnalysis, modules_config)  # #134
     _try_register(orch, AgentSelfHeal, modules_config)     # #104
     _try_register(orch, AgentWellness, modules_config)     # Блок 7

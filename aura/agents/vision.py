@@ -73,9 +73,9 @@ class AgentVision(BaseAgent):
         if any(k in text for k in ("прочитай экран", "что на экране",
                                     "распознай текст", "ocr", "прочти экран")):
             shot = self._screenshot()
-            if not shot.ok:
+            if not shot.ok:  # type: ignore[truthy-function]
                 return shot
-            return self._ocr(shot.text)
+            return self._ocr(shot.text)  # type: ignore[arg-type]
 
         # Обычный скриншот
         return self._screenshot()

@@ -47,7 +47,7 @@ class ProactiveAlertAgent:
         while self._running:
             try:
                 await asyncio.sleep(interval)
-                await self.ctx.bus.publish("proactive.tick", {})
+                await self.ctx.bus.publish("proactive.tick", {})  # type: ignore[union-attr]
             except asyncio.CancelledError:
                 return
             except Exception as e:

@@ -33,7 +33,7 @@ class AudioDuckerAgent:
         ctx.bus.subscribe("speaker.started", self._on_speaker_start)
         ctx.bus.subscribe("speaker.spoken", self._on_speaker_done)
         ctx.bus.subscribe("ducker.resume", self._on_speaker_done)
-        self._watchdog_task = asyncio.create_task(self._watchdog_loop())
+        self._watchdog_task = asyncio.create_task(self._watchdog_loop())  # type: ignore[assignment]
         log.info("audio_ducker started (duck=%d%%)", self._duck_volume)
         event_log.append("agent.started",
                          {"name": self.name, "v": self.version,

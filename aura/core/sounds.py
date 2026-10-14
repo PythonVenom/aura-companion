@@ -46,7 +46,7 @@ def _ensure_sounds() -> bool:
             subprocess.run(
                 ["sox", "-n", str(wav),
                  "synth", str(spec["dur"]),
-                 spec["type"], str(spec["freq"]),
+                 spec["type"], str(spec["freq"]),  # type: ignore[list-item]
                  "fade", "q", "0.02", str(spec["dur"]), "0.02",
                  "vol", "0.3"],
                 check=True, timeout=5,

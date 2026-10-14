@@ -19,7 +19,7 @@ class CleanerAgent:
         self.dry_run = dry_run
 
     async def start(self, ctx: AgentContext) -> None:
-        self.ctx = ctx
+        self.ctx = ctx  # type: ignore[assignment]
         self._running = True
         ctx.bus.subscribe("cleaner.scan", self._on_scan)
         ctx.bus.subscribe("cleaner.aura", self._on_aura_clean)

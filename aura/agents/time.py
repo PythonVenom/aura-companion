@@ -58,12 +58,12 @@ class AgentTime(BaseAgent):
         else:
             display_hour = hour
 
-        hours_str = f"{display_hour} {self._plural(display_hour, ['час', 'часа', 'часов'])}"
+        hours_str = f"{display_hour} {self._plural(display_hour, ['час', 'часа', 'часов'])}"  # type: ignore[arg-type]
 
         if minute == 0:
             minutes_str = ""
         else:
-            minutes_str = f"{minute} {self._plural(minute, ['минута', 'минуты', 'минут'])}"
+            minutes_str = f"{minute} {self._plural(minute, ['минута', 'минуты', 'минут'])}"  # type: ignore[arg-type]
 
         day_part = self._day_part(hour)
 

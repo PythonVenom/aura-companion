@@ -95,7 +95,7 @@ class AgentRegistry(BaseAgent):
     def get_context(self) -> dict:
         """Контекст сессии: последняя команда, диалог, действие."""
         last_events = self.get_last(20)
-        context = {
+        context = {  # type: ignore[var-annotated]
             "last_command": None,
             "last_dialog": None,
             "last_action": None,
@@ -104,7 +104,7 @@ class AgentRegistry(BaseAgent):
         for e in last_events:
             if e["type"] == "command":
                 context["last_command"] = e["data"].get("command")
-                context["recent_commands"].append(e["data"].get("command"))
+                context["recent_commands"].append(e["data"].get("command"))  # type: ignore[union-attr]
             elif e["type"] == "dialog":
                 context["last_dialog"] = e["data"]
             elif e["type"] == "action":

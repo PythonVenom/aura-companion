@@ -100,7 +100,7 @@ class AgentHealthTwin(MicroAgent):
         eid = cur.lastrowid
         conn.commit()
         conn.close()
-        return eid
+        return eid  # type: ignore[return-value]
 
     def add_edge(self, from_id: int, to_id: int, kind: str,  # type: ignore[return-value]
                  note: str = "") -> int:

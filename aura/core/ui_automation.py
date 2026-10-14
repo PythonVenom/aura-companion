@@ -103,7 +103,7 @@ class LinuxAtspiBackend:
             return []
 
     def _walk(self, node: Any, depth: int) -> dict[str, Any]:
-        info = {
+        info = {  # type: ignore[var-annotated]
             "role": (node.get_role_name() or "").lower(),
             "name": node.get_name() or "",
             "children": [],

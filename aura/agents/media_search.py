@@ -129,11 +129,11 @@ class AgentMediaSearch(BaseAgent):
 
         # F-103: resume последнего фильма
         if any(kw in text for kw in self.RESUME_KEYWORDS):
-            return AgentResponse.ok(self.resume_last_movie(), self.name)
+            return AgentResponse.ok(self.resume_last_movie(), self.name)  # type: ignore[attr-defined]
 
         # F-103: fullscreen плеера
         if any(kw in text for kw in self.FULLSCREEN_KEYWORDS):
-            return AgentResponse.ok(self.fullscreen_player(), self.name)
+            return AgentResponse.ok(self.fullscreen_player(), self.name)  # type: ignore[attr-defined]
 
         if any(kw in text for kw in self.FIND_KEYWORDS):
             query = self._extract_query(text)

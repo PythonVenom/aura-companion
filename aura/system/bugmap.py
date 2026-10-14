@@ -169,7 +169,7 @@ def from_todo() -> list[Bug]:
 
 def from_notes() -> list[Bug]:
     """Из STORY.md — заметки с пометкой баг."""
-    bugs = []
+    bugs = []  # type: ignore[var-annotated]
     story = Path.home() / "aura_private" / "STORY.md"
     if not story.exists():
         return bugs

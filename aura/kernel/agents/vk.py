@@ -19,7 +19,7 @@ class VKAgent:
         self.token = token or os.environ.get("AURA_VK_TOKEN", "")
 
     async def start(self, ctx: AgentContext) -> None:
-        self.ctx = ctx
+        self.ctx = ctx  # type: ignore[assignment]
         self._running = True
         ctx.bus.subscribe("vk.send", self._on_send)
         log.info("vk started (token=%s)", "yes" if self.token else "no")

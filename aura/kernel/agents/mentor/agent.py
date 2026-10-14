@@ -27,8 +27,8 @@ class MentorAgent:
     async def start(self, ctx: AgentContext) -> None:
         self.ctx = ctx
         self._running = True
-        self.tracker = PathTracker(self.user)
-        self.ledger = ProfileLedger(self.user)
+        self.tracker = PathTracker(self.user)  # type: ignore[assignment]
+        self.ledger = ProfileLedger(self.user)  # type: ignore[assignment]
         ctx.bus.subscribe("mentor.next", self._on_next)
         ctx.bus.subscribe("mentor.stats", self._on_stats)
         ctx.bus.subscribe("mentor.complete", self._on_complete)
@@ -56,7 +56,7 @@ class MentorAgent:
 
     async def _on_stats(self, event) -> None:
         s = self.tracker.stats()  # type: ignore[attr-defined]
-        render_menu(self.tracker)
+        render_menu(self.tracker)  # type: ignore[arg-type]
         c = self.ledger.career_score()  # type: ignore[attr-defined]
         text = (f"????????????????: {s['done']} ???? {s['total']} ({s['percent']}%). "
                 f"??????????????: {c['career_score']}.")

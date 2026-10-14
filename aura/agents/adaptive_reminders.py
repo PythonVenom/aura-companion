@@ -95,7 +95,7 @@ class AgentAdaptiveReminders(MicroAgent):
         rid = cur.lastrowid
         conn.commit()
         conn.close()
-        return rid
+        return rid  # type: ignore[return-value]
 
     def record_fact(self, what: str, action: str = "taken",
                     ts: float | None = None) -> bool:

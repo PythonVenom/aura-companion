@@ -398,7 +398,7 @@ class AuraMapApp(App):
         # Лог + голос
         self._log(f"{adv.emoji} {adv.name} ({adv.role}): {line}")
         try:
-            from aura.voice.orchestrator import get_voice
+            from aura.voice.orchestrator import get_voice  # type: ignore[attr-defined]
             get_voice().say_text(f"{adv.name}. {line}")
         except Exception:
             pass

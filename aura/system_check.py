@@ -75,7 +75,7 @@ def detect_ram() -> dict:
             for line in f:
                 if line.startswith("MemTotal:"):
                     kb = int(line.split()[1])
-                    info["total_gb"] = round(kb / 1024 / 1024, 1)
+                    info["total_gb"] = round(kb / 1024 / 1024, 1)  # type: ignore[assignment]
                     break
     except Exception as e:
         # F-006: не глотать (раздел 17 промта)

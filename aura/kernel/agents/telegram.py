@@ -19,7 +19,7 @@ class TelegramAgent:
         self.token = token or os.environ.get("AURA_TG_TOKEN", "")
 
     async def start(self, ctx: AgentContext) -> None:
-        self.ctx = ctx
+        self.ctx = ctx  # type: ignore[assignment]
         self._running = True
         ctx.bus.subscribe("telegram.send", self._on_send)
         log.info("telegram started (token=%s)", "yes" if self.token else "no")

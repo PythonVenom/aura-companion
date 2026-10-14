@@ -98,7 +98,7 @@ class Logbook:
         if not entries:
             return f"# Logbook {self._today_str()}\n\n(пусто)"
         lines = [f"# Logbook {self._today_str()}", ""]
-        by_kind = {}
+        by_kind = {}  # type: ignore[var-annotated]
         for e in entries:
             by_kind.setdefault(e["kind"], []).append(e)
         for kind in ("event", "decision", "unresolved", "mood"):

@@ -26,7 +26,7 @@ def install() -> list[str]:
             if isinstance(content, bytes):
                 p.write_bytes(content)
             else:
-                p.write_text(content, encoding="utf-8")
+                p.write_text(content, encoding="utf-8")  # type: ignore[arg-type]
             created.append(name)
     return created
 

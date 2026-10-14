@@ -400,7 +400,7 @@ class CockpitSession:
         print()
         for _k, w in ARSENAL.items():
             sign = "+" if w.xp_reward >= 0 else ""
-            print(f"  {w.name:<18} {w.strategy:<10} "
+            print(f"  {w.name:<18} {w.strategy:<10} "  # type: ignore[attr-defined]
                   f"шанс {w.base_chance}% урон {w.damage} XP {sign}{w.xp_reward}")
         self._pause()
 

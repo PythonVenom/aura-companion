@@ -33,7 +33,7 @@ def fix_xp() -> tuple[int, int, str]:
         return (0, 0, "нет captain/state.db")
 
     key = captain_key.read_text().strip() if captain_key.exists() else None
-    s = StateStore(db_path=str(captain_db), key=key)
+    s = StateStore(db_path=str(captain_db), key=key)  # type: ignore[arg-type]
     st = s.load()
     before = st.xp
 
@@ -42,7 +42,7 @@ def fix_xp() -> tuple[int, int, str]:
         key_old = Path.home() / ".config" / "aura" / "db.key"
         key_old_s = key_old.read_text().strip() if key_old.exists() else None
         try:
-            s_old = StateStore(db_path=str(OLD_STATE), key=key_old_s)
+            s_old = StateStore(db_path=str(OLD_STATE), key=key_old_s)  # type: ignore[arg-type]
             st_old = s_old.load()
             if st_old.xp > before:
                 st.xp = st_old.xp

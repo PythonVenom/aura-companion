@@ -66,7 +66,7 @@ def detect_track_states() -> dict[str, bool]:
 
     # Демон
     with contextlib.suppress(Exception):
-        r = subprocess.run(
+        r = subprocess.run(  # type: ignore[assignment]
             ["systemctl", "--user", "is-active", "aura.service"],
             capture_output=True, text=True, timeout=2,
         )
@@ -101,7 +101,7 @@ def current_state() -> dict:
         from aura.game.state import StateStore
         from aura.profiles import get_profile
         profile = get_profile()
-        s = StateStore(db_path=str(profile.state_db),
+        s = StateStore(db_path=str(profile.state_db),  # type: ignore[arg-type]
                        key=profile.path.joinpath("db.key").read_text().strip()
                        if profile.path.joinpath("db.key").exists() else None)
         st = s.load()

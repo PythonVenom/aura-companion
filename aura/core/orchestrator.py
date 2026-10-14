@@ -356,7 +356,7 @@ class Orchestrator:
             if agent_name:
                 cap = AGENT_CAPABILITIES.get(agent_name)
                 if cap and not require(cap):
-                    prof_name = current().name if current() else "none"
+                    prof_name = current().name if current() else "none"  # type: ignore[union-attr]
                     import logging
                     logging.getLogger("aura.orchestrator").warning(
                         "Capability denied: agent=%s cap=%s profile=%s",

@@ -19,7 +19,7 @@ class MaxAgent:
         self.token = token or os.environ.get("AURA_MAX_TOKEN", "")
 
     async def start(self, ctx: AgentContext) -> None:
-        self.ctx = ctx
+        self.ctx = ctx  # type: ignore[assignment]
         self._running = True
         ctx.bus.subscribe("max.send", self._on_send)
         log.info("max started (token=%s)", "yes" if self.token else "no")

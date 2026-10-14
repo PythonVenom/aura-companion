@@ -443,7 +443,7 @@ def build_orchestrator() -> Orchestrator:
     # #36: прикрепляем CANBus к оркестратору (skeleton)
     try:
         from aura.core.canbus import get_bus
-        orch.bus = get_bus()
+        orch.bus = get_bus()  # type: ignore[attr-defined]
     except Exception as e:
         print(f"⚠️ CANBus: {e}")
 

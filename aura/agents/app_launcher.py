@@ -249,12 +249,12 @@ class AgentAppLauncher(BaseAgent):
             if not cand or cand.lower() in self.BLACKLIST:
                 continue
             try:
-                result = subprocess.run(
+                result = subprocess.run(  # type: ignore[assignment]
                     ["pkill", "-ix", cand], check=False, capture_output=True
                 )
                 if result.returncode == 0:
                     return f"✅ Закрыл: {cand}"
-                result = subprocess.run(
+                result = subprocess.run(  # type: ignore[assignment]
                     ["pkill", "-if", cand], check=False, capture_output=True
                 )
                 if result.returncode == 0:

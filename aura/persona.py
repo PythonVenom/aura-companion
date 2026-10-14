@@ -71,7 +71,7 @@ STYLE_MAP = {
 def _get(persona: dict, key: str) -> str:
     v = persona.get(key)
     if v in (None, "", []):
-        return DEFAULTS[key]
+        return DEFAULTS[key]  # type: ignore[return-value]
     return v
 
 

@@ -143,7 +143,7 @@ class BattleScreen(ModalScreen):
         line = advisor_speak(key, context) or adv.motto
         self._log(f"{adv.emoji} {adv.name}: {line}")
         try:
-            from aura.voice.orchestrator import get_voice
+            from aura.voice.orchestrator import get_voice  # type: ignore[attr-defined]
             get_voice().say_text(f"{adv.name}. {line}")
         except Exception:
             pass

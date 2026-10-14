@@ -34,8 +34,8 @@ def collect() -> dict:
     try:
         from aura.agents import chat_sense
         from aura.agents.messenger import send_command
-        r = send_command({"action": "max_list_chats"})
-        previews = r.get("data", {}).get("chats", []) if r else []
+        r = send_command({"action": "max_list_chats"})  # type: ignore[assignment]
+        previews = r.get("data", {}).get("chats", []) if r else []  # type: ignore[attr-defined]
         m["aura_unanswered_count"] = len(chat_sense.find_unanswered(previews))
     except Exception:
         m["aura_unanswered_count"] = 0

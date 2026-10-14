@@ -20,7 +20,7 @@ class OBDAgent:
         self._connected = False
 
     async def start(self, ctx: AgentContext) -> None:
-        self.ctx = ctx
+        self.ctx = ctx  # type: ignore[assignment]
         self._running = True
         ctx.bus.subscribe("obd.status", self._on_status)
         ctx.bus.subscribe("obd.dtc", self._on_dtc)

@@ -12,12 +12,12 @@ def get_platform() -> BasePlatform:
     if sys_name == "linux":
         # Termux → Android HAL
         if "com.termux" in os.environ.get("PREFIX", ""):
-            from aura.platform_adapters.android import AndroidPlatform
+            from aura.platform_adapters.android import AndroidPlatform  # type: ignore[attr-defined]
             return AndroidPlatform()
         from aura.platform_adapters.linux import LinuxPlatform
         return LinuxPlatform()
     if sys_name == "darwin":
-        from aura.platform_adapters.macos import MacOSPlatform
+        from aura.platform_adapters.macos import MacOSPlatform  # type: ignore[attr-defined]
         return MacOSPlatform()
     # TODO: T-port-3 — Windows, T-port-6 — BSD
     from aura.platform_adapters.linux import LinuxPlatform

@@ -20,7 +20,7 @@ class WhatsAppAgent:
         self.phone_id = os.environ.get("AURA_WA_PHONE_ID", "")
 
     async def start(self, ctx: AgentContext) -> None:
-        self.ctx = ctx
+        self.ctx = ctx  # type: ignore[assignment]
         self._running = True
         ctx.bus.subscribe("wa.send", self._on_send)
         log.info("whatsapp started (token=%s)", "yes" if self.token else "no")

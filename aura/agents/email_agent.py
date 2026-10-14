@@ -102,7 +102,7 @@ class AgentEmail(MicroAgent):
                     typ, d = m.fetch(i, "(RFC822.HEADER)")
                     if not d or not d[0]:
                         continue
-                    msg = emaillib.message_from_bytes(d[0][1])
+                    msg = emaillib.message_from_bytes(d[0][1])  # type: ignore[arg-type]
                     subj_raw = msg.get("Subject", "?")
                     subj, enc = decode_header(subj_raw)[0]
                     if isinstance(subj, bytes):

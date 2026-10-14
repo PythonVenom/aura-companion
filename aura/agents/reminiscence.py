@@ -114,7 +114,7 @@ class AgentReminiscence(MicroAgent):
         if not tags:
             return []
         conn = sqlite3.connect(MEM_DB)
-        results = []
+        results = []  # type: ignore[var-annotated]
         for tag in tags:
             rows = conn.execute(
                 "SELECT text FROM memories WHERE tags LIKE ? "

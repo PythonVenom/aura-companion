@@ -18,7 +18,7 @@ from typing import Any
 try:
     from aura.agents.base import MicroAgent
 except Exception:
-    MicroAgent = object
+    MicroAgent = object  # type: ignore[assignment,misc]
 
 
 DEFAULT_CITY = "Москва"

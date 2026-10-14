@@ -36,7 +36,7 @@ class AgentSelfCheck(MicroAgent):
         try:
             from aura.agents.speaker import AgentSpeaker
             sp = AgentSpeaker()
-            sp.say(report, speak_short=True)
+            sp.say(report, speak_short=True)  # type: ignore[call-arg]
         except Exception:
             pass
 

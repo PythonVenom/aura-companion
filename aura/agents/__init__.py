@@ -35,6 +35,7 @@ from aura.agents.registry import AgentRegistry
 from aura.agents.screen_reader import AgentScreenReader
 from aura.agents.security import AgentSecurity
 from aura.agents.scenes import AgentScenes
+from aura.agents.mqtt import AgentMQTT
 from aura.agents.self_heal import AgentSelfHeal
 from aura.agents.telegram import AgentTelegram
 from aura.agents.text_editor import AgentTextEditor
@@ -81,6 +82,7 @@ __all__ = [
     "AgentScreenReader",
     "AgentSecurity",
     "AgentScenes",
+    "AgentMQTT",
     "AgentSelfHeal",
     "AgentTelegram",
     "AgentTextEditor",

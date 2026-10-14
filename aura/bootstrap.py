@@ -44,6 +44,7 @@ from aura.agents import (
     AgentScreenReader,
     AgentSecurity,
     AgentScenes,
+    AgentMQTT,
     AgentSelfHeal,
     AgentTelegram,
     AgentTextEditor,
@@ -417,6 +418,7 @@ def build_orchestrator() -> Orchestrator:
 
     _try_register(orch, AgentModules, modules_config)       # Блок 6
     _try_register(orch, AgentScenes, modules_config)      # #132
+    _try_register(orch, AgentMQTT, modules_config)        # #133
     _try_register(orch, AgentSelfHeal, modules_config)     # #104
     _try_register(orch, AgentWellness, modules_config)     # Блок 7
     # --- Уровень 10: Internet — последним (общий "найди") ---

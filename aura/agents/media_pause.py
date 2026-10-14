@@ -59,11 +59,9 @@ class AgentMediaPause(BaseAgent):
 
     def can_handle(self, request: AgentRequest) -> bool:
         text = request.text.lower()
-        if not any(kw in text for kw in self.KEYWORDS):
-            return False
         # Bug-fix 2026-10-15 v2: пауза/продолжить — всегда наши,
         # независимо от active (music_local ловит только «включи музыку»).
-        return True
+        return any(kw in text for kw in self.KEYWORDS)
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         text = request.text.lower()

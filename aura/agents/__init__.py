@@ -32,6 +32,7 @@ from aura.agents.context_recall import AgentContextRecall
 from aura.agents.rules import AgentRules
 from aura.agents.fdir import AgentFDIR
 from aura.agents.planner import AgentPlanner
+from aura.agents.actions import AgentActions
 from aura.agents.music_ducker import AgentMusicDucker
 from aura.agents.music_local import AgentMusicLocal
 from aura.agents.power import AgentPower
@@ -80,6 +81,7 @@ __all__ = [
     "AgentRules",
     "AgentFDIR",
     "AgentPlanner",
+    "AgentActions",
     "AgentMcp",
     "AgentMediaPause",
     "AgentMediaSearch",

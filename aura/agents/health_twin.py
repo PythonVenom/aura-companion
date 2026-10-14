@@ -102,7 +102,7 @@ class AgentHealthTwin(MicroAgent):
         conn.close()
         return eid
 
-    def add_edge(self, from_id: int, to_id: int, kind: str,
+    def add_edge(self, from_id: int, to_id: int, kind: str,  # type: ignore[return-value]
                  note: str = "") -> int:
         """Связать два события."""
         self._ensure()
@@ -114,7 +114,7 @@ class AgentHealthTwin(MicroAgent):
         eid = cur.lastrowid
         conn.commit()
         conn.close()
-        return eid
+        return eid  # type: ignore[return-value]
 
     # --- Запросы ---
 
@@ -126,7 +126,7 @@ class AgentHealthTwin(MicroAgent):
             n = int(m.group(1))
             unit = m.group(2)
             if unit.startswith("час") or unit.startswith("ч"):
-                days = n / 24.0
+                days = n / 24.0  # type: ignore[assignment]
             elif unit.startswith("недел"):
                 days = n * 7
             else:

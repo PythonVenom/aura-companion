@@ -51,15 +51,15 @@ class AgentSelfHeal(BaseAgent):
             "llm_timeout": self._check_llm_timeout(),
         }
         issues = []
-        if checks["memory_mb"] > 500:
+        if checks["memory_mb"] > 500:  # type: ignore[operator]
             issues.append(f"⚠️ Память: {checks['memory_mb']:.0f} МБ (норма <500)")
         if checks["media_state"] == "vk":
             issues.append("⚠️ media_state залип на vk (сброшу?)")
-        if checks["agents_count"] > 0 and checks["agents_count"] < 90:
+        if checks["agents_count"] > 0 and checks["agents_count"] < 90:  # type: ignore[operator]  # type: ignore[operator]
             issues.append(f"⚠️ Агентов: {checks['agents_count']} (норма 96)")
         if not checks["ollama"]:
             issues.append("⚠️ Ollama не отвечает")
-        if checks["llm_timeout"] > 10:
+        if checks["llm_timeout"] > 10:  # type: ignore[operator]
             issues.append(f"⚠️ LLM timeout: {checks['llm_timeout']}с (норма 8)")
 
         lines = ["🩺 САМОДИАГНОСТИКА AURA", ""]

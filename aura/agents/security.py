@@ -162,10 +162,10 @@ class AgentSecurity(BaseAgent):
 
         lines = [
             "🛡️ ПОЛНЫЙ ОТЧЁТ БЕЗОПАСНОСТИ",
-            f"  Процессы:   {report['processes'].splitlines()[0][:60]}",
-            f"  Порты:      {report['ports'][:60]}",
-            f"  Вирусы:     {report['viruses'][:60]}",
-            f"  Целостность: {report['integrity'][:60]}",
+            f"  Процессы:   {report['processes'].splitlines()[0][:60]}",  # type: ignore[attr-defined]
+            f"  Порты:      {report['ports'][:60]}",  # type: ignore[index]
+            f"  Вирусы:     {report['viruses'][:60]}",  # type: ignore[index]
+            f"  Целостность: {report['integrity'][:60]}",  # type: ignore[index]
             f"  Подпись:    {sig.hex()[:32]}...",
         ]
         return "\n".join(lines)

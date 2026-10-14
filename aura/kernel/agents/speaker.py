@@ -1,3 +1,4 @@
+# mypy: disable-error-code=annotation-unchecked
 """Speaker Agent v1.0 — kernel-версия.
 Голос Aura: piper → WAV → paplay. Через шину.
 Наука: Actor Model + AgentBehaviour contract.

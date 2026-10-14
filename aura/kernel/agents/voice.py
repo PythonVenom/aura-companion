@@ -6,6 +6,7 @@ import asyncio
 import logging
 import threading
 import time
+from typing import Any
 
 from aura.contracts.agent import AgentContext, Event
 from aura.kernel.log import event_log
@@ -25,9 +26,9 @@ class VoiceAgent:
     def __init__(self, listen_timeout: float = 6.0):
         self.ctx: AgentContext | None = None
         self._running = False
-        self._listener = None
-        self._thread = None
-        self._loop = None
+        self._listener: Any = None
+        self._thread: threading.Thread | None = None
+        self._loop: asyncio.AbstractEventLoop | None = None
         self._listen_timeout = listen_timeout
         self._active_until: float = 0.0
         self._speaker_active = False
@@ -52,7 +53,7 @@ class VoiceAgent:
             self._listener.activate()
             log.info("voice: listener activated")
 
-        if not self._listener.ready:
+        if self._listener is None or not self._listener.ready:
             log.warning("voice: T-one не готов — voice выключен")
             event_log.append("voice.unavailable",
                              {"reason": "t-one not ready"}, src=self.name)

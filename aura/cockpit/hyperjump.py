@@ -28,18 +28,17 @@ def current_commit() -> str:
         return "?"
 
 
-_MODULES_CACHE: int | None = None
-
-
 def count_modules() -> int:
-    """Сколько активных модулей (агентов) в AURA.
-
-    Считает через build_orchestrator (104 агента), fallback — файлы в aura/agents/.
-    Результат кэшируется на процесс.
-    """
-    global _MODULES_CACHE
-    if _MODULES_CACHE is not None:
-        return _MODULES_CACHE
+    """Сколько активных модулей в AURA. Всегда актуально."""
+    try:
+        from aura.bootstrap import build_orchestrator
+        return len(build_orchestrator())
+    except Exception:
+        agents_dir = REPO / "aura" / "agents"
+        return (
+            sum(1 for f in agents_dir.glob("*.py") if f.name != "__init__.py")
+            if agents_dir.exists() else 0
+        )
     try:
         from aura.bootstrap import build_orchestrator
         _MODULES_CACHE = len(build_orchestrator())

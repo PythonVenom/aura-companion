@@ -1,53 +1,46 @@
-# Contributing to Aura
+# Contributing to AURA
 
-Спасибо за интерес!
+## Quick start
 
-## Как помочь
+    git clone https://github.com/PythonVenom/aura-companion.git
+    cd aura-companion
+    python -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    export PYTHONPATH=$PWD
+    ./venv/bin/python -m aura.cli doctor
 
-1. Баг-репорты — Issues с шаблоном bug.yml
-2. Идеи — Issues с шаблоном feature.yml
-3. Код — Pull Requests
-4. Документация — правки в docs/
+## Standards
 
-## Философия
+- Python 3.12+
+- mypy 0 errors: `mypy aura/ --ignore-missing-imports`
+- Ruff 0 errors: `ruff check aura/`
+- Tests required for new agents (pytest)
+- ADR for architecture decisions (docs/adr/)
 
-- Локальность прежде всего (никаких облаков)
-- Accessibility — основа, не фича
-- TDD — тесты до кода
-- YAGNI — не усложняй
+## Adding a new agent
 
-## Установка для разработки
+1. Create `aura/agents/my_agent.py` (inherit `BaseAgent`)
+2. Implement `can_handle()` and `handle()`
+3. Register in `aura/bootstrap.py` (`_try_register`)
+4. Add test in `tests/test_my_agent.py`
+5. Run mypy + ruff + pytest
+6. Commit with prefix `feat(agent): ...`
 
-См. docs/install-advanced.md
+## Commit convention
 
-## Стиль
+- `feat(scope): ...` — new feature
+- `fix(scope): ...` — bugfix
+- `docs: ...` — documentation
+- `chore: ...` — routine
+- `test: ...` — tests
 
-- Python 3.12+, asyncio
-- Строки 100 символов (ruff)
-- Типизация где возможно
+## WIP=1, Batch=1
 
-## Тесты
+- One task at a time
+- Patch → test → commit
+- git status before each step
 
-- Все изменения с тестами
-- CI зелёный обязателен
-- Минимум 1 тест на багфикс
+## Contact
 
-## Коммиты
-
-Conventional Commits:
-
-    feat(scope): subject
-    fix(scope): subject
-    docs(scope): subject
-    test(scope): subject
-
-## PR
-
-1. Форк → ветка → PR
-2. Опиши что и зачем
-3. CI зелёный
-4. Review от мейнтейнера
-
-## Лицензия
-
-MIT (см. LICENSE).
+Captain: Voronin Ivan (PythonVenom)

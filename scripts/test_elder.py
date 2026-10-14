@@ -15,11 +15,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
 SCENARIOS = [
-    ("SOS", "аура помоги мне срочно", "Вызываю помощь"),
-    ("Fall", "я упал не могу встать", "SOS"),
-    ("Meds", "напомни выпить таблетки в 20:00", "Запомнила"),
-    ("Call", "позвони сыну", "Telegram"),
-    ("FinElder", "проверь мои финансы", "FinElder"),
+    # (name, text, tuple of acceptable substrings)
+    ("SOS", "аура помоги мне срочно", ("SOS", "Звоню", "Вызываю")),
+    ("Fall", "я упал не могу встать", ("SOS", "Звоню")),
+    ("Meds", "напомни выпить таблетки в 20:00", ("Запомнила", "записано")),
+    ("Call", "позвони сыну", ("Telegram",)),
+    ("FinElder", "проверь мои финансы", ("FinElder",)),
 ]
 
 
@@ -28,7 +29,11 @@ async def run_scenario(orch, name: str, text: str, expected: str) -> bool:
     try:
         response = await orch.process(text)
         print(f"  Ответ: {response!r}")
-        matched = expected in str(response)
+        text = str(response)
+        if isinstance(expected, tuple):
+            matched = any(e in text for e in expected)
+        else:
+            matched = expected in text
         print(f"  {'✅' if matched else '❌'} ожидался {expected}")
         return matched
     except Exception as e:

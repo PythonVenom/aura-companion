@@ -23,7 +23,6 @@ from __future__ import annotations
 import shutil
 import subprocess
 
-from aura.agents import media_state
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 from aura.platform import get_media
 

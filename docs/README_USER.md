@@ -59,3 +59,18 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 bash install_batya.sh
+
+## 🎙️ Тестирование голоса (обновлено 2026-10-14)
+
+### Автотест 3 фич
+./venv/bin/python scripts/test_voice.py
+Ожидаемый вывод: Итого: 3/3.
+
+### F-074: Профили голоса
+python -m aura.cli check --action list
+python -m aura.cli check --action show
+python -m aura.cli check --action set --name medical
+Доступные профили: default, medical, craft, drive, kids, dev, accessibility.
+
+### STT / Ducking
+Проверяются тем же scripts/test_voice.py (3/3).

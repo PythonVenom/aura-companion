@@ -197,25 +197,24 @@ Aura — свободный проект (MIT). Всё локально, без 
 
 ## 🖥️ Ищу железо для разработки
 
-**ПРИОРИТЕТ 1 — Мобильная станция (ноутбук):**
-Для мобильной работы (батя, встречи, партнёры, тесты в полях):
+**ПРИОРИТЕТ 1 — Мобильная AI-станция (флагман 2026):**
 
-- **Ноутбук:** Lenovo ThinkPad P1 Gen 7 / Dell XPS 16 / Framework 16
-- **CPU:** AMD Ryzen AI 9 HX 370 / Intel Core Ultra 9 185H
-- **GPU:** NVIDIA RTX 4070 Mobile (8 ГБ) / RTX 4080 Mobile
-- **RAM:** 64 ГБ DDR5
-- **SSD:** 2 ТБ NVMe Gen4
-- **NPU:** AMD XDNA 2 / Intel NPU — для локального AI
+- **Платформа:** AMD Strix Halo (Ryzen AI Max+ 395, 16 ядер Zen 5)
+- **RAM:** 128 ГБ LPDDR5X-8000 unified (до 96 ГБ под GPU)
+- **iGPU:** Radeon 8060S (40 CU RDNA 3.5) — 44-56 tok/s на 120B MoE
+- **NPU:** 50 TOPS (XDNA 2)
+- **SSD:** 2-4 ТБ NVMe Gen4
+- **Устройства:** ASUS ProArt PX13 / GMKtec EVO-X3 / AMD Ryzen AI Halo Dev Platform
+- **Цена:** $2,799–3,999
 - **Автономность:** 8+ часов (батя, выезды)
 
 **ПРИОРИТЕТ 2 — Стационар (для тяжёлых задач):**
 
-- **GPU:** NVIDIA RTX 4090 (24 ГБ) — 13B модели, обучение
-- **CPU:** AMD Ryzen 9 7950X / Intel i9-14900K
-- **RAM:** 128 ГБ DDR5
-- **SSD:** 4 ТБ NVMe Gen4
-- **NPU:** AMD Strix Halo / NVIDIA Jetson
-
+- **GPU:** NVIDIA RTX 5090 (32 ГБ GDDR7) — Blackwell, ~3352 AI TOPS
+- **CPU:** AMD Threadripper PRO 9995WX (96 ядер Zen 5) / Ryzen 9 9950X3D
+- **RAM:** 256 ГБ DDR5 (до 2 ТБ на TR PRO)
+- **SSD:** 4 ТБ NVMe Gen5
+- **Альтернатива:** AMD Threadripper Halo Station (2x MI350P, 288 ГБ HBM3E)
 **Партнёрам:** см. [PARTNERSHIP.md](PARTNERSHIP.md) · [docs/sponsorship.md](docs/sponsorship.md)
 
 ## 🌟 Ссылки

@@ -27,7 +27,7 @@ def detect_platform() -> dict:
         p["family"] = "macos"
     elif p["system"] == "windows":
         p["family"] = "windows"
-    elif "bsd" in p["system"]:
+    elif "bsd" in p["system"]:  # type: ignore[operator]
         p["family"] = "bsd"
     else:
         p["family"] = "unknown"
@@ -39,8 +39,8 @@ def detect_platform() -> dict:
         "riscv64": "riscv64",
         "mips": "mips", "mips64": "mips64",
     }
-    p["arch"] = arch_map.get(p["machine"], p["machine"])
-    return p
+    p["arch"] = arch_map.get(p["machine"], p["machine"])  # type: ignore[call-overload]
+    return p  # type: ignore[operator]
 
 
 def is_supported(platform_info: dict | None = None) -> bool:

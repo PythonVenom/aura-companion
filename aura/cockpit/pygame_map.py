@@ -144,8 +144,8 @@ class SectorMap:
             return
         speed = 400 * dt  # пикселей/сек
         self.ship_angle = math.atan2(dy, dx)
-        self.ship_pos[0] += math.cos(self.ship_angle) * speed
-        self.ship_pos[1] += math.sin(self.ship_angle) * speed
+        self.ship_pos[0] += math.cos(self.ship_angle) * speed  # type: ignore[call-overload]
+        self.ship_pos[1] += math.sin(self.ship_angle) * speed  # type: ignore[call-overload]
 
     # ── рисование ────────────────────────────────────────
     def _draw(self) -> None:

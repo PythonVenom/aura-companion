@@ -105,9 +105,9 @@ def run_doctor() -> dict:
     report = {}
     with contextlib.suppress(Exception):
         report["xp"] = fix_xp()
-    report["bridge"] = fix_bridge()
-    report["daemon"] = fix_daemon()
-    report["ruff"] = fix_ruff()
+    report["bridge"] = fix_bridge()  # type: ignore[assignment]
+    report["daemon"] = fix_daemon()  # type: ignore[assignment]
+    report["ruff"] = fix_ruff()  # type: ignore[assignment]
     return report
 
 

@@ -42,7 +42,7 @@ class MentorAgent:
         pass
 
     async def _on_next(self, event) -> None:
-        task = self.tracker.next_task()
+        task = self.tracker.next_task()  # type: ignore[attr-defined]
         if not task:
             text = "?????? ?????????????????? ???????????? ????????????????. ???? ??????????????, ????????!"
         else:
@@ -55,15 +55,15 @@ class MentorAgent:
             await self.ctx.bus.publish("mentor.answer", {"text": text})
 
     async def _on_stats(self, event) -> None:
-        s = self.tracker.stats()
+        s = self.tracker.stats()  # type: ignore[attr-defined]
         render_menu(self.tracker)
-        c = self.ledger.career_score()
+        c = self.ledger.career_score()  # type: ignore[attr-defined]
         text = (f"????????????????: {s['done']} ???? {s['total']} ({s['percent']}%). "
                 f"??????????????: {c['career_score']}.")
         event_log.append("mentor.stats", s, src=self.name)
         if self.ctx:
             event_log.append("mentor.answer", {"text": text[:80]}, src=self.name)  # AURA_MENTOR_LOG_V1
-            await self.ctx.bus.publish("mentor.answer", {"text": text})
+            await self.ctx.bus.publish("mentor.answer", {"text": text})  # type: ignore[attr-defined]
 
     async def _on_complete(self, event) -> None:
         p = get_payload(event)
@@ -71,8 +71,8 @@ class MentorAgent:
         score = int(p.get("score", 80))
         if not skill_id:
             return
-        opened = self.tracker.complete(skill_id, score)
-        self.ledger.add(skill_id, score, reviewer="aura")
+        opened = self.tracker.complete(skill_id, score)  # type: ignore[attr-defined]
+        self.ledger.add(skill_id, score, reviewer="aura")  # type: ignore[attr-defined]
         text = f"?????????? {skill_id} ????????????. ??????????????: {len(opened)} ??????????."
         event_log.append("mentor.completed",
                          {"skill": skill_id, "score": score,

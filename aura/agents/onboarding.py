@@ -135,12 +135,12 @@ class AgentOnboarding(MicroAgent):
                 agent_name=self.name,
             )
         q = QUESTIONS[idx]
-        text = f"[{idx+1}/{len(QUESTIONS)}] {q['text']}"
-        if q["type"] == "choice":
-            text += f"\nВарианты: {', '.join(q['options'])}"
-        elif q["type"] == "multi":
-            text += f"\nЧерез запятую: {', '.join(q['options'])}"
-        text += f"\n(по умолчанию: {q['default']})"
+        text = f"[{idx+1}/{len(QUESTIONS)}] {q['text']}"  # type: ignore[index]
+        if q["type"] == "choice":  # type: ignore[index]
+            text += f"\nВарианты: {', '.join(q['options'])}"  # type: ignore[index]
+        elif q["type"] == "multi":  # type: ignore[index]
+            text += f"\nЧерез запятую: {', '.join(q['options'])}"  # type: ignore[index]
+        text += f"\n(по умолчанию: {q['default']})"  # type: ignore[index]
         return AgentResponse.ok(text=text, agent_name=self.name)
 
     def _status(self) -> AgentResponse:

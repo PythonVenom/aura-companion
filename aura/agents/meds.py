@@ -161,6 +161,17 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
                 agent_name=self.name,
             )
         conn = sqlite3.connect(self.DB)
+        # Dedup: не плодить дубли (boot_report гоняет тесты)
+        existing = conn.execute(
+            "SELECT id FROM meds WHERE name=? AND time_str=?",
+            (name, time_str),
+        ).fetchone()
+        if existing:
+            conn.close()
+            return AgentResponse.ok(
+                text=f"💊 Уже записано: {name} в {time_str}",
+                agent_name=self.name,
+            )
         conn.execute(
             "INSERT INTO meds (name, time_str) VALUES (?, ?)",
             (name, time_str),

@@ -63,3 +63,55 @@ def test_read_screen_preview_truncated(agent):
     # Прямой тест обрезки
     preview = fake_text[:500]
     assert len(preview) == 500
+
+
+# === #145: LLM-описание ===
+
+def test_describe_with_llm_empty(agent):
+    """Пустой OCR → пустая строка, не вызываем LLM."""
+    assert agent._describe_with_llm("") == ""
+    assert agent._describe_with_llm("   ") == ""
+
+
+def test_describe_with_llm_brain_ok(agent):
+    """Brain отвечает → описание возвращается."""
+    with patch("aura.agents.brain.AgentBrain") as MockBrain:
+        MockBrain.return_value.ask.return_value = "На экране открыт Firefox."
+        result = agent._describe_with_llm("Firefox — Wikipedia — статья о Python")
+    assert "Firefox" in result
+
+
+def test_describe_with_llm_brain_error(agent):
+    """Brain упал → пустая строка (graceful)."""
+    with patch("aura.agents.brain.AgentBrain", side_effect=ImportError):
+        result = agent._describe_with_llm("some text")
+    assert result == ""
+
+
+def test_describe_with_llm_brain_returns_error(agent):
+    """Brain вернул ❌ → пустая строка (не показываем ошибку)."""
+    with patch("aura.agents.brain.AgentBrain") as MockBrain:
+        MockBrain.return_value.ask.return_value = "❌ Ошибка: timeout"
+        result = agent._describe_with_llm("text")
+    assert result == ""
+
+
+@pytest.mark.asyncio
+async def test_read_screen_with_llm(agent):
+    """При наличии LLM-описания — возвращаем его вместо OCR preview."""
+    with patch("aura.agents.screen_reader.AgentScreenReader") as MockSR:
+        MockSR.return_value._ocr_full = lambda: "Firefox Wikipedia"
+        with patch.object(agent, "_describe_with_llm", return_value="Открыт Firefox"):
+            result = agent._read_screen()
+    assert "Firefox" in result
+    assert result.startswith("👁️")
+
+
+@pytest.mark.asyncio
+async def test_read_screen_fallback_without_llm(agent):
+    """Без LLM — OCR preview."""
+    with patch("aura.agents.screen_reader.AgentScreenReader") as MockSR:
+        MockSR.return_value._ocr_full = lambda: "Some text on screen"
+        with patch.object(agent, "_describe_with_llm", return_value=""):
+            result = agent._read_screen()
+    assert "Some text" in result

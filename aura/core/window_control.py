@@ -176,3 +176,47 @@ def is_wayland() -> bool:
 
 
 __all__ += ["mouse_click", "type_text_wayland", "is_wayland"]
+
+
+# === #139 Wayland-native (ydotool) ===
+
+def _has_ydotool() -> bool:
+    return shutil.which("ydotool") is not None
+
+
+def _ydotool(*args: str) -> bool:
+    if not _has_ydotool():
+        return False
+    try:
+        r = subprocess.run(
+            ["ydotool", *args],
+            capture_output=True, timeout=TIMEOUT,
+        )
+        return r.returncode == 0
+    except Exception:
+        return False
+
+
+def mouse_click(x: int, y: int, button: str = "left") -> bool:
+    """#139: клик мышью на координаты (Wayland-friendly)."""
+    btn_map = {"left": "0xC0", "right": "0xC1", "middle": "0xC2"}
+    code = btn_map.get(button, "0xC0")
+    # Сначала движение, потом клик
+    _ydotool("mousemove", "--absolute", "-x", str(x), "-y", str(y))
+    return _ydotool("click", code)
+
+
+def type_text_wayland(text: str) -> bool:
+    """#139: ввод текста через ydotool (Wayland-friendly)."""
+    if not text:
+        return False
+    return _ydotool("type", "--", text)
+
+
+def is_wayland() -> bool:
+    """Wayland ли сессия?"""
+    import os
+    return os.environ.get("XDG_SESSION_TYPE", "").lower() == "wayland"
+
+
+__all__ += ["mouse_click", "type_text_wayland", "is_wayland"]

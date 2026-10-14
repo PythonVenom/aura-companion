@@ -169,6 +169,10 @@ class AgentMultiApp(BaseAgent):
 
 
 __all__ = [
-    "AgentMultiApp", "Scenario", "Step",
-    "load_scenarios", "save_scenarios", "SCENARIOS_PATH",
+    "SCENARIOS_PATH",
+    "AgentMultiApp",
+    "Scenario",
+    "Step",
+    "load_scenarios",
+    "save_scenarios",
 ]

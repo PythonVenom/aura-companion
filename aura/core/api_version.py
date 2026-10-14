@@ -11,7 +11,6 @@
 """
 from __future__ import annotations
 
-import functools
 import re
 from dataclasses import dataclass
 
@@ -26,7 +25,7 @@ class APIVersion:
     prerelease: str = ""
 
     @classmethod
-    def parse(cls, s: str) -> "APIVersion":
+    def parse(cls, s: str) -> APIVersion:
         m = SEMVER_RE.match(s)
         if not m:
             raise ValueError(f"Invalid SemVer: {s}")
@@ -37,7 +36,7 @@ class APIVersion:
         base = f"{self.major}.{self.minor}.{self.patch}"
         return f"{base}-{self.prerelease}" if self.prerelease else base
 
-    def is_compatible(self, other: "APIVersion") -> bool:
+    def is_compatible(self, other: APIVersion) -> bool:
         """Совместим ли other с self (same MAJOR)."""
         return self.major == other.major
 
@@ -85,6 +84,10 @@ def check_all() -> list[str]:
 
 
 __all__ = [
-    "APIVersion", "CURRENT_API", "api", "registered",
-    "is_compatible", "check_all",
+    "CURRENT_API",
+    "APIVersion",
+    "api",
+    "check_all",
+    "is_compatible",
+    "registered",
 ]

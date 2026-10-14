@@ -88,4 +88,4 @@ def format_recall(minutes: int = 10) -> str:
     return "\n".join(lines)
 
 
-__all__ = ["record", "recall", "format_recall", "DB"]
+__all__ = ["DB", "format_recall", "recall", "record"]

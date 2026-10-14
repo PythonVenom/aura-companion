@@ -3,7 +3,10 @@ from __future__ import annotations
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 from aura.core.rules import (
-    add as add_rule, format_rules, load, remove as remove_rule,
+    format_rules,
+)
+from aura.core.rules import (
+    remove as remove_rule,
 )
 
 

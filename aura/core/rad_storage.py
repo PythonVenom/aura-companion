@@ -36,7 +36,7 @@ class Block:
     crc: int
 
     @classmethod
-    def create(cls, key: str, data: bytes) -> "Block":
+    def create(cls, key: str, data: bytes) -> Block:
         return cls(key=key, data=data, crc=crc32(data))
 
     def verify(self) -> bool:

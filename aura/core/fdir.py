@@ -22,7 +22,6 @@
 from __future__ import annotations
 
 import enum
-import os
 import time
 from pathlib import Path
 
@@ -137,7 +136,13 @@ def format_status() -> str:
 
 
 __all__ = [
-    "Mode", "get_mode", "get_reason", "set_mode", "is_agent_allowed",
-    "check_health", "reset", "format_status",
     "CRITICAL_AGENTS",
+    "Mode",
+    "check_health",
+    "format_status",
+    "get_mode",
+    "get_reason",
+    "is_agent_allowed",
+    "reset",
+    "set_mode",
 ]

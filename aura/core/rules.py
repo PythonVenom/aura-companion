@@ -85,4 +85,4 @@ def format_rules() -> str:
     return "\n".join(lines)
 
 
-__all__ = ["Rule", "load", "save", "add", "remove", "match", "format_rules", "RULES_PATH"]
+__all__ = ["RULES_PATH", "Rule", "add", "format_rules", "load", "match", "remove", "save"]

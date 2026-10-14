@@ -141,6 +141,13 @@ def _default_registry() -> list[PluginMeta]:
 
 
 __all__ = [
-    "PluginMeta", "load", "save", "register", "unregister",
-    "find", "search", "by_tag", "format_registry",
+    "PluginMeta",
+    "by_tag",
+    "find",
+    "format_registry",
+    "load",
+    "register",
+    "save",
+    "search",
+    "unregister",
 ]

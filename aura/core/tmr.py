@@ -13,8 +13,9 @@ single-event upsets и логических сбоев одной реплики
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 
 class TMRError(Exception):

@@ -116,4 +116,4 @@ class AgentNaptime(BaseAgent):
         return AgentResponse.ok("🔔 Тишина выключена", self.name)
 
 
-__all__ = ["AgentNaptime", "is_naptime", "remaining_min", "STATE_PATH"]
+__all__ = ["STATE_PATH", "AgentNaptime", "is_naptime", "remaining_min"]

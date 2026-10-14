@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from aura.core.plugin_registry import (
-    format_registry, search, unregister,
+    format_registry,
+    search,
 )
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 

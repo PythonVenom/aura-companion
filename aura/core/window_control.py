@@ -175,7 +175,7 @@ def is_wayland() -> bool:
     return os.environ.get("XDG_SESSION_TYPE", "").lower() == "wayland"
 
 
-__all__ += ["mouse_click", "type_text_wayland", "is_wayland"]
+__all__ += ["is_wayland", "mouse_click", "type_text_wayland"]
 
 
 # === #139 Wayland-native (ydotool) ===
@@ -219,4 +219,4 @@ def is_wayland() -> bool:
     return os.environ.get("XDG_SESSION_TYPE", "").lower() == "wayland"
 
 
-__all__ += ["mouse_click", "type_text_wayland", "is_wayland"]
+__all__ += ["is_wayland", "mouse_click", "type_text_wayland"]

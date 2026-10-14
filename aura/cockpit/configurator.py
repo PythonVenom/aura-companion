@@ -19,7 +19,6 @@ import sqlite3
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal
 from textual.widgets import (
-    Select,
     Button,
     DataTable,
     Footer,
@@ -28,6 +27,7 @@ from textual.widgets import (
     Label,
     ListItem,
     ListView,
+    Select,
     Static,
     TabbedContent,
     TabPane,

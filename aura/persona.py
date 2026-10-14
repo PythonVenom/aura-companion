@@ -64,8 +64,8 @@ STYLE_MAP = {
 def _get(persona: dict, key: str) -> str:
     v = persona.get(key)
     if v in (None, "", []):
-        return DEFAULTS[key]
-    return v
+        return str(DEFAULTS[key])
+    return str(v)
 
 
 def build_system_prompt(persona: dict | None = None) -> str:

@@ -15,7 +15,6 @@ from aura.core.protocol import AgentRequest
 @pytest.fixture(autouse=True)
 def isolate(tmp_path, monkeypatch):
     monkeypatch.setattr(R, "RULES_PATH", tmp_path / "rules.json")
-    monkeypatch.setattr(A, "RULES_PATH", tmp_path / "rules.json")
     yield
 
 

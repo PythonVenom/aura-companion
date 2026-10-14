@@ -304,9 +304,11 @@ def build_orchestrator() -> Orchestrator:
     modules_config = load_modules_config()
 
     # --- Уровень 1: простые и точные ---
-    _try_register(orch, AgentSOS, modules_config)  # SOS приоритетно
+    # ВАЖНО: Fall ДО SOS — Fall специфичен ("упал","не могу встать"),
+    # Fall внутри вызывает SOS. Если SOS первый — он перехватит Fall.
+    _try_register(orch, AgentFall, modules_config)  # падение (вызывает SOS)
+    _try_register(orch, AgentSOS, modules_config)   # SOS (после Fall)
     _try_register(orch, AgentMeds, modules_config)  # лекарства
-    _try_register(orch, AgentFall, modules_config)  # падение
     _try_register(orch, AgentCall, modules_config)  # звонок
     _try_register(orch, AgentFinElder, modules_config)  # FinElder
     _try_register(orch, AgentCEC, modules_config)  # CEC TV

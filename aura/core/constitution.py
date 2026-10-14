@@ -65,6 +65,23 @@ RULES = [
 ]
 
 
+ELDERCARE_VERBS = (
+    "напомни", "напомнить", "добавь", "запиши", "записать",
+    "принял", "приняла", "выпил", "выпила", "покажи",
+    "список", "какие у меня", "мои таблетк", "мои лекарств",
+)
+
+
+def _is_eldercare_command(text: str) -> bool:
+    """True = команда планирования (напоминание/список), не медсовет.
+
+    Whitelist: elder-care глаголы (Saltzer & Schroeder 1975, least privilege).
+    Если пользователь просит НАПОМНИТЬ/ДОБАВИТЬ/ПОКАЗАТЬ — пропускаем к агенту.
+    """
+    t = text.lower()
+    return any(v in t for v in ELDERCARE_VERBS)
+
+
 def classify(text: str) -> Rule | None:
     t = text.lower()
     for rule in RULES:
@@ -75,6 +92,9 @@ def classify(text: str) -> Rule | None:
 
 
 def check(text: str) -> tuple:
+    # Elder-care whitelist (P3 fix): напоминания/списки — не медсовет.
+    if _is_eldercare_command(text):
+        return True, "", None
     rule = classify(text)
     if rule is None:
         return True, "", None

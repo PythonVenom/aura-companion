@@ -40,7 +40,8 @@ class AgentFall(BaseAgent):
         try:
             from aura.agents.sos import AgentSOS
             sos = AgentSOS()
-            return await sos.handle(AgentRequest(text="упал"))
+            # "sos" в тексте обходит can_handle SOS (SOS_PHRASES проверяет фразы)
+            return await sos.handle(AgentRequest(text="sos упал"))
         except Exception as e:
             return AgentResponse.ok(
                 text=f"🆘 Обнаружено падение! Но SOS не сработал: {e}",

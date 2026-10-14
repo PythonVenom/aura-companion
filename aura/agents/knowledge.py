@@ -164,7 +164,7 @@ class AgentKnowledge(MicroAgent):
                     self.name,
                 )
             lines = [f"🔍 Найдено {len(found_lines)} строк:"]
-            for f in found[:5]:
+            for f in found[:5]:  # type: ignore[index]
                 rel = f.path.name
                 lines.append(f"  {rel}:{f.line}  {f.text[:60]}")
             return AgentResponse.ok("\n".join(lines), self.name)
@@ -173,7 +173,7 @@ class AgentKnowledge(MicroAgent):
         m = re.search(r"(?:прочитай|покажи)\s+(?:файл\s+)?(\S+)", text)
         if m:
             name = m.group(1).strip(" :,.-")
-            p = find_file(name)
+            p = find_file(name)  # type: ignore[assignment]
             if p is None:
                 return AgentResponse.ok(
                     f"❌ Файл «{name}» не найден",

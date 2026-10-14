@@ -174,3 +174,44 @@ def test_list_windows_exception():
         with patch("aura.core.window_control.subprocess.run",
                    side_effect=OSError("boom")):
             assert WC.list_windows() == []
+
+
+# === #139 Wayland ===
+
+def test_is_wayland_false_on_x11(monkeypatch):
+    monkeypatch.setenv("XDG_SESSION_TYPE", "x11")
+    assert WC.is_wayland() is False
+
+
+def test_is_wayland_true(monkeypatch):
+    monkeypatch.setenv("XDG_SESSION_TYPE", "wayland")
+    assert WC.is_wayland() is True
+
+
+def test_mouse_click_left():
+    with patch.object(WC, "_ydotool", return_value=True) as m:
+        assert WC.mouse_click(100, 200, "left") is True
+    # 2 вызова: mousemove + click
+    assert m.call_count == 2
+
+
+def test_mouse_click_right():
+    with patch.object(WC, "_ydotool", return_value=True) as m:
+        WC.mouse_click(50, 50, "right")
+    calls = [c[0] for c in m.call_args_list]
+    assert any("0xC1" in c for c in calls)
+
+
+def test_mouse_click_no_ydotool():
+    with patch.object(WC, "_has_ydotool", return_value=False):
+        assert WC.mouse_click(0, 0) is False
+
+
+def test_type_text_wayland():
+    with patch.object(WC, "_ydotool", return_value=True) as m:
+        assert WC.type_text_wayland("привет") is True
+    assert m.call_args[0] == ("type", "--", "привет")
+
+
+def test_type_text_empty():
+    assert WC.type_text_wayland("") is False

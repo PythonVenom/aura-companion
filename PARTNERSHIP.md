@@ -20,42 +20,26 @@ Aura — голосовой ассистент, который делает ци
 
 ## Технологический стек
 
-- **Python 3.12** + asyncio, модульная архитектура (48 агентов)
+- **Python 3.12** + asyncio, модульная архитектура (105 агентов)
 - **Локальный LLM:** Ollama (qwen2.5:7b) — работает offline
 - **ASR:** T-one (streaming, русский)
 - **TTS:** Piper (локальный синтез)
 - **RAG:** ChromaDB — память диалогов
 - **Audio:** PipeWire + WirePlumber + BargeIn (VAD)
 - **DE:** KDE Plasma 6, MPRIS, systemd --user
-- **Browser:** Firefox WebExtension + native messaging
-- **115 ADR** — архитектурные решения документированы
+- **Browser:** Firefox WebExtension + native messaging + CDP
+- **131 ADR** — архитектурные решения документированы
 
 ## Текущий статус
 
 | Метрика | Значение |
 |---|---|
-| Тестов | **1403** (pytest) |
-| Агентов | **48** |
-| ADR | **115** |
-| Коммитов | 156 |
+| Тестов | 2450+ (pytest) |
+| Агентов | 105 |
+| ADR | 131 |
+| Коммитов | 220+ |
 | Лицензия | MIT |
-| Статус | v0.9.6-alpha, публичный релиз 27.09.2026 |
-
-## Почему с AMD
-
-**Портфолио:** Aura — работающий кейс **локального ИИ без облака**. Это то, что AMD продвигает через Ryzen AI и Strix Halo.
-
-**Технологически:**
-- Локальные LLM (7B параметров) — на CPU и GPU
-- Голосовой цикл в реальном времени (ASR + LLM + TTS)
-- Целевая платформа — Linux, Arch, KDE
-- Готов к бенчмаркам на ROCm
-
-**Стратегически:**
-- **Accessibility-first** — редкая ниша, высокая социальная значимость
-- **Open Source (MIT)** — модель Blender ↔ AMD
-- **Кросс-платформенный roadmap** — Arch → Ubuntu → Windows → Android
-- **TinyML** в перспективе — от смартфона до микроволновки
+| Статус | v8.2.0 «Autonomous», public release 13.10.2026 |
 
 ## Что ищу
 
@@ -63,13 +47,47 @@ Aura — голосовой ассистент, который делает ци
 - **Интеграции:** AT-SPI, MCP, кастомные коробки
 - **Железо:** для тестирования локальных LLM
 
-## Roadmap (публичный)
+## Как собрать самому (5 минут)
 
-- **Q4 2026:** Arch Linux до 100% (24/7 стабильность, бета)
-- **Q1 2027:** Ubuntu/Debian, ADR-017 Platform Abstraction
-- **Q2 2027:** Windows (WASAPI, WinAPI)
-- **Q3 2027:** Android (Termux → Kotlin)
-- **2028+:** TinyML (ESP32), macOS
+Всё готово — исходники в открытом доступе. Любой может собрать Aura.
+
+### Обычная установка
+
+1. Клонировать:
+   git clone https://github.com/PythonVenom/aura-companion.git
+   cd aura-companion
+
+2. Установить (авто-определит ОС: Arch / Ubuntu / Debian / Fedora / Alpine / macOS):
+   ./install_universal.sh
+
+3. Запустить:
+   systemctl --user start aura.service
+
+### Для elder-care (батя)
+
+   ./install_batya.sh
+
+Профиль elder: без LLM, голос медленнее, автостарт.
+Скрипт сам поставит пакеты, создаст venv, скачает голос, настроит systemd.
+
+### Свой Live ISO
+
+   ./aura-make-iso.sh
+
+Скрипт соберёт archiso-профиль. ISO появится в aura-os/out/.
+Установка через dd — команда будет показана после сборки.
+
+### Свой portable на флешку
+
+   ./aura-usb.sh /mnt/usb --download-models
+
+Создаст структуру на флешке: aura-project / aura-cache / aura-config / aura-models.
+Вставил в чужой ПК — заработало.
+
+### Проверки
+
+Все зависимости в docs/SBOM.json (CycloneDX 1.5).
+Стандарты: 12-Factor App, SemVer 2.0, OWASP Top 10.
 
 ## Аналоги для сравнения
 
@@ -80,22 +98,20 @@ Aura — голосовой ассистент, который делает ци
 | Leon AI | Personal assistant | Aura — российский, русский ASR/TTS из коробки |
 | Home Assistant Voice | Умный дом | Aura — рабочий стол, мессенджеры, браузер |
 
-**Отличие:** Aura — **не «умная колонка»**, а **проводник в цифровой мир** для тех, кому это трудно.
+**Отличие:** Aura — не «умная колонка», а проводник в цифровой мир для тех, кому это трудно.
 
 ## Медиа и материалы
 
-- README: [github.com/PythonVenom/aura-companion](https://github.com/PythonVenom/aura-companion)
-- Манифест: [MANIFESTO.md](MANIFESTO.md)
-- Архитектура: [docs/architecture.md](docs/architecture.md)
-- ADR: [docs/adr/](docs/adr/)
-
-**Демо-видео и бенчмарки** — готовятся. Будут добавлены в ближайшие недели.
+- README: github.com/PythonVenom/aura-companion
+- Манифест: MANIFESTO.md
+- Архитектура: docs/architecture.md
+- ADR: docs/adr/
+- SBOM: docs/SBOM.json
 
 ## Контакт
 
-- **GitHub Issues:** метка `partnership`
-- **Email:** будет добавлен в ближайшие дни
-- **Telegram:** будет добавлен в ближайшие дни
+- **GitHub Issues:** метка partnership
+- **Telegram:** @Pyth0nVen0m
 
 ---
 

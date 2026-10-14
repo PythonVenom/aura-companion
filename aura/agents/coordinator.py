@@ -31,8 +31,17 @@ class AgentCoordinator(BaseAgent):
     )
 
     def can_handle(self, request: AgentRequest) -> bool:
+        import re as _re
         t = request.text.lower()
-        return any(k in t for k in self.TRIGGERS)
+        # Word-boundary для коротких триггеров ("рой", "стая"):
+        # чтобы "открой" не ловилось как "рой".
+        for k in self.TRIGGERS:
+            if len(k) <= 5:
+                if _re.search(r"\b" + _re.escape(k) + r"\b", t):
+                    return True
+            elif k in t:
+                return True
+        return False
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
         if not self.can_handle(request):

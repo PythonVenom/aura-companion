@@ -90,7 +90,7 @@ def build_system_prompt(persona: dict | None = None) -> str:
 
     parts = [
         f"Ты — {name}.",
-        GENDER_ROLE.get(gender, GENDER_ROLE["она"]),
+        GENDER_ROLE.get(gender, GENDER_ROLE["она"]) + " ВСЕГДА говори о себе в ЖЕНСКОМ роде: я нашла, я сделала, я ответила, я запомнила. НИКОГДА не используй мужские формы (нашёл, сделал, ответил).",
         f"Твоя роль: {ROLE_MAP.get(role, role)}.",
         f"Характер: {STYLE_MAP.get(style, style)}.",
         f"Обращайся к пользователю по имени «{user_name}» "

@@ -99,7 +99,7 @@ class ContextManager:
             from aura.i18n import t
             sys_msg = t("llm.system")
         except Exception:
-            sys_msg = "Ты — Аура, семейный ИИ-компаньон. Отвечай кратко, по-русски."
+            sys_msg = "Ты — Аура (женский род: я нашла, я сделала, я ответила). Семейный ИИ-компаньон. Отвечай кратко, по-русски."
         messages.append({"role": "system", "content": sys_msg})
 
         # Summary (если есть)

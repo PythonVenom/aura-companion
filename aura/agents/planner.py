@@ -17,6 +17,8 @@
 """
 from __future__ import annotations
 
+import contextlib
+
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 from aura.core.react_loop import react_loop
 from aura.core.recall_log import record
@@ -41,14 +43,12 @@ class AgentPlanner(BaseAgent):
         result = self._run_plan(text)
 
         # Запись в recall_log (#141)
-        try:
+        with contextlib.suppress(Exception):
             record(
                 agent=self.name,
                 action="plan",
                 detail=f"{text[:100]} → {result.get('answer', '')[:100]}",
             )
-        except Exception:
-            pass
 
         answer = result.get("answer", "Не смогла спланировать")
         steps = result.get("steps", [])

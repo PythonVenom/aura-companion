@@ -14,6 +14,7 @@
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import re
 import time
@@ -46,10 +47,8 @@ def _enable(minutes: int, reason: str = "") -> None:
 
 
 def _disable() -> None:
-    try:
+    with contextlib.suppress(Exception):
         STATE_PATH.unlink(missing_ok=True)
-    except Exception:
-        pass
 
 
 def remaining_min() -> int:

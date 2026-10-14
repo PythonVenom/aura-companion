@@ -14,6 +14,7 @@
 """
 from __future__ import annotations
 
+import contextlib
 import re
 from pathlib import Path
 
@@ -78,10 +79,8 @@ class AgentActions(BaseAgent):
         if not found:
             return AgentResponse.ok(f"❌ Не найдено: {query}", self.name)
 
-        try:
+        with contextlib.suppress(Exception):
             record(self.name, "find_file", f"{query} → {len(found)}")
-        except Exception:
-            pass
 
         lines = [f"📁 Найдено {len(found)}:"]
         for p in found[:10]:

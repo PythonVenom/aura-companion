@@ -71,12 +71,8 @@ def is_agent_allowed(agent_name: str) -> bool:
     """Можно ли использовать агента в текущем режиме."""
     if agent_name in CRITICAL_AGENTS:
         return True
-    if _MODE == Mode.NORMAL:
-        return True
-    if _MODE == Mode.DEGRADED:
-        return True  # все, но с ограничениями (caller решает)
-    # SAFE / EMERGENCY — только критичные
-    return False
+    # NORMAL/DEGRADED — пропускаем всех (в DEGRADED с ограничениями)
+    return _MODE in (Mode.NORMAL, Mode.DEGRADED)
 
 
 def check_health() -> Mode:

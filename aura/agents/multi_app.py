@@ -13,6 +13,7 @@
 """
 from __future__ import annotations
 
+import contextlib
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -149,14 +150,12 @@ class AgentMultiApp(BaseAgent):
             args = ", ".join(f"{k}={v}" for k, v in step.args.items())
             lines.append(f"  {i}. [{step.agent}] {step.action} ({args})")
 
-        try:
+        with contextlib.suppress(Exception):
             record(
                 self.name,
                 "scenario_run",
                 f"{scenario.name} → {len(scenario.steps)} шагов",
             )
-        except Exception:
-            pass
 
         return AgentResponse.ok("\n".join(lines), self.name)
 

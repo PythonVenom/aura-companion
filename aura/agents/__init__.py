@@ -34,6 +34,7 @@ from aura.agents.fdir import AgentFDIR
 from aura.agents.planner import AgentPlanner
 from aura.agents.actions import AgentActions
 from aura.agents.plugins import AgentPlugins
+from aura.agents.multi_app import AgentMultiApp
 from aura.agents.music_ducker import AgentMusicDucker
 from aura.agents.music_local import AgentMusicLocal
 from aura.agents.power import AgentPower
@@ -84,6 +85,7 @@ __all__ = [
     "AgentPlanner",
     "AgentActions",
     "AgentPlugins",
+    "AgentMultiApp",
     "AgentMcp",
     "AgentMediaPause",
     "AgentMediaSearch",

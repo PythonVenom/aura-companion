@@ -203,7 +203,6 @@ async def _main_loop() -> int:
                     if barge_in is not None:
                         barge_in.set_aura_speaking(False)
                     if _ducker is not None:
-                        import contextlib
                         with contextlib.suppress(Exception):
                             _ducker.un_duck()
 

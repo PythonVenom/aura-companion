@@ -13,6 +13,7 @@ class AgentWhatsApp(BaseAgent):
     MODULE_ALWAYS = True
 
     TRIGGERS = (
+        "кто написал", "кто писал",
         "whatsapp", "ватсап", "вацап",
         "напиши в whatsapp", "отправь в whatsapp",
         "прочитай whatsapp",

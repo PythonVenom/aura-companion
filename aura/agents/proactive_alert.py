@@ -23,7 +23,8 @@ DEFAULT_THRESHOLD_HOURS = 6.0
 class AgentProactiveAlert(MicroAgent):
     name = "proactive_alert"
 
-    TRIGGERS = ("тревога", "проверь батю", "молчит", "proactive",
+    TRIGGERS = (
+        "тревожно", "мне плохо", "я боюсь","тревога", "проверь батю", "молчит", "proactive",
                 "если я не отвечаю", "sos по тишине")
 
     def can_handle(self, request: AgentRequest) -> bool:

@@ -105,9 +105,9 @@ class AgentMusicLocal(BaseAgent):
         # Resume — если paused, ИЛИ если есть последний трек (после стопа).
         if any(kw in text for kw in self.RESUME_KEYWORDS):
             return self._vlc_paused() or self._last_track is not None
-        # Next/prev/stop — если VLC активен в любом виде.
+        # Next/prev/stop — если VLC активен ИЛИ есть last_track (после паузы).
         if any(kw in text for kw in self.NEXT_KEYWORDS + self.PREV_KEYWORDS + self.STOP_KEYWORDS):
-            return self._vlc_active()
+            return self._vlc_active() or self._last_track is not None
         all_kw = (
             self.PLAY_KEYWORDS + self.LIST_KEYWORDS
         )

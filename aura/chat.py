@@ -100,10 +100,8 @@ async def _stream_and_speak(orch, text: str, speaker, barge_in=None) -> tuple[st
     finally:
         # Bug 33a: выключить barge-in
         if barge_in is not None:
-            try:
+            with contextlib.suppress(Exception):
                 barge_in.set_aura_speaking(False)
-            except Exception:
-                pass
 
     return "".join(full), spoke_any
 
@@ -203,10 +201,8 @@ async def _main_loop() -> int:
             print(f"❌ Ошибка: {e}")
 
     if barge_in is not None:
-        try:
+        with contextlib.suppress(Exception):
             barge_in.stop()
-        except Exception:
-            pass
     print("🦾 До связи.")
     return 0
 

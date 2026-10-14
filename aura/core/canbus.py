@@ -26,8 +26,9 @@ from __future__ import annotations
 import re
 import time
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 # Максимальный размер ring-buffer
 HISTORY_SIZE = 1000
@@ -151,6 +152,10 @@ def reset_bus() -> None:
 
 
 __all__ = [
-    "AgentCANBus", "Message", "get_bus", "reset_bus",
-    "HISTORY_SIZE", "_matches",
+    "HISTORY_SIZE",
+    "AgentCANBus",
+    "Message",
+    "_matches",
+    "get_bus",
+    "reset_bus",
 ]

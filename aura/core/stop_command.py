@@ -20,7 +20,6 @@
 """
 from __future__ import annotations
 
-import os
 import re
 from pathlib import Path
 
@@ -91,4 +90,4 @@ def recognize_stop(frames_pcm16: bytes, sample_rate: int = 16000) -> bool:
         return False
 
 
-__all__ = ["is_stop", "recognize_stop", "find_vosk_model", "STOP_WORDS"]
+__all__ = ["STOP_WORDS", "find_vosk_model", "is_stop", "recognize_stop"]

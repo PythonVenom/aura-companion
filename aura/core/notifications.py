@@ -100,4 +100,4 @@ def notify(level: NotifLevel, title: str, body: str, agent: str | None = None) -
     return delivered
 
 
-__all__ = ["NotifLevel", "notify", "from_priority"]
+__all__ = ["NotifLevel", "from_priority", "notify"]

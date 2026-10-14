@@ -9,7 +9,6 @@
 """
 from __future__ import annotations
 
-import os
 import shutil
 import subprocess
 from difflib import get_close_matches

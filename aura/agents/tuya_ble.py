@@ -14,7 +14,6 @@ Graceful degradation:
 """
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
@@ -149,4 +148,4 @@ class AgentTuyaBLE(BaseAgent):
         )
 
 
-__all__ = ["AgentTuyaBLE", "TuyaDevice", "TUYA_SERVICE_UUID", "MOCK_DEVICES"]
+__all__ = ["MOCK_DEVICES", "TUYA_SERVICE_UUID", "AgentTuyaBLE", "TuyaDevice"]

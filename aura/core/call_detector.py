@@ -109,4 +109,4 @@ def get_call_apps() -> list[str]:
     return active
 
 
-__all__ = ["is_call_active", "get_call_apps", "CALL_APPS", "EXCLUDE_APPS"]
+__all__ = ["CALL_APPS", "EXCLUDE_APPS", "get_call_apps", "is_call_active"]

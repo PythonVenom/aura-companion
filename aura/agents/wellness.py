@@ -15,7 +15,7 @@ Voice guide — через AgentSpeaker (опционально, если дос
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
@@ -116,4 +116,4 @@ class AgentWellness(BaseAgent):
         return "\n".join(lines)
 
 
-__all__ = ["AgentWellness", "Practice", "PRACTICES"]
+__all__ = ["PRACTICES", "AgentWellness", "Practice"]

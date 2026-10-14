@@ -15,13 +15,21 @@
 from __future__ import annotations
 
 import sqlite3
-from pathlib import Path
 
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal
 from textual.widgets import (
-    Button, DataTable, Footer, Header, Input, Label,
-    ListItem, ListView, Static, TabbedContent, TabPane,
+    Button,
+    DataTable,
+    Footer,
+    Header,
+    Input,
+    Label,
+    ListItem,
+    ListView,
+    Static,
+    TabbedContent,
+    TabPane,
 )
 
 
@@ -99,7 +107,7 @@ class KeysTab(Container):
 
     def _pubkey(self) -> str:
         try:
-            from aura.core.ledger import public_key_b64, PUB_PATH
+            from aura.core.ledger import PUB_PATH, public_key_b64
             if not PUB_PATH.exists():
                 return "(ключ ещё не сгенерирован — нажми Rotate)"
             return public_key_b64()

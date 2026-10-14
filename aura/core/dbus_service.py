@@ -32,7 +32,6 @@ from pathlib import Path
 
 try:
     from jeepney import (
-        DBusAddress,
         MessageType,
         new_method_call,
         new_method_return,

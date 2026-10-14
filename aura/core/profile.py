@@ -57,7 +57,7 @@ class UserProfile:
 
     # --- Загрузка ---
     @classmethod
-    def load(cls) -> "UserProfile":
+    def load(cls) -> UserProfile:
         """Агрегирует данные из 5 файлов. Приоритет: profile.json > legacy."""
         # Новый профиль (если уже создан)
         if PROFILE_JSON.exists():
@@ -131,4 +131,4 @@ class UserProfile:
         return f"UserProfile(name={self.name}, city={self.city}, sos={'✅' if self.sos_contact.get('contact') else '❌'})"
 
 
-__all__ = ["UserProfile", "PROFILE_JSON", "CONFIG_DIR"]
+__all__ = ["CONFIG_DIR", "PROFILE_JSON", "UserProfile"]

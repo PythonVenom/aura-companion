@@ -30,7 +30,6 @@ Fallback:
 from __future__ import annotations
 
 import platform
-import sys
 from typing import Any, Protocol, runtime_checkable
 
 
@@ -280,10 +279,15 @@ def is_ready() -> bool:
 __all__ = [
     "BaseBackend",
     "LinuxAtspiBackend",
-    "WindowsUiaBackend",
     "MacosAxapiBackend",
-    "get_backend", "reset_backend",
-    "list_windows", "read_window_tree", "click_element",
-    "type_text", "get_active_window",
-    "backend_name", "is_ready",
+    "WindowsUiaBackend",
+    "backend_name",
+    "click_element",
+    "get_active_window",
+    "get_backend",
+    "is_ready",
+    "list_windows",
+    "read_window_tree",
+    "reset_backend",
+    "type_text",
 ]

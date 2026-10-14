@@ -12,13 +12,13 @@
 """
 from __future__ import annotations
 
+import contextlib
 import re
 
 from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, Vertical
+from textual.containers import Container, Horizontal
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Input, Label, Static
-
 
 # === Валидация ===
 
@@ -315,10 +315,8 @@ class WizardApp(App):
                 "contact": self.answers.get("sos_phone", ""),
             }
             # Подпись через ledger
-            try:
+            with contextlib.suppress(Exception):
                 p.sign()
-            except Exception:
-                pass
             p.save()
         except Exception as e:
             print(f"⚠️ Сохранение: {e}")
@@ -352,6 +350,10 @@ if __name__ == "__main__":
 
 
 __all__ = [
-    "WizardApp", "main",
-    "validate_name", "validate_age", "validate_phone", "validate_city",
+    "WizardApp",
+    "main",
+    "validate_age",
+    "validate_city",
+    "validate_name",
+    "validate_phone",
 ]

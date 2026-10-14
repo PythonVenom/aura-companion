@@ -121,8 +121,14 @@ def is_available() -> bool:
 
 
 __all__ = [
-    "move_window", "resize_window", "move_resize",
-    "minimize_window", "maximize_window", "close_window",
-    "center_window", "move_to_corner", "list_windows",
+    "center_window",
+    "close_window",
     "is_available",
+    "list_windows",
+    "maximize_window",
+    "minimize_window",
+    "move_resize",
+    "move_to_corner",
+    "move_window",
+    "resize_window",
 ]

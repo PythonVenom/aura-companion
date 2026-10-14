@@ -22,36 +22,36 @@ from aura.agents.internet import AgentInternet
 from aura.agents.journal import AgentJournal
 from aura.agents.journal_mood import VoiceJournal
 from aura.agents.mcp import AgentMcp
-from aura.agents.modules import AgentModules
 from aura.agents.media_pause import AgentMediaPause
 from aura.agents.media_search import AgentMediaSearch
 from aura.agents.messenger import AgentMessenger
+from aura.agents.modules import AgentModules
+from aura.agents.mqtt import AgentMQTT
 from aura.agents.music_ducker import AgentMusicDucker
 from aura.agents.music_local import AgentMusicLocal
 from aura.agents.power import AgentPower
 from aura.agents.rag_memory import AgentRAGMemory
 from aura.agents.recon import AgentRecon
 from aura.agents.registry import AgentRegistry
+from aura.agents.scenes import AgentScenes
 from aura.agents.screen_reader import AgentScreenReader
 from aura.agents.security import AgentSecurity
-from aura.agents.scenes import AgentScenes
-from aura.agents.mqtt import AgentMQTT
-from aura.agents.visual_analysis import AgentVisualAnalysis
 from aura.agents.self_heal import AgentSelfHeal
 from aura.agents.telegram import AgentTelegram
 from aura.agents.text_editor import AgentTextEditor
 from aura.agents.time import AgentTime
 from aura.agents.tool_router import AgentToolRouter
+from aura.agents.tuya_ble import AgentTuyaBLE
 from aura.agents.updates import AgentUpdates
 from aura.agents.vault import AgentVault
 from aura.agents.vision import AgentVision
-from aura.agents.wellness import AgentWellness
+from aura.agents.visual_analysis import AgentVisualAnalysis
 from aura.agents.vk_music import AgentVKMusic
 from aura.agents.vk_web import AgentVKWeb
+from aura.agents.wellness import AgentWellness
 from aura.agents.window_control import AgentWindowControl
 from aura.agents.window_manager import AgentWindowManager
 from aura.agents.wine_launcher import AgentWineLauncher
-from aura.agents.tuya_ble import AgentTuyaBLE
 
 __all__ = [
     "AgentAppLauncher",
@@ -69,36 +69,36 @@ __all__ = [
     "AgentFunctions",
     "AgentInternet",
     "AgentJournal",
+    "AgentMQTT",
     "AgentMcp",
-    "AgentModules",
     "AgentMediaPause",
     "AgentMediaSearch",
     "AgentMessenger",
+    "AgentModules",
     "AgentMusicDucker",
     "AgentMusicLocal",
     "AgentPower",
     "AgentRAGMemory",
     "AgentRecon",
     "AgentRegistry",
+    "AgentScenes",
     "AgentScreenReader",
     "AgentSecurity",
-    "AgentScenes",
-    "AgentMQTT",
-    "AgentVisualAnalysis",
     "AgentSelfHeal",
     "AgentTelegram",
     "AgentTextEditor",
     "AgentTime",
     "AgentToolRouter",
+    "AgentTuyaBLE",
     "AgentUpdates",
     "AgentVKMusic",
     "AgentVKWeb",
     "AgentVault",
     "AgentVision",
+    "AgentVisualAnalysis",
     "AgentWellness",
     "AgentWindowControl",
     "AgentWindowManager",
     "AgentWineLauncher",
-    "AgentTuyaBLE",
     "VoiceJournal",
 ]

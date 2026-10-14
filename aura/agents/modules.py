@@ -117,4 +117,4 @@ class AgentModules(BaseAgent):
         )
 
 
-__all__ = ["AgentModules", "CATEGORIES", "_category"]
+__all__ = ["CATEGORIES", "AgentModules", "_category"]

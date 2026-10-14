@@ -197,8 +197,15 @@ def get_active_tab(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> dict |
 
 
 __all__ = [
-    "is_available", "discover", "list_tabs",
-    "close_tab", "new_tab", "navigate", "get_active_tab",
-    "check_binding", "warn_if_exposed",
-    "DEFAULT_HOST", "DEFAULT_PORT",
+    "DEFAULT_HOST",
+    "DEFAULT_PORT",
+    "check_binding",
+    "close_tab",
+    "discover",
+    "get_active_tab",
+    "is_available",
+    "list_tabs",
+    "navigate",
+    "new_tab",
+    "warn_if_exposed",
 ]

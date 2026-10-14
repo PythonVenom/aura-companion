@@ -74,4 +74,4 @@ class AgentScenes(BaseAgent):
         return "\n".join(lines)
 
 
-__all__ = ["AgentScenes", "SCENES"]
+__all__ = ["SCENES", "AgentScenes"]

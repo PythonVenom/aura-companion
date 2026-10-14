@@ -188,4 +188,4 @@ class CuriosityEngine:
         return deleted
 
 
-__all__ = ["CuriosityEngine", "Gap", "DB", "COOLDOWN_SEC", "MIN_PRIORITY"]
+__all__ = ["COOLDOWN_SEC", "DB", "MIN_PRIORITY", "CuriosityEngine", "Gap"]

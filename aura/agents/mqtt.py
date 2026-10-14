@@ -92,4 +92,4 @@ class AgentMQTT(BaseAgent):
             return False
 
 
-__all__ = ["AgentMQTT", "CONFIG_PATH", "PAHO_OK"]
+__all__ = ["CONFIG_PATH", "PAHO_OK", "AgentMQTT"]

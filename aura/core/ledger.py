@@ -147,4 +147,4 @@ def public_key_b64() -> str:
     return base64.b64encode(raw).decode()
 
 
-__all__ = ["generate_keypair", "sign", "verify", "public_key_b64", "PRIV_PATH", "PUB_PATH", "LEDGER_DB"]
+__all__ = ["LEDGER_DB", "PRIV_PATH", "PUB_PATH", "generate_keypair", "public_key_b64", "sign", "verify"]

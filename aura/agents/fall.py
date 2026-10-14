@@ -9,6 +9,7 @@ import json
 import time
 from pathlib import Path
 
+from aura.core import blackboard as bb
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 STATE_FILE = Path.home() / ".cache" / "aura" / "fall_state.json"
@@ -35,6 +36,13 @@ class AgentFall(BaseAgent):
 
         # 1. Логируем детекцию
         self._log_fall(request.text)
+        # Blackboard: тревога критична — рой должен знать
+        try:
+            bb.post_alert("fall", "critical", f"Падение: {request.text[:50]}")
+            bb.set_sector("health")
+            bb.log_trail("fall", "sos", "escalate")
+        except Exception:
+            pass
 
         # 2. Вызываем SOS
         try:

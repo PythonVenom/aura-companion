@@ -88,6 +88,10 @@ from aura.agents.fall import AgentFall
 from aura.agents.federated_adapter import AgentFederatedAdapter
 from aura.agents.fin_elder import AgentFinElder
 from aura.agents.greeting import AgentGreeting
+from aura.agents.sector_mapper import AgentSectorMapper
+from aura.agents.coordinator import AgentCoordinator
+from aura.agents.data_miner import AgentDataMiner
+from aura.agents.web_scout import AgentWebScout
 from aura.agents.hands_free import AgentHandsFree
 from aura.agents.health import AgentHealth
 from aura.agents.health_twin import AgentHealthTwin
@@ -360,6 +364,12 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentPCControl, modules_config)       # яркость/громкость
     _try_register(orch, AgentMediaPult, modules_config)       # включи ютуб
     _try_register(orch, AgentGreeting, modules_config)        # привет (широкий)
+    # --- Инфокосмос: сектора (2026-10-15) ---
+    _try_register(orch, AgentSectorMapper, modules_config)    # где я / сектор
+    _try_register(orch, AgentDataMiner, modules_config)       # данные (цены, курсы)
+    _try_register(orch, AgentWebScout, modules_config)        # новости по секторам
+    # --- Рой: координатор (2026-10-15) ---
+    _try_register(orch, AgentCoordinator, modules_config)     # что происходит / статус роя
 
     # v2.5: приоритетные агенты автора (recon, voice journal)
     _try_register(orch, AgentRecon, modules_config)

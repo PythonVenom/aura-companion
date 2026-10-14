@@ -5,6 +5,7 @@ import json
 import time
 from pathlib import Path
 
+from aura.core import blackboard as bb
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 CONFIG = Path.home() / ".config" / "aura" / "sos.json"
@@ -65,6 +66,12 @@ class AgentSOS(BaseAgent):
 
         cfg = self._load_config()
         contact = cfg.get("contact", "")
+        # Blackboard: SOS — критично
+        try:
+            bb.post_alert("sos", "critical", "SOS: вызов помощи")
+            bb.set_sector("health")
+        except Exception:
+            pass
 
         if not contact:
             return AgentResponse.ok(

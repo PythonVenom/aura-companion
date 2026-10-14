@@ -11,6 +11,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from aura.core import blackboard as bb
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 DB = Path.home() / ".config" / "aura" / "meds.db"
@@ -178,6 +179,12 @@ class AgentMeds(BaseAgent):  # AURA_MED_EXTEND_V1
         )
         conn.commit()
         conn.close()
+        # Blackboard: задача в рое
+        try:
+            bb.post_task("meds", "scheduled", f"{name} в {time_str}", eta=time_str)
+            bb.set_sector("health")
+        except Exception:
+            pass
         return AgentResponse.ok(
             text=f"💊 Запомнила: {name} в {time_str}",
             agent_name=self.name,

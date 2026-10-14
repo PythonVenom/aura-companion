@@ -208,7 +208,21 @@ async def _main_loop() -> int:
 
 
 def main() -> int:
-    """Точка входа."""
+    """Точка входа. При старте — POST-диагностика (boot-report)."""
+    import os
+    # AURA_SKIP_BOOT_REPORT=1 — пропустить (для тестов/CI)
+    if os.environ.get("AURA_SKIP_BOOT_REPORT", "0") != "1":
+        try:
+            from aura.core.boot_report import run_boot_report
+            report = run_boot_report()
+            print()
+            print(report.to_text())
+            print()
+            if report.status != "ok":
+                print("⚠️ Есть проблемы. Запусти: python -m aura.cli boot-report")
+                print()
+        except Exception as e:
+            print(f"⚠️ Boot report не собрался: {e}")
     try:
         return asyncio.run(_main_loop())
     except KeyboardInterrupt:

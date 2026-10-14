@@ -190,13 +190,12 @@ def _check_rag() -> Check:
 
 
 def run_boot_report() -> BootReport:
-    """Собрать полный boot-report."""
+    """Собрать полный boot-report. Каждая проверка вызывается ОДИН раз."""
     rep = BootReport()
-    rep.add("Doctor", _check_doctor().ok, _check_doctor().detail)
-    rep.add("Агентов", _check_orchestrator().ok, _check_orchestrator().detail)
-    rep.add("RAG", _check_rag().ok, _check_rag().detail)
-    rep.add("Elder-care", _check_eldercare().ok, _check_eldercare().detail)
-    rep.add("Soak-test", _check_stress().ok, _check_stress().detail)
+    for fn in (_check_doctor, _check_orchestrator, _check_rag,
+               _check_eldercare, _check_stress):
+        c = fn()
+        rep.add(c.name, c.ok, c.detail)
     rep.finalize()
     rep.save()
     return rep

@@ -21,6 +21,14 @@ def cmd_check(args):
     print(format_report())
 
 
+def cmd_boot_report(args):
+    """POST-диагностика AURA (boot report)."""
+    from aura.core.boot_report import run_boot_report
+    report = run_boot_report()
+    print(report.to_text())
+    return 0 if report.status == "ok" else 1
+
+
 def cmd_serve(args):
     """Запустить MCP stdio сервер (для Claude Desktop, Cursor, etc)."""
     if getattr(args, "mcp", False):
@@ -515,6 +523,9 @@ def main():
     p_serve.set_defaults(func=cmd_serve)
     sub.add_parser("timers", help="список активных таймеров").set_defaults(func=cmd_timers)
     sub.add_parser("reminders", help="список напоминаний").set_defaults(func=cmd_reminders)
+
+    p_boot = sub.add_parser("boot-report", help="POST-диагностика (doctor, агенты, RAG, elder-care)")
+    p_boot.set_defaults(func=cmd_boot_report)
 
     args = parser.parse_args()
     return args.func(args) or 0

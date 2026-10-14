@@ -27,6 +27,7 @@ from aura.agents.media_search import AgentMediaSearch
 from aura.agents.messenger import AgentMessenger
 from aura.agents.modules import AgentModules
 from aura.agents.mqtt import AgentMQTT
+from aura.agents.naptime import AgentNaptime
 from aura.agents.music_ducker import AgentMusicDucker
 from aura.agents.music_local import AgentMusicLocal
 from aura.agents.power import AgentPower
@@ -70,6 +71,7 @@ __all__ = [
     "AgentInternet",
     "AgentJournal",
     "AgentMQTT",
+    "AgentNaptime",
     "AgentMcp",
     "AgentMediaPause",
     "AgentMediaSearch",

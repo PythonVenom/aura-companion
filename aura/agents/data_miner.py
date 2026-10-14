@@ -7,8 +7,6 @@
 """
 from __future__ import annotations
 
-import json
-import urllib.request
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
 

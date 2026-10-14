@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 
-
 SECTOR_KEYWORDS: dict[str, tuple[str, ...]] = {
     "news":     ("новост", "что происходит", "последние событ", "срочно в мире"),
     "code":     ("код", "программ", "python", "asyncio", "функци", "баг", "ошибк в коде"),
@@ -62,4 +61,4 @@ class AgentSectorMapper(BaseAgent):
         return best if best_score > 0 else "unknown"
 
 
-__all__ = ["AgentSectorMapper", "SECTOR_KEYWORDS"]
+__all__ = ["SECTOR_KEYWORDS", "AgentSectorMapper"]

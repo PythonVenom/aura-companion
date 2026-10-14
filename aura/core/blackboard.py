@@ -144,6 +144,13 @@ def clear() -> None:
 
 
 __all__ = [
-    "post_alert", "post_task", "set_fact", "set_sector",
-    "log_trail", "snapshot", "recent_alerts", "active_tasks", "clear",
+    "active_tasks",
+    "clear",
+    "log_trail",
+    "post_alert",
+    "post_task",
+    "recent_alerts",
+    "set_fact",
+    "set_sector",
+    "snapshot",
 ]

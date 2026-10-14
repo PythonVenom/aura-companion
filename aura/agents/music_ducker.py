@@ -22,11 +22,11 @@ Ducking через pactl sink-inputs: снижает громкость всех
 
 from __future__ import annotations
 
+import json
 import subprocess
+from pathlib import Path as _Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
-import json
-from pathlib import Path as _Path
 
 
 class AgentMusicDucker(BaseAgent):

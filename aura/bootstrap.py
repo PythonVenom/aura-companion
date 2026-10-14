@@ -77,6 +77,8 @@ from aura.agents.care import CareAgent
 from aura.agents.cec import AgentCEC
 from aura.agents.clipboard import AgentClipboard
 from aura.agents.construction import AgentConstruction
+from aura.agents.coordinator import AgentCoordinator
+from aura.agents.data_miner import AgentDataMiner
 from aura.agents.deep_check_agent import AgentDeepCheck
 from aura.agents.deepseek_web import AgentDeepSeekWeb
 from aura.agents.desktop_control import AgentDesktopControl
@@ -88,10 +90,6 @@ from aura.agents.fall import AgentFall
 from aura.agents.federated_adapter import AgentFederatedAdapter
 from aura.agents.fin_elder import AgentFinElder
 from aura.agents.greeting import AgentGreeting
-from aura.agents.sector_mapper import AgentSectorMapper
-from aura.agents.coordinator import AgentCoordinator
-from aura.agents.data_miner import AgentDataMiner
-from aura.agents.web_scout import AgentWebScout
 from aura.agents.hands_free import AgentHandsFree
 from aura.agents.health import AgentHealth
 from aura.agents.health_twin import AgentHealthTwin
@@ -117,6 +115,7 @@ from aura.agents.react_agent import AgentReact
 from aura.agents.recon import AgentRecon
 from aura.agents.reminiscence import AgentReminiscence
 from aura.agents.routine_learner import AgentRoutineLearner
+from aura.agents.sector_mapper import AgentSectorMapper
 from aura.agents.self_check import AgentSelfCheck
 from aura.agents.sensors import AgentSensors
 from aura.agents.sms_bridge import AgentSMS
@@ -126,6 +125,7 @@ from aura.agents.task_manager import AgentTaskManager
 from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.tutorial import AgentTutorial
 from aura.agents.unified_router import AgentUnifiedRouter
+from aura.agents.web_scout import AgentWebScout
 from aura.agents.whatsapp import AgentWhatsApp
 from aura.core.orchestrator import Orchestrator
 

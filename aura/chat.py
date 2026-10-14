@@ -11,6 +11,8 @@ import contextlib
 import re
 import sys
 
+from aura.agents.music_ducker import AgentMusicDucker
+
 # ─── Справка ────────────────────────────────────────────
 HELP = """
 🛸  AURA CHAT — что умеет:
@@ -201,10 +203,9 @@ async def _main_loop() -> int:
                     if barge_in is not None:
                         barge_in.set_aura_speaking(False)
                     if _ducker is not None:
-                        try:
+                        import contextlib
+                        with contextlib.suppress(Exception):
                             _ducker.un_duck()
-                        except Exception:
-                            pass
 
         except Exception as e:
             print(f"❌ Ошибка: {e}")

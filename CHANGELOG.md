@@ -28,6 +28,27 @@
 ### Fixed
 - detect_gpu: `ati` в `compATIble` → Intel определялся как AMD
 - model_selector.select: мутация глобального PROFILES (deepcopy)
+- Bug 27: AgentRecon «обзор» → «обзор системы» (конфликт с WindowManager)
+- Bug 28: brain timeouts 45с → 18с
+- Bug 29: рабочий стол (count×rows для Plasma 6)
+- Bug 30: media_state не залипает на vk
+- Bug 31: Aura молчит во время звонков (call_detector)
+- Bug 32: ducking при речи (AgentMusicDucker в speaker.py)
+- Bug 33: barge-in + «стоп» через Vosk
+- #110 CDP auth (OWASP A05, check_binding)
+- #121 Fuzzing native messaging (OWASP A03, MAX_MSG_SIZE)
+- #127 Ruff + pre-commit (38 → 0 errors)
+
+### Added (14.10)
+- #99 Universal Browser Bridge (Chromium MV3 + 6 браузеров)
+- #100 CDP Bridge (Chromium DevTools Protocol)
+- #101 UI Automation (Linux AT-SPI2 + Windows/macOS stubs)
+- #131 Window control (wmctrl: move/resize/close/corner)
+- #132 AgentScenes (6 сценариев elder-care)
+- #133 AgentMQTT (умный дом через paho-mqtt)
+- #134 AgentVisualAnalysis (скриншот → OCR)
+- #135 AgentGrammars (regex для SOS/fall/stop)
+- #137 RateLimit (token bucket для LLM)
 
 ## v8.1.0 — (см. ниже)
 

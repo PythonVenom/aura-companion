@@ -109,6 +109,49 @@ async def _stream_and_speak(orch, text: str, speaker, barge_in=None) -> tuple[st
     return "".join(full), spoke_any
 
 
+def _hooks(raw: str) -> None:
+    """Хуки AURA v8.2.0: patterns, emotion, affinity, safe_word."""
+    # 1. Safe-word — приоритет
+    try:
+        from aura.core.safe_word import is_safe_word, reset_alerts
+        if is_safe_word(raw):
+            n = reset_alerts("user_safe_word")
+            print(f"🛡️ Safe-word принят. Сброшено тревог: {n}")
+            return
+    except Exception:
+        pass
+    # 2. Patterns — наблюдение
+    try:
+        from aura.core.patterns import observe
+        observe(raw)
+    except Exception:
+        pass
+    # 3. Emotion + Core — по тексту
+    try:
+        from aura.core.emotion_evolution import evolve
+        from aura.lore.cores import detect_core
+        core = detect_core(raw)
+        # маппинг core → event
+        event_map = {
+            "command": "task",
+            "care": "greeting",
+            "guardian": "sos",
+            "analyst": "task",
+            "explorer": "question",
+            "philosopher": "question",
+            "navigator": "task",
+        }
+        evolve(event_map.get(core.id, "task"))
+    except Exception:
+        pass
+    # 4. Affinity — XP за взаимодействие
+    try:
+        from aura.core.affinity import add_xp
+        add_xp(1, raw[:30])
+    except Exception:
+        pass
+
+
 async def _main_loop() -> int:
     from aura.bootstrap import build_orchestrator
     from aura.core.protocol import AgentRequest
@@ -159,6 +202,9 @@ async def _main_loop() -> int:
 
         if not raw:
             continue
+
+        # AURA_HOOKS_V82: интеграция модулей v8.2.0
+        _hooks(raw)
 
         cmd = raw.lower()
 

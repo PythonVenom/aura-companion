@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """scaffold/release.py v4.0 "message" — release gate с evals."""
-import argparse, subprocess, sys
+import argparse
+import subprocess
+import sys
 from pathlib import Path
 
 ap = argparse.ArgumentParser()

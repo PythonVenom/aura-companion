@@ -18,7 +18,6 @@ import json
 import sys
 from pathlib import Path
 
-
 PROFILES = {
     "elder":   {"name": "Пожилой", "base": "elder", "trees": [], "channel": "stable"},
     "veteran": {"name": "Ветеран/СВО", "base": "veteran", "trees": ["ptsd"], "channel": "stable"},

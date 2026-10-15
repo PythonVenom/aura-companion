@@ -9,7 +9,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 CACHE_DIR = Path(os.environ.get("AURA_CACHE_DIR", str(Path.home() / ".cache/aura")))
 PAUSE_FLAG = CACHE_DIR / "aura_pause.flag"
 STATUS_FILE = CACHE_DIR / "aura_status.json"

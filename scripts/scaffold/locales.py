@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """scaffold/locale.py de  — создаёт aura/i18n/locales/de.yaml с переводом из en через ollama."""
-import argparse, sys, json, urllib.request
+import argparse
+import json
+import sys
+import urllib.request
 from pathlib import Path
 
 ap = argparse.ArgumentParser()
@@ -18,6 +21,7 @@ if not en.exists():
     print(f"[fail] нет {en}"); sys.exit(1)
 
 import yaml
+
 src = yaml.safe_load(en.read_text(encoding="utf-8"))
 
 lang_name = {"de":"German","fr":"French","ja":"Japanese","ko":"Korean",

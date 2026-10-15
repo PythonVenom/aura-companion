@@ -15,7 +15,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 REPO = "/home/pythonvenom/aura_project"
 VENV_PY = f"{REPO}/venv/bin/python3"
 
@@ -85,7 +84,7 @@ def say(text: str) -> None:
         return
     except Exception as e:
         print(f"⚠️ [Speaker] {e}")
-    
+
     # Fallback: Piper напрямую
     import shutil
     voice = Path(REPO) / "voices" / "ru_RU-irina-medium.onnx"
@@ -106,7 +105,7 @@ def say(text: str) -> None:
                 return
         except Exception:
             pass
-    
+
     print(f"🔊 [TTS fallback] {text}")
 
 

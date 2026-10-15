@@ -8,6 +8,7 @@ Aura видит файл → stop_speaking().
 См. ADR-009 (AEC) + ADR-050 (push-to-stop fallback).
 """
 from __future__ import annotations
+
 import time
 from pathlib import Path
 
@@ -36,4 +37,4 @@ def watch(speaker, on_stop=None) -> None:
         time.sleep(CHECK_INTERVAL)
 
 
-__all__ = ["watch", "STOP_FILE"]
+__all__ = ["STOP_FILE", "watch"]

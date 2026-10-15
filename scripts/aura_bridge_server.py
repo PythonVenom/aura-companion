@@ -8,8 +8,6 @@ import json
 import os
 import socket
 import struct
-import sys
-from pathlib import Path
 
 SOCK = "/tmp/aura_firefox.sock"
 

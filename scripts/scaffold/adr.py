@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """scaffold/adr.py "Title" [--status Proposed] [--body "..."]"""
-import argparse, re
+import argparse
+import re
 from pathlib import Path
+
 
 def next_num(d):
     nums = [int(p.stem[:3]) for p in d.glob("[0-9][0-9][0-9]-*.md")]

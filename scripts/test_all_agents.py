@@ -77,9 +77,9 @@ async def probe(orch, text: str) -> tuple[str, str, float]:
         status = resp.status.value if hasattr(resp.status, "value") else str(resp.status)
         status = status.upper() if status in ("ok","error","partial","not_handled") else status
         return (status, type(agent).__name__, dt)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return ("TIMEOUT", type(agent).__name__ if agent else "-", 5000.0)
-    except Exception as e:
+    except Exception:
         return ("ERROR", type(agent).__name__ if agent else "-", (time.time()-t0)*1000)
 
 

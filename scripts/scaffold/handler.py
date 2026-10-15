@@ -7,7 +7,8 @@
 - ADR-stub
 - авто-проверка pytest
 """
-import argparse, re, subprocess, sys
+import argparse
+import sys
 from pathlib import Path
 
 ap = argparse.ArgumentParser()

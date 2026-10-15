@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-import secrets, os
+import os
+import secrets
 from pathlib import Path
+
 p = Path.home() / ".config/aura/bridge_token"
 p.parent.mkdir(parents=True, exist_ok=True)
 if p.exists():

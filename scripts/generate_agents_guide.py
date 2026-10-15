@@ -73,7 +73,7 @@ def main() -> None:
     lines = [
         "# 🤖 Aura — Гид по агентам",
         "",
-        f"> Автогенерация: `scripts/generate_agents_guide.py`  ",
+        "> Автогенерация: `scripts/generate_agents_guide.py`  ",
         f"> Всего агентов: **{len(agents)}**  ",
         f"> Категорий: **{len(by_level)}**",
         "",

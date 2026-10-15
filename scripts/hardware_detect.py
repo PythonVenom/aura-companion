@@ -7,9 +7,10 @@
 - Google (2019). MLPerf Inference Benchmark. arXiv:1910.01500.
 """
 from __future__ import annotations
+
 import platform
 import re
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 

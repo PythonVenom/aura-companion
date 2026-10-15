@@ -110,7 +110,9 @@ def run_soak(
     # Создаём orchestrator ОДИН РАЗ — защита от ложной утечки
     orch = None
     try:
-        import io, contextlib
+        import contextlib
+        import io
+
         from aura.bootstrap import build_orchestrator
         # Глушим stderr — RAG-модуль может выдать warning про 'type'
         with contextlib.redirect_stderr(io.StringIO()):
@@ -161,7 +163,7 @@ def run_soak(
         print(f"\n✅ Soak OK: {iteration} итераций за {duration:.1f}s, "
               f"рост RSS={growth:.1f} MB", flush=True)
     else:
-        print(f"\n⚠️ Не выполнено ни одной итерации", flush=True)
+        print("\n⚠️ Не выполнено ни одной итерации", flush=True)
         return 2
     return 0
 
@@ -182,4 +184,4 @@ if __name__ == "__main__":
     sys.exit(main())
 
 
-__all__ = ["run_soak", "Sample", "STRESS_DB", "DEFAULT_MEMORY_LEAK_MB"]
+__all__ = ["DEFAULT_MEMORY_LEAK_MB", "STRESS_DB", "Sample", "run_soak"]

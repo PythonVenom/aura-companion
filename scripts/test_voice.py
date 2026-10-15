@@ -52,7 +52,7 @@ def test_ducker_available() -> bool:
     try:
         from aura.agents.music_ducker import AgentMusicDucker
         d = AgentMusicDucker()
-        print(f"  ✅ AgentMusicDucker загружен")
+        print("  ✅ AgentMusicDucker загружен")
         sinks = d._get_all_active_sink_inputs()
         print(f"  Активных sink inputs: {len(sinks)}")
         return True

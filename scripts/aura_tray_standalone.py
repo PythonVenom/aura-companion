@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Standalone Aura tray — без импорта aura.* (для systemd + system python)."""
+import json
 import subprocess
 import urllib.request
-import json
-from PIL import Image, ImageDraw
-import pystray
-
 from pathlib import Path
+
+import pystray
+from PIL import Image, ImageDraw
+
 ROOT = Path(__file__).resolve().parent.parent
 CTL = str(ROOT / "scripts" / "aura_ctl.py")
 PYTHON = str(ROOT / "venv" / "bin" / "python")

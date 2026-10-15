@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """run_evals.py — прогоняет golden dataset через RouteTree."""
-import sys, yaml
+import sys
 from pathlib import Path
+
+import yaml
+
 
 def main():
     root = Path(__file__).resolve().parents[1]

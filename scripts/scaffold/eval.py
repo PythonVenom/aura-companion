@@ -3,8 +3,11 @@
 
 Добавляет кейс в evals/golden.yaml (идемпотентно).
 """
-import argparse, sys, yaml
+import argparse
+import sys
 from pathlib import Path
+
+import yaml
 
 ap = argparse.ArgumentParser()
 ap.add_argument("input")

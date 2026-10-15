@@ -3,7 +3,8 @@
 
 Создаёт RouteTree leaf + тесты. НЕ трогает существующие листья.
 """
-import argparse, re, sys
+import argparse
+import sys
 from pathlib import Path
 
 ap = argparse.ArgumentParser()

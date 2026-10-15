@@ -4,6 +4,7 @@
 Aura пишет в /tmp/aura_firefox.sock (UNIX socket),
 bridge host в Firefox читает и отвечает.
 """
+import contextlib
 import json
 import os
 import socket
@@ -46,10 +47,8 @@ def main():
                 conn.sendall(struct.pack("@I", len(payload)) + payload)
             except Exception as e:
                 err = json.dumps({"ok": False, "error": str(e)}).encode("utf-8")
-                try:
+                with contextlib.suppress(Exception):
                     conn.sendall(struct.pack("@I", len(err)) + err)
-                except Exception:
-                    pass
 
 
 if __name__ == "__main__":

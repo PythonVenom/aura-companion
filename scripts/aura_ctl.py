@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import subprocess
@@ -21,11 +22,9 @@ def _run(cmd, **kw):
 
 
 def _notify(title, body, icon="audio-input-microphone"):
-    try:
+    with contextlib.suppress(Exception):
         subprocess.run(["notify-send", "-i", icon, title, body],
                        capture_output=True, text=True, timeout=2)
-    except Exception:
-        pass
 
 
 def cmd_pause(args):
@@ -67,13 +66,11 @@ def cmd_panic(args):
     from datetime import datetime
     log_path = CACHE_DIR / "panic.log"
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    try:
+    with contextlib.suppress(Exception):
         log_path.write_text(
             f"[{datetime.now().isoformat()}] PANIC triggered\n",
             encoding="utf-8",
         )
-    except Exception:
-        pass
     _run(["systemctl", "--user", "stop", SERVICE])
     _run(["wpctl", "set-mute", DEFAULT_SOURCE, "1"])
     _notify("Aura", "🆘 PANIC: остановлена, микрофон замьючен", "process-stop")

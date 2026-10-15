@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Native messaging host + socket server. Синхронный request/response."""
+import contextlib
 import json
 import os
 import queue
@@ -63,10 +64,8 @@ def socket_server(in_q: queue.Queue):
             in_q.put((conn, cmd))
         except Exception as e:
             print(f"[bridge] recv: {e}", file=sys.stderr, flush=True)
-            try:
+            with contextlib.suppress(Exception):
                 conn.close()
-            except Exception:
-                pass
 
 
 def main():
@@ -91,10 +90,8 @@ def main():
             conn.sendall(struct.pack("<I", len(payload)) + payload)
         except Exception:
             pass
-        try:
+        with contextlib.suppress(Exception):
             conn.close()
-        except Exception:
-            pass
 
 
 if __name__ == "__main__":

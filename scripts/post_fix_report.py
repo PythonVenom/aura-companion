@@ -11,6 +11,7 @@
 """
 from __future__ import annotations
 
+import contextlib
 import subprocess
 import sys
 from pathlib import Path
@@ -49,15 +50,11 @@ def check_pytest() -> tuple:
             parts = line.split()
             for i, p in enumerate(parts):
                 if "passed" in p and i > 0:
-                    try:
+                    with contextlib.suppress(ValueError):
                         count = int(parts[i - 1])
-                    except ValueError:
-                        pass
                 if "failed" in p and i > 0:
-                    try:
+                    with contextlib.suppress(ValueError):
                         failed = int(parts[i - 1])
-                    except ValueError:
-                        pass
     return rc == 0, count, failed
 
 
@@ -71,8 +68,8 @@ def get_last_commit() -> tuple:
 
 def say(text: str) -> None:
     """Говорим ГОЛОСОМ АУРЫ (Piper + Ирина), не чужим.
-    
-    Наука: раздел 23 промта — не подменять Ауру. 
+
+    Наука: раздел 23 промта — не подменять Ауру.
            Раздел 25 — минимальное изменение.
     """
     # Способ 1: через speaker агента Ауры (Piper + Ирина)

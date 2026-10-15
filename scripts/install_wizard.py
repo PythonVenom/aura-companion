@@ -14,6 +14,7 @@ Borderlands-style: Class + Channel + Mods.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import sys
 from pathlib import Path
@@ -131,10 +132,8 @@ def main():
     settings_path.parent.mkdir(parents=True, exist_ok=True)
     settings = {}
     if settings_path.exists():
-        try:
+        with contextlib.suppress(Exception):
             settings = json.loads(settings_path.read_text(encoding="utf-8"))
-        except Exception:
-            pass
     settings.update({
         "capability_profile": profile,
         "release_channel": channel,

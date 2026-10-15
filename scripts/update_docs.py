@@ -90,7 +90,8 @@ def update_file(rel_path: str, replacements: list, agents: int, tests: int, adr:
     for pattern, template in replacements:
         # Заменяем ВСЕ совпадения на актуальное число
         # Определяем {n} по контексту
-        def repl(m):
+        # B023-fix: привязываем template через default arg (late-binding)
+        def repl(m, _tmpl=template):
             ctx = m.group(0).lower()
             if "агент" in ctx:
                 n = agents
@@ -100,7 +101,7 @@ def update_file(rel_path: str, replacements: list, agents: int, tests: int, adr:
                 n = adr
             else:
                 n = agents  # default
-            return template.format(n=n)
+            return _tmpl.format(n=n)
 
         src = re.sub(pattern, repl, src, flags=re.IGNORECASE)
 

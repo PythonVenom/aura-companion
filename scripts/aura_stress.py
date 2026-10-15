@@ -117,7 +117,7 @@ def run_soak(
         # Глушим stderr — RAG-модуль может выдать warning про 'type'
         with contextlib.redirect_stderr(io.StringIO()):
             orch = build_orchestrator()
-        agents_attr = "agents" if hasattr(orch, "agents") else "_agents"
+        "agents" if hasattr(orch, "agents") else "_agents"
         n_agents = len(orch) if orch else 0
         print(f"  orchestrator готов, агентов: {n_agents}", flush=True)
     except Exception as e:
@@ -136,7 +136,7 @@ def run_soak(
             agents_count = 0
             if orch is not None:
                 latency = asyncio.run(_sanity_ping(orch))
-                attr = "agents" if hasattr(orch, "agents") else "_agents"
+                "agents" if hasattr(orch, "agents") else "_agents"
                 agents_count = len(orch) if orch else 0
 
             sample = Sample(time.time(), rss, agents_count, latency)

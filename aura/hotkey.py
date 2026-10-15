@@ -5,9 +5,8 @@ Fallback: pynput если есть, иначе — systemd unit с ydotool.
 """
 from __future__ import annotations
 
-from typing import Any
-
 import subprocess
+from typing import Any
 
 try:
     from pynput import keyboard

@@ -160,21 +160,54 @@ class AgentSpeaker(MicroAgent):
                             'un_duck error: %s', e)
                 self.is_speaking = False  # >>> AURA_HANG_FIX_V1
 
+    def _voice_for_lang(self) -> str:
+        """Голос piper для текущего языка i18n. ta — fallback en."""
+        _map = {
+            "ru": "ru_RU-irina-medium",
+            "en": "en_US-amy-medium",
+            "de": "de_DE-thorsten-medium",
+            "hi": "hi_IN-priyamvada-medium",
+            "ja": "ja_JP-hi_fi_captain-medium",
+            "ko": "ko_KO-kss-medium",
+        }
+        try:
+            from aura.i18n import get_lang
+            lang = get_lang()
+        except Exception:
+            lang = "ru"
+        if lang not in _map:
+            import logging
+            logging.getLogger(__name__).warning("TTS: no voice for lang=%s, fallback en", lang)
+            lang = "en"
+        return _map[lang]
+
+    def _sync_voice_path(self, voice_name: str) -> None:
+        try:
+            import os as _os
+            from aura.paths import MODELS_DIR
+            vp = str(MODELS_DIR / f"voices/{voice_name}.onnx")
+            if _os.path.exists(vp):
+                self.voice_path = vp
+        except Exception:
+            pass
+
     def _get_voice_settings(self):
-        """Получить настройки голоса из settings."""
         try:
             from aura import settings as _s
-            # F-015: voice_volume_boost для elder-care (MANIFESTO.md)
             base_vol = int(_s.get("volume", 100))
             boost = float(_s.get("voice_volume_boost", 1.0))
             boosted = min(100, int(base_vol * boost))
+            voice_name = _s.get("tts_voice") or self._voice_for_lang()
+            self._sync_voice_path(voice_name)
             return {
-                "voice": _s.get("tts_voice", "ru_RU-irina-medium"),
+                "voice": voice_name,
                 "speed": float(_s.get("tts_speed", 1.0)),
                 "volume": boosted,
             }
         except Exception:
-            return {"voice": "ru_RU-irina-medium", "speed": 1.0, "volume": 100}
+            voice_name = self._voice_for_lang()
+            self._sync_voice_path(voice_name)
+            return {"voice": voice_name, "speed": 1.0, "volume": 100}
 
     def _make_text_smart(self, text):
         # >>> AURA_RUACCENT_V1

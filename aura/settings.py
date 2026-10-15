@@ -10,7 +10,7 @@ SETTINGS_PATH = Path.home() / ".config" / "aura" / "settings.json"
 DEFAULTS = {
     "wake_word": "аура",
     "wake_word_aliases": ["ара", "ура", "алло", "аула"],
-    "tts_voice": "ru_RU-irina-medium",
+    # TTS voice выбирается динамически по i18n (speaker._voice_for_lang)
     "tts_speed": 1.0,
     "volume": 100,
     "notifications": True,

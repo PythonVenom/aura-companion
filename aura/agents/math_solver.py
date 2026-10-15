@@ -25,10 +25,7 @@ class AgentMathSolver(BaseAgent):
             return AgentResponse.not_handled(self.name)
         text = request.text.lower()
         m = re.search(r"(?:сколько будет|вычисли|посчитай)\s+(.+)", text)
-        if m:
-            expr = m.group(1)
-        else:
-            expr = text
+        expr = m.group(1) if m else text
         expr = (expr
             .replace("умножить на", "*").replace("умножить", "*")
             .replace("плюс", "+").replace("минус", "-")

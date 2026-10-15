@@ -26,14 +26,14 @@ class ZMQBridge:
 
     def __init__(self, pub_addr: str = DEFAULT_PUB) -> None:
         self.pub_addr = pub_addr
-        self._ctx = None
-        self._pub = None
+        self._ctx: Any = None
+        self._pub: Any = None
         self._ready = False
         self._lock = threading.Lock()
         if HAS_ZMQ:
             try:
-                self._ctx: Any = zmq.Context()
-                self._pub: Any = self._ctx.socket(zmq.PUB)
+                self._ctx = zmq.Context()
+                self._pub = self._ctx.socket(zmq.PUB)
                 self._pub.bind(pub_addr)
                 self._ready = True
             except Exception:

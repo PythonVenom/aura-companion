@@ -172,9 +172,7 @@ class SemanticMemory:
             for i, meta in zip(ids, metas):
                 ts = meta.get("ts", 0)
                 conf = meta.get("confidence", 1.0)
-                if ts and ts < threshold:
-                    to_delete.append(i)
-                elif conf < min_confidence:
+                if (ts and ts < threshold) or conf < min_confidence:
                     to_delete.append(i)
             if to_delete:
                 self._coll.delete(ids=to_delete)

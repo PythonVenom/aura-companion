@@ -1,12 +1,13 @@
-welcome: "Aura listening, Creator"
-fallback: "Didn't catch that, Creator, repeat please"
-music.playing: "playing {q}"
-music.paused: "paused"
-music.next: "next track"
-music.prev: "previous track"
-app.launched: "launched {name}"
-browser.opened: "opened {url}"
-power.locked: "screen locked"
-control.paused: "Aura paused"
-control.resumed: "Aura listening again"
-llm.system: "You are Aura, a family AI companion. Reply briefly, in English."
+# AUTO-TRANSLATED by gemma2:2b — needs human review
+welcome: 아우라 감상, 창조자
+fallback: 제발 다시 말해줘, 창조자님.
+music.playing: '{q}를 즐기고 있습니다.'
+music.paused: '{paused}'
+music.next: 다음 트랙
+music.prev: 이전 트랙
+app.launched: '{name} 출시'
+browser.opened: '{url} 열렸어요.'
+power.locked: 화면 잠그기
+control.paused: '{Aura} {paused}'
+control.resumed: '{Aura} 다시 듣는다'
+llm.system: 너는 아우라, 가족 AI 어울리는 존재. 간단하게 답변해 주세요.

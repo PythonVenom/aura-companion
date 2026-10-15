@@ -1,12 +1,13 @@
-welcome: "Aura listening, Creator"
-fallback: "Didn't catch that, Creator, repeat please"
-music.playing: "playing {q}"
-music.paused: "paused"
-music.next: "next track"
-music.prev: "previous track"
-app.launched: "launched {name}"
-browser.opened: "opened {url}"
-power.locked: "screen locked"
-control.paused: "Aura paused"
-control.resumed: "Aura listening again"
-llm.system: "You are Aura, a family AI companion. Reply briefly, in English."
+# AUTO-TRANSLATED by gemma2:2b — needs human review
+welcome: அருள் கேட்டு, உருவாக்கர்
+fallback: அதைக் கண்டறியவில்லை, உருவாக்கர், மீண்டும் சொல்லுங்கள்
+music.playing: '{q}'
+music.paused: நிறைவு {paused}
+music.next: பின்னர் பாடல்
+music.prev: முன்னதொரு பாடல்
+app.launched: '{name} இன்றி அறிவித்தல்'
+browser.opened: '{url} 열려'
+power.locked: '{screen} {locked}'
+control.paused: அருவு நிறுத்தப்பட்டது
+control.resumed: அருள் கேள்வியை மீண்டும்
+llm.system: வணக்கம், அனந்தா, ஒரு குடும்ப அனைவருக்கும் பயன்படும் AI சகோதரர்.

@@ -74,3 +74,59 @@ python -m aura.cli check --action set --name medical
 
 ### STT / Ducking
 Проверяются тем же scripts/test_voice.py (3/3).
+
+
+## 🆕 Новое в v8.2.0 (октябрь 2026)
+
+### Видео и камера
+- **Camera**: снимок с вебки (`сделай фото`)
+- **FacialEmotion**: распознавание лиц (MediaPipe + Haar)
+- **VideoAnalyzer**: детекция движения
+- **Gesture**: жесты рук
+- **AVFusion**: синтез аудио+видео
+
+### Память (7 слоёв)
+- Working, Episodic, Semantic, Emotional
+- Prospective, Social, Spatial
+- **MemoryHub** — единый API
+
+### Рой (9 кластеров, GAIA-style)
+- health, voice, system, media, info
+- messengers, home, infospace, self
+
+### Инфраструктура
+- **8 LLM-провайдеров** (Ollama, OpenAI, Gemini, DeepSeek, Qwen, Anthropic, LM Studio, OpenRouter)
+- **MCP adapter** (Model Context Protocol)
+- **ZeroMQ bridge** (PUB/SUB)
+- **Health API**: http://127.0.0.1:8734/health
+- **Steamworks wrapper**
+- **Plugin SDK** + CLI (`python -m aura.cli_plugin list`)
+
+### UI для биполярки
+- **System tray** (иконка + меню)
+- **Super+A** → GUI-виджет (tkinter)
+- **Тёмная тема** + крупный шрифт
+- **Режим тишины** (только текст)
+
+### Ритуалы и характер
+- **Affinity**: уровни отношений (Знакомство → Легенда)
+- **Quirks**: prefix/glitch/suffix (Ordis-style)
+- **7 ядер личности** (GLaDOS-style)
+- **Утренний/вечерний ритуал**
+
+### Multi-tenant и mesh
+- **Sandbox**: изоляция пользователей
+- **Mesh**: экспорт/импорт состояния
+- **Receipts**: hash-chain для критичных действий
+
+### Автоматика
+- **Backup**: tar.gz, ротация 7 дней
+- **Idle**: фоновые задачи (scrub, consolidate)
+- **Alert**: boot-report в Telegram (если проблемы)
+
+### i18n (7 языков)
+- RU / EN / HI / TA / KO / JA / DE
+
+### Игровое
+- **Quiz**: когнитивный тренажёр для elder-care
+- **Realtime**: голос+vision единый поток

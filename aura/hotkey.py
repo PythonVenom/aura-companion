@@ -34,7 +34,7 @@ class HotkeyListener:
     """Слушатель глобальных хоткеев."""
 
     def __init__(self) -> None:
-        self._listener = None
+        self._listener: Any = None
         self._ready = False
 
     @property

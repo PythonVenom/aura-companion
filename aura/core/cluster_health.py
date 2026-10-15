@@ -18,6 +18,23 @@ class HealthReport:
     problems: list[str] = field(default_factory=list)
 
 
+_POPULATED = False
+
+
+def _ensure_populated() -> None:
+    """Авто-заселение кластеров (один раз)."""
+    global _POPULATED
+    if _POPULATED:
+        return
+    try:
+        from aura.bootstrap import build_orchestrator
+        from aura.core.clusters import populate_from_orchestrator
+        populate_from_orchestrator(build_orchestrator())
+        _POPULATED = True
+    except Exception:
+        pass
+
+
 def check_cluster(name: str) -> HealthReport:
     """Проверить один кластер."""
     cluster = CLUSTERS.get(name)
@@ -31,6 +48,7 @@ def check_cluster(name: str) -> HealthReport:
 
 def check_all() -> list[HealthReport]:
     """Проверить все 9 кластеров."""
+    _ensure_populated()
     return [check_cluster(name) for name in CLUSTERS]
 
 

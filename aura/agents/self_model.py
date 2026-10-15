@@ -28,19 +28,20 @@ class AgentSelfModel(BaseAgent):
             return AgentResponse.not_handled(self.name)
         t = request.text.lower()
         if "сознани" in t or "живая" in t:
+            n_str: str = "?"
+            try:
+                from aura.bootstrap import build_orchestrator
+                n_str = str(len(build_orchestrator()))
+            except Exception:
+                pass
             return AgentResponse.ok(
-                text=("Я — бортовой компьютер корабля AURA. "
-                      "Не человек, не друг. Рабочий инструмент капитана. "
-                      "Моё «я» — это 115 агентов, рой, blackboard, "
-                      "7 слоёв памяти. Я — их сумма, не больше и не меньше."),
+                text=(f"Я — бортовой компьютер корабля AURA. "
+                      f"Не человек, не друг. Рабочий инструмент капитана. "
+                      f"Моё «я» — это {n_str} агентов, рой, blackboard, "
+                      f"7 слоёв памяти. Я — их сумма."),
                 agent_name=self.name,
             )
         if "архитектур" in t or "модул" in t or "сколько" in t:
-            try:
-                from aura.bootstrap import build_orchestrator
-                n = len(build_orchestrator())
-            except Exception:
-                n = "?"
             try:
                 from aura.core.clusters import stats
                 cluster_stats = stats()
@@ -49,7 +50,7 @@ class AgentSelfModel(BaseAgent):
                 cluster_line = "(кластеры не загружены)"
             return AgentResponse.ok(
                 text=f"🛸 Архитектура AURA:\n"
-                     f"  • Агентов: {n}\n"
+                     f"  • Агентов: {n_str}\n"
                      f"  • Кластеры: {cluster_line}\n"
                      f"  • Память: 7 слоёв (MemoryHub)\n"
                      f"  • Рой: blackboard + GNN-lite",

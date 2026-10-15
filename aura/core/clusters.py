@@ -52,6 +52,18 @@ def assign_agent(agent_name: str) -> str:
     return "system"
 
 
+def populate_from_orchestrator(orch) -> int:
+    """Заселить кластеры агентами из оркестратора."""
+    n = 0
+    for a in orch.registry._agents:
+        name = type(a).__name__
+        cluster_name = assign_agent(name)
+        if cluster_name in CLUSTERS:
+            CLUSTERS[cluster_name].agents.append(name)
+            n += 1
+    return n
+
+
 def stats() -> dict[str, int]:
     """Статистика по кластерам."""
     return {name: len(c.agents) for name, c in CLUSTERS.items()}

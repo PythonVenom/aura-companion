@@ -122,6 +122,7 @@ from aura.agents.reminiscence import AgentReminiscence
 from aura.agents.routine_learner import AgentRoutineLearner
 from aura.agents.sector_mapper import AgentSectorMapper
 from aura.agents.self_check import AgentSelfCheck
+from aura.agents.self_model import AgentSelfModel
 from aura.agents.sensors import AgentSensors
 from aura.agents.sms_bridge import AgentSMS
 from aura.agents.sos import AgentSOS
@@ -384,6 +385,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentVideoAnalyzer, modules_config)   # анализ видео
     _try_register(orch, AgentGesture, modules_config)         # жесты
     _try_register(orch, AgentAudioVisualFusion, modules_config) # синтез аудио+видео
+    _try_register(orch, AgentSelfModel, modules_config)       # самосознание
 
     # v2.5: приоритетные агенты автора (recon, voice journal)
     _try_register(orch, AgentRecon, modules_config)

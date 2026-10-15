@@ -55,12 +55,34 @@ PHRASES: dict[str, str] = {
 }
 
 
+_DEFAULTS: dict[str, Any] = {
+    "day": 1,
+    "sector": "unknown",
+    "shields": "100%",
+    "reactor": "номинал",
+    "hull": "100%",
+    "modules": 0,
+    "xp": 0,
+    "remaining": 0,
+    "active": 0,
+    "count": 0,
+    "file": "?",
+    "endpoint": "?",
+    "hash": "?",
+    "rank": "?",
+}
+
+
 def speak_line(event: str, **ctx: Any) -> str:
-    """Собрать фразу по событию. Если плейсхолдер отсутствует — оставить как есть."""
+    """Собрать фразу по событию с безопасными дефолтами.
+
+    Не падает при отсутствии плейсхолдеров (AURA_DEFAULTS_V82).
+    """
     template = LINES.get(event)
     if template is None:
         return LINES["unknown"]
+    merged: dict[str, Any] = {**_DEFAULTS, **ctx}
     try:
-        return template.format(**ctx)
+        return template.format(**merged)
     except KeyError as e:
         return f"[{event}] не хватает параметра: {e}"

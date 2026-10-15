@@ -62,11 +62,8 @@ def morning_briefing() -> str:
 def evening_ritual() -> str:
     """Собрать вечерний ритуал."""
     lines = ["🌙 Вечерний ритуал."]
-    try:
-        # Заглушка: если есть метод summary
+    with contextlib.suppress(Exception):
         lines.append("  День записан в бортовой журнал.")
-    except Exception:
-        pass
     try:
         from aura.core.receipts import stats
         r = stats()

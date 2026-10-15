@@ -39,10 +39,8 @@ def create() -> Path:
     files = _resolve(CRITICAL)
     with tarfile.open(archive, "w:gz") as tar:
         for f in files:
-            try:
+            with contextlib.suppress(Exception):
                 tar.add(f, arcname=f.name)
-            except Exception:
-                pass
     return archive
 
 

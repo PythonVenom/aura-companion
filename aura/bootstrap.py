@@ -134,6 +134,7 @@ from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.tutorial import AgentTutorial
 from aura.agents.unified_router import AgentUnifiedRouter
 from aura.agents.video_analyzer import AgentVideoAnalyzer
+from aura.agents.vision_llm import AgentVisionLLM
 from aura.agents.web_scout import AgentWebScout
 from aura.agents.whatsapp import AgentWhatsApp
 from aura.core.orchestrator import Orchestrator
@@ -388,6 +389,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentAudioVisualFusion, modules_config) # синтез аудио+видео
     _try_register(orch, AgentSelfModel, modules_config)       # самосознание
     _try_register(orch, AgentCUA, modules_config)             # CUA (браузер)
+    _try_register(orch, AgentVisionLLM, modules_config)       # Vision LLM (llava)
 
     # v2.5: приоритетные агенты автора (recon, voice journal)
     _try_register(orch, AgentRecon, modules_config)

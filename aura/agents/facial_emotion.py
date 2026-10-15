@@ -58,7 +58,7 @@ class AgentFacialEmotion(BaseAgent):
                 # Fallback: каскад Хаара (OpenCV)
                 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 cascade = cv2.CascadeClassifier(
-                    str(cv2.data.haarcascades) + "haarcascade_frontalface_default.xml"
+                    str(getattr(getattr(cv2, "data", None), "haarcascades", "")) + "haarcascade_frontalface_default.xml"
                 )
                 faces = cascade.detectMultiScale(gray, 1.3, 5)
                 if len(faces) == 0:

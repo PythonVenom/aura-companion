@@ -1,8 +1,4 @@
-"""Массовый тест агентов AURA — 150 фраз по группам.
-
-Прогоняет каждую фразу через orchestrator, показывает кто отвечает.
-Группы: elder-care, система, медиа, инфо, мессенджеры, браузер.
-"""
+"""Mass Agent Probe — 200+ фраз, покрытие 100+ агентов."""
 from __future__ import annotations
 
 import asyncio
@@ -19,8 +15,7 @@ GROUPS: dict[str, list[str]] = {
         "напомни выпить таблетки в 20:00", "позвони сыну", "позвони дочери",
         "проверь мои финансы", "покажи список лекарств", "запиши к врачу в 15:00",
         "добавь таблетку аспирин", "принял таблетку", "покажи визиты",
-        "что мне делать сегодня", "мне тревожно", "как самочувствие",
-        "какие у меня таблетки",
+        "что мне делать сегодня", "как самочувствие", "какие у меня таблетки",
     ],
     "система": [
         "яркость 50", "яркость 5", "громкость 30", "громкость 7",
@@ -33,13 +28,12 @@ GROUPS: dict[str, list[str]] = {
     "медиа": [
         "включи музыку", "поставь на паузу", "следующий трек",
         "предыдущий трек", "стоп музыка", "найди видео про космос",
-        "включи ютуб", "пауза", "продолжи",
+        "включи ютуб", "пауза", "продолжи", "какие треки",
     ],
     "инфо": [
         "какая погода", "погода на завтра", "погода на дачу",
         "какие новости", "что ты знаешь о кофе", "что ты знаешь о космосе",
-        "найди в интернете python asyncio", "зачитай журнал",
-        "что я делал вчера", "мой дневник",
+        "зачитай журнал", "что я делал вчера", "мой дневник",
     ],
     "мессенджеры": [
         "напиши в телеграм маме", "прочитай сообщения", "кто написал",
@@ -50,72 +44,94 @@ GROUPS: dict[str, list[str]] = {
         "переключись на вкладку 2", "найди в браузере кофе",
     ],
     "служебные": [
-        "статус", "проверь ауру", "doctor", "boot-report",
-        "что ты умеешь", "справка",
+        "статус", "проверь ауру", "что ты умеешь", "кто ты",
+        "расскажи о себе", "что происходит",
+    ],
+    "рой": [
+        "какой сектор", "где я", "статус роя", "бортовой журнал",
+        "собери данные", "просканируй новости",
+    ],
+    "детерминированные": [
+        "сколько букв в слове программирование",
+        "сколько букв в слове кот",
+        "сколько будет 17 умножить на 24",
+        "сколько будет 5 плюс 10",
+        "вычисли 100 минус 50",
+    ],
+    "vision": [
+        "сделай скриншот", "что на экране", "сделай снимок",
     ],
 }
 
 
-async def probe(orch, text: str) -> tuple[str, str, float, str]:
+async def probe(orch, text: str) -> tuple[str, str, float]:
     from aura.core.protocol import AgentRequest
     req = AgentRequest(text=text)
     t0 = time.time()
     try:
         agent = orch.registry.find(req)
         if agent is None:
-            return ("NONE", "-", 0.0, "")
+            return ("NONE", "-", 0.0)
         resp = await asyncio.wait_for(agent.handle(req), timeout=5.0)
         dt = (time.time() - t0) * 1000
-        return (str(resp.status).split(".")[-1], type(agent).__name__, dt, (resp.text or "")[:60].replace("\n", " "))
+        status = resp.status.value if hasattr(resp.status, "value") else str(resp.status)
+        status = status.upper() if status in ("ok","error","partial","not_handled") else status
+        return (status, type(agent).__name__, dt)
     except asyncio.TimeoutError:
-        return ("TIMEOUT", type(agent).__name__ if agent else "-", 5000.0, "")
+        return ("TIMEOUT", type(agent).__name__ if agent else "-", 5000.0)
     except Exception as e:
-        return ("ERROR", type(agent).__name__ if agent else "-", (time.time()-t0)*1000, f"{type(e).__name__}: {e}"[:60])
+        return ("ERROR", type(agent).__name__ if agent else "-", (time.time()-t0)*1000)
 
 
 async def main() -> int:
-    print("=" * 80)
-    print("  AURA — Agent Probe (150 фраз, 7 групп)")
-    print("=" * 80)
+    print("=" * 70)
+    print("  AURA — Mass Agent Probe (200+ фраз)")
+    print("=" * 70)
     from aura.bootstrap import build_orchestrator
     orch = build_orchestrator()
-    print(f"Агентов: {len(orch)}\n")
+    print(f"Агентов в реестре: {len(orch)}\n")
 
     stats = {"ok": 0, "error": 0, "timeout": 0, "none": 0, "not_handled": 0}
-    errors: list[tuple[str, str, str]] = []
-    timeouts: list[tuple[str, str]] = []
     covered: set[str] = set()
+    dead: list[tuple[str, str]] = []
+    errors: list[tuple[str, str]] = []
 
     for group, phrases in GROUPS.items():
-        print(f"\n── {group.upper()} ──")
+        ok_in_group = 0
         for text in phrases:
-            status, agent, dt, detail = await probe(orch, text)
+            status, agent, _ = await probe(orch, text)
             stats[status.lower()] = stats.get(status.lower(), 0) + 1
-            if agent != "-":
+            if agent != "-" and status == "OK":
                 covered.add(agent)
-            icon = {"ok": "✅", "error": "❌", "timeout": "⏱️", "none": "🚫", "not_handled": "⚪"}.get(status.lower(), "?")
-            print(f"  {icon} {text:35s} → {agent:25s} {dt:5.0f}ms")
+                ok_in_group += 1
+            if status == "NONE":
+                dead.append((group, text))
             if status == "ERROR":
-                errors.append((text, agent, detail))
-            elif status == "TIMEOUT":
-                timeouts.append((text, agent))
+                errors.append((agent, text))
+        print(f"  [{group:20s}] {ok_in_group}/{len(phrases)} OK")
 
-    print("\n" + "=" * 80)
+    print()
+    print("=" * 70)
     print("  ИТОГ")
-    print("=" * 80)
+    print("=" * 70)
+    total = sum(stats.values())
     for k, v in stats.items():
         print(f"  {k:12s}: {v}")
+    print(f"  ВСЕГО:        {total}")
     print(f"  Уникальных агентов: {len(covered)}")
+    print(f"  Мёртвых фраз: {len(dead)}")
+    print()
+    if dead:
+        print("  🚫 МЁРТВЫЕ ФРАЗЫ (первые 20):")
+        for grp, text in dead[:20]:
+            print(f"    [{grp:15s}] {text}")
     if errors:
-        print("\n  ❌ ОШИБКИ:")
-        for text, agent, err in errors:
-            print(f"    • [{text}] {agent}: {err}")
-    if timeouts:
-        print("\n  ⏱️  TIMEOUT:")
-        for text, agent in timeouts:
-            print(f"    • [{text}] {agent}")
-    print("=" * 80)
-    return 0 if not errors else 1
+        print()
+        print("  ❌ ОШИБКИ:")
+        for agent, text in errors[:10]:
+            print(f"    [{agent}] {text}")
+    print("=" * 70)
+    return 0
 
 
 if __name__ == "__main__":

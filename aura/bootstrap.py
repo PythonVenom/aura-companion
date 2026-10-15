@@ -79,6 +79,7 @@ from aura.agents.clipboard import AgentClipboard
 from aura.agents.construction import AgentConstruction
 from aura.agents.coordinator import AgentCoordinator
 from aura.agents.string_counter import AgentStringCounter
+from aura.agents.math_solver import AgentMathSolver
 from aura.agents.data_miner import AgentDataMiner
 from aura.agents.deep_check_agent import AgentDeepCheck
 from aura.agents.deepseek_web import AgentDeepSeekWeb
@@ -372,6 +373,7 @@ def build_orchestrator() -> Orchestrator:
     # --- Рой: координатор (2026-10-15) ---
     _try_register(orch, AgentCoordinator, modules_config)     # что происходит / статус роя
     _try_register(orch, AgentStringCounter, modules_config)   # сколько букв/слов (детерм.)
+    _try_register(orch, AgentMathSolver, modules_config)      # арифметика (детерм.)
 
     # v2.5: приоритетные агенты автора (recon, voice journal)
     _try_register(orch, AgentRecon, modules_config)

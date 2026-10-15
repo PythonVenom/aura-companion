@@ -50,6 +50,17 @@ def _chinese_ratio(text: str) -> float:
     return cjk / max(len(text), 1)
 
 
+def _is_russian(text: str) -> bool:
+    """True если ответ преимущественно на русском (>60% кириллицы)."""
+    if not text:
+        return False
+    letters = [c for c in text if c.isalpha()]
+    if not letters:
+        return True
+    cyr = sum(1 for c in letters if 'а' <= c.lower() <= 'я' or c.lower() == 'ё')
+    return cyr / len(letters) > 0.6
+
+
 class AgentBrain:
     """
     LLM-фолбэк Ауры.
@@ -198,9 +209,10 @@ class AgentBrain:
                 yield chunk
             full = "".join(buffer)
             if full:
-                self.context_history.append(
-                    {"role": "assistant", "content": full}
-                )
+                if _is_russian(full):
+                    self.context_history.append(
+                        {"role": "assistant", "content": full}
+                    )
                 return
             # пусто — падаем в fallback
         except Exception:
@@ -232,7 +244,8 @@ class AgentBrain:
         for model, t in zip(self.FALLBACK_MODELS, timeouts, strict=False):
             resp, err = self._try_model(model, messages, t)
             if resp:
-                self.context_history.append({"role": "assistant", "content": resp})
+                if _is_russian(resp):
+                    self.context_history.append({"role": "assistant", "content": resp})
                 return resp
             if err is not None:
                 last_error = err

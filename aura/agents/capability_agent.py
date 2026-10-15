@@ -8,8 +8,7 @@ from aura.core.protocol import AgentResponse, BaseAgent
 class AgentCapabilities(BaseAgent):
     name = "capabilities"
     MODULE_ALWAYS = True
-    KEYWORDS = ("что ты умеешь", "твои возможности", "список функций",
-                "что можешь", "capabilities")
+    KEYWORDS = ("что ты умеешь", "твои возможности", "список функций", "кто ты", "расскажи о себе", "представься")
 
     def can_handle(self, request):
         t = request.text.lower().strip()

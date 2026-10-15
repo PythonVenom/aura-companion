@@ -34,6 +34,27 @@ STRINGS: dict[str, dict[str, str]] = {
         "listening": "கேட்கிறேன்.",
         "thinking": "செயலாக்குகிறேன்.",
     },
+    "ko": {
+        "greeting": "좋은 아침입니다, 함장님.",
+        "status_ok": "시스템 정상.",
+        "status_bad": "문제가 발견되었습니다.",
+        "listening": "듣고 있습니다.",
+        "thinking": "처리 중입니다.",
+    },
+    "ja": {
+        "greeting": "おはようございます、艦長。",
+        "status_ok": "システムは正常です。",
+        "status_bad": "問題が検出されました。",
+        "listening": "聞いています。",
+        "thinking": "処理中です。",
+    },
+    "de": {
+        "greeting": "Guten Morgen, Captain.",
+        "status_ok": "System ist nominal.",
+        "status_bad": "Probleme erkannt.",
+        "listening": "Ich höre.",
+        "thinking": "Verarbeite.",
+    },
 }
 
 

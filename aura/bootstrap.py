@@ -65,6 +65,7 @@ from aura.agents import (
     AgentWineLauncher,
 )
 from aura.agents.adaptive_reminders import AgentAdaptiveReminders
+from aura.agents.av_fusion import AgentAudioVisualFusion
 from aura.agents.blind import AgentBlind
 from aura.agents.blind_reply import AgentBlindReply
 from aura.agents.bpm import AgentBPM
@@ -91,6 +92,7 @@ from aura.agents.facial_emotion import AgentFacialEmotion
 from aura.agents.fall import AgentFall
 from aura.agents.federated_adapter import AgentFederatedAdapter
 from aura.agents.fin_elder import AgentFinElder
+from aura.agents.gesture import AgentGesture
 from aura.agents.greeting import AgentGreeting
 from aura.agents.hands_free import AgentHandsFree
 from aura.agents.health import AgentHealth
@@ -129,6 +131,7 @@ from aura.agents.task_manager import AgentTaskManager
 from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.tutorial import AgentTutorial
 from aura.agents.unified_router import AgentUnifiedRouter
+from aura.agents.video_analyzer import AgentVideoAnalyzer
 from aura.agents.web_scout import AgentWebScout
 from aura.agents.whatsapp import AgentWhatsApp
 from aura.core.orchestrator import Orchestrator
@@ -378,6 +381,9 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentMathSolver, modules_config)      # арифметика (детерм.)
     _try_register(orch, AgentCamera, modules_config)          # камера (V4L2)
     _try_register(orch, AgentFacialEmotion, modules_config)   # эмоции по лицу
+    _try_register(orch, AgentVideoAnalyzer, modules_config)   # анализ видео
+    _try_register(orch, AgentGesture, modules_config)         # жесты
+    _try_register(orch, AgentAudioVisualFusion, modules_config) # синтез аудио+видео
 
     # v2.5: приоритетные агенты автора (recon, voice journal)
     _try_register(orch, AgentRecon, modules_config)

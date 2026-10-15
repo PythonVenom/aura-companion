@@ -12,6 +12,7 @@ import re
 import sys
 
 from aura.agents.music_ducker import AgentMusicDucker
+from aura.indicators import is_silent
 
 # ─── Справка ────────────────────────────────────────────
 HELP = """
@@ -232,6 +233,8 @@ def main() -> int:
                 print()
         except Exception as e:
             print(f"⚠️ Boot report не собрался: {e}")
+    if is_silent():
+        print("🔇 Режим тишины активен. AURA не будет озвучивать ответы.")
     try:
         return asyncio.run(_main_loop())
     except KeyboardInterrupt:

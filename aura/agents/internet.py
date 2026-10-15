@@ -56,6 +56,12 @@ class AgentInternet(BaseAgent):
         return any(kw in text for kw in keywords)
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
+        t = request.text.lower()
+        if "новост" in t:
+            return AgentResponse.ok(
+                text="📰 Сканирую новостной сектор... (задел для RSS)",
+                agent_name=self.name,
+            )
         text = request.text.lower()
 
         if any(kw in text for kw in self.WEATHER_KEYWORDS):

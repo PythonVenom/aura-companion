@@ -17,6 +17,8 @@ class AgentCEC(BaseAgent):
     name = "cec"
     MODULE_ALWAYS = True
 
+    SKIP_REASON = "нет cec-utils"
+
     TRIGGERS = (
         "включи телевизор", "выключи телевизор", "включи тв", "выключи тв",
         "громче тв", "тише тв", "переключи канал", "телевизор",

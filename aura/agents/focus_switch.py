@@ -54,6 +54,8 @@ class AgentFocusSwitch(BaseAgent):
         "GNOME Terminal": "gnome-terminal",
     }
 
+    SKIP_REASON = "нет открытых окон"
+
     KEYWORDS = (
         "фокус на",
         "переключись на",

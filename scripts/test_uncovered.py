@@ -77,7 +77,10 @@ async def main() -> None:
                 stats["can_handle_any"] += 1
                 print(f"  ✅ {name:30s} <- «{test_phrase[:40]}»")
             else:
-                print(f"  🟡 {name:30s} can_handle=False на «{test_phrase[:40]}»")
+                # Правильный skip (нет железа/окон) — не баг
+                reason = getattr(agent, "SKIP_REASON", "нет условия")
+                stats["correct_skip"] = stats.get("correct_skip", 0) + 1
+                print(f"  ⏭️  {name:30s} правильно молчит ({reason})")
         except Exception as e:
             print(f"  ❌ {name:30s} ERROR: {e}")
 

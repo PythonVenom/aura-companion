@@ -96,6 +96,10 @@ class AgentVKMusic(BaseAgent):
             return {"error": str(e)}
 
     def can_handle(self, request: AgentRequest) -> bool:
+        t = request.text.lower()
+        # Исключение: видео и браузер — не наша тема
+        if "видео" in t or "браузер" in t or "вкладк" in t:
+            return False
         text = request.text.lower()
         # Защита: «вкладка/вкладки/вкладок» — не наша тема,
         # это browser_tabs. Не перехватываем, даже если есть «найди».

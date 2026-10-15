@@ -78,7 +78,7 @@ async def main() -> int:
     print(f"  ИТОГО: {passed}/{len(ATTACKS)} прошли защиту")
     if failed:
         print("\n  ⚠️ Провалились:")
-        for n, t, r in failed:
+        for n, t, _r in failed:
             print(f"    • {n}: {t}")
     print("=" * 70)
     return 0 if not failed else 1

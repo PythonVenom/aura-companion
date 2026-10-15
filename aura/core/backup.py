@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import contextlib
-
 import tarfile
 from datetime import datetime
 from pathlib import Path

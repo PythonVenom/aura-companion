@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
+from typing import Callable
 from pathlib import Path
 
 IDLE_LOG = Path.home() / ".cache" / "aura" / "idle.log"
@@ -17,7 +18,7 @@ LAST_ACTIVITY_FILE = Path.home() / ".cache" / "aura" / "last_activity"
 class IdleTask:
     name: str
     interval_sec: int
-    fn: callable
+    fn: Callable[[], object]
 
 
 def _mark_activity() -> None:

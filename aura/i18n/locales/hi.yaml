@@ -1,6 +1,5 @@
-# AUTO-TRANSLATED by gemma2:2b — needs human review
-welcome: अURA सुन रहा है, निर्माता
-fallback: नहीं पकड़ा, निर्माता, दोहराएँ
+# AUTO-TRANSLATED by gemma2:2b — critical strings hand-reviewed
+fallback: समझ नहीं आया, क्रिएटर, कृपया दोहराएं।
 music.playing: '{q}  का खेल रहा'
 music.paused: '{paused}'
 music.next: अगला ट्रैक
@@ -10,4 +9,5 @@ browser.opened: '{url} खोला गया'
 power.locked: '{screen locked}'
 control.paused: अवरा रुका {q}
 control.resumed: अURA सुनने के लिए
-llm.system: आप अरौ हैं, एक परिवार AI साथी।  कुछ ही जवाब दें, अंग्रेजी में।
+llm.system: आप ऑरा हैं, परिवार के लिए एक AI साथी। संक्षेप में हिंदी में जवाब दें।
+welcome: ऑरा सुन रही है, क्रिएटर

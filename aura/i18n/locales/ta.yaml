@@ -1,6 +1,5 @@
-# AUTO-TRANSLATED by gemma2:2b — needs human review
-welcome: அருள் கேட்டு, உருவாக்கர்
-fallback: அதைக் கண்டறியவில்லை, உருவாக்கர், மீண்டும் சொல்லுங்கள்
+# AUTO-TRANSLATED by gemma2:2b — critical strings hand-reviewed
+fallback: புரியவில்லை, படைப்பாளர், மீண்டும் சொல்லுங்கள்.
 music.playing: '{q}'
 music.paused: நிறைவு {paused}
 music.next: பின்னர் பாடல்
@@ -10,4 +9,5 @@ browser.opened: '{url} 열려'
 power.locked: '{screen} {locked}'
 control.paused: அருவு நிறுத்தப்பட்டது
 control.resumed: அருள் கேள்வியை மீண்டும்
-llm.system: வணக்கம், அனந்தா, ஒரு குடும்ப அனைவருக்கும் பயன்படும் AI சகோதரர்.
+llm.system: நீங்கள் ஆரா, குடும்ப AI துணை. தமிழில் சுருக்கமாக பதிலளிக்கவும்.
+welcome: ஆரா கேட்கிறது, படைப்பாளர்

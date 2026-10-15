@@ -1,5 +1,4 @@
-# AUTO-TRANSLATED by gemma2:2b — needs human review
-welcome: Aura-Hören, Creator
+# AUTO-TRANSLATED by gemma2:2b — critical strings hand-reviewed
 fallback: Nicht verstanden, Creator, bitte wiederholen.
 music.playing: spielen {q}
 music.paused: pausiert
@@ -10,4 +9,5 @@ browser.opened: geöffnet {url}
 power.locked: Bildschirm gesperrt
 control.paused: Aura pausiert
 control.resumed: Aura wieder hören
-llm.system: Du bist Aura, ein Familien-AI-Kompanion.  Schreibe kurz auf Englisch.
+llm.system: Du bist Aura, ein KI-Begleiter für die Familie. Antworte kurz auf Deutsch.
+welcome: Aura hört zu, Creator

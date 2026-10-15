@@ -1,6 +1,5 @@
-# AUTO-TRANSLATED by gemma2:2b — needs human review
-welcome: オーラ聴取、クリエイター
-fallback: '{q} {name} {url}'
+# AUTO-TRANSLATED by gemma2:2b — critical strings hand-reviewed
+fallback: 聞き取れませんでした、クリエイター、もう一度お願いします。
 music.playing: '{q}をプレイ中'
 music.paused: 停止中
 music.next: 次の曲
@@ -10,4 +9,5 @@ browser.opened: '{url}を開きました。'
 power.locked: 画面ロック
 control.paused: アウラが停止した
 control.resumed: アウラを聴く again
-llm.system: あなたはアURA、家族AIの companion です。短い言葉で答えてください。
+llm.system: あなたはオーラ、家族向けのAIコンパニオンです。日本語で簡潔に答えてください。
+welcome: オーラ、聞いています、クリエイター

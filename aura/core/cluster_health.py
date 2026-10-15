@@ -31,7 +31,7 @@ def check_cluster(name: str) -> HealthReport:
 
 def check_all() -> list[HealthReport]:
     """Проверить все 9 кластеров."""
-    return [check_cluster(name) for name in CLUSTERS.keys()]
+    return [check_cluster(name) for name in CLUSTERS]
 
 
 def summary() -> dict:

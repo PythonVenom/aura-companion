@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import contextlib
 import json
 from datetime import datetime
 from pathlib import Path
@@ -25,10 +26,8 @@ def export_state(device: str = "local") -> Path:
     for name in ("blackboard.json", "affinity.json"):
         src = STATE_DIR / name
         if src.exists():
-            try:
+            with contextlib.suppress(Exception):
                 state[name] = json.loads(src.read_text(encoding="utf-8"))
-            except Exception:
-                pass
     target.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
     return target
 

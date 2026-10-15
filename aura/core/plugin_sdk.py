@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import contextlib
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -54,10 +55,8 @@ class PluginSDK:
             if d.is_dir():
                 manifest_path = d / "manifest.json"
                 if manifest_path.exists():
-                    try:
+                    with contextlib.suppress(Exception):
                         out.append(PluginManifest.load(manifest_path))
-                    except Exception:
-                        pass
         return out
 
     def install_template(self, name: str, author: str = "unknown") -> Path:

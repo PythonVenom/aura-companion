@@ -10,8 +10,9 @@ import json
 import threading
 from typing import Any
 
+zmq: Any = None
 try:
-    import zmq
+    import zmq  # type: ignore[no-redef]
     HAS_ZMQ = True
 except ImportError:
     HAS_ZMQ = False
@@ -31,8 +32,8 @@ class ZMQBridge:
         self._lock = threading.Lock()
         if HAS_ZMQ:
             try:
-                self._ctx = zmq.Context()
-                self._pub = self._ctx.socket(zmq.PUB)
+                self._ctx: Any = zmq.Context()
+                self._pub: Any = self._ctx.socket(zmq.PUB)
                 self._pub.bind(pub_addr)
                 self._ready = True
             except Exception:

@@ -5,8 +5,10 @@ Fallback: если steam не запущен — работает standalone.
 """
 from __future__ import annotations
 
+import contextlib
 import os
 from pathlib import Path
+from typing import Any
 
 APP_ID = "480"  # Spacewar (тестовый app_id)
 
@@ -17,7 +19,7 @@ class SteamworksWrapper:
     def __init__(self, app_id: str = APP_ID) -> None:
         self.app_id = app_id
         self._ready = False
-        self._steam = None
+        self._steam: Any = None
         # Индикатор, что steamworkspy установлен
         try:
             import steamworks  # noqa: F401
@@ -31,10 +33,8 @@ class SteamworksWrapper:
 
     def init(self) -> bool:
         """Инициализация. Создаёт steam_appid.txt."""
-        try:
+        with contextlib.suppress(Exception):
             Path("steam_appid.txt").write_text(self.app_id)
-        except Exception:
-            pass
         if self._ready:
             try:
                 import steamworks
@@ -69,7 +69,7 @@ class SteamworksWrapper:
     def is_steam_running(self) -> bool:
         """Запущен ли Steam?"""
         # Проверка через переменную окружения
-        return bool(os.environ.get("SteamAppId") or os.environ.get("SteamGameId"))
+        return bool(os.environ.get("STEAMAPPID") or os.environ.get("STEAMGAMEID"))
 
 
 _STEAM: SteamworksWrapper | None = None

@@ -78,8 +78,6 @@ from aura.agents.cec import AgentCEC
 from aura.agents.clipboard import AgentClipboard
 from aura.agents.construction import AgentConstruction
 from aura.agents.coordinator import AgentCoordinator
-from aura.agents.string_counter import AgentStringCounter
-from aura.agents.math_solver import AgentMathSolver
 from aura.agents.data_miner import AgentDataMiner
 from aura.agents.deep_check_agent import AgentDeepCheck
 from aura.agents.deepseek_web import AgentDeepSeekWeb
@@ -101,6 +99,7 @@ from aura.agents.kid_structure import AgentKidStructure
 from aura.agents.kid_therapy import AgentKidTherapy
 from aura.agents.knowledge import AgentKnowledge
 from aura.agents.massage import AgentMassage
+from aura.agents.math_solver import AgentMathSolver
 from aura.agents.matter import AgentMatter
 from aura.agents.media_pult import AgentMediaPult
 from aura.agents.meds import AgentMeds
@@ -123,6 +122,7 @@ from aura.agents.sensors import AgentSensors
 from aura.agents.sms_bridge import AgentSMS
 from aura.agents.sos import AgentSOS
 from aura.agents.soul_talk import AgentSoulTalk
+from aura.agents.string_counter import AgentStringCounter
 from aura.agents.task_manager import AgentTaskManager
 from aura.agents.time_agent import AgentTimeAgent
 from aura.agents.tutorial import AgentTutorial

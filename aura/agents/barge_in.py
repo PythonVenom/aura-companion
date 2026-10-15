@@ -166,7 +166,7 @@ class AgentBargeIn:
 
             # Bug 45: RMS-гейт — эхо от колонок тише речи пользователя
             import numpy as _np
-            _samples = _np.frombuffer(frame, dtype=_np.int16).astype(_np.float32)
+            _samples: _np.ndarray = _np.frombuffer(frame, dtype=_np.int16).astype(_np.float32)
             _rms = int(_np.sqrt(_np.mean(_samples * _samples))) if len(_samples) else 0
             if _rms < self.MIN_RMS:
                 self._consecutive_speech = 0

@@ -25,7 +25,7 @@ class WakeWordDetector:
         if not pcm_bytes or len(pcm_bytes) < MIN_BYTES:
             return False
         try:
-            pcm = np.frombuffer(pcm_bytes, dtype=np.int16)
+            pcm: bytes = np.frombuffer(pcm_bytes, dtype=np.int16)
             result = self._model.predict(pcm)
         except Exception:
             return False

@@ -178,9 +178,13 @@ def _check_eldercare() -> Check:
 
 def _check_rag() -> Check:
     """Проверка готовности RAG."""
+    import contextlib
+    import io
     try:
         from aura.agents.rag_memory import AgentRAGMemory
-        r = AgentRAGMemory()
+        # Глушим stderr — numpy 2.0 warning от scipy
+        with contextlib.redirect_stderr(io.StringIO()):
+            r = AgentRAGMemory()
         ok = r.check_ready()
         detail = "загружен" if ok else "не загружен"
         return Check("RAG", ok, detail)

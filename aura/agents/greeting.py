@@ -66,8 +66,16 @@ class AgentGreeting(BaseAgent):
             key = "night"
 
         # afternoon_greeting может не быть — fallback на evening
+        ctx = {}
         try:
-            text = speak_line(key)
+            from aura.core import blackboard as bb
+            snap = bb.snapshot()
+            ctx["sector"] = snap.get("sector", "unknown")
+            ctx["modules"] = 0  # lazy — не строим orchestrator зря
+        except Exception:
+            pass
+        try:
+            text = speak_line(key, **ctx)
         except Exception:
             text = speak_line("morning")
 

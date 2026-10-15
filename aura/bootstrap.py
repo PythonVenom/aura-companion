@@ -80,6 +80,7 @@ from aura.agents.cec import AgentCEC
 from aura.agents.clipboard import AgentClipboard
 from aura.agents.construction import AgentConstruction
 from aura.agents.coordinator import AgentCoordinator
+from aura.agents.cua import AgentCUA
 from aura.agents.data_miner import AgentDataMiner
 from aura.agents.deep_check_agent import AgentDeepCheck
 from aura.agents.deepseek_web import AgentDeepSeekWeb
@@ -386,6 +387,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentGesture, modules_config)         # жесты
     _try_register(orch, AgentAudioVisualFusion, modules_config) # синтез аудио+видео
     _try_register(orch, AgentSelfModel, modules_config)       # самосознание
+    _try_register(orch, AgentCUA, modules_config)             # CUA (браузер)
 
     # v2.5: приоритетные агенты автора (recon, voice journal)
     _try_register(orch, AgentRecon, modules_config)

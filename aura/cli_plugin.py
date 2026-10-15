@@ -29,7 +29,6 @@ def cmd_list(args) -> int:
 
 
 def cmd_install(args) -> int:
-    sdk = get_sdk()
     # Заглушка: установка из локального каталога
     from pathlib import Path
     src = Path(args.name)

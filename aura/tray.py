@@ -22,7 +22,7 @@ except ImportError:
     HAS_TRAY = False
 
 
-def _make_icon(color: str = "green") -> "Image.Image":
+def _make_icon(color: str = "green") -> Image.Image:
     """Сгенерировать простую иконку (кружок)."""
     colors = {
         "green": (76, 175, 80),

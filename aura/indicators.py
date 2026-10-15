@@ -53,7 +53,7 @@ def full_status() -> str:
     return "\n".join(lines)
 
 
-__all__ = ["is_online", "is_silent", "status_line", "full_status"]
+__all__ = ["full_status", "is_online", "is_silent", "status_line"]
 
 
 if __name__ == "__main__":

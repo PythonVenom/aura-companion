@@ -169,7 +169,7 @@ class SemanticMemory:
             ids = data.get("ids", [])
             metas = data.get("metadatas", [])
             to_delete = []
-            for i, meta in zip(ids, metas):
+            for i, meta in zip(ids, metas, strict=False):
                 ts = meta.get("ts", 0)
                 conf = meta.get("confidence", 1.0)
                 if (ts and ts < threshold) or conf < min_confidence:
@@ -193,7 +193,7 @@ class SemanticMemory:
             docs = data.get("documents", [])
             seen: dict[str, str] = {}
             to_delete = []
-            for i, doc in zip(ids, docs):
+            for i, doc in zip(ids, docs, strict=False):
                 key = doc.strip().lower()
                 if key in seen:
                     to_delete.append(i)
@@ -214,7 +214,7 @@ class SemanticMemory:
             docs = data.get("documents", [])
             metas = data.get("metadatas", [])
             groups: dict[str, list[dict]] = {}
-            for doc, meta in zip(docs, metas):
+            for doc, meta in zip(docs, metas, strict=False):
                 if meta.get("subject", "").lower() != subject.lower():
                     continue
                 key = meta.get("predicate", "")

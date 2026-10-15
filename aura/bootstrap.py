@@ -71,6 +71,7 @@ from aura.agents.bpm import AgentBPM
 from aura.agents.briefing import BriefingAgent
 from aura.agents.calendar import AgentCalendar
 from aura.agents.call import AgentCall
+from aura.agents.camera import AgentCamera
 from aura.agents.capability_agent import AgentCapabilities
 from aura.agents.captain import AgentCaptain
 from aura.agents.care import CareAgent
@@ -86,6 +87,7 @@ from aura.agents.dictation import AgentDictation
 from aura.agents.email_agent import AgentEmail
 from aura.agents.emotion_voice import AgentEmotionVoice
 from aura.agents.evening_ritual import AgentEveningRitual
+from aura.agents.facial_emotion import AgentFacialEmotion
 from aura.agents.fall import AgentFall
 from aura.agents.federated_adapter import AgentFederatedAdapter
 from aura.agents.fin_elder import AgentFinElder
@@ -374,6 +376,8 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentCoordinator, modules_config)     # что происходит / статус роя
     _try_register(orch, AgentStringCounter, modules_config)   # сколько букв/слов (детерм.)
     _try_register(orch, AgentMathSolver, modules_config)      # арифметика (детерм.)
+    _try_register(orch, AgentCamera, modules_config)          # камера (V4L2)
+    _try_register(orch, AgentFacialEmotion, modules_config)   # эмоции по лицу
 
     # v2.5: приоритетные агенты автора (recon, voice journal)
     _try_register(orch, AgentRecon, modules_config)

@@ -23,11 +23,11 @@ class AgentSpeaker(MicroAgent):
     def __init__(self):
         super().__init__("speaker", "Голос Ауры")
         self.activate()
-        # AURA_VOICE_XDG_FIX: искать в project/models, иначе в ~/.local/share/aura/voices
+        # AURA_VOICE_XDG_FIX_V3: XDG в приоритете (project/models/voices — пустая)
         from pathlib import Path as _P
-        _proj = __import__("aura.paths", fromlist=["MODELS_DIR"]).MODELS_DIR / "voices"
         _xdg = _P.home() / ".local/share/aura/voices"
-        _voice_dir = _proj if _proj.exists() else _xdg
+        _proj = __import__("aura.paths", fromlist=["MODELS_DIR"]).MODELS_DIR / "voices"
+        _voice_dir = _xdg if _xdg.exists() else _proj
         self.voice_path = str(_voice_dir / "ru_RU-irina-medium.onnx")
         import shutil
         self.piper_cmd = shutil.which("piper") or os.path.expanduser("~/.local/bin/piper")
@@ -190,9 +190,10 @@ class AgentSpeaker(MicroAgent):
         try:
             import os as _os
 
-            from aura.paths import MODELS_DIR
             # AURA_VOICE_XDG_FIX_V2: тот же fallback что в __init__
             from pathlib import Path as _P2
+
+            from aura.paths import MODELS_DIR
             _proj2 = MODELS_DIR / "voices"
             _xdg2 = _P2.home() / ".local/share/aura/voices"
             _dir2 = _proj2 if _proj2.exists() else _xdg2

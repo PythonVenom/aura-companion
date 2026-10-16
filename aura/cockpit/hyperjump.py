@@ -39,16 +39,6 @@ def count_modules() -> int:
             sum(1 for f in agents_dir.glob("*.py") if f.name != "__init__.py")
             if agents_dir.exists() else 0
         )
-    try:
-        from aura.bootstrap import build_orchestrator
-        _MODULES_CACHE = len(build_orchestrator())
-    except Exception:
-        agents_dir = REPO / "aura" / "agents"
-        _MODULES_CACHE = (
-            sum(1 for f in agents_dir.glob("*.py") if f.name != "__init__.py")
-            if agents_dir.exists() else 0
-        )
-    return _MODULES_CACHE
 
 
 def did_hyperjump(last_commit: str, current: str | None = None) -> bool:

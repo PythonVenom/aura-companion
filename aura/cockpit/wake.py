@@ -15,7 +15,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from datetime import datetime as _dt
 
-from aura.cockpit.hyperjump import did_hyperjump, hyperjump_context
+from aura.cockpit.hyperjump import current_commit, did_hyperjump, hyperjump_context
 from aura.cockpit.music import Music, track_for_event
 from aura.cockpit.scheduler import greeting_context, greeting_event, should_greet
 from aura.game.state import StateStore
@@ -39,24 +39,23 @@ def wake() -> str:
     local_now = _dt.now()   # для приветствия — локальное время
 
     # 1. Гиперпрыжок? (сменился ли commit)
-    if did_hyperjump(state.last_seen, None):
+    if did_hyperjump(state.last_commit, None):
         _play_music("hyperjump")
         ctx = hyperjump_context(state)
         VoiceOrchestrator().say("hyperjump", **ctx)
 
     # 2. Приветствие по времени (если давно не виделись)
+    line = ""
     event = greeting_event(local_now.hour)
     if should_greet(state.last_seen, now=now):
         _play_music(event)
         ctx = greeting_context(state, story)
         line = speak_line(event, **ctx)
         VoiceOrchestrator().say(event, **ctx)
-    else:
-        line = speak_line(event, **greeting_context(state, story))
-        _play_music(event)
 
     # 3. Обновить last_seen
     state.last_seen = now.isoformat()
+    state.last_commit = current_commit()
     store.save(state)
     store.close()
 

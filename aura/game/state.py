@@ -80,6 +80,7 @@ class GameState:
     quests_active: list[str] = field(default_factory=list)
     battles: list[dict] = field(default_factory=list)
     last_seen: str = ""
+    last_commit: str = ""
     landing_date: str = ""
 
     def __post_init__(self) -> None:

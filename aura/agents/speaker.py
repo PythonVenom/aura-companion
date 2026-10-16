@@ -184,6 +184,7 @@ class AgentSpeaker(MicroAgent):
     def _sync_voice_path(self, voice_name: str) -> None:
         try:
             import os as _os
+
             from aura.paths import MODELS_DIR
             vp = str(MODELS_DIR / f"voices/{voice_name}.onnx")
             if _os.path.exists(vp):

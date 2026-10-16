@@ -72,6 +72,7 @@ class Music:
             self._proc = subprocess.Popen(
                 [
                     "mpv", "--idle=yes", "--no-video",
+                    "--ao=pulse",  # обход залипания буфера PipeWire при restart
                     f"--input-ipc-server={SOCKET_PATH}",
                     f"--volume={int(self.volume * 100)}",
                     "--loop-file=inf",

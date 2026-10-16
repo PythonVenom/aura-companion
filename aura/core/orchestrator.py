@@ -277,7 +277,7 @@ class Orchestrator:
         "деньнед": "день недели", "деньнеделю": "день недели",
         "число": "какое число", "погод": "погода",
         "музы": "музыку", "муз": "музыку", "включи музы": "включи музыку",
-        "какая": "какая погода", "какой": "какой день",
+        "какая": "какая погода",
     }
 
     def _normalize(self, text: str) -> str:
@@ -292,10 +292,15 @@ class Orchestrator:
             if w in self._FUZZY_MAP:
                 out.append(self._FUZZY_MAP[w])
                 continue
-            # fuzzy по ключам
+            # AURA_FUZZY_V2: не фаззить короткие слова (<=4 букв)
+            # иначе "как" → "какой" (0.857 similarity, ложный матч).
+            if len(w) <= 4:
+                out.append(w)
+                continue
+            # fuzzy по ключам — cutoff выше для надёжности
             try:
                 from difflib import get_close_matches
-                m = get_close_matches(w, self._FUZZY_MAP.keys(), n=1, cutoff=0.75)
+                m = get_close_matches(w, self._FUZZY_MAP.keys(), n=1, cutoff=0.85)
                 if m:
                     out.append(self._FUZZY_MAP[m[0]])
                     continue

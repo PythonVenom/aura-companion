@@ -6,26 +6,27 @@ import org.kde.plasma.plasma5support as Plasma5Support
 import org.kde.plasma.components as PlasmaComponents3
 import org.kde.kirigami as Kirigami
 import org.kde.plasma.extras as PlasmaExtras
+import org.kde.plasma.core as PlasmaCore
 
 PlasmoidItem {
     id: root
     Plasmoid.contextualActions: [
-        Kirigami.Action {
+        PlasmaCore.Action {
             text: i18n("Открыть Aura")
             icon.name: "audio-input-microphone"
             onTriggered: root.expanded = !root.expanded
         },
-        Kirigami.Action {
+        PlasmaCore.Action {
             text: i18n("Пауза / Продолжить")
             icon.name: "media-playback-pause"
             onTriggered: ctlSource.call((root.auraState === "paused") ? "resume" : "pause")
         },
-        Kirigami.Action {
+        PlasmaCore.Action {
             text: i18n("Перезапустить Aura")
             icon.name: "view-refresh"
             onTriggered: ctlSource.call("restart")
         },
-        Kirigami.Action {
+        PlasmaCore.Action {
             text: i18n("Стоп Aura")
             icon.name: "media-playback-stop"
             onTriggered: ctlSource.call("stop")
@@ -41,6 +42,7 @@ PlasmoidItem {
     property string auraState: "unknown"
     property string auraText: ""
     property var chatMessages: []
+    property int _seq: 0
 
     readonly property var stateColors: ({
         "idle": "#5a7a9a", "listening": "#f5c542", "thinking": "#f58742",
@@ -56,7 +58,7 @@ PlasmoidItem {
     Plasma5Support.DataSource {
         id: execSource
         engine: "executable"
-        connectedSources: []
+        connectedSources: ["cat \"$HOME/.cache/aura/aura_status.json\" 2>/dev/null"]
         onNewData: (sourceName, data) => {
             var stdout = (data["stdout"] || "").trim();
             if (stdout.length > 0) {
@@ -68,15 +70,12 @@ PlasmoidItem {
             }
             execSource.disconnectSource(sourceName);
         }
-        function fetch() {
-            connectSource("cat \"$HOME/.cache/aura/aura_status.json\" 2>/dev/null");
-        }
     }
 
     Plasma5Support.DataSource {
         id: chatSource
         engine: "executable"
-        connectedSources: []
+        connectedSources: ["tail -n 50 \"$HOME/.cache/aura/chat_history.jsonl\" 2>/dev/null"]
         onNewData: (sourceName, data) => {
             var stdout = (data["stdout"] || "").trim();
             if (stdout.length > 0) {
@@ -91,9 +90,6 @@ PlasmoidItem {
             }
             chatSource.disconnectSource(sourceName);
         }
-        function fetch() {
-            connectSource("tail -n 50 \"$HOME/.cache/aura/chat_history.jsonl\" 2>/dev/null");
-        }
     }
 
     Plasma5Support.DataSource {
@@ -106,10 +102,11 @@ PlasmoidItem {
         function call(cmd) {
             connectSource("python3 $HOME/aura-companion/scripts/aura_ctl.py " + cmd);
         }
-        function sendChat(text) {
-            var escaped = text.replace(/"/g, '\\"').replace(/\\/g, '\\\\');
-            connectSource("python3 -c \"import json,sys;open('$HOME/.cache/aura/chat_inbox.jsonl','a').write(json.dumps({'user':sys.argv[1],'ts':__import__('time').time()},ensure_ascii=False)+chr(10))\" \"" + escaped + "\"");
-        }
+    function sendChat(text) {
+        var escaped = text.replace(/"/g, String.fromCharCode(92)+String.fromCharCode(34)).replace(/\\\\/g, String.fromCharCode(92)+String.fromCharCode(92)+String.fromCharCode(92)+String.fromCharCode(92));
+        root._seq++;
+        connectSource("$HOME/aura-companion/scripts/aura_chat_send.sh \"" + escaped + "\" _seq_" + root._seq);
+    }
     }
 
     Timer {
@@ -118,8 +115,9 @@ PlasmoidItem {
         repeat: true
         triggeredOnStart: true
         onTriggered: {
-            execSource.fetch();
-            chatSource.fetch();
+            root._seq++;
+            execSource.connectedSources = ["cat \"/home/pythonvenom/.cache/aura/aura_status.json\" 2>/dev/null _seq_" + root._seq]
+            chatSource.connectedSources = ["tail -n 50 \"/home/pythonvenom/.cache/aura/chat_history.jsonl\" 2>/dev/null _seq_" + root._seq]
         }
     }
 

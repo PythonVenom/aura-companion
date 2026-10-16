@@ -31,6 +31,9 @@ class ChatBridge:
             Path(history_path) if history_path else DEFAULT_CACHE / "chat_history.jsonl"
         )
         self._offset = 0
+        # TAIL_F_OFFSET_FIX: пропускать старые сообщения при старте — читаем только новые.
+        if self.inbox_path.exists():
+            self._offset = self.inbox_path.stat().st_size
 
     def read_new(self) -> list[dict]:
         """Прочитать новые сообщения из inbox с последнего offset."""

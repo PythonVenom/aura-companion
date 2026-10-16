@@ -53,6 +53,7 @@ from aura.dialog_fsm import get_state as fsm_get
 from aura.dialog_fsm import set_state as fsm_set
 from aura.dialogue_manager import SCENARIOS, DialogueManager
 from aura.heartbeat import Heartbeat
+from aura.kernel.thread import KernelThread
 from aura.status import clear_status, set_status
 
 
@@ -191,6 +192,9 @@ class AuraOrchestrator:
 
         # Proactive Engine (ADR-014)
         self.proactive = default_engine(get_agent=lambda n: _get_agent(self.orch, n))
+
+        # C-0.6: KernelThread — async kernel параллельно sync Orchestrator
+        self.kernel_thread: KernelThread | None = None
 
     PAUSE_FLAG = Path.home() / ".cache/aura/aura_pause.flag"
     def _is_paused(self) -> bool:
@@ -925,6 +929,15 @@ def main() -> int:
     daemon_mode = "--daemon" in _sys.argv
     aura = AuraOrchestrator()
     stop_event = None
+
+    # C-0.6: запуск async kernel в daemon-потоке (Graceful Degradation)
+    kernel_thread = KernelThread()
+    if kernel_thread.start(timeout=10):
+        print("[main] kernel thread запущен (async kernel alive)", flush=True)
+        aura.kernel_thread = kernel_thread
+    else:
+        print("[main] kernel thread не стартовал — работаем без него", flush=True)
+
     if daemon_mode:
         import threading as _th
         stop_event = _th.Event()
@@ -940,6 +953,9 @@ def main() -> int:
     finally:
         if stop_event is not None:
             stop_event.set()
+        if aura.kernel_thread is not None:
+            aura.kernel_thread.stop(timeout=5)
+            print("[main] kernel thread остановлен", flush=True)
     return 0
 
 

@@ -23,7 +23,7 @@ class WeatherAgent:
     async def start(self, ctx: AgentContext) -> None:
         self.ctx = ctx
         self._running = True
-        from aura.agents.weather import AgentWeather  # type: ignore[attr-defined]
+        from aura.agents.weather import WeatherAgent as AgentWeather  # type: ignore[attr-defined]
         self._legacy = AgentWeather()
         ctx.bus.subscribe("weather.ask", self._on_ask)
         log.info("weather adapter started (city=%s)", self._legacy.CITY)

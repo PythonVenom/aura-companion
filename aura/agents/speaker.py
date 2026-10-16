@@ -191,7 +191,12 @@ class AgentSpeaker(MicroAgent):
             import os as _os
 
             from aura.paths import MODELS_DIR
-            vp = str(MODELS_DIR / f"voices/{voice_name}.onnx")
+            # AURA_VOICE_XDG_FIX_V2: тот же fallback что в __init__
+            from pathlib import Path as _P2
+            _proj2 = MODELS_DIR / "voices"
+            _xdg2 = _P2.home() / ".local/share/aura/voices"
+            _dir2 = _proj2 if _proj2.exists() else _xdg2
+            vp = str(_dir2 / f"{voice_name}.onnx")
             if _os.path.exists(vp):
                 self.voice_path = vp
         except Exception:

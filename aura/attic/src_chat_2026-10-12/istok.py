@@ -1,5 +1,6 @@
 """Исток — сбор метрик системы."""
 import asyncio
+
 import psutil
 
 
@@ -8,7 +9,7 @@ class Istok:
         pass
 
     async def collect_all(self):
-        loop = asyncio.get_event_loop()
+        asyncio.get_event_loop()
         cpu = psutil.cpu_percent(interval=0.2, percpu=False)
         ram = psutil.virtual_memory().percent
         disk = psutil.disk_usage("/").percent

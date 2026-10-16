@@ -51,6 +51,7 @@ class Aura:
 
 if __name__ == "__main__":
     import asyncio
+
     from src.istok import Istok
 
     async def main():

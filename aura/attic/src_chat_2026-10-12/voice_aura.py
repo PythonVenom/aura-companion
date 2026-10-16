@@ -1,13 +1,19 @@
 """Aura Voice Bridge — Vosk слушает, Aura выполняет."""
-import json, os, queue, sys, time
+import json
+import os
+import queue
+import sys
+import time
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import subprocess as _sp
 
 import sounddevice as sd
 import vosk
-from src.demon import Aura
 from src.aura_control import AuraControl, handle
+from src.demon import Aura
 
-import subprocess as _sp
 
 def speak(text):
     """Озвучивает текст через espeak-ng (русский)."""

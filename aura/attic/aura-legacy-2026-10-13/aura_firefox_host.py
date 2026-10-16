@@ -4,14 +4,12 @@ Aura Firefox Host — native messaging host
 Мост: Firefox <-> Unix socket <-> Аура
 """
 
-import sys
-import os
 import json
-import struct
+import os
 import socket
+import struct
+import sys
 import threading
-import time
-
 
 SOCKET_PATH = "/tmp/aura_firefox.sock"
 

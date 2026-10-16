@@ -1,5 +1,13 @@
 """Aura Control v2.0 — управление ПК с верификацией и lock-файлом."""
-import subprocess, os, re, sys, time, asyncio, atexit, datetime
+import asyncio
+import atexit
+import datetime
+import os
+import re
+import subprocess
+import sys
+import time
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from src.demon import Aura
 
@@ -459,22 +467,17 @@ class AuraControl:
 
     def _tuya_packet(self, command, data=b''):
         """Tuya BLE пакет: 55 AA VER CMD LEN DATA CRC(4)"""
-        import struct
         header = bytes([0x55, 0xAA, 0x00, command, len(data)]) + data
         # CRC8 (Tuya использует crc8 с полином 0x07, init 0x00)
         crc8 = 0
         for b in header:
             crc8 ^= b
             for _ in range(8):
-                if crc8 & 0x80:
-                    crc8 = ((crc8 << 1) ^ 0x07) & 0xFF
-                else:
-                    crc8 = (crc8 << 1) & 0xFF
+                crc8 = (crc8 << 1 ^ 7) & 255 if crc8 & 128 else crc8 << 1 & 255
         return header + bytes([crc8])
 
     def _tuya_dp(self, dp_id, value):
         """DP (Data Point) пакет: 55 AA VER CMD LEN DP_ID TYPE LEN VALUE CRC"""
-        import struct
         if isinstance(value, bool):
             data = bytes([dp_id, 0x01, 0x00, 0x01 if value else 0x00])
         elif isinstance(value, int) and value <= 255:
@@ -486,10 +489,7 @@ class AuraControl:
         for b in header:
             crc8 ^= b
             for _ in range(8):
-                if crc8 & 0x80:
-                    crc8 = ((crc8 << 1) ^ 0x07) & 0xFF
-                else:
-                    crc8 = (crc8 << 1) & 0xFF
+                crc8 = (crc8 << 1 ^ 7) & 255 if crc8 & 128 else crc8 << 1 & 255
         return header + bytes([crc8])
 
     def light_on(self):

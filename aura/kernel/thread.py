@@ -12,6 +12,7 @@ Main thread (sync, Orchestrator) <-> Kernel thread (async, event-driven).
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import threading
 from typing import Any
@@ -57,10 +58,8 @@ class KernelThread:
             log.exception("kernel thread crashed: %s", e)
             self._ready.set()
         finally:
-            try:
+            with contextlib.suppress(Exception):
                 self.loop.run_until_complete(self.kernel.stop())
-            except Exception:
-                pass
             self.loop.close()
             log.info("kernel thread stopped")
 

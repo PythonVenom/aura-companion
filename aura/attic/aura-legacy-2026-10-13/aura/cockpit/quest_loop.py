@@ -87,7 +87,7 @@ def run_quest(quest: Quest, speak: bool = True,
                                  reactor=state.reactor))
 
             action = ask_weapon(
-                f"Приказ, капитан? [1-6, q=отступить] "
+                "Приказ, капитан? [1-6, q=отступить] "
             )
             if action is None:
                 quest.aborted = True

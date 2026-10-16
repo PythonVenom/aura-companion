@@ -53,7 +53,7 @@ class Put:
 
     def load(self):
         if os.path.exists(SAVE_FILE):
-            with open(SAVE_FILE, "r") as f:
+            with open(SAVE_FILE) as f:
                 return json.load(f)
         return {
             "quants": 100,
@@ -106,7 +106,7 @@ class Put:
 
     def show_tree(self):
         lines = ["=== Дерево Развития ==="]
-        for branch, levels in TREE.items():
+        for branch, _levels in TREE.items():
             lvl = self.state["branches"][branch]
             bar = "█" * lvl + "░" * (5 - lvl)
             lines.append(f"  {branch:<15} [{bar}] {lvl}/5")

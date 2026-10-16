@@ -1,4 +1,5 @@
 """Aura Voice — распознавание русской речи через Vosk (офлайн)."""
+import contextlib
 import json
 import os
 import queue
@@ -49,10 +50,8 @@ def demo():
     def on_phrase(text):
         print(f"\n>>> РАСПОЗНАНО: {text}")
     v = VoiceListener()
-    try:
+    with contextlib.suppress(KeyboardInterrupt):
         v.listen(on_phrase, duration=30)
-    except KeyboardInterrupt:
-        pass
     print("\n[voice] Стоп.")
 
 

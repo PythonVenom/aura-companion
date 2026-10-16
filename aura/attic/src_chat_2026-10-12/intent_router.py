@@ -1,6 +1,7 @@
 """Intent Router — Fast Path для Aura. Без LLM."""
 import re
-from aura_control import AuraControl, PRESETS, RU_COLORS
+
+from aura_control import PRESETS, RU_COLORS, AuraControl
 
 
 class IntentRouter:

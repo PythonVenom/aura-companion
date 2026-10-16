@@ -30,7 +30,7 @@ class WeatherAgent:
         event_log.append("agent.started",
                          {"name": self.name, "v": self.version,
                           "legacy": "AgentWeather",
-                          "city": self._legacy.CITY},
+                          "city": "unknown"},
                          src=self.name)
 
     async def handle(self, event: Event) -> None:

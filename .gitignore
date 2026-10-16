@@ -149,3 +149,6 @@ profiles/*/db.key
 !docs/screenshots/
 docs/screenshots/*.png
 !docs/screenshots/*.svg
+
+# Local ML models (795M — too big for git)
+ml/

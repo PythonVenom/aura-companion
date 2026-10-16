@@ -26,7 +26,7 @@ class WeatherAgent:
         from aura.agents.weather import WeatherAgent as AgentWeather  # type: ignore[attr-defined]
         self._legacy = AgentWeather()
         ctx.bus.subscribe("weather.ask", self._on_ask)
-        log.info("weather adapter started (city=%s)", self._legacy.CITY)
+        log.info("weather adapter started")
         event_log.append("agent.started",
                          {"name": self.name, "v": self.version,
                           "legacy": "AgentWeather",

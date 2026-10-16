@@ -59,7 +59,17 @@ class ChatBridge:
     def append_history(self, user: str, aura: str) -> None:
         """Дописать пару user/aura в history (атомарный append)."""
         self.history_path.parent.mkdir(parents=True, exist_ok=True)
-        payload = {"user": user or "", "aura": aura or "", "ts": time.time()}
+        _ts = time.time()
+        from datetime import datetime as _dt
+        _now = _dt.fromtimestamp(_ts)
+        payload = {
+            "user": user or "",
+            "aura": aura or "",
+            "ts": _ts,
+            "date": _now.strftime("%Y-%m-%d"),
+            "time": _now.strftime("%H:%M:%S"),
+            "session": getattr(self, "_session_id", "default"),
+        }
         try:
             with open(self.history_path, "a", encoding="utf-8") as f:
                 f.write(json.dumps(payload, ensure_ascii=False) + "\n")

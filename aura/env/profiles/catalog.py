@@ -37,6 +37,31 @@ PROFILES = {
         "extra": ["plasma-x11-session", "kwin-x11", "plasma-workspace"],
         "desc": "Пластичность Plasma, X11 (совместимо с NVIDIA 470).",
     },
+    # === Профиль 4: "Aura Shell" — финальная сборка (SonicDE + Krema + QuickBar) ===
+    "aura_shell": {
+        "wm": "sonic-win",  # kwin-x11 форк
+        "workspace": "sonic-workspace",
+        "addons": "sonic-workspace-addons",
+        "dock": "krema",  # параболический зум как macOS
+        "launcher": "plasma6-applets-quickbar",  # глобальное меню
+        "panel": "plasma-panel (X11)",  # панель сверху
+        "notify": "plasma-workspace",
+        "terminal": "konsole",
+        "files": "dolphin",
+        "sound": "pipewire-pulse pavucontrol-qt",
+        "screenshot": "spectacle",
+        "clipboard": "klipper",
+        "session": "sddm (X11 session)",
+        "aura": ["aura.service", "aura-dbus.service", "aura-tray.service"],
+        "plasmoid": "org.aura.status",
+        "extra": [
+            "latte-dock-ng-git",  # fallback dock
+            "plasma6-applets-panel-colorizer",  # кастомизация
+            "plasma6-applets-quickbar",
+        ],
+        "gpu": "nvidia_470 (X11 mandatory)",
+        "desc": "Финальная сборка: SonicDE + Krema + QuickBar + Aura из коробки.",
+    },
     # === Профиль 3: "Aura Composed" — гибрид GNOME-простота + KDE-настройки + i3-скорость ===
     "composed": {
         "wm": "kwin-x11",  # можно переключить на i3
@@ -75,7 +100,6 @@ def all_profiles() -> list[str]:
     return list(PROFILES.keys())
 
 if __name__ == "__main__":
-    import json
     print("=== ПРОФИЛИ AURA SHELL ===")
     for name, prof in PROFILES.items():
         print(f"\n[{name}] {prof['desc']}")

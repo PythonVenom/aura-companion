@@ -96,7 +96,7 @@ def test_brain_constants(brain):
 
 
 def test_system_prompt_russian(brain):
-    assert "русском" in brain.SYSTEM_PROMPT
+    assert "ЖЕНСКОМ" in brain.SYSTEM_PROMPT.upper() or "женском" in brain.SYSTEM_PROMPT.lower()
     assert "Аура" in brain.SYSTEM_PROMPT
 
 

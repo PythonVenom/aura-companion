@@ -42,6 +42,10 @@ PlasmoidItem {
     property string auraState: "unknown"
     property string auraText: ""
     property var chatMessages: []
+    property string cpuLoad: "?"
+    property int ramUsed: 0
+    property int ramTotal: 0
+    property string cpuTemp: "?"
     property int _seq: 0
 
     readonly property var stateColors: ({
@@ -91,6 +95,25 @@ PlasmoidItem {
             chatSource.disconnectSource(sourceName);
         }
     }
+    Plasma5Support.DataSource {
+        id: sysSource
+        engine: "executable"
+        connectedSources: ["$HOME/aura-companion/scripts/aura_sysinfo.sh 2>/dev/null"]
+        onNewData: (sourceName, data) => {
+            var stdout = (data["stdout"] || "").trim();
+            if (stdout.length > 0) {
+                try {
+                    var p = JSON.parse(stdout);
+                    root.cpuLoad = p.cpu_load || "?";
+                    root.ramUsed = p.ram_used || 0;
+                    root.ramTotal = p.ram_total || 0;
+                    root.cpuTemp = p.cpu_temp || "?";
+                } catch (e) {}
+            }
+            sysSource.disconnectSource(sourceName);
+        }
+    }
+
 
     Plasma5Support.DataSource {
         id: ctlSource
@@ -118,6 +141,7 @@ PlasmoidItem {
             root._seq++;
             execSource.connectedSources = ["cat \"/home/pythonvenom/.cache/aura/aura_status.json\" 2>/dev/null _seq_" + root._seq]
             chatSource.connectedSources = ["tail -n 50 \"/home/pythonvenom/.cache/aura/chat_history.jsonl\" 2>/dev/null _seq_" + root._seq]
+            sysSource.connectedSources = ["$HOME/aura-companion/scripts/aura_sysinfo.sh 2>/dev/null _seq_" + root._seq]
         }
     }
 
@@ -164,6 +188,32 @@ PlasmoidItem {
                 Item { Layout.fillWidth: true }
             }
 
+
+            // === ИНДИКАТОРЫ РЕСУРСОВ (SD-TRAY-6) ===
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+                Text {
+                    text: "⚙ CPU " + root.cpuLoad
+                    font.pixelSize: Kirigami.Units.gridUnit * 0.8 * root.fscale
+                    color: Kirigami.Theme.textColor
+                    opacity: 0.85
+                }
+                Item { Layout.fillWidth: true }
+                Text {
+                    text: "🧠 RAM " + root.ramUsed + "/" + root.ramTotal + "M"
+                    font.pixelSize: Kirigami.Units.gridUnit * 0.8 * root.fscale
+                    color: Kirigami.Theme.textColor
+                    opacity: 0.85
+                }
+                Item { Layout.fillWidth: true }
+                Text {
+                    text: "🌡 " + root.cpuTemp + "°C"
+                    font.pixelSize: Kirigami.Units.gridUnit * 0.8 * root.fscale
+                    color: Kirigami.Theme.textColor
+                    opacity: 0.85
+                }
+            }
             // === КНОПКИ УПРАВЛЕНИЯ ===
             GridLayout {
                 Layout.fillWidth: true

@@ -59,6 +59,10 @@ class AgentRAGMemory(BaseAgent):
         "статистика rag-памяти", "память статус",
     )
     CLEAR_KEYWORDS = ("очисти память", "забудь всё")
+    WEEK_KEYWORDS = (
+        "recall week", "неделя памяти", "что было на неделе",
+        "вспомни неделю", "сводка за неделю", "дайджест недели",
+    )
 
     # F-009: из settings с fallback (default — user home, не HDD)
     @classmethod
@@ -145,7 +149,7 @@ class AgentRAGMemory(BaseAgent):
         text = request.text.lower()
         return any(
             kw in text
-            for kw in self.SEARCH_KEYWORDS + self.STATS_KEYWORDS + self.CLEAR_KEYWORDS
+            for kw in self.SEARCH_KEYWORDS + self.STATS_KEYWORDS + self.CLEAR_KEYWORDS + self.WEEK_KEYWORDS
         )
 
     async def handle(self, request: AgentRequest) -> AgentResponse:
@@ -171,6 +175,31 @@ class AgentRAGMemory(BaseAgent):
                 )
             return AgentResponse.ok(
                 text=self.search(query), agent_name=self.name
+            )
+
+        if any(kw in cmd for kw in self.WEEK_KEYWORDS):
+            try:
+                from aura.memory.rag_warm import recall_week
+            except Exception as e:
+                return AgentResponse.ok(
+                    text=f"❌ rag_warm недоступен: {e}", agent_name=self.name
+                )
+            query = cmd
+            for word in self.WEEK_KEYWORDS:
+                query = query.replace(word, "")
+            query = query.strip() or "что обсуждали"
+            results = recall_week(query, n=3)
+            if not results:
+                return AgentResponse.ok(
+                    text="📭 WARM-память пуста. Консолидация ещё не запускалась.",
+                    agent_name=self.name,
+                )
+            lines = ["🗓️ Сводки по неделям:"]
+            for r in results:
+                lines.append(f"\n[{r['date']}] (n={r['n']}, dist={r['distance']:.2f})")
+                lines.append(r["summary"][:400])
+            return AgentResponse.ok(
+                text="\n".join(lines), agent_name=self.name
             )
 
         return AgentResponse.not_handled(agent_name=self.name)

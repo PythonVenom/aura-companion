@@ -70,12 +70,31 @@ def stats() -> dict:
     }
 
 
+def _mem_consolidate() -> None:
+    """MEM-2: HOT→WARM консолидация + MEM-3: индексация WARM в ChromaDB."""
+    try:
+        from aura.memory.consolidate import consolidate_old
+        r = consolidate_old()
+        print(f"   Mem: consolidated {r['processed']}, "
+              f"skipped {len(r['skipped'])}, errors {r['errors']}")
+    except Exception as e:
+        print(f"   ⚠️ consolidate failed: {e}")
+    try:
+        from aura.memory.rag_warm import index_warm
+        r = index_warm()
+        print(f"   Mem: indexed {r['indexed']}, "
+              f"skipped {r['skipped']}, errors {r['errors']}")
+    except Exception as e:
+        print(f"   ⚠️ index_warm failed: {e}")
+
+
 def main() -> None:
     archive = create()
     deleted = rotate()
     print(f"✅ Backup: {archive}")
     print(f"   Удалено старых: {deleted}")
     print(f"   Stats: {stats()}")
+    _mem_consolidate()
 
 
 if __name__ == "__main__":

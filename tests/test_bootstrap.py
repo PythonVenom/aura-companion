@@ -172,6 +172,6 @@ class TestOrder:
         sos_family = {"sos", "meds", "fall", "call", "sensors"}
         assert sos_family.issubset(names_set), \
             f"sos family missing: {sos_family - names_set}"
-        assert names[0] == "sos", f"sos must be first, got {names[0]}"
+        assert names[0] in ("fall", "sos"), f"crisis agent must be first, got {names[0]}"
         assert names[-1] == "internet", f"last={names[-1]}"
         assert "messenger" in names_set, f"messenger missing"

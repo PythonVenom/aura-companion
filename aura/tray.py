@@ -1,7 +1,7 @@
-"""System tray — иконка AURA + быстрое меню.
+"""System tray - иконка AURA + быстрое меню.
 
-Наука: Whispr, Hanzo, cmd0 — AI в трее с глобальным хоткеем.
-pystray 0.19.5 — кросс-платформенный, Python.
+Наука: Whispr, Hanzo, cmd0 - AI в трее с глобальным хоткеем.
+pystray 0.19.5 - кросс-платформенный, Python.
 
 Функции:
 - Иконка в трее (цвет = статус)
@@ -93,7 +93,7 @@ def main() -> int:
     icon = pystray.Icon(
         "aura",
         _make_icon("green"),
-        f"AURA — {_status_text()}",
+        (f"AURA - {_status_text()}").encode("ascii", "replace").decode("ascii"),
         menu=pystray.Menu(
             pystray.MenuItem("Открыть чат", _open_chat),
             pystray.MenuItem("Статус", _show_status),

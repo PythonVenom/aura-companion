@@ -14,10 +14,10 @@ from __future__ import annotations
 
 import os
 import subprocess
-from aura.core.storage import get_media_path
 from difflib import get_close_matches
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
+from aura.core.storage import get_media_path
 
 
 class AgentMediaSearch(BaseAgent):

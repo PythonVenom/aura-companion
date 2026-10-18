@@ -29,7 +29,6 @@ import os
 import time
 import urllib.request
 from datetime import datetime
-from pathlib import Path
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
 

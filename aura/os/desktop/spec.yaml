@@ -1,0 +1,21 @@
+# AuraOS Desktop Specification
+version: "1.0"
+codename: "Aura-GNOME-Style"
+base:
+  wm: openbox
+  panel: lxqt
+  display_manager: sddm
+  theme_gtk: "Arc-Dark"
+  theme_qt: "KvGnomeDark"
+  icons: "Papirus-Dark"
+
+panel:
+  position: "top"
+  height: 32
+  plugins:
+    - mainmenu
+    - taskbar
+    - statusnotifier
+    - volume
+    - worldclock
+    - networkmonitor

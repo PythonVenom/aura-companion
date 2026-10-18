@@ -1,5 +1,5 @@
 # AuraOS Desktop Specification
-version: "1.0"
+version: "1.1"
 codename: "Aura-GNOME-Style"
 base:
   wm: openbox
@@ -19,3 +19,13 @@ panel:
     - volume
     - worldclock
     - networkmonitor
+    - customcommand1
+    - customcommand2
+
+custom_commands:
+  customcommand1:
+    command: "lxqt-config"
+    text: "⚙️"
+  customcommand2:
+    command: "blueman-manager"
+    text: ""

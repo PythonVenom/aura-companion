@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+from aura.core.storage import get_media_path
 from difflib import get_close_matches
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
@@ -60,15 +61,15 @@ class AgentMediaSearch(BaseAgent):
     DEFAULT_MOVIE_DIRS = [
         os.path.expanduser("~/Movies"),
         os.path.expanduser("~/Видео"),
-        "/mnt/aura_hdd/media",
-        "/mnt/aura_hdd/movies",
-        "/mnt/aura_hdd/video",
+        str(get_media_path() / "media"),
+        str(get_media_path() / "movies"),
+        str(get_media_path() / "video"),
     ]
     DEFAULT_MUSIC_DIRS = [
         os.path.expanduser("~/Music"),
         os.path.expanduser("~/Музыка"),
-        "/mnt/aura_hdd/music",
-        "/mnt/aura_hdd/audio",
+        str(get_media_path() / "music"),
+        str(get_media_path() / "audio"),
     ]
 
     def __init__(

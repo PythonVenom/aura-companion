@@ -77,7 +77,8 @@ class AgentRAGMemory(BaseAgent):
             import logging
             logging.getLogger('aura.rag_memory').debug(
                 'rag_memory error: %s', e)
-        return str(Path.home() / ".local" / "share" / "aura" / "rag_db")
+        from aura.core.storage import get_rag_db_path
+        return str(get_rag_db_path())
     COLLECTION_NAME = "aura_dialogs"
     EMBED_MODEL = "nomic-embed-text"
     OLLAMA_URL = "http://localhost:11434/api/embed"

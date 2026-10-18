@@ -1,5 +1,5 @@
 # AuraOS Desktop Specification
-version: "1.1"
+version: "1.2"
 codename: "Aura-GNOME-Style"
 base:
   wm: openbox
@@ -21,6 +21,7 @@ panel:
     - networkmonitor
     - customcommand1
     - customcommand2
+    - customcommand3  # Новый виджет Aura
 
 custom_commands:
   customcommand1:
@@ -29,3 +30,6 @@ custom_commands:
   customcommand2:
     command: "blueman-manager"
     text: ""
+  customcommand3:
+    command: "echo \"Aura: $(jq -r '.state' ~/.cache/aura/aura_status.json)\""
+    text: "Aura: ..."

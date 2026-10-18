@@ -1,6 +1,6 @@
 # AuraOS Desktop Specification
-version: "1.2"
-codename: "Aura-GNOME-Style"
+version: "1.3"
+codename: "Aura-Ubuntu-Style"
 base:
   wm: openbox
   panel: lxqt
@@ -10,18 +10,19 @@ base:
   icons: "Papirus-Dark"
 
 panel:
-  position: "top"
-  height: 32
+  position: "bottom" # <-- ПАНЕЛЬ ВНИЗУ
+  height: 40
   plugins:
     - mainmenu
     - taskbar
+    - desktopswitch # <-- Переключатель рабочих столов
     - statusnotifier
     - volume
     - worldclock
     - networkmonitor
     - customcommand1
     - customcommand2
-    - customcommand3  # Новый виджет Aura
+    - customcommand3
 
 custom_commands:
   customcommand1:

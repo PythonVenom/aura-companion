@@ -1,6 +1,7 @@
 """AuraOS Desktop Provisioner (Infrastructure as Code)."""
 import shutil
 from pathlib import Path
+
 import yaml
 
 SPEC_PATH = Path(__file__).parent / "spec.yaml"
@@ -8,7 +9,7 @@ LXQT_CONFIG = Path.home() / ".config" / "lxqt" / "panel.conf"
 
 def provision():
     print("Reading spec.yaml...")
-    with open(SPEC_PATH, "r", encoding="utf-8") as f:
+    with open(SPEC_PATH, encoding="utf-8") as f:
         spec = yaml.safe_load(f)
 
     panel = spec.get("panel", {})
@@ -35,7 +36,7 @@ def provision():
             lines.append(f"text={cmd_data.get('text', 'CMD')}")
         else:
             lines.append(f"type={p}")
-        
+
         if p in ("mainmenu", "taskbar"):
             lines.append("alignment=Left")
         else:

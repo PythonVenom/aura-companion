@@ -1,3 +1,5 @@
+import re
+
 """Voice Agent — микрофон → STT → voice.heard.
 Обёртка над AgentListener (T-one sherpa-onnx).
 Наука: Voice Loop (Pieraccini 2012), Adapter Pattern.
@@ -19,7 +21,7 @@ class VoiceAgent:
     version = "1.1.0"
 
     # Wake words (нижний регистр, подстрока)
-    WAKE_WORDS = ("аура", "ура,", " аура", "ауру", "ауры")
+    WAKE_WORDS = ("аура", "ауру", "ауры")
     # Активное окно после wake — сколько секунд слушаем команду
     ACTIVE_WINDOW_SEC = 10.0
 
@@ -35,7 +37,9 @@ class VoiceAgent:
 
     def _has_wake(self, text: str) -> bool:
         t = text.lower()
-        return any(w in t for w in self.WAKE_WORDS)
+        # Ищем точное совпадение слова, а не подстроку
+        words = re.findall(r'[а-яёa-z]+', t)
+        return any(w in self.WAKE_WORDS for w in words)
 
     def _in_active_window(self) -> bool:
         import time as _t

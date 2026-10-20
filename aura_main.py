@@ -48,6 +48,7 @@ from aura.bootstrap import build_orchestrator
 from aura.core import hands_free
 from aura.core.chat_bridge import ChatBridge
 from aura.core.chat_watcher import ChatWatcher
+from aura.kernel.agents.system_control import handle_system_command
 from aura.dialog_fsm import clear_state as fsm_clear
 from aura.dialog_fsm import get_state as fsm_get
 from aura.dialog_fsm import set_state as fsm_set
@@ -642,6 +643,16 @@ class AuraOrchestrator:
                 self._chat_dedup = {
                     k: v for k, v in self._chat_dedup.items() if v > _cutoff
                 }
+            # МЕНТОР ОС: проверяем системные команды (выключить/ребут/сон)
+            sys_cmd = handle_system_command(user_text)
+            if sys_cmd:
+                response = sys_cmd
+                try:
+                    self.chat_bridge.append_history(user_text, response)
+                except Exception as e:
+                    print(f'⚠️ chat history (sys): {e}', flush=True)
+                continue
+
             try:
                 response = asyncio.run(self.orch.process(user_text))
             except Exception as e:

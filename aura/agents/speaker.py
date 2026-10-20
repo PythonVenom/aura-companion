@@ -20,7 +20,8 @@ from aura.agents.base import MicroAgent
 
 
 class AgentSpeaker(MicroAgent):
-    def __init__(self):
+    def __init__(self)
+        self._speak_lock = threading.Lock():
         super().__init__("speaker", "Голос Ауры")
         self.activate()
         # AURA_VOICE_XDG_FIX_V3: XDG в приоритете (project/models/voices — пустая)
@@ -149,9 +150,7 @@ class AgentSpeaker(MicroAgent):
                             logging.getLogger('aura.speaker').debug(
                                 'speaker error: %s', e)
                 else:
-                    subprocess.Popen(
-                        ['espeak-ng', '-v', 'ru', '-p', '60', '-s', '160', text],
-                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    pass # espeak removed
             except Exception as e:
                 print(f"❌ Ошибка озвучивания: {e}")
             finally:

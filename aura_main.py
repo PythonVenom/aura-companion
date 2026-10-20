@@ -49,6 +49,8 @@ from aura.core import hands_free
 from aura.core.chat_bridge import ChatBridge
 from aura.core.chat_watcher import ChatWatcher
 from aura.kernel.agents.system_control import handle_system_command
+from aura.mcp.skill_loader import find_skill
+from aura.mcp.skill_executor import execute_skill
 from aura.dialog_fsm import clear_state as fsm_clear
 from aura.dialog_fsm import get_state as fsm_get
 from aura.dialog_fsm import set_state as fsm_set
@@ -651,6 +653,16 @@ class AuraOrchestrator:
                     self.chat_bridge.append_history(user_text, response)
                 except Exception as e:
                     print(f'⚠️ chat history (sys): {e}', flush=True)
+                continue
+
+            # РЕЕСТР НАВЫКОВ: проверяем, есть ли навык для этого запроса
+            skill = find_skill(user_text)
+            if skill:
+                response = execute_skill(skill)
+                try:
+                    self.chat_bridge.append_history(user_text, response)
+                except Exception as e:
+                    print(f'⚠️ chat history (skill): {e}', flush=True)
                 continue
 
             try:

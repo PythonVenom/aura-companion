@@ -14,16 +14,6 @@ ShellRoot {
     property bool calendarOpen: false
     property bool powerMenuOpen: false
 
-    // --- ЧАТ ---
-    property string chatHistoryText: "История пуста (попробуй написать что-нибудь)"
-    Process {
-        id: chatReaderProc
-        command: ["bash", "/home/pythonvenom/.config/quickshell/scripts/aura-chat.sh", "read"]
-        running: false
-        stdout: StdioCollector { onStreamFinished: chatHistoryText = text.trim() }
-    }
-    Timer { interval: 2000; running: chatOpen; repeat: true; onTriggered: chatReaderProc.running = true }
-
     // --- ТЕЛЕМЕТРИЯ ---
     property string auraStatus: "..."
     property string cpuLoad: "..."
@@ -43,7 +33,12 @@ ShellRoot {
             }
         }
     }
-    Timer { interval: 1000; running: true; repeat: true; onTriggered: telemetryProc.running = true }
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: telemetryProc.running = true
+    }
 
     // --- ПОГОДА И ОБНОВЛЕНИЯ ---
     property string weatherText: "🌤 ..."
@@ -51,22 +46,43 @@ ShellRoot {
         id: weatherProc
         command: ["bash", "/home/pythonvenom/.config/quickshell/scripts/weather.sh"]
         running: false
-        stdout: StdioCollector { onStreamFinished: weatherText = text.trim() }
+        stdout: StdioCollector {
+            onStreamFinished: weatherText = text.trim()
+        }
     }
-    Timer { interval: 900000; running: true; repeat: true; triggeredOnStart: true; onTriggered: weatherProc.running = true }
+    Timer {
+        interval: 900000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: weatherProc.running = true
+    }
 
     property string updateText: "📦 ..."
     Process {
         id: updateProc
         command: ["bash", "/home/pythonvenom/.config/quickshell/scripts/updates.sh"]
         running: false
-        stdout: StdioCollector { onStreamFinished: updateText = text.trim() }
+        stdout: StdioCollector {
+            onStreamFinished: updateText = text.trim()
+        }
     }
-    Timer { interval: 3600000; running: true; repeat: true; triggeredOnStart: true; onTriggered: updateProc.running = true }
+    Timer {
+        interval: 3600000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: updateProc.running = true
+    }
 
     // --- ЧАСЫ ---
     property string currentTime: Qt.formatDateTime(new Date(), "ddd, hh:mm")
-    Timer { interval: 1000; running: true; repeat: true; onTriggered: currentTime = Qt.formatDateTime(new Date(), "ddd, hh:mm") }
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: currentTime = Qt.formatDateTime(new Date(), "ddd, hh:mm")
+    }
 
     // ВЕРХНЯЯ ПАНЕЛЬ
     PanelWindow {
@@ -86,11 +102,12 @@ ShellRoot {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        logEvent("system", "Открыто меню приложений")
+                        logEvent("system", "Открыто меню")
                         Quickshell.execDetached(["rofi", "-show", "drun"])
                     }
                 }
             }
+            
             Text {
                 text: "🗔 Обзор"
                 color: "#a6e3a1"
@@ -98,7 +115,7 @@ ShellRoot {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        logEvent("system", "Открыт обзор окон")
+                        logEvent("system", "Обзор окон")
                         Quickshell.execDetached(["bash", "/home/pythonvenom/.config/quickshell/scripts/aura-wm.sh", "overview"])
                     }
                 }
@@ -120,8 +137,18 @@ ShellRoot {
                 color: "#89b4fa"
                 font.pixelSize: 12
             }
-            Text { text: weatherText; color: "#a6adc8"; font.pixelSize: 14 }
-            Text { text: updateText; color: "#f9e2af"; font.pixelSize: 14 }
+            
+            Text {
+                text: weatherText
+                color: "#a6adc8"
+                font.pixelSize: 14
+            }
+            
+            Text {
+                text: updateText
+                color: "#f9e2af"
+                font.pixelSize: 14
+            }
             
             Text {
                 text: "⚙️"
@@ -136,6 +163,7 @@ ShellRoot {
                     }
                 }
             }
+            
             Text {
                 text: "⏻"
                 color: "#f38ba8"
@@ -148,56 +176,6 @@ ShellRoot {
                         calendarOpen = false
                         chatOpen = false
                     }
-                }
-            }
-        }
-    }
-
-    // МЕНЮ ПИТАНИЯ
-    PanelWindow {
-        visible: powerMenuOpen
-        anchors { top: true; right: true }
-        margins.top: 38
-        margins.right: 8
-        implicitWidth: 180
-        implicitHeight: 200
-        color: "#1e1e2e"
-        
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 10
-            spacing: 5
-            
-            Button {
-                text: "Выключить"
-                Layout.fillWidth: true
-                onClicked: {
-                    logEvent("system", "Пользователь выключил ПК")
-                    Quickshell.execDetached(["systemctl", "poweroff"])
-                }
-            }
-            Button {
-                text: "Перезагрузить"
-                Layout.fillWidth: true
-                onClicked: {
-                    logEvent("system", "Пользователь перезагрузил ПК")
-                    Quickshell.execDetached(["systemctl", "reboot"])
-                }
-            }
-            Button {
-                text: "Сон"
-                Layout.fillWidth: true
-                onClicked: {
-                    logEvent("system", "Пользователь отправил ПК в сон")
-                    Quickshell.execDetached(["systemctl", "suspend"])
-                }
-            }
-            Button {
-                text: "Выйти"
-                Layout.fillWidth: true
-                onClicked: {
-                    logEvent("system", "Пользователь вышел из сессии")
-                    Quickshell.execDetached(["lxqt-leave", "--logout"])
                 }
             }
         }
@@ -242,7 +220,6 @@ ShellRoot {
                         anchors.fill: parent
                         hoverEnabled: true
                         onClicked: {
-                            logEvent("system", "Открыт терминал")
                             Quickshell.execDetached(["bash", "/home/pythonvenom/.config/quickshell/scripts/smart-launch.sh", "QTerminal", "qterminal"])
                         }
                     }
@@ -264,7 +241,6 @@ ShellRoot {
                         anchors.fill: parent
                         hoverEnabled: true
                         onClicked: {
-                            logEvent("system", "Открыт файловый менеджер")
                             Quickshell.execDetached(["pcmanfm-qt"])
                         }
                     }
@@ -310,7 +286,6 @@ ShellRoot {
                         anchors.fill: parent
                         hoverEnabled: true
                         onClicked: {
-                            logEvent("system", "Открыт браузер")
                             Quickshell.execDetached(["bash", "/home/pythonvenom/.config/quickshell/scripts/smart-launch.sh", "Firefox", "firefox"])
                         }
                     }
@@ -319,12 +294,104 @@ ShellRoot {
         }
     }
 
+    // ОКНО ЧАТА (FloatingWindow)
+    FloatingWindow {
+        id: chatWindow
+        visible: chatOpen
+        title: "Aura Chat"
+        implicitWidth: 400
+        implicitHeight: 500
+        color: "#1e1e2e"
+        
+        Component.onCompleted: {
+            if (chatOpen) inputField.forceActiveFocus()
+        }
+        onVisibleChanged: {
+            if (chatOpen) inputField.forceActiveFocus()
+        }
+
+        property string chatHistoryText: "Загрузка..."
+        Process {
+            id: chatReaderProc
+            command: ["bash", "/home/pythonvenom/.config/quickshell/scripts/aura-chat.sh", "read"]
+            running: false
+            stdout: StdioCollector {
+                onStreamFinished: chatWindow.chatHistoryText = text.trim()
+            }
+        }
+        Timer {
+            interval: 2000
+            running: visible
+            repeat: true
+            onTriggered: chatReaderProc.running = true
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 10
+            spacing: 10
+            
+            Text {
+                text: "Диалог с Aura"
+                color: "#89b4fa"
+                font.bold: true
+                font.pixelSize: 16
+                Layout.alignment: Qt.AlignHCenter
+            }
+            
+            ScrollView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                TextArea {
+                    text: chatWindow.chatHistoryText
+                    readOnly: true
+                    wrapMode: TextArea.Wrap
+                    color: "#cdd6f4"
+                    background: Rectangle {
+                        color: "#181825"
+                        radius: 5
+                    }
+                }
+            }
+            
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+                
+                TextField {
+                    id: inputField
+                    Layout.fillWidth: true
+                    placeholderText: "Напиши Aura..."
+                    color: "#cdd6f4"
+                    background: Rectangle {
+                        color: "#313244"
+                        radius: 5
+                    }
+                    onAccepted: {
+                        if (text.trim() !== "") {
+                            Quickshell.execDetached(["bash", "/home/pythonvenom/.config/quickshell/scripts/aura-chat.sh", "send", text])
+                            text = ""
+                        }
+                    }
+                }
+                
+                Button {
+                    text: "➤"
+                    onClicked: {
+                        if (inputField.text.trim() !== "") {
+                            Quickshell.execDetached(["bash", "/home/pythonvenom/.config/quickshell/scripts/aura-chat.sh", "send", inputField.text])
+                            inputField.text = ""
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // ШТОРКА НАСТРОЕК
-    PanelWindow {
+    FloatingWindow {
+        id: settingsWindow
         visible: settingsOpen
-        anchors { top: true; left: true }
-        margins.top: 38
-        margins.left: 8
         implicitWidth: 320
         implicitHeight: 250
         color: "#1e1e2e"
@@ -340,28 +407,69 @@ ShellRoot {
                 font.bold: true
                 font.pixelSize: 16
             }
+            
             GridLayout {
                 columns: 2
                 rowSpacing: 10
                 columnSpacing: 10
                 Layout.fillWidth: true
                 
-                Button { text: "📶 Wi-Fi"; Layout.fillWidth: true; onClicked: { logEvent("system", "Открыты настройки Wi-Fi"); Quickshell.execDetached(["nm-connection-editor"]) } }
-                Button { text: "📡 Bluetooth"; Layout.fillWidth: true; onClicked: { logEvent("system", "Открыты настройки Bluetooth"); Quickshell.execDetached(["blueman-manager"]) } }
-                Button { text: "🔊 Звук"; Layout.fillWidth: true; onClicked: { logEvent("system", "Открыты настройки звука"); Quickshell.execDetached(["pavucontrol"]) } }
-                Button { text: "🎤 Микрофон"; Layout.fillWidth: true; onClicked: { logEvent("system", "Открыты настройки микрофона"); Quickshell.execDetached(["pavucontrol"]) } }
-                Button { text: "📷 Камера"; Layout.fillWidth: true; onClicked: { logEvent("system", "Открыта камера"); Quickshell.execDetached(["guvcview"]) } }
-                Button { text: "⚙️ Система"; Layout.fillWidth: true; onClicked: { logEvent("system", "Открыты системные настройки"); Quickshell.execDetached(["lxqt-config"]) } }
+                Button {
+                    text: "📶 Wi-Fi"
+                    Layout.fillWidth: true
+                    onClicked: {
+                        logEvent("system", "Wi-Fi")
+                        Quickshell.execDetached(["nm-connection-editor"])
+                    }
+                }
+                Button {
+                    text: "📡 Bluetooth"
+                    Layout.fillWidth: true
+                    onClicked: {
+                        logEvent("system", "Bluetooth")
+                        Quickshell.execDetached(["blueman-manager"])
+                    }
+                }
+                Button {
+                    text: "🔊 Звук"
+                    Layout.fillWidth: true
+                    onClicked: {
+                        logEvent("system", "Звук")
+                        Quickshell.execDetached(["pavucontrol"])
+                    }
+                }
+                Button {
+                    text: "🎤 Микрофон"
+                    Layout.fillWidth: true
+                    onClicked: {
+                        logEvent("system", "Микрофон")
+                        Quickshell.execDetached(["pavucontrol"])
+                    }
+                }
+                Button {
+                    text: "📷 Камера"
+                    Layout.fillWidth: true
+                    onClicked: {
+                        logEvent("system", "Камера")
+                        Quickshell.execDetached(["guvcview"])
+                    }
+                }
+                Button {
+                    text: "⚙️ Система"
+                    Layout.fillWidth: true
+                    onClicked: {
+                        logEvent("system", "Система")
+                        Quickshell.execDetached(["lxqt-config"])
+                    }
+                }
             }
         }
     }
 
     // КАЛЕНДАРЬ
-    PanelWindow {
+    FloatingWindow {
+        id: calendarWindow
         visible: calendarOpen
-        anchors { top: true; right: true }
-        margins.top: 38
-        margins.right: 8
         implicitWidth: 320
         implicitHeight: 380
         color: "#1e1e2e"
@@ -390,68 +498,46 @@ ShellRoot {
             }
         }
     }
-
-    // ОКНО ЧАТА
-    PanelWindow {
-        visible: chatOpen
-        anchors { top: true; right: true }
-        margins.top: 38
-        margins.right: 8
-        implicitWidth: 400
-        implicitHeight: 500
+    
+    // МЕНЮ ПИТАНИЯ
+    FloatingWindow {
+        id: powerWindow
+        visible: powerMenuOpen
+        implicitWidth: 180
+        implicitHeight: 200
         color: "#1e1e2e"
         
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: 10
-            spacing: 10
+            spacing: 5
             
-            Text {
-                text: "Диалог с Aura"
-                color: "#89b4fa"
-                font.bold: true
-                font.pixelSize: 16
-                Layout.alignment: Qt.AlignHCenter
-            }
-            
-            ScrollView {
+            Button {
+                text: "Выключить"
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                TextArea {
-                    text: chatHistoryText
-                    readOnly: true
-                    wrapMode: TextArea.Wrap
-                    color: "#cdd6f4"
-                    background: Rectangle { color: "#181825"; radius: 5 }
+                onClicked: {
+                    Quickshell.execDetached(["systemctl", "poweroff"])
                 }
             }
-            
-            RowLayout {
+            Button {
+                text: "Перезагрузить"
                 Layout.fillWidth: true
-                spacing: 10
-                
-                TextField {
-                    id: inputField
-                    Layout.fillWidth: true
-                    placeholderText: "Напиши Aura..."
-                    color: "#cdd6f4"
-                    background: Rectangle { color: "#313244"; radius: 5 }
-                    onAccepted: {
-                        if (text.trim() !== "") {
-                            Quickshell.execDetached(["bash", "/home/pythonvenom/.config/quickshell/scripts/aura-chat.sh", "send", text])
-                            text = ""
-                        }
-                    }
+                onClicked: {
+                    Quickshell.execDetached(["systemctl", "reboot"])
                 }
-                
-                Button {
-                    text: "➤"
-                    onClicked: {
-                        if (inputField.text.trim() !== "") {
-                            Quickshell.execDetached(["bash", "/home/pythonvenom/.config/quickshell/scripts/aura-chat.sh", "send", inputField.text])
-                            inputField.text = ""
-                        }
-                    }
+            }
+            Button {
+                text: "Сон"
+                Layout.fillWidth: true
+                onClicked: {
+                    Quickshell.execDetached(["systemctl", "suspend"])
+                }
+            }
+            Button {
+                text: "Выйти"
+                Layout.fillWidth: true
+                onClicked: {
+                    Quickshell.execDetached(["lxqt-leave", "--logout"])
                 }
             }
         }

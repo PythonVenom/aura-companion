@@ -153,3 +153,4 @@ docs/screenshots/*.png
 # Local ML models (795M — too big for git)
 ml/
 chat_inbox
+chat_history

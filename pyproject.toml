@@ -24,6 +24,7 @@ classifiers = [
     "Topic :: Multimedia :: Sound/Audio :: Speech",
 ]
 dependencies = [
+    "cryptography>=41.0.0",
     "fastapi>=0.115",
     "uvicorn>=0.32",
     "pydantic>=2.0",

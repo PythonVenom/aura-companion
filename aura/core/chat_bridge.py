@@ -31,23 +31,20 @@ class ChatBridge:
             Path(history_path) if history_path else DEFAULT_CACHE / "chat_history.jsonl"
         )
         self._offset = 0
-        # TAIL_F_OFFSET_FIX: пропускать старые сообщения при старте — читаем только новые.
+        self._inode = 0
         if self.inbox_path.exists():
-            self._offset = self.inbox_path.stat().st_size
+            st = self.inbox_path.stat()
+            self._offset = st.st_size
+            self._inode = st.st_ino
+        self._inode = self.inbox_path.stat().st_ino
 
     def read_new(self) -> list[dict]:
-        """Прочитать новые сообщения из inbox с последнего offset."""
+        """Всегда читает весь INBOX. Дедупликация — в _drain_chat_queue."""
         if not self.inbox_path.exists():
-            self._offset = 0
             return []
         msgs = []
         try:
             with open(self.inbox_path, encoding="utf-8") as f:
-                f.seek(0, 2)
-                size = f.tell()
-                if size < self._offset:
-                    self._offset = 0
-                f.seek(self._offset)
                 for line in f:
                     line = line.strip()
                     if not line:
@@ -56,7 +53,6 @@ class ChatBridge:
                         msgs.append(json.loads(line))
                     except json.JSONDecodeError:
                         continue
-                self._offset = f.tell()
         except Exception:
             return []
         return msgs

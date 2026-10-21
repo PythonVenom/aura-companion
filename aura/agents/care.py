@@ -27,7 +27,7 @@ def should_trigger(task: CareTask, now: datetime) -> bool:
 
 class CareAgent(BaseAgent):
     name = "care"
-    MODULE_ALWAYS = True
+    MODULE_ALWAYS = False
     KEYWORDS = ("напомни", "напоминания", "пить воду",
                 "поесть", "таблетки", "поспать", "забота")
 

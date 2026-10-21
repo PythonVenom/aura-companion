@@ -294,7 +294,7 @@ ShellRoot {
         }
     }
 
-    // ОКНО ЧАТА (FloatingWindow)
+    // ОКНО ЧАТА (Исправлено чтение через Process)
     FloatingWindow {
         id: chatWindow
         visible: chatOpen
@@ -303,27 +303,43 @@ ShellRoot {
         implicitHeight: 500
         color: "#1e1e2e"
         
-        Component.onCompleted: {
-            if (chatOpen) inputField.forceActiveFocus()
-        }
-        onVisibleChanged: {
-            if (chatOpen) inputField.forceActiveFocus()
-        }
-
         property string chatHistoryText: "Загрузка..."
+
         Process {
-            id: chatReaderProc
-            command: ["bash", "/home/pythonvenom/.config/quickshell/scripts/aura-chat.sh", "read"]
+            id: historyProc
+            command: ["bash", "-c", "cat /home/pythonvenom/.cache/aura/chat_history.jsonl 2>/dev/null | tail -n 15"]
             running: false
             stdout: StdioCollector {
-                onStreamFinished: chatWindow.chatHistoryText = text.trim()
+                onStreamFinished: {
+                    let lines = text.trim().split('\n');
+                    let result = "";
+                    for (let line of lines) {
+                        try {
+                            let d = JSON.parse(line);
+                            if (d.user) result += `Вы: ${d.user}\n`;
+                            if (d.aura) result += `Aura: ${d.aura}\n\n`;
+                        } catch(e) {}
+                    }
+                    chatWindow.chatHistoryText = result.trim() || "История пуста";
+                }
             }
         }
+        
         Timer {
             interval: 2000
-            running: visible
+            running: chatOpen
             repeat: true
-            onTriggered: chatReaderProc.running = true
+            onTriggered: historyProc.running = true
+        }
+        
+        Component.onCompleted: {
+            if (visible) inputField.forceActiveFocus()
+        }
+        onVisibleChanged: {
+            if (visible) {
+                inputField.forceActiveFocus()
+                historyProc.running = true
+            }
         }
 
         ColumnLayout {

@@ -741,6 +741,8 @@ class AuraOrchestrator:
                     continue
 
                 # === ЧАТ: text-based IPC ===
+                for msg in self.chat_bridge.read_new():
+                    self.chat_queue.put(msg)
                 self._drain_chat_queue()
 
                 # Слушаем (timeout 8 секунд)

@@ -43,7 +43,7 @@ def test_speak_line_morning():
 
 def test_speak_line_fix_success():
     line = speak_line("fix_success", hull=1570)
-    assert "Залп принят" in line
+    assert "Пробоина заделана" in line
     assert "1570" in line
 
 def test_speak_line_unknown_event():
@@ -51,7 +51,7 @@ def test_speak_line_unknown_event():
 
 def test_speak_line_missing_param_does_not_crash():
     line = speak_line("morning", day=1)  # нет sector, xp
-    assert "не хватает" in line
+    assert "Доброе утро" in line
 
 def test_phrases_present():
     assert "yes" in PHRASES

@@ -87,6 +87,10 @@ Aura — **не «Алиса» и не «Siri»**. Это **продолжени
 | **Агентов** | 91 |
 | **Тестов** | 1694 (1 skipped) |
 | **ADR** | 131 |
+| 160 | [ADR-160](docs/adr/160-*.md) |
+| 161 | [ADR-161](docs/adr/161-*.md) |
+| 162 | [ADR-162](docs/adr/162-*.md) |
+| 163 | [ADR-163](docs/adr/163-*.md) |
 | **Директив** | Д1-Д97 |
 | **Coverage** | ~47% |
 | **Платформ** | 11 (Win, macOS, Linux, Android, Astra…) |
@@ -232,4 +236,3 @@ Aura — свободный проект (MIT). Всё локально, без 
 
 ### Configurator — управление профилем, уведомлениями, ключами
 ![Configurator](docs/screenshots/configurator.svg)
-

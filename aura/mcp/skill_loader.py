@@ -4,6 +4,7 @@
 """
 import logging
 from pathlib import Path
+
 import yaml
 
 logger = logging.getLogger("aura.skills")
@@ -19,7 +20,7 @@ def load_skills() -> dict:
     skills = {}
     for file in SKILLS_DIR.glob("*.yaml"):
         try:
-            with open(file, "r", encoding="utf-8") as f:
+            with open(file, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
                 if data and "name" in data and "command" in data:
                     skills[data["name"]] = data
@@ -33,8 +34,8 @@ def find_skill(text: str) -> dict | None:
     """Найти навык по триггеру (ключевым словам)."""
     text = text.lower()
     skills = load_skills()
-    
-    for name, skill in skills.items():
+
+    for _name, skill in skills.items():
         triggers = skill.get("triggers", [])
         for trigger in triggers:
             if trigger.lower() in text:

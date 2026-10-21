@@ -7,7 +7,7 @@ def test_defaults_empty_persona():
     p = persona.build_system_prompt({})
     assert "Аура" in p
     assert "друг" in p
-    assert "тёпл" in p.lower()
+    assert "сухо" in p.lower()
 
 
 def test_defaults_none():

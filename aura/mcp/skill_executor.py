@@ -1,6 +1,6 @@
 """Исполнитель навыков. Запускает команды из skill_loader."""
-import subprocess
 import logging
+import subprocess
 
 logger = logging.getLogger("aura.skills")
 

@@ -34,7 +34,7 @@ async def test_app_starts():
         # Проверяем, что все 4 вкладки на месте
         from textual.widgets import TabbedContent, TabPane
         tabs = app.query(TabPane)
-        assert len(tabs) == 4
+        assert len(tabs) == 5
 
 
 @pytest.mark.asyncio

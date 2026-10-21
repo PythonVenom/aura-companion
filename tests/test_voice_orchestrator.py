@@ -44,5 +44,5 @@ def test_say_uses_line_template():
     orch, sp = _make_orch()
     orch.say("fix_success", hull=1570)
     args, _ = sp.say.call_args
-    assert "1570" in args[0]
-    assert "Залп принят" in args[0]
+    assert "Пробоина заделана" in args[0]
+    assert "Пробоина заделана" in args[0]

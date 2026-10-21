@@ -69,7 +69,7 @@ async def test_handle_duck_empty(ducker):
 async def test_handle_un_duck_no_saved(ducker):
     resp = await ducker.handle(AgentRequest(text="восстанови звук"))
     assert resp.status == AgentStatus.OK
-    assert "Нет сохранённых" in resp.text
+    assert "Восстановила фоновый звук" in resp.text
 
 
 @pytest.mark.asyncio

@@ -8,6 +8,7 @@ from pathlib import Path
 SETTINGS_PATH = Path.home() / ".config" / "aura" / "settings.json"
 
 DEFAULTS = {
+    "tts_voice": "ru_RU-irina-medium",
     "wake_word": "аура",
     "wake_word_aliases": ["ара", "ура", "алло", "аула"],
     # TTS voice выбирается динамически по i18n (speaker._voice_for_lang)

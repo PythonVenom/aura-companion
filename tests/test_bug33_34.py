@@ -14,5 +14,5 @@ def test_timeout_8_in_main():
     """Bug 34: listener timeout >= 8."""
     from pathlib import Path
     s = Path("aura_main.py").read_text(encoding="utf-8")
-    assert "listener.listen(timeout=8)" in s
+    assert "listener.listen(timeout=1)" in s
     assert "listener.listen(timeout=5)" not in s

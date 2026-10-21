@@ -36,14 +36,19 @@ class ChatBridge:
             self._offset = self.inbox_path.stat().st_size
 
     def read_new(self) -> list[dict]:
-        """Прочитать последние 10 сообщений из inbox (без offset)."""
+        """Прочитать новые сообщения из inbox с последнего offset."""
         if not self.inbox_path.exists():
+            self._offset = 0
             return []
         msgs = []
         try:
             with open(self.inbox_path, encoding="utf-8") as f:
-                lines = f.readlines()[-10:]  # последние 10 строк
-                for line in lines:
+                f.seek(0, 2)
+                size = f.tell()
+                if size < self._offset:
+                    self._offset = 0
+                f.seek(self._offset)
+                for line in f:
                     line = line.strip()
                     if not line:
                         continue
@@ -51,6 +56,7 @@ class ChatBridge:
                         msgs.append(json.loads(line))
                     except json.JSONDecodeError:
                         continue
+                self._offset = f.tell()
         except Exception:
             return []
         return msgs

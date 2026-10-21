@@ -47,7 +47,6 @@ from aura.agents.speaker import AgentSpeaker
 from aura.bootstrap import build_orchestrator
 from aura.core import hands_free
 from aura.core.chat_bridge import ChatBridge
-from aura.core.chat_watcher import ChatWatcher
 from aura.kernel.agents.system_control import handle_system_command
 from aura.dialog_fsm import clear_state as fsm_clear
 from aura.dialog_fsm import get_state as fsm_get
@@ -182,7 +181,6 @@ class AuraOrchestrator:
         self.chat_queue: _queue.Queue = _queue.Queue()
         print("🔥 [INIT] ChatWatcher()...", flush=True)
         print("🔥 [INIT] ChatWatcher()...", flush=True)
-        self.chat_watcher = ChatWatcher(self.chat_bridge, self.chat_queue)
         print("🔥 [INIT] ChatWatcher создан!", flush=True)
         print("🔥 [INIT] ChatWatcher создан!", flush=True)
 

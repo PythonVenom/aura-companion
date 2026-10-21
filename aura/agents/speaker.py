@@ -20,8 +20,8 @@ from aura.agents.base import MicroAgent
 
 
 class AgentSpeaker(MicroAgent):
-    def __init__(self)
-        self._speak_lock = threading.Lock():
+    def __init__(self):
+        self._speak_lock = threading.Lock()
         super().__init__("speaker", "Голос Ауры")
         self.activate()
         # AURA_VOICE_XDG_FIX_V3: XDG в приоритете (project/models/voices — пустая)

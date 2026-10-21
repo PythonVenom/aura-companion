@@ -31,6 +31,10 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -e . > /dev/null 2>&1
 
+echo "2.5. Симлинки для моделей..."
+ln -sfn /mnt/aura_hdd/aura_models/sherpa-onnx-streaming-t-one-russian-2025-09-08 "$NEW_DIR/sherpa-onnx-streaming-t-one-russian-2025-09-08"
+ln -sfn /home/pythonvenom/aura-companion/models "$NEW_DIR/models"
+
 echo "3. Запуск тестов..."
 if pytest -q; then
     echo "✅ Тесты пройдены. Переключаем трафик на $TARGET_NAME."

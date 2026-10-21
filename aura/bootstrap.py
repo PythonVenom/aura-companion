@@ -138,6 +138,7 @@ from aura.agents.vision_llm import AgentVisionLLM
 from aura.agents.web_scout import AgentWebScout
 from aura.agents.whatsapp import AgentWhatsApp
 from aura.core.orchestrator import Orchestrator
+from aura.kernel.agents.steam import AgentSteam
 
 MODULES_CONFIG_PATH = Path.home() / ".config" / "aura" / "modules.toml"
 
@@ -467,6 +468,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentInternet, modules_config)
     # v2.5: приоритет для автора
     orch.registry.register(CareAgent())
+    orch.registry.register(AgentSteam())
     orch.registry.register(AgentHandsFree())
     _load_plugins(orch)
 

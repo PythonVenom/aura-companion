@@ -104,44 +104,9 @@ class AuraOrchestrator:
         self.heartbeat = Heartbeat()
         self.orch = build_orchestrator()
 
-        # F-067: автозапуск ONE-SHOT (спустить воздух)
-        try:
-            from aura.system.oneshot import run_oneshot
-            r = run_oneshot(dry_run=False, restart_daemon=False, verbose=False)
-            if r.ruff_fixed > 0:
-                print(f"🩹 ONE-SHOT: починил {r.ruff_fixed} ошибок")
-            if r.is_clean():
-                print("🩹 ONE-SHOT: система чиста")
-        except Exception as e:
-            print(f"⚠️ ONE-SHOT не запустился: {e}")
+        # F-067: ONE-SHOT отключен в __init__ (блокирует старт)
 
-        # F-065: глубокая проверка при старте
-        try:
-            from aura.system.deep_check import run_deep_check
-            report = run_deep_check()
-            if report.all_ok:
-                print(f"🛸 Глубокая проверка: {report.total} систем в норме")
-            else:
-                print(f"⚠️ Глубокая проверка: "
-                      f"{report.ok_count}/{report.total} в норме")
-                for r in report.failures()[:5]:
-                    print(f"   🔴 {r.name}: {r.detail}")
-        except Exception as e:
-            print(f"⚠️ Deep check не запустился: {e}")
-
-        # F-037: самопроверка при старте (говорит голосом)
-        try:
-            import asyncio as _aio
-
-            from aura.agents.self_check import AgentSelfCheck
-            _check = AgentSelfCheck()
-            _report = _aio.run(_check.handle(
-                __import__("aura.core.protocol", fromlist=["AgentRequest"])
-                .AgentRequest(text="проверь себя")
-            ))
-            print(f"🛸 Самопроверка: {_report.text}")
-        except Exception as _e:
-            print(f"⚠️ Самопроверка не удалась: {_e}")
+        # F-065: глубокая проверка отключена в __init__ (блокирует старт)
 
         # Capability-профиль (Saltzer & Schroeder 1975, least privilege).
         # Borderlands-style: base_class + trees + class_mods.
@@ -153,7 +118,6 @@ class AuraOrchestrator:
             parts = prof_name.split("-")
             base_class = parts[0]
             trees = tuple(parts[1:]) if len(parts) > 1 else ()
-            print("🔥 [INIT] set_current(Profile)...", flush=True)
             print("🔥 [INIT] set_current(Profile)...", flush=True)
             set_current(Profile(
                 name=prof_name,

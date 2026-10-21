@@ -88,9 +88,11 @@ class AgentCaptain(BaseAgent):
         return (
             "🛸 Капитан, приоритеты по Д97 (дедлайн > долг > желание):\n"
             "\n"
-            "1. 🔴 Флешка для бати (сегодня) — elder-care\n"
-            "2. 🟡 Captain + Rituals (2-3ч) — для elder-care\n"
-            "3. 🟡 Тесты на бате (1д) — после флешки\n"
+            "1. 🟢 Blue-Green deploy — работает (blue активна)\n"
+            "2. 🟢 AuraOS Cockpit (Quickshell) — панель, док, чат\n"
+            "3. 🟢 Steam-агент (Deck Verified) — интегрирован\n"
+            "4. 🟡 Осталось: Drones (OBD), B2B (медицина, юро)\n"
+            "5. 🟢 Тесты: 2618 passed, 0 failed\n"
             "\n"
             "❄️ РФРИТ заморожен (разморозка: «едем по РФРИТ»)"
         )

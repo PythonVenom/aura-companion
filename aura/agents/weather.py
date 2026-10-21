@@ -62,8 +62,9 @@ class WeatherAgent(MicroAgent):
             + urllib.parse.quote(city)
             + "?format=j1&lang=ru"
         )
-        with urllib.request.urlopen(url, timeout=8) as r:
-            data = json.load(r)
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=8) as r:
+            data = json.loads(r.read().decode('utf-8'))
         # Адаптируем под старый интерфейс
         cur = data["current_condition"][0]
         result: dict[str, Any] = {

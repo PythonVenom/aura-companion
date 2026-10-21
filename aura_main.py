@@ -643,6 +643,18 @@ class AuraOrchestrator:
                 self._chat_dedup = {
                     k: v for k, v in self._chat_dedup.items() if v > _cutoff
                 }
+            # СТОП-КРАН
+            if any(w in user_text.lower() for w in ['стоп', 'остановись', 'замолчи', 'хватит']):
+                self.chat_bridge.append_history(user_text, "Останавливаюсь. Жду следующей команды.")
+                continue
+
+            # ДРЕВО УМЕНИЙ (Diablo Style)
+            if any(w in user_text.lower() for w in ['что ты умеешь', 'твои навыки', 'древо умений']):
+                import subprocess
+                tree = subprocess.run(['bash', '/home/pythonvenom/.config/quickshell/scripts/skills_tree.sh'], capture_output=True, text=True)
+                self.chat_bridge.append_history(user_text, tree.stdout)
+                continue
+
             # МЕНТОР ОС: проверяем системные команды (выключить/ребут/сон)
             sys_cmd = handle_system_command(user_text)
             if sys_cmd:
@@ -661,7 +673,8 @@ class AuraOrchestrator:
                 self.chat_bridge.append_history(user_text, response)
             except Exception as e:
                 print(f"⚠️ chat history: {e}", flush=True)
-            # не говорим вслух — это текстовый чат
+            if self.speaker is not None:
+                self.speaker.say(response)
 
     def run(self) -> None:
         """Главный цикл — паритет с AuraCore.run."""

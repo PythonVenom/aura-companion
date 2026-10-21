@@ -94,7 +94,7 @@ from aura.agents.fall import AgentFall
 from aura.agents.federated_adapter import AgentFederatedAdapter
 from aura.agents.fin_elder import AgentFinElder
 from aura.agents.gesture import AgentGesture
-from aura.agents.greeting import AgentGreeting
+    # from aura.agents.greeting import AgentGreeting  # ОТКЛЮЧЕНО: зацикливание на приветствиях
 from aura.agents.hands_free import AgentHandsFree
 from aura.agents.health import AgentHealth
 from aura.agents.health_twin import AgentHealthTwin
@@ -374,7 +374,7 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentMouse, modules_config)
     _try_register(orch, AgentPCControl, modules_config)       # яркость/громкость
     _try_register(orch, AgentMediaPult, modules_config)       # включи ютуб
-    _try_register(orch, AgentGreeting, modules_config)        # привет (широкий)
+    #     _try_register(orch, AgentGreeting, modules_config)        # привет (широкий)  # ОТКЛЮЧЕНО: зацикливание на приветствиях
     # --- Инфокосмос: сектора (2026-10-15) ---
     _try_register(orch, AgentSectorMapper, modules_config)    # где я / сектор
     _try_register(orch, AgentDataMiner, modules_config)       # данные (цены, курсы)

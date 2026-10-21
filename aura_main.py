@@ -154,6 +154,8 @@ class AuraOrchestrator:
             parts = prof_name.split("-")
             base_class = parts[0]
             trees = tuple(parts[1:]) if len(parts) > 1 else ()
+            print("🔥 [INIT] set_current(Profile)...", flush=True)
+            print("🔥 [INIT] set_current(Profile)...", flush=True)
             set_current(Profile(
                 name=prof_name,
                 base_class=base_class,
@@ -172,30 +174,50 @@ class AuraOrchestrator:
                 "Capability profile setup failed: %s — fail-open", e,
             )
         self.running = True
+        print("🔥 [INIT] ChatBridge()...", flush=True)
+        print("🔥 [INIT] ChatBridge()...", flush=True)
         self.chat_bridge = ChatBridge()
+        print("🔥 [INIT] ChatBridge создан!", flush=True)
+        print("🔥 [INIT] ChatBridge создан!", flush=True)
         self.chat_queue: _queue.Queue = _queue.Queue()
+        print("🔥 [INIT] ChatWatcher()...", flush=True)
+        print("🔥 [INIT] ChatWatcher()...", flush=True)
         self.chat_watcher = ChatWatcher(self.chat_bridge, self.chat_queue)
+        print("🔥 [INIT] ChatWatcher создан!", flush=True)
+        print("🔥 [INIT] ChatWatcher создан!", flush=True)
 
         # Достаём агентов, которых будем дёргать вручную
+        print("🔥 [INIT] journal...", flush=True)
+        print("🔥 [INIT] journal...", flush=True)
+        print("🔥 [INIT] journal...", flush=True)
         self.journal = _get_agent(self.orch, "journal")
+        print("🔥 [INIT] rag_memory...", flush=True)
         self.rag_memory = _get_agent(self.orch, "rag_memory")
+        print("🔥 [INIT] audio_router...", flush=True)
         self.audio_router = _get_agent(self.orch, "audio_router")
+        print("🔥 [INIT] vk_music...", flush=True)
         self.vk_music = _get_agent(self.orch, "vk_music")
+        print("🔥 [INIT] registry...", flush=True)
         self.registry = _get_agent(self.orch, "registry")
+        print("🔥 [INIT] ducker...", flush=True)
         self.ducker = _get_agent(self.orch, "music_ducker")
+        print("🔥 [INIT] media_pause...", flush=True)
         self.media_pause = _get_agent(self.orch, "media_pause")
 
         # Dialogue Manager (ADR-013)
+        print("🔥 [INIT] DialogueManager...", flush=True)
         self.dm = DialogueManager(
             SCENARIOS,
             get_agent=lambda n: _get_agent(self.orch, n),
         )
 
         # Proactive Engine (ADR-014)
+        print("🔥 [INIT] proactive...", flush=True)
         self.proactive = default_engine(get_agent=lambda n: _get_agent(self.orch, n))
 
         # C-0.6: KernelThread — async kernel параллельно sync Orchestrator
         self.kernel_thread: KernelThread | None = None
+        print("🔥 [INIT] __init__ завершен!", flush=True)
 
     PAUSE_FLAG = Path.home() / ".cache/aura/aura_pause.flag"
     def _is_paused(self) -> bool:
@@ -417,7 +439,7 @@ class AuraOrchestrator:
         if not self.dm.is_active():
             return False
         set_status("listening")
-        heard = self.listener.listen(timeout=8)  # Bug 34
+        heard = self.listener.listen(timeout=1)  # Bug 34
         if not heard:
             return True
         print(f"💬 DM: {heard}")
@@ -454,7 +476,7 @@ class AuraOrchestrator:
         chat = fsm.get("chat", "")
         # Слушаем БЕЗ активации «Аура».
         try:
-            heard = self.listener.listen(timeout=8)  # Bug 34
+            heard = self.listener.listen(timeout=1)  # Bug 34
         except Exception as e:
             print(f"⚠️ FSM listen error: {e}")
             return True
@@ -629,6 +651,7 @@ class AuraOrchestrator:
             except _queue.Empty:
                 return
             user_text = (msg or {}).get("user", "").strip()
+            print(f"🔍 [DRAIN] Получено сообщение: {user_text!r}", flush=True)
             if not user_text:
                 continue
             _now = _t.time()
@@ -677,6 +700,7 @@ class AuraOrchestrator:
                 self.speaker.say(response)
 
     def run(self) -> None:
+        print("🔥🔥🔥 [RUN] Метод run() ВЫЗВАН!", flush=True)
         """Главный цикл — паритет с AuraCore.run."""
         print("\n" + "=" * 60)
         print("🦾 АУРА — ORCHESTRATOR v0.9")
@@ -703,6 +727,7 @@ class AuraOrchestrator:
 
         while self.running:
             try:
+                print("🔄 [LOOP] tick", flush=True)
                 self.heartbeat.beat()
 
                 # === ПАУЗА (hotkey) ===
@@ -741,18 +766,20 @@ class AuraOrchestrator:
                     continue
 
                 # === ЧАТ: text-based IPC ===
+                print("📖 [LOOP] reading INBOX...", flush=True)
                 for msg in self.chat_bridge.read_new():
                     self.chat_queue.put(msg)
                 self._drain_chat_queue()
 
                 # Слушаем (timeout 8 секунд)
+                print("🎤 [LOOP] listening...", flush=True)
                 set_status("listening")
                 # Bug 40: AEC force перед слушанием (микрофон = echo-cancel-source)
                 # self._ensure_aec()  # DISABLED: echo-cancel душит микрофон
                 # Bug 38: приглушаем музыку ПОКА слушаем (интеллектуальный duck)
                 self._duck_on()
                 # Bug 73: timeout 2 вместо 8 — ChatBridge голодал до 8 сек
-                heard = self.listener.listen(timeout=8)
+                heard = self.listener.listen(timeout=1)
                 print(f"🎤 heard={heard!r}")
                 if not heard:
                     self._duck_off()
@@ -952,12 +979,18 @@ def _daemon_background(aura, stop_event) -> None:
 
 
 def main() -> int:
+    print("🔥 [MAIN] Старт main()", flush=True)
     daemon_mode = "--daemon" in _sys.argv
+    print(f"🔥 [MAIN] daemon_mode={daemon_mode}", flush=True)
+    print("🔥 [MAIN] Создаем AuraOrchestrator...", flush=True)
     aura = AuraOrchestrator()
+    print("🔥 [MAIN] AuraOrchestrator создан!", flush=True)
     stop_event = None
 
     # C-0.6: запуск async kernel в daemon-потоке (Graceful Degradation)
+    print("🔥 [MAIN] Создаем KernelThread...", flush=True)
     kernel_thread = KernelThread()
+    print("🔥 [MAIN] Запускаем KernelThread...", flush=True)
     if kernel_thread.start(timeout=10):
         print("[main] kernel thread запущен (async kernel alive)", flush=True)
         aura.kernel_thread = kernel_thread
@@ -971,6 +1004,7 @@ def main() -> int:
                        daemon=True, name="aura-daemon")
         t.start()
         print("[main] демон запущен в фоне", flush=True)
+        print("[main] вызываем aura.run()", flush=True)
     try:
         aura.run()
     except KeyboardInterrupt:

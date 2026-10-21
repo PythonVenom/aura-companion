@@ -716,7 +716,6 @@ class AuraOrchestrator:
 
         set_status("idle")
         self.heartbeat.start()
-        self.chat_watcher.start()
 
         # === BARGE-IN: включён (ADR-009 + aura-aec.service) ===
         if self.barge_in and self.barge_in.ready:

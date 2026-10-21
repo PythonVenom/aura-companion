@@ -21,7 +21,9 @@ class ChatWatcher(threading.Thread):
         self._stop_event = threading.Event()
 
     def run(self) -> None:
+        print("🕵️ ChatWatcher.run() STARTED", flush=True)
         while not self._stop_event.is_set():
+            pass
             try:
                 for msg in self.bridge.read_new():
                     self.queue.put(msg)

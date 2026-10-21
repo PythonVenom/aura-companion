@@ -38,10 +38,15 @@ class ChatBridge:
     def read_new(self) -> list[dict]:
         """Прочитать новые сообщения из inbox с последнего offset."""
         if not self.inbox_path.exists():
+            self._offset = 0
             return []
         msgs = []
         try:
             with open(self.inbox_path, encoding="utf-8") as f:
+                # Если файл стал меньше — сбрасываем offset
+                f.seek(0, 2)
+                if f.tell() < self._offset:
+                    self._offset = 0
                 f.seek(self._offset)
                 for line in f:
                     line = line.strip()

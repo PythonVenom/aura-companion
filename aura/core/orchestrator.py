@@ -488,20 +488,35 @@ class Orchestrator:
                 except Exception:
                     pass
 
-                # Форматируем ответ через LLM
-                if self.brain is not None:
-                    try:
-                        fmt_prompt = (
-                            f"Данные от инструмента {tool_name}: {clean_text}\n"
-                            f"Сформулируй краткий и понятный ответ на вопрос: '{text}'. "
-                            f"Не упоминай JSON или служебные данные. Ответь на русском языке."
+                # Форматируем ответ через прямой вызов Ollama (быстро и без рекурсии)
+                try:
+                    fmt_prompt = (
+                        f"Пользователь спросил: '{text}'.\n"
+                        f"Инструмент вернул следующие данные: {clean_text}\n"
+                        f"Сформулируй краткий и точный ответ пользователю на русском языке. "
+                        f"Не упоминай JSON, инструменты или служебные данные. Просто ответь на вопрос."
+                    )
+                    
+                    def _call_format():
+                        req = urllib.request.Request(
+                            "http://localhost:11434/api/generate",
+                            data=json.dumps({
+                                "model": "qwen2.5:7b-instruct-q4_K_M",
+                                "prompt": fmt_prompt,
+                                "stream": False,
+                                "options": {"temperature": 0.1}
+                            }).encode("utf-8"),
+                            headers={"Content-Type": "application/json"}
                         )
-                        final_text = await asyncio.to_thread(self.brain.ask, fmt_prompt)
-                        print(f"DEBUG: LLM format response: {final_text}")
-                        if final_text and not final_text.startswith("❌"):
-                            return final_text
-                    except Exception as e:
-                        print(f"⚠️ Ошибка форматирования MCP-ответа: {e}")
+                        with urllib.request.urlopen(req, timeout=30) as r:
+                            return json.loads(r.read().decode("utf-8")).get("response", "").strip()
+                    
+                    final_text = await asyncio.to_thread(_call_format)
+                    print(f"DEBUG: LLM format response: {final_text}")
+                    if final_text:
+                        return final_text
+                except Exception as e:
+                    print(f"⚠️ Ошибка форматирования MCP-ответа: {e}")
                         
                 return f"🔌 [MCP:{tool_name}] {clean_text}"
             else:

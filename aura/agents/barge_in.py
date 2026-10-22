@@ -1,207 +1,70 @@
-"""
-Barge-in: перебивание Ауры.
-
-Сервис (не BaseAgent). Как brain, tool_router.
-Свой InputStream (16 kHz), VAD webrtcvad в фоне.
-Когда Аура говорит и пользователь заговорил — callback.
-
-Архитектура: ADR-006 (Уровень 3 — отдельный поток).
-Не трогает listener. Один общий ALSA-микрофон.
-
-Состояние: "слушаю всегда", но callback — только когда
-`aura_speaking=True`.
-"""
-
-from __future__ import annotations
-
-import collections
-import queue
+import subprocess
 import threading
 import time
-
+import webrtcvad
+import os
 
 class AgentBargeIn:
-    """
-    Детектор речи для barge-in.
-
-    Публичные методы:
-    - start(on_speech): запустить фоновый VAD
-    - stop(): остановить
-    - set_aura_speaking(bool): Аура говорит — VAD активен
-    """
-
-    SAMPLE_RATE = 16000
-    FRAME_DURATION_MS = 30
-    FRAME_SIZE = int(SAMPLE_RATE * FRAME_DURATION_MS / 1000)  # 480
-    VAD_AGGRESSIVENESS = 3            # было 2, ужесточили после AEC
-    MIN_RMS = 4000                    # Bug 45 v3: эхо < 2000, речь рядом > 4000
-    QUEUE_MAXSIZE = 50
-    GATE_SECONDS = 4.0                # Bug 29: 2.5с (было 1.0) — ждём пока AEC устаканится
-    MIN_SPEECH_FRAMES = 20  # Bug 45: 0.6с подряд            # Bug 29: 300мс подряд (было 3=90мс) — не ловим эхо
-    COOLDOWN_SECONDS = 5.0  # Bug 45: 5с между            # Bug 29: не дёргать callback чаще 2с (было 0.5)
-
     def __init__(self):
-        # Сначала — инициализация всех полей (чтобы не ломать методы)
-        self.ready = False
-        self.disabled_by_settings = False
-        self.vad = None
-        self.sd = None
-        self.stream = None
-        self.audio_queue = None
-        self.thread = None
+        # 2 - средняя агрессивность VAD (1 - низкая, 3 - высокая)
+        self.vad = webrtcvad.Vad(2)
         self.running = False
-        self.aura_speaking = False
+        self.ready = True
+        self._thread = None
+        self._process = None
         self.on_speech = None
-        self._last_speech_ts = 0.0
-        self._cooldown = self.COOLDOWN_SECONDS  # Bug 29: 2.0с
-        self._speaking_started = 0.0  # когда Аура начала говорить
-        self._consecutive_speech = 0  # счётчик фреймов речи подряд
-        # Bug 33: ring-buffer фреймов для Vosk (1.5с = 50 фреймов по 30мс)
-        self._frame_buffer = collections.deque(maxlen=50)
-
-        try:
-            import sounddevice as sd
-            import webrtcvad
-            self.sd = sd
-            self.vad = webrtcvad.Vad(self.VAD_AGGRESSIVENESS)
-            self.ready = True
-            print("✅ BargeIn загружен (VAD webrtcvad, отдельный поток)")
-        except Exception as e:
-            print(f"⚠️ BargeIn ошибка: {e}")
-            self.ready = False
+        self._is_aura_speaking = False
 
     def start(self, on_speech=None) -> bool:
-        """Запустить фоновый VAD. on_speech — callback при речи."""
-        if not self.ready:
-            return False
         if self.running:
             return True
-
+        
         self.on_speech = on_speech
-        self.audio_queue = queue.Queue(maxsize=self.QUEUE_MAXSIZE)
         self.running = True
-
-        def callback(indata, frames, time_info, status):
-            if not self.running:
-                return
-            import contextlib
-            with contextlib.suppress(queue.Full):
-                self.audio_queue.put_nowait(bytes(indata))
-
-        try:
-            self.stream = self.sd.InputStream(
-                samplerate=self.SAMPLE_RATE,
-                channels=1,
-                dtype="int16",
-                blocksize=self.FRAME_SIZE,
-                callback=callback,
-            )
-            self.stream.start()
-        except Exception as e:
-            print(f"⚠️ BargeIn stream error: {e}")
-            self.running = False
-            return False
-
-        self.thread = threading.Thread(target=self._loop, daemon=True)
-        self.thread.start()
+        self._thread = threading.Thread(target=self._listen_loop, daemon=True)
+        self._thread.start()
+        print("✅ BargeIn (pw-record) запущен")
         return True
 
-    def get_recent_pcm(self) -> bytes:
-        """Bug 33: последние ~1.5с PCM (для Vosk)."""
-        return b"".join(self._frame_buffer)
+    def _listen_loop(self):
+        # Читаем сырой звук с дефолтного (или 70) устройства через pw-record
+        # Формат: 16000 Hz, 1 канал, s16 (2 байта на сэмпл)
+        cmd = ["pw-record", "--rate", "16000", "--channels", "1", "--format", "s16", "-"]
+        
+        try:
+            self._process = subprocess.Popen(
+                cmd, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.DEVNULL
+            )
+            
+            while self.running:
+                # Читаем ВСЕГДА, чтобы буфер не забивался старым звуком
+                data = self._process.stdout.read(640)
+                if not data:
+                    break
+                
+                if len(data) == 640 and self._is_aura_speaking:
+                    try:
+                        if self.vad.is_speech(data, 16000):
+                            print("👂 [Barge-in] Обнаружена речь! Останавливаю Aura.")
+                            if self.on_speech:
+                                self.on_speech()
+                            self._is_aura_speaking = False # Сброс после срабатывания
+                    except Exception as e:
+                        print(f"VAD error: {e}")
+                        
+        except Exception as e:
+            print(f"⚠️ Barge-in stream error: {e}")
+        finally:
+            if self._process:
+                self._process.terminate()
+                self._process = None
 
-    def clear_buffer(self) -> None:
-        """Bug 33: очистить буфер после обработки."""
-        self._frame_buffer.clear()
+    def set_aura_speaking(self, speaking: bool):
+        self._is_aura_speaking = speaking
 
-    def stop(self) -> None:
-        """Остановить VAD и закрыть поток."""
+    def stop(self):
         self.running = False
-        if self.stream is not None:
-            try:
-                self.stream.stop()
-                self.stream.close()
-            except Exception as e:
-                # F-006: не глотать (раздел 17 промта)
-                import logging
-                logging.getLogger('aura.barge_in').debug(
-                    'barge_in error: %s', e)
-            self.stream = None
-        if self.thread is not None:
-            self.thread.join(timeout=1.0)
-            self.thread = None
-
-    def set_aura_speaking(self, value: bool) -> None:
-        """Аура говорит — VAD активен (callback сработает).
-
-        При включении: запоминаем время старта (для gate) и сбрасываем
-        счётчик подряд идущих фреймов речи.
-        """
-        if value and not self.aura_speaking:
-            self._speaking_started = time.time()
-            self._consecutive_speech = 0
-        self.aura_speaking = value
-
-    def _loop(self) -> None:
-        """Фоновый цикл: читает фреймы, VAD, callback."""
-        while self.running:
-            try:
-                frame = self.audio_queue.get(timeout=0.2)
-            except queue.Empty:
-                continue
-
-            if not self.aura_speaking:
-                continue
-
-            # Gate: не дёргать callback первые GATE_SECONDS после старта речи.
-            # AEC вычитает эхо с задержкой ~20 мс — на старте эхо ещё в микрофоне.
-            if time.time() - self._speaking_started < self.GATE_SECONDS:
-                continue
-
-            if len(frame) != self.FRAME_SIZE * 2:
-                continue
-
-            # Bug 33: пишем в ring-buffer для Vosk (независимо от VAD)
-            self._frame_buffer.append(frame)
-
-            # Bug 45: RMS-гейт — эхо от колонок тише речи пользователя
-            import numpy as _np
-            _samples: _np.ndarray = _np.frombuffer(frame, dtype=_np.int16).astype(_np.float32)
-            _rms = int(_np.sqrt(_np.mean(_samples * _samples))) if len(_samples) else 0
-            if _rms < self.MIN_RMS:
-                self._consecutive_speech = 0
-                # Bug 45 v2: лог для калибровки (первые 5 срабатываний)
-                if getattr(self, "_rms_logs", 0) < 5 and _rms > 500:
-                    print(f"🔇 RMS {_rms} < {self.MIN_RMS} (эхо)")
-                    self._rms_logs = getattr(self, "_rms_logs", 0) + 1
-                continue
-
-            try:
-                is_speech = self.vad.is_speech(frame, self.SAMPLE_RATE)
-            except Exception:
-                continue
-
-            # Счётчик: нужно MIN_SPEECH_FRAMES подряд. Одиночные всплески
-            # (остатки эха, щелчки) не считаются.
-            if not is_speech:
-                self._consecutive_speech = 0
-                continue
-
-            self._consecutive_speech += 1
-            if self._consecutive_speech < self.MIN_SPEECH_FRAMES:
-                continue
-
-            now = time.time()
-            if now - self._last_speech_ts < self._cooldown:
-                continue
-            self._last_speech_ts = now
-            self._consecutive_speech = 0  # сбросили после срабатывания
-
-            if self.on_speech is not None:
-                try:
-                    self.on_speech()
-                except Exception as e:
-                    print(f"⚠️ BargeIn callback error: {e}")
-
-
-__all__ = ["AgentBargeIn"]
+        if self._process:
+            self._process.terminate()

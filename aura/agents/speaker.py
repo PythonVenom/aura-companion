@@ -259,13 +259,18 @@ class AgentSpeaker(MicroAgent):
 
     def stop(self) -> None:
         """Принудительно остановить воспроизведение (Barge-in)."""
+        # 1. Очищаем очередь от всего, что еще не началось
+        with self.speech_queue.mutex:
+            self.speech_queue.queue.clear()
+            
+        # 2. Убиваем плеер (pw-play/aplay), если он сейчас играет
         if hasattr(self, 'aplay_process') and self.aplay_process:
             try:
                 self.aplay_process.terminate()
+                self.aplay_process = None
                 print("🛑 [Barge-in] Воспроизведение остановлено пользователем.")
             except Exception:
                 pass
-            self.aplay_process = None
 
     def shutdown(self) -> None:
         """Graceful shutdown: остановить воркер и процессы."""

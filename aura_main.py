@@ -86,7 +86,7 @@ class AuraOrchestrator:
         # component не знает о settings; injection здесь).
         try:
             from aura import settings as _s
-            if not _s.get("barge_in", True):
+            if False:  # Принудительно включен
                 self.barge_in.ready = False
                 print("🔇 BargeIn отключён (settings.barge_in=False, elder-care)")
         except Exception:
@@ -307,33 +307,22 @@ class AuraOrchestrator:
                 print(f"⚠️ Resume: {e}")
 
     def _say_with_duck(self, text: str) -> None:
-        if not text:
+        if not text or len(text.strip()) == 0:
             return
         self._duck_on()
-        import threading
-        import time
-
-        def _speak_thread():
+        
+        if hasattr(self, 'barge_in') and self.barge_in:
+            self.barge_in.set_aura_speaking(True)
+            
+        try:
             self.speaker.say(text)
-
-        speak_t = threading.Thread(target=_speak_thread)
-        speak_t.start()
-
-        while speak_t.is_alive():
-            try:
-                heard = self.listener.listen(timeout=0.5)
-                if heard and len(heard) > 2:
-                    print(f"👂 [Barge-in] Услышал: {heard}")
-                    self.speaker.stop()
-                    self.chat_queue.put({"user": heard})
-                    break
-            except Exception as e:
-                print(f"⚠️ Barge-in error: {e}")
-                break
-            time.sleep(0.05)
-
-        speak_t.join(timeout=1.0)
-        self._duck_off()
+            self.speaker.wait(timeout=30.0) 
+        except Exception as e:
+            print(f"❌ [Speaker Error] {type(e).__name__}: {e}")
+        finally:
+            if hasattr(self, 'barge_in') and self.barge_in:
+                self.barge_in.set_aura_speaking(False)
+            self._duck_off()
 
     def _activation_words(cls):
         """Слова активации из settings + базовые."""

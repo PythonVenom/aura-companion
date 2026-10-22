@@ -42,6 +42,7 @@ from aura.agents.barge_in import AgentBargeIn
 from aura.agents.listener import AgentListener
 from aura.agents.proactive import default_engine
 from aura.agents.speaker import AgentSpeaker
+from aura.agents.reminders import ReminderSystem
 
 # Новая модульная сборка
 from aura.bootstrap import build_orchestrator
@@ -80,6 +81,7 @@ class AuraOrchestrator:
     def __init__(self) -> None:
         self.listener = AgentListener()
         self.speaker = AgentSpeaker()
+        self.reminders = ReminderSystem(self.speaker)
         self.barge_in = AgentBargeIn()
 
         # F-015: elder-care toggle на интеграционном слое (Beck 2002 TDD:
@@ -717,7 +719,7 @@ class AuraOrchestrator:
                     self._last_proactive_check = 0
                     
                 # Проверяем не чаще раза в 10 секунд, чтобы не спамить
-                if time.time() - self._last_proactive_check > 10.0:
+                if False:  # PROACTIVE DISABLED BY CAPTAIN
                     self._last_proactive_check = time.time()
                     try:
                         # Если check() асинхронный, запускаем его в loop
@@ -738,6 +740,21 @@ class AuraOrchestrator:
                     except Exception as e:
                         print(f"⚠️ Proactive error: {e}")
 
+
+
+
+                # === НАПОМИНАЛКИ ИЗ UI ===
+                import json, os
+                new_rem_file = os.path.expanduser("~/.cache/aura/new_reminder.json")
+                rem_file = os.path.expanduser("~/.cache/aura/reminders.json")
+                if os.path.exists(new_rem_file):
+                    try:
+                        data = json.load(open(new_rem_file, 'r', encoding='utf-8'))
+                        json.dump(data, open(rem_file, 'w', encoding='utf-8'))
+                        os.remove(new_rem_file)
+                        print(f"✅ Новое напоминание: {data}")
+                    except Exception as e:
+                        print(f"⚠️ Ошибка напоминалки: {e}")
 
                 # === ЧАТ: text-based IPC ===
                 print("📖 [LOOP] reading INBOX...", flush=True)

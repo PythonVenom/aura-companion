@@ -1,8 +1,0 @@
-# Default
-* @PythonVenom
-
-# Critical paths require review
-/aura_main.py @PythonVenom
-/aura/core/ @PythonVenom
-/aura/agents/messenger.py @PythonVenom
-/docs/adr/ @PythonVenom

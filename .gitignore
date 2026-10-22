@@ -162,3 +162,4 @@ venv/
 __pycache__/
 *.sfs
 *.iso
+aura-os-standard/

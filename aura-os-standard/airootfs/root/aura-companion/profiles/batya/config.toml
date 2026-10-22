@@ -1,8 +1,0 @@
-# F-080d: identity бати. Батя сам решает как обращаться.
-[identity]
-name = "Аура"
-honorific = ""   # пусто = без обращения. Батя впишет сам.
-
-# F-086: elder-care без LLM
-[settings]
-use_llm = false

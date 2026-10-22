@@ -1,7 +1,0 @@
-# Брат-автоэлектрик. Диагностика авто.
-[identity]
-name = "Аура"
-honorific = "Брат"
-
-[settings]
-use_llm = true    # LLM для сложных вопросов

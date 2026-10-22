@@ -313,7 +313,7 @@ class Orchestrator:
             if self.brain is not None:
                 try:
                     result = await asyncio.to_thread(self.brain.ask, text)
-                    if result and not result.startswith("❌"):
+                    if result and len(result.strip()) > 0 and not result.startswith("❌"):
                         return result
                 except Exception as e:
                     print(f"⚠️ Brain: {e}")
@@ -342,7 +342,7 @@ class Orchestrator:
             if self.brain is not None:
                 try:
                     result = await asyncio.to_thread(self.brain.ask, text)
-                    if result and not result.startswith("❌"):
+                    if result and len(result.strip()) > 0 and not result.startswith("❌"):
                         self._last_response = response
                         _mem_write(text, result)
                         return result
@@ -543,6 +543,19 @@ class Orchestrator:
                         self.pending_mcp_action = (tool_name, args)
                         update_status("idle")
                         return f"⚠️ Капитан, для выполнения '{tool_name}' с аргументами {args} требуется подтверждение. Скажи «Подтверждаю» и повтори команду."
+
+                    # === ДЕНЬ 21: Path Traversal Defense (Real Path) ===
+                    import os
+                    if "path" in args:
+                        user_path = str(args["path"])
+                        # Вычисляем РЕАЛЬНЫЙ путь (убираем .. и симлинки)
+                        real_path = os.path.abspath(os.path.realpath(user_path))
+                        real_cwd = os.path.abspath(os.path.realpath(cwd))
+                        
+                        # Разрешаем только рабочую папку и /tmp
+                        if not real_path.startswith(real_cwd) and not real_path.startswith("/tmp/"):
+                            print(f"🛑 [SECURITY] Блокировка опасного пути: {real_path} (исходный: {user_path})")
+                            return f"🛑 Капитан, доступ к пути '{user_path}' запрещён. Разрешено работать только в {cwd} и /tmp/"
 
                     print(f"🔌 [MCP Chain] Шаг {step+1}: Вызов {tool_name} с {args}")
                     update_status("running", tool_name)

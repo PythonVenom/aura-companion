@@ -27,7 +27,7 @@ class AgentBargeIn:
 
     def _listen_loop(self):
         # ИСПРАВЛЕНИЕ: Слушаем target 72 напрямую
-        cmd = ["pw-record", "--target", "72", "--rate", "16000", "--channels", "1", "--format", "s16", "-"]
+        cmd = ["pw-record", "--target", "100", "--rate", "16000", "--channels", "1", "--format", "s16", "-"]
         
         try:
             self._process = subprocess.Popen(

@@ -41,7 +41,7 @@ class AgentListener:
         self.stream = self.recognizer.create_stream()
         
         # Читаем напрямую с железа (ID 72)
-        cmd = ["pw-record", "--target", "72", "--rate", "16000", "--channels", "1", "--format", "s16", "-"]
+        cmd = ["pw-record", "--target", "100", "--rate", "16000", "--channels", "1", "--format", "s16", "-"]
         self._process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         
         start_time = time.time()

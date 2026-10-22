@@ -104,8 +104,14 @@ class AuraOrchestrator:
         self.heartbeat = Heartbeat()
         self.orch = build_orchestrator()
         if hasattr(self.orch, 'mcp_manager') and self.orch.mcp_manager:
+            import threading
             import asyncio
-            asyncio.create_task(self.orch.mcp_manager.load_all())
+            def _load_mcp_bg():
+                try:
+                    asyncio.run(self.orch.mcp_manager.load_all())
+                except Exception as e:
+                    print(f"⚠️ MCP Background Load Error: {e}")
+            threading.Thread(target=_load_mcp_bg, daemon=True).start()
 
         # F-067: ONE-SHOT отключен в __init__ (блокирует старт)
 
@@ -716,18 +722,38 @@ class AuraOrchestrator:
                     continue
 
                 # === DIALOG FSM (ADR-012) ===
-                # === PROACTIVE (ADR-014) — Bug 39: ОТКЛЮЧЁН до фикса ===
-                # proactive_msg = self.proactive.check()
-                # if proactive_msg:
-                #     print(f"💡 Proactive: {proactive_msg}")
-                #     self._say_with_duck(proactive_msg)
-                #     continue
-
                 if self._handle_fsm():
                     continue
 
                 if self._handle_dialog():
                     continue
+
+                # === PROACTIVE (ADR-014) — Bug 39: Fixed with throttle ===
+                if not hasattr(self, '_last_proactive_check'):
+                    self._last_proactive_check = 0
+                    
+                # Проверяем не чаще раза в 10 секунд, чтобы не спамить
+                if time.time() - self._last_proactive_check > 10.0:
+                    self._last_proactive_check = time.time()
+                    try:
+                        # Если check() асинхронный, запускаем его в loop
+                        import inspect
+                        if inspect.iscoroutinefunction(self.proactive.check):
+                            import asyncio
+                            proactive_msg = asyncio.run(self.proactive.check())
+                        else:
+                            proactive_msg = self.proactive.check()
+                            
+                        if proactive_msg:
+                            # Проверяем, не говорит ли Aura прямо сейчас
+                            is_speaking = getattr(self.speaker, 'is_speaking', False)
+                            if not is_speaking:
+                                print(f"💡 Proactive: {proactive_msg}")
+                                self._say_with_duck(proactive_msg)
+                                continue
+                    except Exception as e:
+                        print(f"⚠️ Proactive error: {e}")
+
 
                 # === ЧАТ: text-based IPC ===
                 print("📖 [LOOP] reading INBOX...", flush=True)
@@ -739,12 +765,12 @@ class AuraOrchestrator:
                 print("🎤 [LOOP] listening...", flush=True)
                 set_status("listening")
                 # Bug 40: AEC force перед слушанием (микрофон = echo-cancel-source)
-                # self._ensure_aec()  # DISABLED: echo-cancel душит микрофон
+                self._ensure_aec()  # Bug 40: Включаем AEC для борьбы с эхом
                 # Bug 38: приглушаем музыку ПОКА слушаем (интеллектуальный duck)
                 self._duck_on()
                 # Bug 73: timeout 2 вместо 8 — ChatBridge голодал до 8 сек
                 heard = self.listener.listen(timeout=1)
-                print(f"🎤 heard={heard!r}")
+                import logging; logging.getLogger("aura.main").debug(f"heard={heard!r}")
                 if not heard:
                     self._duck_off()
                     # === ЧАТ: второй drain после listen (Bug 73) ===

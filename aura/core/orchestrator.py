@@ -91,6 +91,7 @@ class Orchestrator:
     """
 
     def __init__(self, tool_router=None, brain=None, dispatcher=None, procedural=None, mcp_manager=None) -> None:
+        self.FACTUAL_PREFIXES = ['кто', 'что', 'где', 'когда', 'почему', 'как', 'сколько', 'переведи', 'обсуждали']
         self.registry = AgentRegistry()
         self.tool_router = tool_router
         self.brain = brain
@@ -210,6 +211,17 @@ class Orchestrator:
         except Exception as e:
             print(f"⚠️ ReAct: {e}")
 
+        # FAST-TRACK: Chat intent goes directly to Brain (bypass agents/dispatchers)
+        try:
+            from aura.core.intent_classifier import classify
+            intent, conf = classify(text)
+            if intent in ("chat", "memory.recall") and conf > 0.3 and self.brain is not None:
+                resp = await asyncio.to_thread(self.brain.ask, text)
+                if resp and not resp.startswith("❌"):
+                    return resp
+        except Exception:
+            pass
+
         # Intent Parser (Декомпозиция)
         if self._is_complex_goal(text):
             plan = self.intent_parser.parse(text)
@@ -306,9 +318,9 @@ class Orchestrator:
                     _mem_write(text, mcp_result)
                     return mcp_result
 
-            # 3. GUARD (AURA_CORE_FIX_V1): не отдавать в LLM факт-запросы без агента
-            if self._is_factual_intent(text):
-                return "Пока не умею это. Скажи иначе или попроси другое."
+            # 3. GUARD Отключен Капитаном для нормальной работы LLM
+            # if self._is_factual_intent(text):
+            #     return "Пока не умею это. Скажи иначе или попроси другое."
             # 3. Brain
             if self.brain is not None:
                 try:
@@ -711,6 +723,17 @@ class Orchestrator:
         Fail-open для unmapped агентов (раздел 20 промта: backward compat).
         TODO: через 2-3 итерации → fail-closed.
         """
+        # FAST-TRACK: Chat intent goes directly to Brain (bypass agents/dispatchers)
+        try:
+            from aura.core.intent_classifier import classify
+            intent, conf = classify(text)
+            if intent in ("chat", "memory.recall") and conf > 0.3 and self.brain is not None:
+                resp = await asyncio.to_thread(self.brain.ask, text)
+                if resp and not resp.startswith("❌"):
+                    return resp
+        except Exception:
+            pass
+
         # Intent Parser (Декомпозиция)
         if self._is_complex_goal(text):
             plan = self.intent_parser.parse(text)

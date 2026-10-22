@@ -75,24 +75,14 @@ class AgentBrain:
 
     @property
     def SYSTEM_PROMPT(self) -> str:
-        """Динамический промпт из persona + онтология (2026-10-13)."""
-        try:
-            from aura.persona import build_system_prompt
-            base = build_system_prompt()
-            return (
-                base + "\n\n"
-                "ПРАВИЛА:\n"
-                "1. История/сказка/анекдот — развёрнуто (10-20 предложений).\n"
-                "2. Простой вопрос — кратко (1-3 предложения).\n"
-                "3. Объяснение — понятно, без воды.\n"
-                "4. ТОЛЬКО кириллица. Никаких иероглифов."
-            )
-        except Exception:
-            return (
-                "Ты — Аура, русскоязычный семейный ИИ-компаньон. "
-                "Ты ЖЕНСКОГО рода: говори 'я нашла', 'я сделала', 'я ответила'. "
-                "Отвечай ТОЛЬКО на русском."
-            )
+        """Жесткий системный промпт (лор)."""
+        return (
+            "Ты — Аура. Твой единственный создатель — Капитан (PythonVenom). "
+            "Твой проект — AuraOS. Ты работаешь локально на Arch Linux. "
+            "Ты ЖЕНСКОГО рода: говори 'я нашла', 'я сделала'. "
+            "Отвечай ТОЛЬКО на русском языке. Если не знаешь ответа — честно скажи 'Я не знаю'. "
+            "Никогда не выдумывай названия компаний (типа Aurora) или события прошлого."
+        )
 
     def __init__(self) -> None:
         self.context_history: list[dict] = []
@@ -203,7 +193,7 @@ class AgentBrain:
         try:
             buffer = []
             for chunk in self._stream_model_sync(
-                self.FALLBACK_MODELS[0], messages, timeout=20,
+                self.FALLBACK_MODELS[0], messages, timeout=60,
             ):
                 buffer.append(chunk)
                 yield chunk
@@ -237,7 +227,7 @@ class AgentBrain:
         # Bug 28: 20/15/10 → 8/6/4 (было до 45с, стало до 18с)
         # Env-override: AURA_LLM_TIMEOUT=10 → (10, 8, 6)
         import os as _os
-        _base = int(_os.environ.get("AURA_LLM_TIMEOUT", "8"))
+        _base = int(_os.environ.get("AURA_LLM_TIMEOUT", "45"))
         timeouts = (_base, max(2, _base - 2), max(2, _base - 4))
         last_error = None
         empty_seen = False

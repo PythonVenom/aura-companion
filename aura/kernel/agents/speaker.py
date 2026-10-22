@@ -28,8 +28,8 @@ class SpeakerAgent:
     name = "speaker"
     version = "1.0.0"
 
-    def __init__(self)
-        self._speak_lock = threading.Lock():
+    def __init__(self):
+        self._speak_lock = threading.Lock()
         self.ctx: AgentContext | None = None
         self._running = False
         self._queue: queue.Queue = queue.Queue()

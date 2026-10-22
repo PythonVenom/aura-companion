@@ -36,7 +36,10 @@ class ChatBridge:
             st = self.inbox_path.stat()
             self._offset = st.st_size
             self._inode = st.st_ino
-        self._inode = self.inbox_path.stat().st_ino
+        if self.inbox_path.exists():
+            self._inode = self.inbox_path.stat().st_ino
+        else:
+            self._inode = None
 
     def read_new(self) -> list[dict]:
         """Всегда читает весь INBOX. Дедупликация — в _drain_chat_queue."""

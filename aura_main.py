@@ -777,6 +777,15 @@ class AuraOrchestrator:
 
                 print(f"📝 Команда: {cmd}")
 
+                # HITL: проверка системных команд (голос)
+                sys_cmd = handle_system_command(cmd)
+                if sys_cmd:
+                    response = sys_cmd
+                    print(f"🤖 {response}")
+                    set_status("speaking", response)
+                    self._say_with_duck(response)
+                    continue
+
                 # === Bug 29: HALT/RESUME после barge-in ===
                 _STOP = ("стоп", "замолчи", "хватит", "тихо", "останови",
                          "остановись", "молчи", "заткнись")

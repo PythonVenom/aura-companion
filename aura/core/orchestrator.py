@@ -129,7 +129,7 @@ class Orchestrator:
                 clean_search = clean_search.replace(w, "")
             clean_search = " ".join(clean_search.split()).strip()
 
-            if any(w in text.lower() for w in ["найди", "поищи", "новости", "курс", "погода", "кто такой", "что такое", "гугл", "интернет"]):
+            if any(w in text.lower() for w in ["файл", "readme", "прочитай", "list", "find", "cat", "grep", "директор", "база", "sql", "таблиц", "users", "test.db", "database", "найди", "поищи", "новости", "курс", "погода", "кто такой", "что такое", "гугл", "интернет", "создай", "запиши", "сохрани", "сделай"]):
                 print(f"🔍 [Search] Очищенный запрос: '{clean_search}'")
                 import logging
                 logging.getLogger("aura.orchestrator").debug(f"MCP Fallback attempt (tools loaded: {len(self.mcp_manager.tools)})")
@@ -399,7 +399,7 @@ class Orchestrator:
         return None
 
     async def _try_mcp_fallback(self, text: str) -> str | None:
-        """Пытается решить запрос через MCP-инструменты (LLM-роутинг)."""
+        """MCP Chaining: Многошаговое выполнение через ReAct-цикл."""
         import asyncio, json, urllib.request, re, os
         
         cwd = os.getcwd()
@@ -417,127 +417,132 @@ class Orchestrator:
             
         tools_str = "\n".join(tools_list)
         
-        prompt = (
-            "You are an AI tool router. You MUST select one of the following tools.\n"
-            f"Available tools:\n{tools_str}\n\n"
-            f"Current working directory: {cwd}\n"
-            "RULES:\n"
-            "1. If the user asks to read files, use the tool.\n"
-            "2. Return ONLY valid JSON.\n"
-            "3. NEVER use placeholder paths like '/path/to/your/project/'.\n"
-            f"4. If user asks for 'README.md', use '{cwd}/README.md'.\n"
-            "5. For web search, extract ONLY the core keywords.\n"
-            "--- EXAMPLES ---\n"
-            "User: Read README.md\n"
-            f"Assistant: {{\"tool\": \"read_file\", \"args\": {{\"path\": \"{cwd}/README.md\"}}}}\n"
-            "User: Найди новости про ИИ\n"
-            "Assistant: {\"tool\": \"search_news\", \"args\": {\"query\": \"искусственный интеллект\"}}\n"
-            "User: What is the weather?\n"
-            "Assistant: {\"tool\": \"none\"}\n"
-            "------------------\n"
-            f"User: {text}\n"
-            "Assistant: "
-        )
+        history = []
+        max_steps = 3
+        called_tools = set()
         
-        def _call_llm():
-            req = urllib.request.Request(
-                "http://localhost:11434/api/generate",
-                data=json.dumps({
-                    "model": "qwen2.5:7b-instruct-q4_K_M",
-                    "prompt": prompt,
-                    "stream": False,
-                    "format": "json",
-                    "options": {"temperature": 0.0}
-                }).encode("utf-8"),
-                headers={"Content-Type": "application/json"}
+        for step in range(max_steps):
+            context_str = ""
+            for i, h in enumerate(history):
+                context_str += f"Step {i+1} Tool: {h['tool']}\nResult: {h['result']}\n\n"
+            if not context_str:
+                context_str = "No steps taken yet."
+
+            prompt = (
+                "You are an AI agent executing a multi-step plan. You have access to tools.\n"
+                f"Available tools:\n{tools_str}\n\n"
+                f"Current working directory: {cwd}\n"
+                f"User request: {text}\n\n"
+                f"History of previous steps:\n{context_str}\n"
+                "RULES:\n"
+                "1. If you need to perform an action, return JSON: {\"tool\": \"tool_name\", \"args\": {...}}\n"
+                "2. If the task is fully completed, or if a tool failed and you cannot fix it, return: {\"tool\": \"done\"}\n"
+                "3. DO NOT repeat the same tool call twice. If you see an error in history, use a different tool or return done.\n"
+                f"4. If you write a file, use absolute path like '{cwd}/filename.txt'.\n"
+                "5. Do NOT wrap JSON in markdown. Return ONLY valid JSON.\n"
+                "--- EXAMPLES ---\n"
+                "User: Read README.md\n"
+                f"Assistant: {{\"tool\": \"read_file\", \"args\": {{\"path\": \"{cwd}/README.md\"}}}}\n"
+                "User: Save data to file\n"
+                f"Assistant: {{\"tool\": \"write_file\", \"args\": {{\"path\": \"{cwd}/output.txt\", \"content\": \"Data\"}}}}\n"
+                "------------------\n"
+                "Assistant: "
             )
-            with urllib.request.urlopen(req, timeout=20) as r:
-                return json.loads(r.read().decode("utf-8"))
-                
-        try:
-            resp = await asyncio.to_thread(_call_llm)
-            raw_str = resp.get("response", "{}").strip()
             
-            if raw_str.startswith("```json"): raw_str = raw_str[7:]
-            if raw_str.endswith("```"): raw_str = raw_str[:-3]
-            raw_str = raw_str.strip()
-            
-            raw = json.loads(raw_str)
-            tool_name = raw.get("tool")
-            
-            if tool_name and tool_name != "none" and tool_name in self.mcp_manager.tools:
-                args = raw.get("args", {})
-                
-                # ЖЕСТКАЯ ОЧИСТКА ДЛЯ ПОИСКА
-                if tool_name == "search_news":
-                    clean_q = text.lower()
-                    for w in ["найди", "поищи", "в интернете", "пожалуйста", "сегодня", "мне", "последние", "новости", "про", "о", "об", "гугл"]:
-                        clean_q = clean_q.replace(w, "")
-                    args["query"] = " ".join(clean_q.split()).strip()
-                    print(f"🔍 [Search] Финальный запрос: '{args['query']}'")
-
-                # ФИКС ПУТЕЙ
-                if "path" in args:
-                    path_val = str(args["path"])
-                    if "/path/to/" in path_val:
-                        filename = os.path.basename(path_val)
-                        args["path"] = os.path.join(cwd, filename)
-                        print(f"🔧 [MCP] Исправлен путь на: {args['path']}")
-                    elif not path_val.startswith("/"):
-                        args["path"] = os.path.join(cwd, path_val)
-
-                print(f"🔌 [MCP] Вызов {tool_name} с аргументами {args}")
-                result = await self.mcp_manager.call(tool_name, args)
-                raw_result = json.dumps(result, ensure_ascii=False)
-                print(f"🔌 [MCP] Результат: {raw_result}")
-                
-                # Извлекаем чистый текст
-                clean_text = raw_result
-                try:
-                    parsed = json.loads(raw_result)
-                    if isinstance(parsed, dict) and "content" in parsed:
-                        texts = [c.get("text", "") for c in parsed["content"] if c.get("type") == "text"]
-                        clean_text = "\n".join(texts)
-                except Exception:
-                    pass
-
-                # Форматируем ответ
-                try:
-                    fmt_prompt = (
-                        f"Пользователь спросил: '{text}'.\n"
-                        f"Данные: {clean_text}\n"
-                        f"Сформулируй краткий и точный ответ на русском языке. Не упоминай JSON."
-                    )
+            def _call_llm(p=prompt):
+                req = urllib.request.Request(
+                    "http://localhost:11434/api/generate",
+                    data=json.dumps({
+                        "model": "qwen2.5:7b-instruct-q4_K_M",
+                        "prompt": p,
+                        "stream": False,
+                        "format": "json",
+                        "options": {"temperature": 0.0}
+                    }).encode("utf-8"),
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    return json.loads(r.read().decode("utf-8"))
                     
-                    def _call_format():
-                        req = urllib.request.Request(
-                            "http://localhost:11434/api/generate",
-                            data=json.dumps({
-                                "model": "qwen2.5:7b-instruct-q4_K_M",
-                                "prompt": fmt_prompt,
-                                "stream": False,
-                                "options": {"temperature": 0.1}
-                            }).encode("utf-8"),
-                            headers={"Content-Type": "application/json"}
-                        )
-                        with urllib.request.urlopen(req, timeout=30) as r:
-                            return json.loads(r.read().decode("utf-8")).get("response", "").strip()
+            try:
+                resp = await asyncio.to_thread(_call_llm)
+                raw_str = resp.get("response", "{}").strip()
+                
+                if raw_str.startswith("```json"): raw_str = raw_str[7:]
+                if raw_str.endswith("```"): raw_str = raw_str[:-3]
+                raw_str = raw_str.strip()
+                
+                raw = json.loads(raw_str)
+                tool_name = raw.get("tool")
+                
+                if tool_name == "done" or tool_name == "none":
+                    print(f"🔌 [MCP Chain] Завершено за {step} шагов.")
+                    break
+                
+                if tool_name in called_tools:
+                    print(f"🔌 [MCP Chain] Детект зацикливания на {tool_name}. Остановка.")
+                    break
                     
-                    final_text = await asyncio.to_thread(_call_format)
-                    if final_text:
-                        return final_text
-                except Exception as e:
-                    print(f"⚠️ Ошибка форматирования: {e}")
+                if tool_name and tool_name in self.mcp_manager.tools:
+                    called_tools.add(tool_name)
+                    args = raw.get("args", {})
+                    
+                    if tool_name == "search_news":
+                        q = args.get("query", text)
+                        args = {"query": q}
+                    
+                    if "path" in args:
+                        path_val = str(args["path"])
+                        if "/path/to/" in path_val:
+                            filename = os.path.basename(path_val)
+                            args["path"] = os.path.join(cwd, filename)
+                        elif not path_val.startswith("/"):
+                            args["path"] = os.path.join(cwd, path_val)
+
+                    print(f"🔌 [MCP Chain] Шаг {step+1}: Вызов {tool_name} с {args}")
+                    result = await self.mcp_manager.call(tool_name, args)
+                    raw_result = json.dumps(result, ensure_ascii=False)
+                    
+                    clean_text = raw_result
+                    try:
+                        parsed = json.loads(raw_result)
+                        if isinstance(parsed, dict) and "content" in parsed:
+                            texts = [c.get("text", "") for c in parsed["content"] if c.get("type") == "text"]
+                            clean_text = "\n".join(texts)
+                    except Exception:
+                        pass
                         
-                return f"🔌 [MCP:{tool_name}] {clean_text}"
-            else:
-                print(f"🔌 [MCP] LLM выбрала none. Ответ: {raw_str}")
-        except Exception as e:
-            print(f"⚠️ MCP Fallback error: {type(e).__name__}: {e}")
-            
+                    history.append({"tool": tool_name, "result": clean_text[:1000]})
+                    
+                else:
+                    print(f"🔌 [MCP Chain] Неизвестный инструмент: {tool_name}")
+                    break
+                    
+            except Exception as e:
+                print(f"⚠️ MCP Chain error: {type(e).__name__}: {e}")
+                break
+
+        if history:
+            final_prompt = (
+                f"Пользователь спросил: '{text}'.\n"
+                f"Вот лог выполненных действий:\n" + "\n".join([f"Шаг {i+1} ({h['tool']}): {h['result']}" for i, h in enumerate(history)]) + "\n\n"
+                f"Сформулируй краткий итоговый ответ для пользователя на русском языке. Ответь, что было сделано и какой результат."
+            )
+            try:
+                def _call_fmt():
+                    req = urllib.request.Request(
+                        "http://localhost:11434/api/generate",
+                        data=json.dumps({"model": "qwen2.5:7b-instruct-q4_K_M", "prompt": final_prompt, "stream": False, "options": {"temperature": 0.3}}).encode("utf-8"),
+                        headers={"Content-Type": "application/json"}
+                    )
+                    with urllib.request.urlopen(req, timeout=30) as r:
+                        return json.loads(r.read().decode("utf-8")).get("response", "").strip()
+                return await asyncio.to_thread(_call_fmt)
+            except Exception:
+                pass
+                
         return None
 
-    FACTUAL_PREFIXES = ("погод", "курс ", "новост", "пробк", "гороскоп", "астро")
 
     def _is_factual_intent(self, text: str) -> bool:
         """True = факт-запрос, LLM не должен отвечать. AURA_CORE_FIX_V1."""

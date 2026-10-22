@@ -41,7 +41,11 @@ pip install --upgrade pip
 pip install -r requirements.txt
 pip install torch torchaudio soundfile edge-tts duckduckgo-search  # Доустанавливаем специфичные пакеты
 
-# 6. Проверка голосовой модели Piper
+# 6. Скачивание нейроголоса MMS-TTS (Meta)
+echo "🎙️ Скачивание нейроголоса MMS-TTS (Meta)..."
+./venv/bin/python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='facebook/mms-tts-rus', local_dir='~/.cache/huggingface/mms-tts-rus')"
+
+# 6.1 Проверка голосовой модели Piper (фолбэк)
 echo "🎙️ Проверка голосовой модели Piper..."
 VOICE_DIR="$HOME/.local/share/aura/voices"
 VOICE_FILE="$VOICE_DIR/ru_RU-irina-medium.onnx"

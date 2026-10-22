@@ -1,0 +1,12 @@
+Source: aura
+Section: misc
+Priority: optional
+Maintainer: pythonvenom <aura@pythonvenom.local>
+Build-Depends: debhelper (>= 11)
+Standards-Version: 4.1.4
+
+Package: aura
+Architecture: all
+Depends: python3 (>= 3.11), python3-venv, pipewire, wireplumber, pulseaudio-utils, ffmpeg
+Description: Voice layer over the OS
+ Local AI assistant. Privacy-first. Accessibility-first.

@@ -1,0 +1,13 @@
+[Unit]
+Description=Aura auto-install
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/root/install-aura.sh
+StandardInput=tty
+StandardOutput=tty
+TTYPath=/dev/tty1
+
+[Install]
+WantedBy=multi-user.target

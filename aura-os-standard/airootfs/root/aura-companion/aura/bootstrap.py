@@ -1,0 +1,498 @@
+"""
+Bootstrap Ауры.
+
+Единственное место, где собирается Orchestrator со всеми агентами.
+Точка входа для новой модульной архитектуры.
+
+По науке:
+- Явная регистрация агентов
+- Никакой магии
+- Порядок важен (первый подходящий выигрывает)
+- Легко расширять: добавил агента — зарегистрировал здесь
+"""
+
+from __future__ import annotations
+
+import tomllib
+from pathlib import Path
+
+from aura.agents import (
+    AgentAppLauncher,
+    AgentAtSpi,
+    AgentAudioPult,
+    AgentAudioRouter,
+    AgentBrain,
+    AgentBrowserTabs,
+    AgentChecklist,
+    AgentContextMemory,
+    AgentContextRecall,
+    AgentFDIR,
+    AgentFocusSwitch,
+    AgentFunctions,
+    AgentInternet,
+    AgentJournal,
+    AgentMcp,
+    AgentMediaPause,
+    AgentMediaSearch,
+    AgentMessenger,
+    AgentModules,
+    AgentMQTT,
+    AgentMusicDucker,
+    AgentMusicLocal,
+    AgentNaptime,
+    AgentPower,
+    AgentRAGMemory,
+    AgentRegistry,
+    AgentRules,
+    AgentScenes,
+    AgentScreenReader,
+    AgentSecurity,
+    AgentSelfHeal,
+    AgentTelegram,
+    AgentTextEditor,
+    AgentTime,
+    AgentToolRouter,
+    AgentTuyaBLE,
+    AgentUpdates,
+    AgentVault,
+    AgentVision,
+    AgentVisualAnalysis,
+    AgentVKMusic,
+    AgentVKWeb,
+    AgentWellness,
+    AgentWindowControl,
+    AgentWindowManager,
+    AgentWineLauncher,
+)
+from aura.agents.adaptive_reminders import AgentAdaptiveReminders
+from aura.agents.av_fusion import AgentAudioVisualFusion
+from aura.agents.blind import AgentBlind
+from aura.agents.blind_reply import AgentBlindReply
+from aura.agents.bpm import AgentBPM
+from aura.agents.briefing import BriefingAgent
+from aura.agents.calendar import AgentCalendar
+from aura.agents.call import AgentCall
+from aura.agents.camera import AgentCamera
+from aura.agents.capability_agent import AgentCapabilities
+from aura.agents.captain import AgentCaptain
+from aura.agents.care import CareAgent
+from aura.agents.cec import AgentCEC
+from aura.agents.clipboard import AgentClipboard
+from aura.agents.construction import AgentConstruction
+from aura.agents.coordinator import AgentCoordinator
+from aura.agents.cua import AgentCUA
+from aura.agents.data_miner import AgentDataMiner
+from aura.agents.deep_check_agent import AgentDeepCheck
+from aura.agents.deepseek_web import AgentDeepSeekWeb
+from aura.agents.desktop_control import AgentDesktopControl
+from aura.agents.dictation import AgentDictation
+from aura.agents.email_agent import AgentEmail
+from aura.agents.emotion_voice import AgentEmotionVoice
+from aura.agents.evening_ritual import AgentEveningRitual
+from aura.agents.facial_emotion import AgentFacialEmotion
+from aura.agents.fall import AgentFall
+from aura.agents.federated_adapter import AgentFederatedAdapter
+from aura.agents.fin_elder import AgentFinElder
+from aura.agents.gesture import AgentGesture
+    # from aura.agents.greeting import AgentGreeting  # ОТКЛЮЧЕНО: зацикливание на приветствиях
+from aura.agents.hands_free import AgentHandsFree
+from aura.agents.health import AgentHealth
+from aura.agents.health_twin import AgentHealthTwin
+from aura.agents.homeassistant import AgentHomeAssistant
+from aura.agents.journal_mood import VoiceJournal
+from aura.agents.kid_structure import AgentKidStructure
+from aura.agents.kid_therapy import AgentKidTherapy
+from aura.agents.knowledge import AgentKnowledge
+from aura.agents.massage import AgentMassage
+from aura.agents.math_solver import AgentMathSolver
+from aura.agents.matter import AgentMatter
+from aura.agents.media_pult import AgentMediaPult
+from aura.agents.meds import AgentMeds
+from aura.agents.meds_offline import AgentMedsOffline
+from aura.agents.mouse import AgentMouse
+from aura.agents.onboarding import AgentOnboarding
+from aura.agents.open_resolver import AgentOpenResolver
+from aura.agents.parallel_universe import AgentParallelUniverse
+from aura.agents.pc_control import AgentPCControl
+from aura.agents.planner_agent import AgentPlanner
+from aura.agents.predictor import AgentPredictor
+from aura.agents.proactive_alert import AgentProactiveAlert
+from aura.agents.react_agent import AgentReact
+from aura.agents.recon import AgentRecon
+from aura.agents.reminiscence import AgentReminiscence
+from aura.agents.routine_learner import AgentRoutineLearner
+from aura.agents.sector_mapper import AgentSectorMapper
+from aura.agents.self_check import AgentSelfCheck
+from aura.agents.self_model import AgentSelfModel
+from aura.agents.sensors import AgentSensors
+from aura.agents.sms_bridge import AgentSMS
+from aura.agents.sos import AgentSOS
+from aura.agents.soul_talk import AgentSoulTalk
+from aura.agents.string_counter import AgentStringCounter
+from aura.agents.task_manager import AgentTaskManager
+from aura.agents.time_agent import AgentTimeAgent
+from aura.agents.tutorial import AgentTutorial
+from aura.agents.unified_router import AgentUnifiedRouter
+from aura.agents.video_analyzer import AgentVideoAnalyzer
+from aura.agents.vision_llm import AgentVisionLLM
+from aura.agents.web_scout import AgentWebScout
+from aura.agents.whatsapp import AgentWhatsApp
+from aura.core.orchestrator import Orchestrator
+from aura.core.procedural_memory import ProceduralMemory
+from aura.mcp.manager import MCPManager
+from aura.kernel.agents.steam import AgentSteam
+from aura.kernel.agents.mcp_agent import AgentMCP
+
+MODULES_CONFIG_PATH = Path.home() / ".config" / "aura" / "modules.toml"
+
+
+def load_modules_config() -> dict:
+    """Прочитать modules.toml.
+
+    Приоритет:
+    1. profiles/$AURA_PROFILE/modules.toml (если env AURA_PROFILE)
+    2. ~/.config/aura/modules.toml
+
+    Наука: 12-factor app, factor 3 (Config in env).
+    """
+    import os
+    profile = os.environ.get("AURA_PROFILE", "").strip()
+    paths = []
+    if profile:
+        repo = Path(__file__).parent.parent
+        paths.append(repo / "profiles" / profile / "modules.toml")
+    paths.append(MODULES_CONFIG_PATH)
+
+    for cfg_path in paths:
+        if not cfg_path.exists():
+            continue
+        try:
+            with open(cfg_path, "rb") as f:
+                data = tomllib.load(f)
+            return data.get("modules", {})
+        except Exception:
+            continue
+    return {}
+
+
+def is_module_enabled(agent_class, config: dict) -> bool:
+    """Включён ли модуль (ADR-011).
+
+    Ищем по нескольким формам имени:
+    1. agent_class.MODULE_NAME (явное)
+    2. agent_class.__name__.lower()  — AgentBrowserTabs -> agentbrowsertabs
+    3. snake_case — AgentBrowserTabs -> agent_browser_tabs
+    4. snake_case без agent_ — browser_tabs
+
+    Наука: Convention over Configuration (Rails, 2004).
+    """
+    import re
+
+    if getattr(agent_class, "MODULE_ALWAYS", False):
+        return True
+    if not config:
+        return True
+
+    cls_name = agent_class.__name__
+    snake = re.sub(r"(?<!^)(?=[A-Z])", "_", cls_name).lower()
+
+    candidates = [
+        getattr(agent_class, "MODULE_NAME", None),
+        cls_name.lower(),
+        snake,
+        snake[6:] if snake.startswith("agent_") else None,
+    ]
+
+    for name in candidates:
+        if name and name in config:
+            return bool(config[name])
+    return True
+
+
+def _try_register(orch, agent_class, config: dict) -> bool:
+    """Зарегистрировать агента, если его модуль включён (ADR-011)."""
+    if not is_module_enabled(agent_class, config):
+        return False
+    try:
+        orch.register(agent_class())
+        return True
+    except Exception as e:
+        print(f"⚠️ Не зарегистрирован {agent_class.__name__}: {e}")
+        return False
+
+
+def _load_plugins(orch) -> int:
+    """Загрузить плагины и зарегистрировать их агентов в оркестраторе (ADR-090)."""
+    try:
+        from aura.core.plugin_adapter import register_plugin_agent
+        from aura.core.plugin_manager import PluginManager
+        pm = PluginManager()
+        plugins = pm.list_plugins()
+        loaded = 0
+        for p in plugins:
+            plugin_dir = pm.root / p.id
+            py = plugin_dir / "plugin.py"
+            if not py.exists():
+                continue
+            try:
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(f"aura_plugin_{p.id}", py)
+                if spec is None or spec.loader is None:
+                    print(f"⚠️ Плагин {p.id}: spec не создан")
+                    continue
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                # Найти первый класс с методом can_handle
+                agent_cls = None
+                for name in dir(mod):
+                    obj = getattr(mod, name)
+                    if isinstance(obj, type) and hasattr(obj, "can_handle") and hasattr(obj, "handle"):
+                        agent_cls = obj
+                        break
+                if agent_cls is not None:
+                    register_plugin_agent(orch, agent_cls, p.id)
+                    loaded += 1
+            except Exception as e:
+                print(f"⚠️ plugin {p.id}: {e}")
+        if loaded:
+            print(f"🔌 Плагинов загружено: {loaded}")
+        return loaded
+    except Exception as e:
+        print(f"⚠️ _load_plugins: {e}")
+        return 0
+
+
+
+class _OllamaEmbedder:
+    def embed(self, text: str) -> list[float]:
+        import json, urllib.request
+        req = urllib.request.Request("http://localhost:11434/api/embeddings", data=json.dumps({"model": "nomic-embed-text", "prompt": text}).encode("utf-8"), headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=5) as r: return json.loads(r.read().decode("utf-8"))["embedding"]
+
+def build_orchestrator() -> Orchestrator:
+    """
+    Собрать Orchestrator со всеми агентами.
+
+    Порядок регистрации (важен!):
+    1. Простые и точные (time, power, vault)
+    2. Узкий ducking (music_ducker — до audio_pult, чтобы не перехватить «громче»)
+    3. audio_pult — широкие «громче/тише»
+    4. Дневник, память, реестр, функции, обновления, security
+    5. Аудио-маршрутизация
+    6. X11 (vision, focus_switch, window_manager, context_memory, text_editor)
+    7. Специфичные «открой X» (vk_music, browser_tabs)
+    8. Опасные, но широкие ключи (app_launcher, window_control, screen_reader)
+    9. Медиа (media_search — перехватывает «включи»)
+    10. Internet — последним (общий «найди»)
+
+    Returns:
+        Orchestrator с зарегистрированными агентами.
+    """
+    # Honeypots (ADR-115): устанавливаем canary-файлы при старте
+    try:
+        from aura.security import canary
+        canary.install()
+    except Exception as e:
+        # F-006: не глотать (раздел 17 промта)
+        import logging
+        logging.getLogger('aura.bootstrap').debug(
+            'bootstrap error: %s', e)
+
+    # AUTO_CONFIG_V7 (ADR-153): детект железа → профиль
+    try:
+        import sys as _sys
+        from pathlib import Path as _P
+        _root = _P(__file__).resolve().parents[1]
+        _sys.path.insert(0, str(_root))
+        from aura.inference.model_selector import save as _ms_save
+        from aura.inference.model_selector import select as _ms_select
+        from scripts.hardware_detect import detect
+        from scripts.hardware_detect import save as _hw_save
+        _hw = detect()
+        _cfg = _ms_select(_hw)
+        _hw_save(_hw)
+        _ms_save(_cfg)
+        print(f"🔧 Hardware: {_hw.profile} | LLM: {_cfg.llm or '(none)'}")
+    except Exception as _e:
+        print(f"⚠️ Auto-config: {_e}")
+
+    tool_router = AgentToolRouter()
+    # Bug 47: AURA_BRAIN=0 в env → brain отключён (fast path для видео)
+    import os as _os
+    if _os.environ.get("AURA_BRAIN", "1") == "0":
+        brain = None
+        print("⚡ Brain ОТКЛЮЧЁН (AURA_BRAIN=0) — только агенты")
+    else:
+        brain = AgentBrain()
+    from aura.core import dispatcher as _dispatcher
+    procedural = ProceduralMemory(embedder=_OllamaEmbedder())
+    mcp_manager = MCPManager()
+    orch = Orchestrator(tool_router=tool_router, brain=brain, dispatcher=_dispatcher, procedural=procedural, mcp_manager=mcp_manager)
+    modules_config = load_modules_config()
+
+    # --- Уровень 1: простые и точные ---
+    # ВАЖНО: Fall ДО SOS — Fall специфичен ("упал","не могу встать"),
+    # Fall внутри вызывает SOS. Если SOS первый — он перехватит Fall.
+    _try_register(orch, AgentFall, modules_config)  # падение (вызывает SOS)
+    _try_register(orch, AgentSOS, modules_config)   # SOS (после Fall)
+    _try_register(orch, AgentMeds, modules_config)  # лекарства
+    _try_register(orch, AgentCall, modules_config)  # звонок
+    _try_register(orch, AgentFinElder, modules_config)  # FinElder
+    _try_register(orch, AgentCEC, modules_config)  # CEC TV
+    _try_register(orch, AgentHomeAssistant, modules_config)  # HA
+    _try_register(orch, AgentSensors, modules_config)  # sensors
+    _try_register(orch, AgentMatter, modules_config)  # matter
+    _try_register(orch, AgentWhatsApp, modules_config)  # WhatsApp
+    _try_register(orch, AgentEmail, modules_config)  # Email
+    _try_register(orch, AgentBlind, modules_config)  # Слепые (T047)
+    _try_register(orch, AgentBlindReply, modules_config)  # T048
+    _try_register(orch, AgentSMS, modules_config)  # T046
+    _try_register(orch, AgentMedsOffline, modules_config)  # T-mesh-1
+    _try_register(orch, AgentProactiveAlert, modules_config)  # T054
+    _try_register(orch, AgentEmotionVoice, modules_config)  # T052
+    _try_register(orch, AgentSoulTalk, modules_config)  # T051
+    _try_register(orch, AgentReminiscence, modules_config)  # T053
+    _try_register(orch, AgentKidStructure, modules_config)  # T055
+    _try_register(orch, AgentKidTherapy, modules_config)  # T056
+    _try_register(orch, AgentHealthTwin, modules_config)  # T-twin-1
+    _try_register(orch, AgentFederatedAdapter, modules_config)  # T-fed-1
+    _try_register(orch, AgentRoutineLearner, modules_config)  # T-user-1
+    _try_register(orch, AgentOnboarding, modules_config)  # T-user-2
+    _try_register(orch, AgentTutorial, modules_config)  # F-036
+    _try_register(orch, AgentSelfCheck, modules_config)  # F-037
+    _try_register(orch, AgentPredictor, modules_config)  # T-user-3
+    _try_register(orch, AgentAdaptiveReminders, modules_config)  # T-user-4
+    _try_register(orch, AgentUnifiedRouter, modules_config)  # T-msg-6
+    _try_register(orch, AgentTime, modules_config)
+    _try_register(orch, AgentPower, modules_config)
+    _try_register(orch, AgentTimeAgent, modules_config)
+    _try_register(orch, AgentMassage, modules_config)
+    _try_register(orch, AgentDictation, modules_config)
+    _try_register(orch, AgentConstruction, modules_config)
+    _try_register(orch, AgentBPM, modules_config)
+    _try_register(orch, AgentHealth, modules_config)
+    _try_register(orch, AgentVault, modules_config)
+
+    # --- Уровень 1.5: агенты из project (merge 2026-10-13) ---
+    # Порядок: специфичные → общие. greeting последним (перехватывает «привет»).
+    _try_register(orch, AgentDeepCheck, modules_config)       # проверь ауру
+    _try_register(orch, BriefingAgent, modules_config)        # брифинг/рапорт
+    _try_register(orch, AgentDeepSeekWeb, modules_config)     # дядя р2
+    _try_register(orch, AgentKnowledge, modules_config)       # зачитай файл
+    _try_register(orch, AgentTaskManager, modules_config)     # задачи
+    _try_register(orch, AgentCalendar, modules_config)        # запиши/напомни
+    _try_register(orch, AgentParallelUniverse, modules_config)
+    _try_register(orch, AgentDesktopControl, modules_config)  # рабочие столы
+    _try_register(orch, AgentMouse, modules_config)
+    _try_register(orch, AgentPCControl, modules_config)       # яркость/громкость
+    _try_register(orch, AgentMediaPult, modules_config)       # включи ютуб
+    #     _try_register(orch, AgentGreeting, modules_config)        # привет (широкий)  # ОТКЛЮЧЕНО: зацикливание на приветствиях
+    # --- Инфокосмос: сектора (2026-10-15) ---
+    _try_register(orch, AgentSectorMapper, modules_config)    # где я / сектор
+    _try_register(orch, AgentDataMiner, modules_config)       # данные (цены, курсы)
+    _try_register(orch, AgentWebScout, modules_config)        # новости по секторам
+    # --- Рой: координатор (2026-10-15) ---
+    _try_register(orch, AgentCoordinator, modules_config)     # что происходит / статус роя
+    _try_register(orch, AgentStringCounter, modules_config)   # сколько букв/слов (детерм.)
+    _try_register(orch, AgentMathSolver, modules_config)      # арифметика (детерм.)
+    _try_register(orch, AgentCamera, modules_config)          # камера (V4L2)
+    _try_register(orch, AgentFacialEmotion, modules_config)   # эмоции по лицу
+    _try_register(orch, AgentVideoAnalyzer, modules_config)   # анализ видео
+    _try_register(orch, AgentGesture, modules_config)         # жесты
+    _try_register(orch, AgentAudioVisualFusion, modules_config) # синтез аудио+видео
+    _try_register(orch, AgentSelfModel, modules_config)       # самосознание
+    _try_register(orch, AgentCUA, modules_config)             # CUA (браузер)
+    _try_register(orch, AgentVisionLLM, modules_config)       # Vision LLM (llava)
+
+    # v2.5: приоритетные агенты автора (recon, voice journal)
+    _try_register(orch, AgentRecon, modules_config)
+    _try_register(orch, VoiceJournal, modules_config)
+
+    _try_register(orch, AgentCaptain, modules_config)
+    _try_register(orch, AgentClipboard, modules_config)
+    _try_register(orch, AgentEveningRitual, modules_config)
+
+    # --- Уровень 2: узкий ducking — ДО audio_pult ---
+    _try_register(orch, AgentMusicDucker, modules_config)
+    _try_register(orch, AgentMusicLocal, modules_config)
+    _try_register(orch, AgentMediaPause, modules_config)
+
+    # --- Уровень 3: audio_pult — широкие ключи ---
+    _try_register(orch, AgentAudioPult, modules_config)
+
+    # --- Уровень 4: дневник, память, реестр, функции, обновления, security ---
+    _try_register(orch, AgentJournal, modules_config)
+    _try_register(orch, AgentRAGMemory, modules_config)
+    _try_register(orch, AgentRegistry, modules_config)
+    _try_register(orch, AgentCapabilities, modules_config)
+    _try_register(orch, AgentPlanner, modules_config)
+    _try_register(orch, AgentReact, modules_config)
+    _try_register(orch, AgentFunctions, modules_config)
+    _try_register(orch, AgentUpdates, modules_config)
+    _try_register(orch, AgentSecurity, modules_config)
+
+    # --- Уровень 5: аудио-маршрутизация ---
+    _try_register(orch, AgentAudioRouter, modules_config)
+
+    # --- Уровень 6: X11 специфичные ---
+    _try_register(orch, AgentVision, modules_config)
+    _try_register(orch, AgentFocusSwitch, modules_config)
+    _try_register(orch, AgentWindowManager, modules_config)
+    _try_register(orch, AgentContextMemory, modules_config)
+    _try_register(orch, AgentTextEditor, modules_config)
+    _try_register(orch, AgentChecklist, modules_config)
+    _try_register(orch, AgentAtSpi, modules_config)
+    _try_register(orch, AgentMcp, modules_config)
+    _try_register(orch, AgentTelegram, modules_config)
+    _try_register(orch, AgentVKWeb, modules_config)
+
+    # --- Уровень 7: специфичные "открой X" — раньше AppLauncher ---
+    # Порядок важен: browser_tabs специфичнее — «найди вкладку X»
+    # должно уходить сюда, а не в vk_music (у которого SEARCH_KEYWORDS = «найди»).
+    _try_register(orch, AgentBrowserTabs, modules_config)
+    _try_register(orch, AgentMessenger, modules_config)
+    _try_register(orch, AgentVKMusic, modules_config)
+
+    # --- Уровень 8: опасные, но широкие ключи ---
+    _try_register(orch, AgentOpenResolver, modules_config)
+    _try_register(orch, AgentAppLauncher, modules_config)
+    _try_register(orch, AgentWindowControl, modules_config)
+    _try_register(orch, AgentScreenReader, modules_config)
+
+    # --- Уровень 9: медиа (перехватывает "включи") ---
+    _try_register(orch, AgentMediaSearch, modules_config)
+
+    # Наши новые агенты (13.10.2026) — до Internet, чтобы Internet остался последним
+    _try_register(orch, AgentWineLauncher, modules_config)   # #34
+    _try_register(orch, AgentTuyaBLE, modules_config)        # #29
+
+    _try_register(orch, AgentModules, modules_config)       # Блок 6
+    _try_register(orch, AgentScenes, modules_config)      # #132
+    _try_register(orch, AgentMQTT, modules_config)        # #133
+    _try_register(orch, AgentNaptime, modules_config)      # #142
+    _try_register(orch, AgentContextRecall, modules_config)  # #141
+    _try_register(orch, AgentRules, modules_config)        # #143
+    _try_register(orch, AgentFDIR, modules_config)        # #150
+    _try_register(orch, AgentVisualAnalysis, modules_config)  # #134
+    _try_register(orch, AgentSelfHeal, modules_config)     # #104
+    _try_register(orch, AgentWellness, modules_config)     # Блок 7
+    # --- Уровень 10: Internet — последним (общий "найди") ---
+    _try_register(orch, AgentInternet, modules_config)
+    # v2.5: приоритет для автора
+    orch.registry.register(CareAgent())
+    # orch.registry.register(AgentSteam())
+    orch.registry.register(AgentMCP())
+    orch.registry.register(AgentHandsFree())
+    _load_plugins(orch)
+
+    # #36: прикрепляем CANBus к оркестратору (skeleton)
+    try:
+        from aura.core.canbus import get_bus
+        orch.bus = get_bus()  # type: ignore[attr-defined]
+    except Exception as e:
+        print(f"⚠️ CANBus: {e}")
+
+    return orch
+
+
+__all__ = ["build_orchestrator"]

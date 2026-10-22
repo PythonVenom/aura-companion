@@ -1,0 +1,22 @@
+{
+  "name": "default",
+  "description": "Профиль pythonvenom (Arch + KDE X11)",
+  "de": "kde",
+  "session": "x11",
+  "distro": "arch",
+  "sound": "pipewire",
+  "min_turn_silence": 0.8,
+  "text_stable_seconds": 2.5,
+  "silence_fallback": 3.0,
+  "tts_speed": 1.0,
+  "tts_voice": "ru_RU-irina-medium",
+  "address": "none",
+  "confirm_actions": false,
+  "barge_in": true,
+  "listener_timeout": 2.0,
+  "wake_words": [
+    "аура"
+  ],
+  "vad_aggressiveness": 3,
+  "accent_model": "turbo3.1"
+}

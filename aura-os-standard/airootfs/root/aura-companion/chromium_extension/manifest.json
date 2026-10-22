@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Aura Bridge",
+  "version": "1.0.0",
+  "description": "Голосовое управление через Aura (Chromium: Chrome, Edge, Brave, Vivaldi, Opera)",
+  "permissions": [
+    "nativeMessaging",
+    "tabs",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://web.max.ru/*",
+    "https://web.telegram.org/*",
+    "https://vk.com/*",
+    "https://web.whatsapp.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://web.max.ru/*"],
+      "js": ["content_max.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

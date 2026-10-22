@@ -1,0 +1,18 @@
+# tag: base
+# description: базовое состояние проекта Aura (git + service + tests)
+
+## id=01 name=git-state
+cmd: git log --oneline -5
+cmd: git status --short
+
+## id=02 name=service
+cmd: systemctl --user status aura.service --no-pager | head -8
+
+## id=03 name=unit-file
+file: ~/.config/systemd/user/aura.service
+
+## id=04 name=tests
+cmd: cd ~/aura_project && source venv/bin/activate && pytest -q 2>&1 | tail -3
+
+## id=05 name=aura-ctl-test
+cmd: cd ~/aura_project && source venv/bin/activate && pytest tests/test_aura_ctl.py -q 2>&1 | tail -3

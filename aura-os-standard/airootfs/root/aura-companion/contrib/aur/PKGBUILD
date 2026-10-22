@@ -1,0 +1,16 @@
+# Maintainer: pythonvenom <aura@pythonvenom.local>
+pkgname=aura-companion
+pkgver=2.0.0
+pkgrel=1
+pkgdesc="Voice layer over the OS. Local. Open source. No cloud."
+arch=('any')
+url="https://github.com/PythonVenom/aura-companion"
+license=('MIT')
+depends=('python' 'python-pip' 'pipewire' 'wireplumber' 'playerctl' 'ffmpeg')
+makedepends=('python-build' 'python-installer')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+package() {
+    cd "$pkgname-$pkgver"
+    python -m installer --destdir="$pkgdir" .
+}

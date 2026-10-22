@@ -1,0 +1,13 @@
+Source: aura-companion
+Section: misc
+Priority: optional
+Maintainer: pythonvenom <aura@pythonvenom.local>
+Build-Depends: debhelper (>= 11), python3, python3-setuptools
+Standards-Version: 4.5.0
+Homepage: https://github.com/PythonVenom/aura-companion
+
+Package: aura-companion
+Architecture: all
+Depends: python3 (>= 3.11), python3-venv, pipewire, wireplumber, playerctl, ffmpeg
+Description: Voice layer over the OS
+ Local AI assistant. Privacy-first. Accessibility-first.

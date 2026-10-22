@@ -1,0 +1,16 @@
+name: Feature
+description: Предложение функции
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Проблема
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Предложение
+    validations:
+      required: true

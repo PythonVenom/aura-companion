@@ -1,0 +1,28 @@
+name: Partnership
+description: Спонсорство, интеграция, гранты
+labels: ["partnership"]
+body:
+  - type: input
+    id: org
+    attributes:
+      label: Компания / фонд
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Тип
+      options:
+        - Спонсорство
+        - Грант
+        - Железо / оборудование
+        - Интеграция
+        - Другое
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Детали
+    validations:
+      required: true

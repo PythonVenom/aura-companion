@@ -1,0 +1,5 @@
+post_install() {
+    echo "→ Aura установлена."
+    echo "→ Запусти: systemctl --user start aura.service"
+    echo "→ Настрой SOS: ~/.config/aura/sos.json"
+}

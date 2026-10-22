@@ -1,0 +1,12 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.onnx binary
+*.wav binary
+*.mp3 binary
+*.pdf binary
+
+*.py linguist-language=Python
+*.js linguist-language=JavaScript

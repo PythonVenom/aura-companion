@@ -1,0 +1,8 @@
+aiohttp
+soundfile
+torch
+torchaudio
+transformers
+huggingface_hub
+duckduckgo-search
+edge-tts

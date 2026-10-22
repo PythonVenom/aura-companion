@@ -1,0 +1,135 @@
+cases:
+- input: пауза
+  route: control
+  action: pause
+- input: продолжи
+  route: control
+  action: resume
+- input: замолчи
+  route: control
+  action: pause
+- input: стоп
+  route: control
+  action: pause
+- input: panic
+  route: control
+  action: pause
+- input: заблокируй экран
+  route: power
+  action: lock
+- input: lock screen
+  route: power
+  action: lock
+- input: залочь
+  route: power
+  action: lock
+- input: включи нирвану
+  route: music
+  action: play
+  args:
+    query_has: нирвану
+- input: поставь рамштайн
+  route: music
+  action: play
+  args:
+    query_has: рамштайн
+- input: играй кино
+  route: music
+  action: play
+  args:
+    query_has: кино
+- input: включи трек
+  route: music
+  action: play
+- input: следующий трек
+  route: music
+  action: next
+- input: next
+  route: music
+  action: next
+- input: предыдущий трек
+  route: music
+  action: prev
+- input: пауза музыки
+  route: music
+  action: pause
+- input: который час
+  route: time
+  action: now
+- input: сколько времени
+  route: time
+  action: now
+- input: какое сегодня число
+  route: time
+  action: date
+- input: дата
+  route: time
+  action: date
+- input: какой день
+  route: time
+  action: date
+- input: открой firefox
+  route: app
+  action: launch
+  args:
+    name_has: firefox
+- input: запусти терминал
+  route: app
+  action: launch
+- input: открой vscode
+  route: app
+  action: launch
+  args:
+    name_has: vscode
+- input: open browser
+  route: app
+  action: launch
+- input: открой дипсик
+  route: app
+  action: launch
+- input: запусти либру
+  route: app
+  action: launch
+- input: открой телеграм
+  route: app
+  action: launch
+- input: открой код
+  route: app
+  action: launch
+- input: открой https://ya.ru
+  route: browser
+  action: open
+  args:
+    url_has: ya.ru
+- input: открой сайт youtube.com
+  route: browser
+  action: open
+- input: открой ссылку https://github.com
+  route: browser
+  action: open
+- input: open http://example.com
+  route: browser
+  action: open
+- input: открой в браузере google.com
+  route: browser
+  action: open
+- input: расскажи анекдот
+  route: ask
+- input: что такое любовь
+  route: ask
+- input: бла бла
+  route: ask
+- input: привет
+  route: ask
+- input: как дела
+  route: ask
+- input: спасибо
+  route: ask
+- input: кто ты
+  route: ask
+- input: что нового
+  route: ask
+- input: помоги мне
+  route: ask
+- input: xyzzy
+  route: ask

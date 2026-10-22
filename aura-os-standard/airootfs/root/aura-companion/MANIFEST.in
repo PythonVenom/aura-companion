@@ -1,0 +1,6 @@
+include README.md LICENSE CHANGELOG.md
+recursive-include aura *.py
+recursive-include docs *.md
+exclude .aura/*
+exclude config/agents.json
+exclude tools/fix_*.py

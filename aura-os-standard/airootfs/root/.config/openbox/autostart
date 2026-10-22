@@ -1,0 +1,9 @@
+#!/bin/bash
+picom --config /dev/null --backend glx --vsync --daemon &
+xsetroot -solid "#1a1a1a" &
+cd /root/aura-companion
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+systemctl start ollama
+python aura_main.py --daemon &

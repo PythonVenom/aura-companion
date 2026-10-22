@@ -154,3 +154,11 @@ docs/screenshots/*.png
 ml/
 chat_inbox
 chat_history
+
+# AuraOS Build artifacts
+aura-os-standard/work/
+aura-os-standard/out/
+venv/
+__pycache__/
+*.sfs
+*.iso

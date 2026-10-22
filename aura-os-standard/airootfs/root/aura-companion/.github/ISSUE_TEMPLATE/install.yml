@@ -1,0 +1,24 @@
+name: Install problem
+description: Проблема при установке
+labels: [install, bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: Что произошло
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Вывод терминала
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: distro
+    attributes:
+      label: Дистрибутив
+      placeholder: Arch / Ubuntu 24.04
+    validations:
+      required: true

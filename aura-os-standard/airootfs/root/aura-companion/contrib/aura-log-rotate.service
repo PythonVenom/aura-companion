@@ -1,0 +1,8 @@
+[Unit]
+Description=Aura log rotation
+
+[Service]
+Type=oneshot
+ExecStart=/home/pythonvenom/aura_project/venv/bin/python -m aura.log_rotate
+WorkingDirectory=/home/pythonvenom/aura_project
+Environment=PYTHONPATH=/home/pythonvenom/aura_project

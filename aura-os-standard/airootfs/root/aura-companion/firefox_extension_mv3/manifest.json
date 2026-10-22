@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Aura Bridge",
+  "version": "0.2.0",
+  "description": "Голосовое управление Максом через Ауру",
+  "permissions": ["nativeMessaging", "tabs", "activeTab", "scripting"],
+  "host_permissions": ["https://web.max.ru/*"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://web.max.ru/*"],
+      "js": ["content_max.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "aura-bridge@pythonvenom.local",
+      "strict_min_version": "109.0"
+    }
+  }
+}

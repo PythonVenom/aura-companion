@@ -1,0 +1,42 @@
+# F-079: modules.toml для бати (elder-care профиль, авто-генерация 2026-10-13)
+# Всё elder-care включено. Остальное — выключено.
+
+[modules]
+at_spi = false
+brain = false
+checklist = false
+context_memory = false
+deep_check = false
+deep_seek_web = false
+desktop_control = false
+email = false
+federated_adapter = false
+focus_switch = false
+greeting = false
+kid_structure = false
+kid_therapy = false
+mcp = false
+media_pult = false
+media_search = false
+messenger = false
+mouse = false
+music_ducker = false
+music_local = false
+onboarding = false
+p_c_control = false
+parallel_universe = false
+predictor = false
+routine_learner = false
+s_m_s = false
+self_check = false
+task_manager = false
+telegram = false
+text_editor = false
+tool_router = false
+tutorial = false
+unified_router = false
+updates = false
+v_k_music = false
+v_k_web = false
+vault = false
+vision = false

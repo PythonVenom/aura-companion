@@ -1,0 +1,57 @@
+# Aura flash-image: mkarchiso profile
+
+## Структура
+
+~/.config/mkarchiso/aura-profile/
+├── profiledef.sh
+├── packages.x86_64
+├── airootfs/
+│   ├── etc/systemd/system/auto-install.service
+│   └── root/aura_project/     (копия проекта)
+└── efiboot/
+
+## Шаги
+
+1. Установить archiso:
+   sudo pacman -S archiso
+
+2. Скопировать профиль:
+   sudo cp -r /usr/share/archiso/configs/releng ~/.config/mkarchiso/aura-profile
+
+3. Добавить в packages.x86_64:
+   python
+   python-pip
+   git
+   pipewire
+   pipewire-pulse
+   pipewire-audio
+   wireplumber
+   vlc
+   playerctl
+   sudo
+   nano
+
+4. Скопировать aura_project в airootfs/root/
+
+5. Добавить auto-install.service:
+   [Unit]
+   Description=Aura auto-install
+   After=network.target
+
+   [Service]
+   Type=oneshot
+   ExecStart=/root/install-aura.sh
+   StandardInput=tty
+
+   [Install]
+   WantedBy=multi-user.target
+
+6. Включить сервис:
+   ln -s /etc/systemd/system/auto-install.service \
+         airootfs/etc/systemd/system/multi-user.target.wants/
+
+7. Собрать ISO:
+   sudo mkarchiso -v ~/.config/mkarchiso/aura-profile
+
+8. Записать на флешку:
+   sudo dd if=out/archlinux-*.iso of=/dev/sdX bs=4M status=progress

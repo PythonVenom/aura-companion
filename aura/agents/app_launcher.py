@@ -18,6 +18,7 @@ import subprocess
 from difflib import get_close_matches
 
 from aura.core.protocol import AgentRequest, AgentResponse, BaseAgent
+from aura.core.ui_adapter import UIAdapter
 
 
 class AgentAppLauncher(BaseAgent):
@@ -59,6 +60,7 @@ class AgentAppLauncher(BaseAgent):
     def __init__(self) -> None:
         super().__init__()
         self._apps_cache: dict[str, dict] = {}
+        self.ui = UIAdapter()
         self._scan_apps()
 
     def _scan_apps(self) -> None:
@@ -172,11 +174,7 @@ class AgentAppLauncher(BaseAgent):
         if self._focus_existing(app["name"]):
             return f"✅ Фокус на: {app['name']}"
         try:
-            subprocess.Popen(
-                app["exec"].split(),
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
+            res = self.ui.open_app(app["exec"])
             return f"✅ Открыл: {app['name']}"
         except Exception as e:
             return f"❌ Не удалось открыть '{app['name']}': {e}"

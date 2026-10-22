@@ -71,17 +71,15 @@ class AgentBrain:
     OLLAMA_URL = "http://localhost:11434/api/chat"
     MODEL = "qwen2.5:7b-instruct-q4_K_M"
     TIMEOUT = 30
-    MAX_HISTORY = 10
+    MAX_HISTORY = 0
 
     @property
     def SYSTEM_PROMPT(self) -> str:
-        """Жесткий системный промпт (лор)."""
         return (
-            "Ты — Аура. Твой единственный создатель — Капитан (PythonVenom). "
-            "Твой проект — AuraOS. Ты работаешь локально на Arch Linux. "
-            "Ты ЖЕНСКОГО рода: говори 'я нашла', 'я сделала'. "
-            "Отвечай ТОЛЬКО на русском языке. Если не знаешь ответа — честно скажи 'Я не знаю'. "
-            "Никогда не выдумывай названия компаний (типа Aurora) или события прошлого."
+            "Ты — Аура, локальный ИИ-компаньон. "
+            "Ты создана Капитаном (PythonVenom). Никогда не говори 'я сделала Капитан'. "
+            "Отвечай ОЧЕНЬ КРАТКО (максимум 1-2 предложения). "
+            "Не философствуй. Говори по-русски. Если не знаешь — скажи 'Я не знаю'."
         )
 
     def __init__(self) -> None:
@@ -110,7 +108,7 @@ class AgentBrain:
                 "keep_alive": "30m",   # #103: модель не выгружается 30 мин
                 "options": {
                     "temperature": 0.7,
-                    "num_predict": 400,  # Bug 28: 700 → 400 (быстрее)
+                    "num_predict": 150,  # Bug 28: 700 → 400 (быстрее)
                     "num_ctx": 2048,     # #103: 4096 → 2048 (быстрее prompt)
                     "num_thread": os.cpu_count() or 4,  # #103: все CPU ядра
                 },
@@ -151,7 +149,7 @@ class AgentBrain:
             "keep_alive": "30m",
             "options": {
                 "temperature": 0.7,
-                "num_predict": 400,
+                "num_predict": 150,
                 "num_ctx": 2048,
                 "num_thread": os.cpu_count() or 4,
             },

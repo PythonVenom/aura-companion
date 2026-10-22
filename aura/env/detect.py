@@ -96,3 +96,13 @@ def get_env(key: str, default=None):
 if __name__ == "__main__":
     import json
     print(json.dumps(detect(), ensure_ascii=False, indent=2))
+
+
+def get_display_server() -> str:
+    """Определяет графический сервер (x11 / wayland)."""
+    import os
+    if os.environ.get("WAYLAND_DISPLAY"):
+        return "wayland"
+    elif os.environ.get("DISPLAY"):
+        return "x11"
+    return "unknown"

@@ -38,6 +38,11 @@ class StdioMCPClient:
         while self.proc and self.proc.stdout:
             line = await self.proc.stdout.readline()
             if not line:
+                # Процесс умер. Резолвим все ожидающие фьючерсы с ошибкой
+                for fut in self._pending.values():
+                    if not fut.done():
+                        fut.set_exception(RuntimeError("MCP process exited unexpectedly"))
+                self._pending.clear()
                 break
             try:
                 msg = json.loads(line.decode("utf-8"))

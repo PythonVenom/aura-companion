@@ -123,7 +123,14 @@ class Orchestrator:
 
         if self.mcp_manager is not None:
             
-            if any(w in text.lower() for w in ["файл", "readme", "прочитай", "list", "find", "cat", "grep", "директор", "база", "sql", "таблиц", "users", "test.db", "database"]):
+            # Очищаем поисковый запрос от лишних слов
+            clean_search = text.lower()
+            for w in ["найди", "поищи", "в интернете", "пожалуйста", "сегодня", "мне", "последние", "новости", "про", "о", "об"]:
+                clean_search = clean_search.replace(w, "")
+            clean_search = " ".join(clean_search.split()).strip()
+
+            if any(w in text.lower() for w in ["найди", "поищи", "новости", "курс", "погода", "кто такой", "что такое", "гугл", "интернет"]):
+                print(f"🔍 [Search] Очищенный запрос: '{clean_search}'")
                 import logging
                 logging.getLogger("aura.orchestrator").debug(f"MCP Fallback attempt (tools loaded: {len(self.mcp_manager.tools)})")
                 mcp_res = await self._try_mcp_fallback(text)
@@ -418,17 +425,15 @@ class Orchestrator:
             "1. If the user asks to read files, use the tool.\n"
             "2. Return ONLY valid JSON.\n"
             "3. NEVER use placeholder paths like '/path/to/your/project/'.\n"
-            "4. For SQLite queries, NEVER include the database name or filename in the SQL query (e.g., no 'WHERE dbname=...'). Just use standard SQL.\n"
             f"4. If user asks for 'README.md', use '{cwd}/README.md'.\n"
+            "5. For web search, extract ONLY the core keywords.\n"
             "--- EXAMPLES ---\n"
             "User: Read README.md\n"
             f"Assistant: {{\"tool\": \"read_file\", \"args\": {{\"path\": \"{cwd}/README.md\"}}}}\n"
+            "User: Найди новости про ИИ\n"
+            "Assistant: {\"tool\": \"search_news\", \"args\": {\"query\": \"искусственный интеллект\"}}\n"
             "User: What is the weather?\n"
             "Assistant: {\"tool\": \"none\"}\n"
-            "User: How many users in the database?\n"
-            "Assistant: {\"tool\": \"query\", \"args\": {\"sql\": \"SELECT COUNT(*) FROM users\"}}\n"
-            "User: What tables are in the database?\n"
-            "Assistant: {\"tool\": \"get_schema\", \"args\": {}}\n"
             "------------------\n"
             f"User: {text}\n"
             "Assistant: "
@@ -463,22 +468,30 @@ class Orchestrator:
             if tool_name and tool_name != "none" and tool_name in self.mcp_manager.tools:
                 args = raw.get("args", {})
                 
+                # ЖЕСТКАЯ ОЧИСТКА ДЛЯ ПОИСКА
+                if tool_name == "search_news":
+                    clean_q = text.lower()
+                    for w in ["найди", "поищи", "в интернете", "пожалуйста", "сегодня", "мне", "последние", "новости", "про", "о", "об", "гугл"]:
+                        clean_q = clean_q.replace(w, "")
+                    args["query"] = " ".join(clean_q.split()).strip()
+                    print(f"🔍 [Search] Финальный запрос: '{args['query']}'")
+
+                # ФИКС ПУТЕЙ
                 if "path" in args:
                     path_val = str(args["path"])
-                    if "/path/to/your/project" in path_val or "/path/to/" in path_val:
+                    if "/path/to/" in path_val:
                         filename = os.path.basename(path_val)
                         args["path"] = os.path.join(cwd, filename)
-                        print(f"🔧 [MCP] Исправлен галлюцинированный путь на: {args['path']}")
+                        print(f"🔧 [MCP] Исправлен путь на: {args['path']}")
                     elif not path_val.startswith("/"):
                         args["path"] = os.path.join(cwd, path_val)
-                        print(f"🔧 [MCP] Относительный путь преобразован в: {args['path']}")
 
                 print(f"🔌 [MCP] Вызов {tool_name} с аргументами {args}")
                 result = await self.mcp_manager.call(tool_name, args)
                 raw_result = json.dumps(result, ensure_ascii=False)
                 print(f"🔌 [MCP] Результат: {raw_result}")
                 
-                # Извлекаем чистый текст из MCP-ответа
+                # Извлекаем чистый текст
                 clean_text = raw_result
                 try:
                     parsed = json.loads(raw_result)
@@ -488,13 +501,12 @@ class Orchestrator:
                 except Exception:
                     pass
 
-                # Форматируем ответ через прямой вызов Ollama (быстро и без рекурсии)
+                # Форматируем ответ
                 try:
                     fmt_prompt = (
                         f"Пользователь спросил: '{text}'.\n"
-                        f"Инструмент вернул следующие данные: {clean_text}\n"
-                        f"Сформулируй краткий и точный ответ пользователю на русском языке. "
-                        f"Не упоминай JSON, инструменты или служебные данные. Просто ответь на вопрос."
+                        f"Данные: {clean_text}\n"
+                        f"Сформулируй краткий и точный ответ на русском языке. Не упоминай JSON."
                     )
                     
                     def _call_format():
@@ -512,17 +524,16 @@ class Orchestrator:
                             return json.loads(r.read().decode("utf-8")).get("response", "").strip()
                     
                     final_text = await asyncio.to_thread(_call_format)
-                    print(f"DEBUG: LLM format response: {final_text}")
                     if final_text:
                         return final_text
                 except Exception as e:
-                    print(f"⚠️ Ошибка форматирования MCP-ответа: {e}")
+                    print(f"⚠️ Ошибка форматирования: {e}")
                         
                 return f"🔌 [MCP:{tool_name}] {clean_text}"
             else:
-                print(f"🔌 [MCP] LLM решила не использовать инструмент. Сырой ответ: {raw_str}")
+                print(f"🔌 [MCP] LLM выбрала none. Ответ: {raw_str}")
         except Exception as e:
-            print(f"⚠️ MCP Fallback error: {e}")
+            print(f"⚠️ MCP Fallback error: {type(e).__name__}: {e}")
             
         return None
 

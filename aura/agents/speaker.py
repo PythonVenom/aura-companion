@@ -79,21 +79,26 @@ class AgentSpeaker(MicroAgent):
                 self.aplay_process.wait(timeout=5)
 
     def _speak_worker(self):
-        """Воркер: использует MMS-TTS (нейроголос Facebook, локально)."""
+        """Воркер: Silero TTS (Baya) с правильной локальной загрузкой + фолбэк на Piper."""
         import torch
         import soundfile as sf
         import uuid
-        from transformers import VitsModel, AutoTokenizer
         
-        print("DEBUG: [Worker] Загружаю MMS-TTS (нейроголос Meta)...")
-        model_path = os.path.expanduser("~/.cache/huggingface/mms-tts-rus")
+        print("DEBUG: [Worker] Загружаю Silero TTS (Baya)...")
+        model_path = os.path.expanduser("~/.cache/torch/hub/checkpoints/v3_1_ru.pt")
+        model = None
+        
         try:
-            tokenizer = AutoTokenizer.from_pretrained(model_path)
-            model = VitsModel.from_pretrained(model_path)
-            print("DEBUG: [Worker] MMS-TTS успешно загружен.")
+            if not os.path.exists(model_path):
+                raise FileNotFoundError(f"Модель не найдена: {model_path}")
+            
+            # Загружаем через PackageImporter (правильный формат для Silero v3)
+            importer = torch.package.PackageImporter(model_path)
+            model = importer.load_pickle('tts_models', 'model')
+            model.to('cpu')
+            print("DEBUG: [Worker] Silero успешно загружен.")
         except Exception as e:
-            print(f"❌ [Worker] Не удалось загрузить MMS-TTS: {e}")
-            return
+            print(f"❌ [Worker] Ошибка загрузки Silero: {e}")
 
         while True:
             try:
@@ -112,25 +117,42 @@ class AgentSpeaker(MicroAgent):
                     try: ducker.duck()
                     except: pass
 
-                print(f"DEBUG: [Worker] Генерирую речь через MMS-TTS...")
-                inputs = tokenizer(text, return_tensors="pt")
-                with torch.no_grad():
-                    output = model(**inputs).waveform
-                
-                wav_file = f"/tmp/aura_speech_{uuid.uuid4().hex}.wav"
-                audio = output.numpy().squeeze()
-                sf.write(wav_file, audio, model.config.sampling_rate)
-                print("DEBUG: [Worker] MMS-TTS сгенерировал WAV.")
-                
-                self.aplay_process = subprocess.Popen(
-                    ['pw-play', wav_file],
-                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-                )
-                self.aplay_process.wait()
-                self.aplay_process = None
-                print("DEBUG: [Worker] MMS-TTS отработал (pw-play).")
+                success = False
+                if model:
+                    try:
+                        print("DEBUG: [Worker] Генерирую речь через Silero...")
+                        wav_file = f"/tmp/aura_speech_{uuid.uuid4().hex}.wav"
+                        audio = model.apply_tts(text=text, speaker='baya', sample_rate=48000)
+                        sf.write(wav_file, audio, 48000)
+                        print("DEBUG: [Worker] Silero сгенерировал WAV.")
+                        
+                        self.aplay_process = subprocess.Popen(
+                            ['pw-play', wav_file],
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                        )
+                        self.aplay_process.wait()
+                        self.aplay_process = None
+                        success = True
+                        print("DEBUG: [Worker] Silero отработал.")
+                    except Exception as e:
+                        print(f"⚠️ Silero упал: {e}")
+
+                if not success:
+                    print("DEBUG: [Worker] Переключаюсь на Piper...")
+                    if os.path.exists(self.piper_cmd) and os.path.exists(self.voice_path):
+                        import tempfile
+                        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as f:
+                            f.write(text)
+                            text_file = f.name
+                        wav_file = f"/tmp/aura_speech_fallback.wav"
+                        _cmd = [self.piper_cmd, '-m', self.voice_path, '-i', text_file, '-f', wav_file]
+                        subprocess.run(_cmd, capture_output=True, timeout=15)
+                        self.aplay_process = subprocess.Popen(['pw-play', wav_file], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                        self.aplay_process.wait()
+                        self.aplay_process = None
+                        print("DEBUG: [Worker] Piper отработал.")
             except Exception as e:
-                print(f"❌ [Worker] Speaker error: {type(e).__name__}: {e}")
+                print(f"❌ [Worker] Speaker error: {e}")
             finally:
                 if ducker:
                     try: ducker.unduck()

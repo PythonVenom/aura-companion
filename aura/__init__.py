@@ -3,7 +3,7 @@ from importlib.metadata import PackageNotFoundError, version
 try:
     __version__ = version("aura-companion")
 except PackageNotFoundError:
-    __version__ = "unknown"
+    __version__ = "1.0.0-rc1"
 
 """
 Аура — семейный ИИ-компаньон.

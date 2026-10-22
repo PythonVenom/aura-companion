@@ -1,3 +1,4 @@
+import sys
 """
 Машинка 02: Голос (AgentSpeaker).
 
@@ -78,11 +79,9 @@ class AgentSpeaker(MicroAgent):
                 self.aplay_process.wait(timeout=5)
 
     def _speak_worker(self):
-        """Вечный воркер: блокирующий get(timeout). Не выходит сам.
-
-        Bug 10 fix v2: раньше `while not empty()` завершался, say()
-        создавал второй worker → два paplay = троение.
-        """
+        """Воркер с жестким дебагом."""
+        import uuid
+        print("DEBUG: [Worker] Поток запущен и ждет текст...")
         while True:
             try:
                 text = self.speech_queue.get(timeout=0.5)
@@ -91,78 +90,46 @@ class AgentSpeaker(MicroAgent):
                 continue
             if text is None:
                 break
+                
+            print(f"DEBUG: [Worker] Получен текст: {text[:30]}...")
             self.is_speaking = True
-            ducked = False
+            ducker = self._get_ducker()
             try:
                 text = self._make_text_smart(text)
-                # Bug 32: приглушить всё (музыка, браузер) кроме Aura
-                ducker = self._get_ducker()
                 if ducker:
-                    try:
-                        ducker.duck()
-                        ducked = True
-                    except Exception as e:
-                        import logging
-                        logging.getLogger('aura.speaker').debug(
-                            'duck error: %s', e)
-                # FIX: сброс флага после речи
-                if os.path.exists(self.piper_cmd) and os.path.exists(self.voice_path):
-                    import tempfile
-                    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as f:
-                        f.write(text)
-                        text_file = f.name
-                    wav_file = f"/tmp/aura_speech_{int(time.time())}_{threading.get_ident()}.wav"
-                    _vs = self._get_voice_settings()
-                    _speed = _vs["speed"]
-                    _cmd = [self.piper_cmd, '-m', self.voice_path, '-i', text_file, '-f', wav_file]
-                    if _speed != 1.0:
-                        _cmd.extend(["--length_scale", str(1.0 / _speed)])
-                    subprocess.run(_cmd, capture_output=True, timeout=15)
-                    self.aplay_process = subprocess.Popen(
-                        ['paplay', wav_file],
-                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    # >>> AURA_HANG_FIX_V1
-                    # Оценка длительности: WAV 22050 Hz mono 16-bit
-                    try:
-                        _secs = max(2.0, os.path.getsize(wav_file) / 44100.0)
-                    except OSError:
-                        _secs = 10.0
-                    _timeout = _secs + 5.0
-                    try:
-                        self.aplay_process.wait(timeout=_timeout)
-                    except subprocess.TimeoutExpired:
-                        print(f'⚠️ paplay висит >{_timeout:.1f}s — kill')
-                        try:
-                            self.aplay_process.kill()
-                            self.aplay_process.wait(timeout=1.0)
-                        except Exception as e:
-                            # F-006: не глотать (раздел 17 промта)
-                            import logging
-                            logging.getLogger('aura.speaker').debug(
-                                'speaker error: %s', e)
-                    finally:
-                        os.unlink(text_file)
-                        try:
-                            os.unlink(wav_file)
-                        except Exception as e:
-                            # F-006: не глотать (раздел 17 промта)
-                            import logging
-                            logging.getLogger('aura.speaker').debug(
-                                'speaker error: %s', e)
-                else:
-                    pass # espeak removed
+                    try: ducker.duck()
+                    except: pass
+
+                mp3_file = f"/tmp/aura_speech_{uuid.uuid4().hex}.mp3"
+                cmd_tts = [
+                    sys.executable, "-m", "edge_tts", 
+                    "--voice", "ru-RU-SvetlanaNeural", 
+                    "--text", text, 
+                    "--write-media", mp3_file
+                ]
+                
+                print(f"DEBUG: [Worker] Запускаю Edge-TTS...")
+                res = subprocess.run(cmd_tts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=15)
+                if res.returncode != 0:
+                    print(f"❌ Edge-TTS Error: {res.stderr.decode('utf-8')}")
+                    continue
+                print(f"DEBUG: [Worker] Аудио создано. Запускаю mpv...")
+                
+                self.aplay_process = subprocess.Popen(
+                    ['mpv', '--no-video', '--no-terminal', mp3_file],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
+                self.aplay_process.wait()
+                print("DEBUG: [Worker] Воспроизведение завершено.")
+                self.aplay_process = None
+                
             except Exception as e:
-                print(f"❌ Ошибка озвучивания: {e}")
+                print(f"❌ [Worker] Speaker error: {type(e).__name__}: {e}")
             finally:
-                # Bug 32: восстановить громкость
-                if ducked and ducker:
-                    try:
-                        ducker.un_duck()
-                    except Exception as e:
-                        import logging
-                        logging.getLogger('aura.speaker').debug(
-                            'un_duck error: %s', e)
-                self.is_speaking = False  # >>> AURA_HANG_FIX_V1
+                if ducker:
+                    try: ducker.unduck()
+                    except: pass
+                self.is_speaking = False
 
     def _voice_for_lang(self) -> str:
         """Голос piper для текущего языка i18n. ta — fallback en."""

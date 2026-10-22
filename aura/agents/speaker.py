@@ -79,9 +79,7 @@ class AgentSpeaker(MicroAgent):
                 self.aplay_process.wait(timeout=5)
 
     def _speak_worker(self):
-        """Воркер с жестким дебагом."""
-        import uuid
-        print("DEBUG: [Worker] Поток запущен и ждет текст...")
+        """Воркер: использует локальный Piper (без задержек и интернета)."""
         while True:
             try:
                 text = self.speech_queue.get(timeout=0.5)
@@ -91,7 +89,6 @@ class AgentSpeaker(MicroAgent):
             if text is None:
                 break
                 
-            print(f"DEBUG: [Worker] Получен текст: {text[:30]}...")
             self.is_speaking = True
             ducker = self._get_ducker()
             try:
@@ -100,29 +97,29 @@ class AgentSpeaker(MicroAgent):
                     try: ducker.duck()
                     except: pass
 
-                mp3_file = f"/tmp/aura_speech_{uuid.uuid4().hex}.mp3"
-                cmd_tts = [
-                    sys.executable, "-m", "edge_tts", 
-                    "--voice", "ru-RU-SvetlanaNeural", 
-                    "--text", text, 
-                    "--write-media", mp3_file
-                ]
-                
-                print(f"DEBUG: [Worker] Запускаю Edge-TTS...")
-                res = subprocess.run(cmd_tts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=15)
-                if res.returncode != 0:
-                    print(f"❌ Edge-TTS Error: {res.stderr.decode('utf-8')}")
-                    continue
-                print(f"DEBUG: [Worker] Аудио создано. Запускаю mpv...")
-                
-                self.aplay_process = subprocess.Popen(
-                    ['mpv', '--no-video', '--no-terminal', mp3_file],
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE
-                )
-                self.aplay_process.wait()
-                print("DEBUG: [Worker] Воспроизведение завершено.")
-                self.aplay_process = None
-                
+                if os.path.exists(self.piper_cmd) and os.path.exists(self.voice_path):
+                    import tempfile
+                    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as f:
+                        f.write(text)
+                        text_file = f.name
+                    
+                    wav_file = f"/tmp/aura_speech_{int(time.time())}.wav"
+                    _cmd = [self.piper_cmd, '-m', self.voice_path, '-i', text_file, '-f', wav_file]
+                    
+                    print(f"DEBUG: [Worker] Генерирую WAV через Piper...")
+                    subprocess.run(_cmd, capture_output=True, timeout=15, check=True)
+                    print(f"DEBUG: [Worker] Воспроизвожу через pw-play...")
+                    
+                    self.aplay_process = subprocess.Popen(
+                        ['pw-play', wav_file],
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                    )
+                    self.aplay_process.wait()
+                    self.aplay_process = None
+                    print("DEBUG: [Worker] Piper отработал.")
+                else:
+                    print("❌ [Worker] Piper или голосовая модель не найдены!")
+
             except Exception as e:
                 print(f"❌ [Worker] Speaker error: {type(e).__name__}: {e}")
             finally:

@@ -123,14 +123,7 @@ class Orchestrator:
 
         if self.mcp_manager is not None:
             
-            # Очищаем поисковый запрос от лишних слов
-            clean_search = text.lower()
-            for w in ["найди", "поищи", "в интернете", "пожалуйста", "сегодня", "мне", "последние", "новости", "про", "о", "об"]:
-                clean_search = clean_search.replace(w, "")
-            clean_search = " ".join(clean_search.split()).strip()
-
-            if any(w in text.lower() for w in ["файл", "readme", "прочитай", "list", "find", "cat", "grep", "директор", "база", "sql", "таблиц", "users", "test.db", "database", "найди", "поищи", "новости", "курс", "погода", "кто такой", "что такое", "гугл", "интернет", "создай", "запиши", "сохрани", "сделай"]):
-                print(f"🔍 [Search] Очищенный запрос: '{clean_search}'")
+            if any(w in text.lower() for w in ["файл", "readme", "прочитай", "list", "find", "cat", "grep", "директор", "база", "sql", "таблиц", "users", "test.db", "database", "найди", "поищи", "новости", "курс", "погода", "кто такой", "что такое", "гугл", "интернет", "создай", "запиши", "сохрани", "сделай", "гитхаб", "github", "репозитор", "issue", "pull request", "пр"]):
                 import logging
                 logging.getLogger("aura.orchestrator").debug(f"MCP Fallback attempt (tools loaded: {len(self.mcp_manager.tools)})")
                 mcp_res = await self._try_mcp_fallback(text)

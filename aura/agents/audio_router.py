@@ -117,7 +117,7 @@ class AgentAudioRouter(BaseAgent):
             self.current_profile = None
             _, message = self.detect_and_route()
             return AgentResponse.ok(
-                text=message or "🔧 Аудио-маршрутизация обновлена.",
+                text=message or " ",
                 agent_name=self.name,
             )
 
@@ -307,7 +307,7 @@ class AgentAudioRouter(BaseAgent):
             self._fix_speaker_volume()
             return (profile, "📡 Обнаружено Bluetooth-аудио. Использую его.")
 
-        return (profile, "🔧 Аудио-маршрутизация обновлена.")
+        return (profile, " ")
 
 
 __all__ = ["AgentAudioRouter"]

@@ -172,13 +172,13 @@ class AgentSpeaker(MicroAgent):
         # >>> AURA_NO_ADDRESS_V1
         # Дефолт: address != "вы" → вокатив НЕ добавляется.
         # Elder care (backlog, дальняя полка): address == "вы" + persona.honorific.
-        suffix = persona.get("honorific", "Создатель") if address == "вы" else ""
+        suffix = persona.get("honorific", "Капитан") if address == "вы" else ""
 
         if suffix and suffix.lower() not in text.lower() and len(text) < 50:
             text = f"{text}, {suffix}"
         if text.endswith('.'):
             text = text[:-1] + '...'
-        text = text.replace("аура", "Аура").replace("создатель", "Создатель")
+        text = text.replace("аура", "Аура").replace("создатель", "Капитан")
         return text
 
     def shutdown(self) -> None:

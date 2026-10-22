@@ -99,7 +99,7 @@ def render_hud(h: dict) -> str:
 
     return "\n".join([
         TOP,
-        row(f"{B}🛸  AURA  {R}{D}— Создатель видит сквозь{R}"),
+        row(f"{B}🛸  AURA  {R}{D}— Капитан видит сквозь{R}"),
         MID,
         row(f"  {mk(h['mic'])} Микрофон    {D}T-one STT{R}"),
         row(f"  {mk(h['llm'])} LLM         {h['llm_name']}"),
@@ -268,7 +268,7 @@ async def _loop() -> int:
             say(ans)
             pause()
 
-    print(f"\n{G}🦾 До связи, Создатель.{R}")
+    print(f"\n{G}🦾 До связи, Капитан.{R}")
     return 0
 
 

@@ -6,8 +6,7 @@ import os
 
 class AgentBargeIn:
     def __init__(self):
-        # 2 - средняя агрессивность VAD (1 - низкая, 3 - высокая)
-        self.vad = webrtcvad.Vad(2)
+        self.vad = webrtcvad.Vad(3)
         self.running = False
         self.ready = True
         self._thread = None
@@ -23,13 +22,12 @@ class AgentBargeIn:
         self.running = True
         self._thread = threading.Thread(target=self._listen_loop, daemon=True)
         self._thread.start()
-        print("✅ BargeIn (pw-record) запущен")
+        print("✅ BargeIn (pw-record, target 72) запущен")
         return True
 
     def _listen_loop(self):
-        # Читаем сырой звук с дефолтного (или 70) устройства через pw-record
-        # Формат: 16000 Hz, 1 канал, s16 (2 байта на сэмпл)
-        cmd = ["pw-record", "--rate", "16000", "--channels", "1", "--format", "s16", "-"]
+        # ИСПРАВЛЕНИЕ: Слушаем target 72 напрямую
+        cmd = ["pw-record", "--target", "72", "--rate", "16000", "--channels", "1", "--format", "s16", "-"]
         
         try:
             self._process = subprocess.Popen(
@@ -39,18 +37,20 @@ class AgentBargeIn:
             )
             
             while self.running:
-                # Читаем ВСЕГДА, чтобы буфер не забивался старым звуком
                 data = self._process.stdout.read(640)
                 if not data:
                     break
                 
                 if len(data) == 640 and self._is_aura_speaking:
+                    if time.time() - getattr(self, 'speak_start_time', 0) < 3.0: continue
                     try:
                         if self.vad.is_speech(data, 16000):
-                            print("👂 [Barge-in] Обнаружена речь! Останавливаю Aura.")
+                            self.speech_frames = getattr(self, 'speech_frames', 0) + 1
+                            if getattr(self, 'speech_frames', 0) > 50:  # Ждем 300 мс речи
+                                print("👂 [Barge-in] Обнаружена речь! Останавливаю Aura.")
                             if self.on_speech:
                                 self.on_speech()
-                            self._is_aura_speaking = False # Сброс после срабатывания
+                            self._is_aura_speaking = False
                     except Exception as e:
                         print(f"VAD error: {e}")
                         
@@ -63,6 +63,7 @@ class AgentBargeIn:
 
     def set_aura_speaking(self, speaking: bool):
         self._is_aura_speaking = speaking
+        if speaking: self.speak_start_time = time.time()
 
     def stop(self):
         self.running = False

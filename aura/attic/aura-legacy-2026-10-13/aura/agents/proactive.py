@@ -118,11 +118,11 @@ def _collect_briefing(get_agent) -> str:
     time_agent = get_agent("time") if get_agent else None
     if time_agent:
         try:
-            blocks.append("Доброе утро, Создатель.")
+            blocks.append("Доброе утро, Капитан.")
         except Exception:
-            blocks.append("Доброе утро, Создатель.")
+            blocks.append("Доброе утро, Капитан.")
     else:
-        blocks.append("Доброе утро, Создатель.")
+        blocks.append("Доброе утро, Капитан.")
 
     # Блок 2: погода (internet)
     internet = get_agent("internet") if get_agent else None
@@ -150,7 +150,7 @@ def _collect_briefing(get_agent) -> str:
             logging.getLogger('aura.proactive').debug(
                 'proactive error: %s', e)
 
-    return " ".join(blocks) if blocks else "Доброе утро, Создатель."
+    return " ".join(blocks) if blocks else "Доброе утро, Капитан."
 
 
 def morning_briefing_trigger(get_agent=None) -> Trigger:
@@ -318,10 +318,10 @@ def max_new_message_trigger(get_agent) -> Trigger:
                 logging.getLogger('aura.proactive').debug(
                     'proactive error: %s', e)
             if chat:
-                return f"Создатель, новое сообщение от {chat}. Зачитать?"
-            return "Создатель, новое сообщение в Максе. Зачитать?"
+                return f"Капитан, новое сообщение от {chat}. Зачитать?"
+            return "Капитан, новое сообщение в Максе. Зачитать?"
         except Exception:
-            return "Создатель, в Максе новое сообщение."
+            return "Капитан, в Максе новое сообщение."
 
     return Trigger(
         name="max_new_message",

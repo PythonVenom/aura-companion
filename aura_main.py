@@ -1,3 +1,4 @@
+import asyncio
 #!/usr/bin/env python3
 """
 АУРА — новая точка входа (модульная архитектура).
@@ -27,7 +28,6 @@
 - tool_router + brain — LLM-роутинг (не мигрированы)
 """
 
-import asyncio
 import contextlib
 import json
 import queue as _queue
@@ -107,7 +107,6 @@ class AuraOrchestrator:
         self.orch = build_orchestrator()
         if hasattr(self.orch, 'mcp_manager') and self.orch.mcp_manager:
             import threading
-            import asyncio
             def _load_mcp_bg():
                 try:
                     asyncio.run(self.orch.mcp_manager.load_all())
@@ -396,7 +395,7 @@ class AuraOrchestrator:
         if not self.dm.is_active():
             return False
         set_status("listening")
-        heard = self.listener.listen(timeout=1)  # Bug 34
+        heard = self.listener.listen(timeout=6)  # Bug 34
         if not heard:
             return True
         print(f"💬 DM: {heard}")
@@ -433,7 +432,7 @@ class AuraOrchestrator:
         chat = fsm.get("chat", "")
         # Слушаем БЕЗ активации «Аура».
         try:
-            heard = self.listener.listen(timeout=1)  # Bug 34
+            heard = self.listener.listen(timeout=6)  # Bug 34
         except Exception as e:
             print(f"⚠️ FSM listen error: {e}")
             return True
@@ -677,7 +676,7 @@ class AuraOrchestrator:
         self.heartbeat.start()
 
         # === BARGE-IN: включён (ADR-009 + aura-aec.service) ===
-        if self.barge_in and self.barge_in.ready:
+        if False: # BARGE-IN DISABLED BY CAPTAIN
             if self.barge_in.start(on_speech=self._on_barge_in):
                 print("✅ BargeIn запущен (перебивание работает)")
 
@@ -725,7 +724,6 @@ class AuraOrchestrator:
                         # Если check() асинхронный, запускаем его в loop
                         import inspect
                         if inspect.iscoroutinefunction(self.proactive.check):
-                            import asyncio
                             proactive_msg = asyncio.run(self.proactive.check())
                         else:
                             proactive_msg = self.proactive.check()
@@ -770,8 +768,8 @@ class AuraOrchestrator:
                 # Bug 38: приглушаем музыку ПОКА слушаем (интеллектуальный duck)
                 self._duck_on()
                 # Bug 73: timeout 2 вместо 8 — ChatBridge голодал до 8 сек
-                heard = self.listener.listen(timeout=1)
-                import logging; logging.getLogger("aura.main").debug(f"heard={heard!r}")
+                heard = self.listener.listen(timeout=6)
+                import logging; print(f"🎤 heard={heard!r}", flush=True)
                 if not heard:
                     self._duck_off()
                     # === ЧАТ: второй drain после listen (Bug 73) ===
@@ -919,7 +917,7 @@ class AuraOrchestrator:
                 # Cooldown + снять mic mute
                 time.sleep(1.5)
                 try:
-                    self.listener.resume()
+                    pass # self.listener.resume() удален
                 except Exception as _e:
                     print(f'⚠️ echo-resume: {_e}')
 

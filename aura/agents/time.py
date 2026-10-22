@@ -68,15 +68,15 @@ class AgentTime(BaseAgent):
         day_part = self._day_part(hour)
 
         if minutes_str:
-            return f"{hours_str} {minutes_str} {day_part}, Создатель"
-        return f"{hours_str} {day_part}, Создатель"
+            return f"{hours_str} {minutes_str} {day_part}"
+        return f"{hours_str} {day_part}"
 
     def _format_date(self) -> str:
         """Форматирует текущую дату по-русски."""
         now = datetime.now()
         return (
             f"Сегодня {self._weekday()}, "
-            f"{now.day} {self._month()} {now.year} года, Создатель"
+            f"{now.day} {self._month()} {now.year} года"
         )
 
     @staticmethod

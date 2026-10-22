@@ -1,4 +1,3 @@
-# mypy: disable-error-code=annotation-unchecked
 """Speaker Agent v1.0 — kernel-версия.
 Голос Aura: piper → WAV → paplay. Через шину.
 Наука: Actor Model + AgentBehaviour contract.
@@ -20,7 +19,7 @@ from aura.kernel.payload import get_payload
 log = logging.getLogger("aura.agents.speaker")
 
 # Путь к голосовой модели — как в старом speaker
-PROJECT = Path.home() / "aura-companion"
+PROJECT = Path.home() / "aura_project"
 VOICE_PATH = PROJECT / "voices/ru_RU-irina-medium.onnx"
 
 
@@ -29,7 +28,6 @@ class SpeakerAgent:
     version = "1.0.0"
 
     def __init__(self):
-        self._speak_lock = threading.Lock()
         self.ctx: AgentContext | None = None
         self._running = False
         self._queue: queue.Queue = queue.Queue()

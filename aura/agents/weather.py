@@ -11,6 +11,7 @@ API: https://open-meteo.com — free, no key, UV + apparent_temperature.
 - WHO (2002) — Global Solar UV Index
 """
 import json
+import re
 import urllib.parse
 import urllib.request
 from typing import Any
@@ -20,6 +21,10 @@ try:
 except Exception:
     MicroAgent = object  # type: ignore[assignment,misc]
 
+
+from pathlib import Path
+WEATHER_CITY_CACHE = Path.home() / ".cache/aura/weather_city.json"
+WEATHER_ERR_TS = Path.home() / ".cache/aura/weather_last_error.ts"
 
 DEFAULT_CITY = "Москва"
 # Координаты городов РФ (расширять по мере нужды)
@@ -48,42 +53,157 @@ class WeatherAgent(MicroAgent):
             self.description = "Погода"
 
     # ---- helpers ----
+
+    def _detect_city(self) -> str | None:
+        """Определяет город по IP через ip-api.com (бесплатно, без ключа)."""
+        import time as _t
+        # кэш на 1 час
+        if WEATHER_CITY_CACHE.exists():
+            try:
+                data = json.loads(WEATHER_CITY_CACHE.read_text(encoding="utf-8"))
+                if _t.time() - data.get("ts", 0) < 3600 and data.get("city"):
+                    return data["city"]
+            except Exception:
+                pass
+        try:
+            req = urllib.request.Request(
+                "http://ip-api.com/json/?fields=status,city,regionName,country",
+                headers={"User-Agent": "AuraOS/1.0"},
+            )
+            with urllib.request.urlopen(req, timeout=5) as r:
+                geo = json.loads(r.read().decode("utf-8"))
+            if geo.get("status") == "success" and geo.get("city"):
+                WEATHER_CITY_CACHE.parent.mkdir(parents=True, exist_ok=True)
+                WEATHER_CITY_CACHE.write_text(
+                    json.dumps({"city": geo["city"], "ts": _t.time()}, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                return geo["city"]
+        except Exception:
+            pass
+        return None
+
     @staticmethod
     def _coords(city: str):
         key = city.lower().strip()
         return CITY_COORDS.get(key, CITY_COORDS["москва"])
 
-    def _fetch(self, city: str, days: int = 1):
-        """F-085c: wttr.in вместо open-meteo (у РФ провайдера отрезан)."""
-        # Формат: %t — температура, %f — ощущается, %C — описание,
-        # %w — ветер, %h — влажность, %u — UV-индекс
-        url = (
-            "https://wttr.in/"
-            + urllib.parse.quote(city)
-            + "?format=j1&lang=ru"
-        )
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=8) as r:
-            data = json.loads(r.read().decode('utf-8'))
-        # Адаптируем под старый интерфейс
-        cur = data["current_condition"][0]
+    def _fetch(self, city: str | None = None, days: int = 1):
+        """Погода через curl с каскадным фолбэком (город -> авто по IP)."""
+        import subprocess
+        import time as _t
+
+        if WEATHER_ERR_TS.exists():
+            try:
+                _last = float(WEATHER_ERR_TS.read_text(encoding="utf-8").strip())
+                if _t.time() - _last < 300:
+                    raise RuntimeError("weather_cooldown")
+            except (ValueError, OSError):
+                pass
+
+        if not city:
+            city = self._detect_city()
+            
+        # Собираем список URL для проверки
+        urls = []
+        if city:
+            path = urllib.parse.quote(city)
+            urls.append(f"https://wttr.in/{path}?format=j1")
+            urls.append(f"https://wttr.in/{path}?format=%l:+%c+%t,+%f")
+        
+        # Если город не сработал — просим wttr.in определить по IP
+        urls.append("https://wttr.in/?format=j1")
+        urls.append("https://wttr.in/?format=%l:+%c+%t,+%f")
+
+        last_err = None
+        for url in urls:
+            try:
+                if "format=j1" in url:
+                    res = subprocess.run(["curl", "-s", "-m", "12", "-H", "Accept-Language: ru", url], capture_output=True, text=True, check=True)
+                    data = json.loads(res.stdout)
+                    res_dict = self._adapt_wttr(data)
+                else:
+                    res = subprocess.run(["curl", "-s", "-m", "10", url], capture_output=True, text=True, check=True)
+                    raw = res.stdout.strip()
+                    if not raw or "Unknown location" in raw or "ERR" in raw:
+                        raise ValueError("Bad response")
+                    m = re.search(r'([+-]?\d+)°C', raw)
+                    temp = float(m.group(1)) if m else 0.0
+                    res_dict = {
+                        "current": {
+                            "temperature_2m": temp,
+                            "apparent_temperature": temp,
+                            "weather_code": 0,
+                            "wind_speed_10m": 0,
+                            "relative_humidity_2m": 0,
+                            "_desc_ru": raw.split(":")[-1].strip(),
+                        },
+                        "daily": {"temperature_2m_max": [temp], "temperature_2m_min": [temp],
+                                  "weather_code": [0], "uv_index_max": [0.0]}, # Защита от пустого списка
+                    }
+                
+                # Успех!
+                try:
+                    WEATHER_ERR_TS.unlink(missing_ok=True)
+                except OSError:
+                    pass
+                return res_dict
+            except Exception as e:
+                last_err = e
+                _t.sleep(1.0)
+
+        try:
+            WEATHER_ERR_TS.parent.mkdir(parents=True, exist_ok=True)
+            WEATHER_ERR_TS.write_text(str(_t.time()), encoding="utf-8")
+        except OSError:
+            pass
+        raise RuntimeError("weather_unavailable") from last_err
+
+    @staticmethod
+    def _adapt_wttr(data: dict) -> dict:
+        """Адаптирует JSON wttr.in под старый интерфейс."""
+        def _f(val, default=0.0):
+            try:
+                return float(val)
+            except (ValueError, TypeError):
+                return default
+
+        cur_list = data.get("current_condition", [])
+        if not cur_list:
+            raise ValueError("Location not found or empty response")
+        cur = cur_list[0]
+        
         result: dict[str, Any] = {
             "current": {
-                "temperature_2m": float(cur["temp_C"]),
-                "apparent_temperature": float(cur["FeelsLikeC"]),
-                "weather_code": 0,  # маппинг кодов — ниже в _weather_ru
-                "wind_speed_10m": float(cur["windspeedKmph"]),
-                "relative_humidity_2m": float(cur["humidity"]),
+                "temperature_2m": _f(cur.get("temp_C")),
+                "apparent_temperature": _f(cur.get("FeelsLikeC")),
+                "weather_code": 0,
+                "wind_speed_10m": _f(cur.get("windspeedKmph")),
+                "relative_humidity_2m": _f(cur.get("humidity")),
             },
             "daily": {
-                "temperature_2m_max": [float(d["maxtempC"]) for d in data["weather"][:3]],
-                "temperature_2m_min": [float(d["mintempC"]) for d in data["weather"][:3]],
-                "weather_code": [0, 0, 0],
-                "uv_index_max": [float(cur.get("uvIndex", 0))] * 3,
+                "temperature_2m_max": [],
+                "temperature_2m_min": [],
+                "weather_code": [],
+                "uv_index_max": [],
             },
         }
-        # Описание сохраняем отдельно для _format_current
-        result["current"]["_desc_ru"] = cur["lang_ru"][0]["value"] if "lang_ru" in cur else cur["weatherDesc"][0]["value"]
+        weather_days = data.get("weather", [])
+        for d in weather_days[:3]:
+            result["daily"]["temperature_2m_max"].append(_f(d.get("maxtempC")))
+            result["daily"]["temperature_2m_min"].append(_f(d.get("mintempC")))
+            result["daily"]["weather_code"].append(0)
+        
+        # Заполняем до 3 элементов
+        while len(result["daily"]["temperature_2m_max"]) < 3:
+            result["daily"]["temperature_2m_max"].append(0.0)
+            result["daily"]["temperature_2m_min"].append(0.0)
+            result["daily"]["weather_code"].append(0)
+            
+        result["daily"]["uv_index_max"] = [_f(cur.get("uvIndex"))] * 3
+
+        desc = cur.get("lang_ru", [{}])[0].get("value") or cur.get("weatherDesc", [{}])[0].get("value", "Неизвестно")
+        result["current"]["_desc_ru"] = desc
         return result
 
     @staticmethod
@@ -158,7 +278,7 @@ class WeatherAgent(MicroAgent):
             data = self._fetch(c, days=1)
             return self._format_current(c, data)
         except Exception as e:
-            return f"Не могу получить погоду: {e}"
+            return f"⚠️ Погода недоступна ({e}). Скажи «погода в <городе>» вручную."
 
     def tomorrow(self, city: str | None = None) -> str:
         c = city or DEFAULT_CITY
@@ -166,7 +286,7 @@ class WeatherAgent(MicroAgent):
             data = self._fetch(c, days=2)
             return self._format_day(c, data, day=1)
         except Exception as e:
-            return f"Не могу получить прогноз: {e}"
+            return ("⚠️ Прогноз временно недоступен. Скажи «погода в <городе>» или попробуй позже.")
 
     def after_tomorrow(self, city: str | None = None) -> str:
         c = city or DEFAULT_CITY
@@ -174,7 +294,7 @@ class WeatherAgent(MicroAgent):
             data = self._fetch(c, days=3)
             return self._format_day(c, data, day=2)
         except Exception as e:
-            return f"Не могу получить прогноз: {e}"
+            return ("⚠️ Прогноз временно недоступен. Скажи «погода в <городе>» или попробуй позже.")
 
     def rural_forecast(self, city: str | None = None) -> str:
         c = city or DEFAULT_CITY

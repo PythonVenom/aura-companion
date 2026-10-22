@@ -231,13 +231,13 @@ class Orchestrator:
             return f"❌ Ошибка агента {agent.name}: {e}"
 
         if response.status == AgentStatus.OK:
-            # AURA_STRIP_VOCATIVE_V1 — убрать 'Создатель'
+            # AURA_STRIP_VOCATIVE_V1 — убрать 'Капитан'
             if response.text:
                 import re as _re
                 response.text = _re.sub(
-                    r',\s*Создатель\b', '', response.text).strip()
+                    r',\s*Капитан\b', '', response.text).strip()
                 response.text = _re.sub(
-                    r'\bСоздатель,?\s*', '', response.text).strip()
+                    r'\bКапитан,?\s*', '', response.text).strip()
 
             self._last_response = response
             _mem_write(text, response.text)

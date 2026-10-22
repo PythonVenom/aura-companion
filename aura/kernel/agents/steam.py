@@ -84,7 +84,7 @@ class AgentSteam(BaseAgent):
                 "unknown": "⚪ Статус неизвестен (Valve ещё не проверила эту игру или API не отдал данные)",
             }
             if deck == "unknown":
-                return f"🎮 {name} (AppID {app_id}): Valve еще не присвоила статус Deck Verified этой игре. Проверь позже."
+                return f"🎮 {name}: ⚪ Нет данных о Deck Verified."
             return f"🎮 {name} (AppID {app_id}): {mapping.get(deck, deck)}"
         except Exception as e:
             return f"❌ Ошибка Steam API: {e}"

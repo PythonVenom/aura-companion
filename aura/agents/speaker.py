@@ -1,3 +1,4 @@
+import re
 import sys
 """
 Машинка 02: Голос (AgentSpeaker).
@@ -246,9 +247,22 @@ class AgentSpeaker(MicroAgent):
 
         if suffix and suffix.lower() not in text.lower() and len(text) < 50:
             text = f"{text}, {suffix}"
+        # --- ОЧИСТКА ТЕКСТА ---
+        text = text.replace("🌤", "").replace("☁️", "").replace("🌦", "")
+        text = text.replace("Погода: ", "").replace("Какая: ", "")
+        text = text.replace("+", "плюс ").replace("-", "минус ")
+        text = text.replace("°C", " градусов")
+        text = text.replace("C", "")
+        # -----------------------
         if text.endswith('.'):
             text = text[:-1] + '...'
         text = text.replace("аура", "Аура").replace("создатель", "Создатель")
+        text = text.replace("°C", " градусов").replace("+", "плюс ").replace("☁️", "").replace("🌤", "").replace("Какая: ", "")
+        try:
+            from num2words import num2words
+            text = re.sub(r'\b\d+\b', lambda m: num2words(int(m.group()), lang='ru'), text)
+        except Exception:
+            pass
         return text
 
 

@@ -51,7 +51,7 @@ class AuraKernel:
         from aura.kernel.agents.proactive_alert import ProactiveAlertAgent
         from aura.kernel.agents.smarthome import SmartHomeAgent
         from aura.kernel.agents.sos import SOSAgent
-        from aura.kernel.agents.speaker import SpeakerAgent
+        
         from aura.kernel.agents.stop_control import StopControlAgent
         from aura.kernel.agents.telegram import TelegramAgent
         from aura.kernel.agents.time import TimeAgent
@@ -62,7 +62,7 @@ class AuraKernel:
 
         # Агенты
         self.sup.spawn("time", self._make_factory(TimeAgent))
-        self.sup.spawn("speaker", self._make_factory(SpeakerAgent))
+        pass # SpeakerAgent disabled
         self.sup.spawn("meds", self._make_factory(MedsAgent))
         self.sup.spawn("fall", self._make_factory(FallAgent))
         self.sup.spawn("sos", self._make_factory(SOSAgent))

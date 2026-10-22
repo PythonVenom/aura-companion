@@ -42,12 +42,22 @@ class ChatBridge:
             self._inode = None
 
     def read_new(self) -> list[dict]:
-        """Всегда читает весь INBOX. Дедупликация — в _drain_chat_queue."""
+        """Читает только новые строки с прошлого offset."""
         if not self.inbox_path.exists():
+            return []
+        try:
+            st = self.inbox_path.stat()
+        except OSError:
+            return []
+        if self._inode != st.st_ino or st.st_size < self._offset:
+            self._offset = 0
+            self._inode = st.st_ino
+        if st.st_size == self._offset:
             return []
         msgs = []
         try:
             with open(self.inbox_path, encoding="utf-8") as f:
+                f.seek(self._offset)
                 for line in f:
                     line = line.strip()
                     if not line:
@@ -56,6 +66,7 @@ class ChatBridge:
                         msgs.append(json.loads(line))
                     except json.JSONDecodeError:
                         continue
+                self._offset = f.tell()
         except Exception:
             return []
         return msgs

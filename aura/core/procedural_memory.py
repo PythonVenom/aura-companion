@@ -54,6 +54,34 @@ class ProceduralMemory:
         self._hot = {}
         self._init_db()
 
+
+    def log_episode(self, user_input: str, tool_used: str, result: str) -> None:
+        """Записать эпизод в память."""
+        import time
+        with sqlite3.connect(self.db_path) as c:
+            c.execute(
+                "INSERT INTO episodes (ts, user_input, tool_used, result) VALUES (?, ?, ?, ?)",
+                (time.time(), user_input, tool_used, result[:500])
+            )
+            c.commit()
+
+    def get_recent_episodes(self, limit: int = 3) -> str:
+        """Получить последние N эпизодов в виде текста для контекста."""
+        with sqlite3.connect(self.db_path) as c:
+            c.row_factory = sqlite3.Row
+            rows = c.execute(
+                "SELECT user_input, tool_used, result FROM episodes ORDER BY ts DESC LIMIT ?",
+                (limit,)
+            ).fetchall()
+        
+        if not rows:
+            return "Нет недавних действий."
+            
+        lines = []
+        for r in reversed(rows):
+            lines.append(f"User: {r['user_input']} -> Tool: {r['tool_used']} -> Результат: {r['result'][:100]}")
+        return "\n".join(lines)
+
     def _init_db(self) -> None:
         with sqlite3.connect(self.db_path) as c:
             c.executescript("""
@@ -70,6 +98,14 @@ class ProceduralMemory:
                     created_at REAL NOT NULL
                 );
                 CREATE INDEX IF NOT EXISTS idx_proc_last_used ON procedures(last_used DESC);
+                
+                CREATE TABLE IF NOT EXISTS episodes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ts REAL NOT NULL,
+                    user_input TEXT NOT NULL,
+                    tool_used TEXT,
+                    result TEXT
+                );
             """)
             c.commit()
 

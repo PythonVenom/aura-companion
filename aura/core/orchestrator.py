@@ -96,6 +96,7 @@ class Orchestrator:
         self.brain = brain
         self.procedural = procedural
         self.mcp_manager = mcp_manager
+        self.pending_mcp_action = None
         self.dispatcher = dispatcher
         self.route_tree = None
         if dispatcher is not None:
@@ -132,6 +133,39 @@ class Orchestrator:
                     return mcp_res
         text = self._normalize(text)  # AURA_FUZZY_V1
         request = AgentRequest(text=text)
+
+        # === HITL Confirmation Check ===
+        if text.lower() in ["подтверждаю", "да", "подтверждаю действие", "выполняй"]:
+            if self.pending_mcp_action:
+                tool_name, args = self.pending_mcp_action
+                self.pending_mcp_action = None
+                print(f"✅ [HITL] Подтверждено. Выполняю {tool_name} с {args}")
+                try:
+                    import json
+                    result = await self.mcp_manager.call(tool_name, args)
+                    raw_result = json.dumps(result, ensure_ascii=False)
+                    clean_text = raw_result
+                    try:
+                        parsed = json.loads(raw_result)
+                        if isinstance(parsed, dict) and "content" in parsed:
+                            texts = [c.get("text", "") for c in parsed["content"] if c.get("type") == "text"]
+                            clean_text = "\n".join(texts)
+                    except: pass
+                    
+                    if self.procedural is not None:
+                        self.procedural.log_episode(text, tool_name, clean_text)
+                    return f"✅ Выполнено: {clean_text}"
+                except Exception as e:
+                    return f"❌ Ошибка выполнения: {e}"
+            else:
+                return "Нет отложенных действий для подтверждения."
+        else:
+            # Если пользователь сказал что-то другое, сбрасываем ожидание
+            if self.pending_mcp_action:
+                print("⚠️ [HITL] Отложенное действие отменено.")
+                self.pending_mcp_action = None
+
+
 
         # observability (ADR-112)
         try:
@@ -427,6 +461,7 @@ class Orchestrator:
                 f"Current working directory: {cwd}\n"
                 f"User request: {text}\n\n"
                 f"History of previous steps:\n{context_str}\n"
+                f"Recent memory (episodes):\n{self.procedural.get_recent_episodes(3) if self.procedural else 'None'}\n"
                 "RULES:\n"
                 "1. If you need to perform an action, return JSON: {\"tool\": \"tool_name\", \"args\": {...}}\n"
                 "2. If the task is fully completed, or if a tool failed and you cannot fix it, return: {\"tool\": \"done\"}\n"
@@ -492,7 +527,15 @@ class Orchestrator:
                         elif not path_val.startswith("/"):
                             args["path"] = os.path.join(cwd, path_val)
 
+                    # === HITL (Human-in-the-Loop) ===
+                    DANGEROUS_TOOLS = ["write_file", "edit_file", "create_issue", "add_issue_comment", "update_issue"]
+                    if tool_name in DANGEROUS_TOOLS:
+                        print(f"⚠️ [HITL] Запрос на опасное действие: {tool_name} с {args}")
+                        self.pending_mcp_action = (tool_name, args)
+                        return f"⚠️ Капитан, для выполнения '{tool_name}' с аргументами {args} требуется подтверждение. Скажи «Подтверждаю» и повтори команду."
+                    
                     print(f"🔌 [MCP Chain] Шаг {step+1}: Вызов {tool_name} с {args}")
+                    import json
                     result = await self.mcp_manager.call(tool_name, args)
                     raw_result = json.dumps(result, ensure_ascii=False)
                     
@@ -506,6 +549,8 @@ class Orchestrator:
                         pass
                         
                     history.append({"tool": tool_name, "result": clean_text[:1000]})
+                    if self.procedural is not None:
+                        self.procedural.log_episode(text, tool_name, clean_text)
                     
                 else:
                     print(f"🔌 [MCP Chain] Неизвестный инструмент: {tool_name}")

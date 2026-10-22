@@ -247,7 +247,7 @@ class AgentSpeaker(MicroAgent):
         # >>> AURA_NO_ADDRESS_V1
         # Дефолт: address != "вы" → вокатив НЕ добавляется.
         # Elder care (backlog, дальняя полка): address == "вы" + persona.honorific.
-        suffix = persona.get("honorific", "Создатель") if address == "вы" else ""
+        suffix = persona.get("honorific", "") if address == "вы" else ""
 
         if suffix and suffix.lower() not in text.lower() and len(text) < 50:
             text = f"{text}, {suffix}"
@@ -255,6 +255,17 @@ class AgentSpeaker(MicroAgent):
             text = text[:-1] + '...'
         text = text.replace("аура", "Аура").replace("создатель", "Создатель")
         return text
+
+
+    def stop(self) -> None:
+        """Принудительно остановить воспроизведение (Barge-in)."""
+        if hasattr(self, 'aplay_process') and self.aplay_process:
+            try:
+                self.aplay_process.terminate()
+                print("🛑 [Barge-in] Воспроизведение остановлено пользователем.")
+            except Exception:
+                pass
+            self.aplay_process = None
 
     def shutdown(self) -> None:
         """Graceful shutdown: остановить воркер и процессы."""

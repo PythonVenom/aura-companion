@@ -307,39 +307,34 @@ class AuraOrchestrator:
                 print(f"⚠️ Resume: {e}")
 
     def _say_with_duck(self, text: str) -> None:
-        """F-067-fix: duck → say → un_duck.
-
-        Ducking защищён try/except — если упадёт,
-        voice всё равно пойдёт (Bug 38 + F-066).
-        """
         if not text:
             return
-        print(f"🔊 Скажу: {text[:80]}")
+        self._duck_on()
+        import threading
+        import time
 
-        # Ducking — приглушаем музыку (не блокирует)
-        ducked = False
-        try:
-            if hasattr(self, "ducker") and self.ducker is not None:
-                self.ducker.duck()
-                ducked = True
-        except Exception as e:
-            print(f"⚠️ duck: {e}")
+        def _speak_thread():
+            self.speaker.say(text)
 
-        try:
-            if self.speaker is not None:
-                self.speaker.say(text)
-                self.speaker.wait()
-        except Exception as e:
-            print(f"⚠️ speaker: {e}")
+        speak_t = threading.Thread(target=_speak_thread)
+        speak_t.start()
 
-        # Un-duck — вернуть музыку
-        if ducked:
+        while speak_t.is_alive():
             try:
-                self.ducker.un_duck()
+                heard = self.listener.listen(timeout=0.5)
+                if heard and len(heard) > 2:
+                    print(f"👂 [Barge-in] Услышал: {heard}")
+                    self.speaker.stop()
+                    self.chat_queue.put({"user": heard})
+                    break
             except Exception as e:
-                print(f"⚠️ un_duck: {e}")
+                print(f"⚠️ Barge-in error: {e}")
+                break
+            time.sleep(0.05)
 
-    @classmethod
+        speak_t.join(timeout=1.0)
+        self._duck_off()
+
     def _activation_words(cls):
         """Слова активации из settings + базовые."""
         base = (

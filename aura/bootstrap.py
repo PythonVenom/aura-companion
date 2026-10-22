@@ -138,7 +138,10 @@ from aura.agents.vision_llm import AgentVisionLLM
 from aura.agents.web_scout import AgentWebScout
 from aura.agents.whatsapp import AgentWhatsApp
 from aura.core.orchestrator import Orchestrator
+from aura.core.procedural_memory import ProceduralMemory
+from aura.mcp.manager import MCPManager
 from aura.kernel.agents.steam import AgentSteam
+from aura.kernel.agents.mcp_agent import AgentMCP
 
 MODULES_CONFIG_PATH = Path.home() / ".config" / "aura" / "modules.toml"
 
@@ -259,6 +262,13 @@ def _load_plugins(orch) -> int:
         return 0
 
 
+
+class _OllamaEmbedder:
+    def embed(self, text: str) -> list[float]:
+        import json, urllib.request
+        req = urllib.request.Request("http://localhost:11434/api/embeddings", data=json.dumps({"model": "nomic-embed-text", "prompt": text}).encode("utf-8"), headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=5) as r: return json.loads(r.read().decode("utf-8"))["embedding"]
+
 def build_orchestrator() -> Orchestrator:
     """
     Собрать Orchestrator со всеми агентами.
@@ -315,7 +325,9 @@ def build_orchestrator() -> Orchestrator:
     else:
         brain = AgentBrain()
     from aura.core import dispatcher as _dispatcher
-    orch = Orchestrator(tool_router=tool_router, brain=brain, dispatcher=_dispatcher)
+    procedural = ProceduralMemory(embedder=_OllamaEmbedder())
+    mcp_manager = MCPManager()
+    orch = Orchestrator(tool_router=tool_router, brain=brain, dispatcher=_dispatcher, procedural=procedural, mcp_manager=mcp_manager)
     modules_config = load_modules_config()
 
     # --- Уровень 1: простые и точные ---
@@ -468,7 +480,8 @@ def build_orchestrator() -> Orchestrator:
     _try_register(orch, AgentInternet, modules_config)
     # v2.5: приоритет для автора
     orch.registry.register(CareAgent())
-    orch.registry.register(AgentSteam())
+    # orch.registry.register(AgentSteam())
+    orch.registry.register(AgentMCP())
     orch.registry.register(AgentHandsFree())
     _load_plugins(orch)
 

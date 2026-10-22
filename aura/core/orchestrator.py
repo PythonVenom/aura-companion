@@ -25,6 +25,7 @@ import asyncio
 
 from aura.core.protocol import AgentRequest, AgentResponse, AgentStatus
 from aura.core.registry import AgentRegistry
+from aura.core.intent_parser import IntentParser
 
 
 # CONSTITUTION_HOOK + MEMORY_HOOK_V4 — v4.0 orchestrator integration (ADR-122, 123, 124)
@@ -89,10 +90,12 @@ class Orchestrator:
         response = await orch.process("который час")
     """
 
-    def __init__(self, tool_router=None, brain=None, dispatcher=None) -> None:
+    def __init__(self, tool_router=None, brain=None, dispatcher=None, procedural=None, mcp_manager=None) -> None:
         self.registry = AgentRegistry()
         self.tool_router = tool_router
         self.brain = brain
+        self.procedural = procedural
+        self.mcp_manager = mcp_manager
         self.dispatcher = dispatcher
         self.route_tree = None
         if dispatcher is not None:
@@ -101,6 +104,7 @@ class Orchestrator:
                 self.route_tree = build_route_tree()
             except Exception as e:
                 print(f"⚠️ RouteTree init: {e}")
+        self.intent_parser = IntentParser()
         self.fallback_text = "Не расслышала. Повтори, пожалуйста."  # AURA_CORE_FIX_V1
         self._last_response: AgentResponse | None = None
 
@@ -116,6 +120,21 @@ class Orchestrator:
         2. Если найден — выполнить handle()
         3. Если не найден — fallback
         """
+
+        print(f"DEBUG_START: self.mcp_manager={self.mcp_manager}")
+        if self.mcp_manager is not None:
+            if not self.mcp_manager.tools:
+                try:
+                    await self.mcp_manager.load_all()
+                except Exception as e:
+                    print(f"⚠️ Failed to load MCP tools: {e}")
+            
+            if any(w in text.lower() for w in ["файл", "readme", "прочитай", "list", "find", "cat", "grep", "директор"]):
+                print(f"🔌 [MCP] Попытка MCP Fallback... (tools loaded: {len(self.mcp_manager.tools)})")
+                mcp_res = await self._try_mcp_fallback(text)
+                if mcp_res:
+                    _mem_write(text, mcp_res)
+                    return mcp_res
         text = self._normalize(text)  # AURA_FUZZY_V1
         request = AgentRequest(text=text)
 
@@ -162,7 +181,45 @@ class Orchestrator:
         except Exception as e:
             print(f"⚠️ ReAct: {e}")
 
+        # Intent Parser (Декомпозиция)
+        if self._is_complex_goal(text):
+            plan = self.intent_parser.parse(text)
+            if plan.get("steps"):
+                results = []
+                for step in plan["steps"]:
+                    agent_id = step.get("agent")
+                    step_text = step.get("text", text)
+                    args = step.get("args", {})
+                    # Ищем агента по id
+                    a = next((ag for ag in self.registry._agents if ag.name == agent_id), None)
+                    if a:
+                        try:
+                            req = AgentRequest(text=step_text, args=args)
+                            resp = await a.handle(req)
+                            if resp and resp.text:
+                                results.append(f"[{agent_id}] {resp.text}")
+                        except Exception as e:
+                            results.append(f"[{agent_id}] Ошибка: {e}")
+                if results:
+                    final_text = "\n".join(results)
+                    _mem_write(text, final_text)
+                    return final_text
+
+
+        if self._is_complex_goal(text):
+            if self.procedural is not None:
+                proc = self.procedural.recall(text)
+                if proc is not None:
+                    replay = await self._replay_procedure(proc, text)
+                    if replay is not None:
+                        _mem_write(text, replay)
+                        return replay
+
+
+
         agent = self.registry.find(request)
+
+
         if agent is None:
             # 2. TIER0_FASTPATH (ADR-152): 90% простых команд — мгновенно
             #    (только если ни один агент не взял И dispatcher есть)
@@ -212,6 +269,14 @@ class Orchestrator:
                             return rtext
                 except Exception as e:
                     print(f"⚠️ ToolRouter: {e}")
+
+            # MCP Fallback (до Brain)
+            if self.mcp_manager is not None and self.brain is not None:
+                mcp_result = await self._try_mcp_fallback(text)
+                if mcp_result:
+                    _mem_write(text, mcp_result)
+                    return mcp_result
+
             # 3. GUARD (AURA_CORE_FIX_V1): не отдавать в LLM факт-запросы без агента
             if self._is_factual_intent(text):
                 return "Пока не умею это. Скажи иначе или попроси другое."
@@ -231,13 +296,13 @@ class Orchestrator:
             return f"❌ Ошибка агента {agent.name}: {e}"
 
         if response.status == AgentStatus.OK:
-            # AURA_STRIP_VOCATIVE_V1 — убрать 'Создатель'
+            # AURA_STRIP_VOCATIVE_V1 — убрать 'Капитан'
             if response.text:
                 import re as _re
                 response.text = _re.sub(
-                    r',\s*Создатель\b', '', response.text).strip()
+                    r',\s*Капитан\b', '', response.text).strip()
                 response.text = _re.sub(
-                    r'\bСоздатель,?\s*', '', response.text).strip()
+                    r'\bКапитан,?\s*', '', response.text).strip()
 
             self._last_response = response
             _mem_write(text, response.text)
@@ -261,6 +326,163 @@ class Orchestrator:
 
         return self.fallback_text
 
+
+
+    def _enrich_with_context(self, text: str) -> str:
+        """Добавляет инфу об активном окне в запрос к LLM."""
+        try:
+            from aura.core.context_capture import format_context_for_prompt
+            ctx = format_context_for_prompt()
+            if ctx and len(ctx) > 5:
+                return f"{ctx}\n\nЗапрос: {text}"
+        except Exception as e:
+            pass
+        return text
+
+    def _is_complex_goal(self, text: str) -> bool:
+        """Эвристика: сложная цель требующая декомпозиции."""
+        t = text.lower()
+        triggers = ["чтобы", "подготовь", "сделай", "хочу", "уборк", "встреч"]
+        return len(t.split()) > 3 and any(x in t for x in triggers)
+
+
+    def _is_complex_goal(self, text: str) -> bool:
+        t = text.lower()
+        triggers = ["чтобы", "подготовь", "сделай", "хочу", "уборк", "встреч"]
+        return len(t.split()) > 3 and any(x in t for x in triggers)
+
+    async def _replay_procedure(self, proc, new_goal: str) -> str | None:
+        from aura.core.procedural_memory import goal_hash
+        from aura.contracts.agent import AgentRequest, AgentStatus
+
+        if proc.goal_hash == goal_hash(new_goal):
+            steps = proc.steps
+        else:
+            steps = await self._adapt_steps(proc.steps, new_goal)
+            if steps is None:
+                self.procedural.mark_failed(proc)
+                return None
+
+        results = []
+        for step in steps:
+            agent_name = step.get("agent", "")
+            step_text = step.get("text") or step.get("step_text") or ""
+            agent = next((a for a in self.registry._agents if a.name == agent_name), None)
+            if agent is None:
+                self.procedural.mark_failed(proc)
+                return None
+            try:
+                resp = await agent.handle(AgentRequest(text=step_text))
+            except Exception:
+                self.procedural.mark_failed(proc)
+                return None
+            if resp.status != AgentStatus.OK:
+                self.procedural.mark_failed(proc)
+                return None
+            if resp.text: results.append(resp.text)
+
+        return " · ".join(results) if results else None
+
+    async def _adapt_steps(self, template_steps: list[dict], new_goal: str) -> list[dict] | None:
+        import asyncio, json, urllib.request, re
+        prompt = f"Ты адаптируешь план. Дан шаблон шагов и новая цель.\nШаблон: {json.dumps(template_steps, ensure_ascii=False)}\nНовая цель: {new_goal}\nВерни JSON-массив той же длины. Поля agent не меняй. Поле text перепиши под новую цель. Только JSON."
+        def _call():
+            req = urllib.request.Request("http://localhost:11434/api/generate", data=json.dumps({"model": "qwen2.5:3b-instruct-q3_K_M", "prompt": prompt, "stream": False, "format": "json", "options": {"temperature": 0.0}}).encode("utf-8"), headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=10) as r: return json.loads(r.read().decode("utf-8"))
+        try:
+            resp = await asyncio.to_thread(_call)
+            parsed = json.loads(resp.get("response", "[]"))
+            if isinstance(parsed, list) and len(parsed) == len(template_steps): return parsed
+        except Exception: pass
+        return None
+
+    async def _try_mcp_fallback(self, text: str) -> str | None:
+        """Пытается решить запрос через MCP-инструменты (LLM-роутинг)."""
+        import asyncio, json, urllib.request, re, os
+        
+        cwd = os.getcwd()
+        
+        tools_list = []
+        for name, data in self.mcp_manager.tools.items():
+            schema = data["schema"]
+            desc = schema.get("description", "No description")
+            props = schema.get("inputSchema", {}).get("properties", {})
+            args_desc = ", ".join(props.keys()) if props else "none"
+            tools_list.append(f"- {name}: {desc} (args: {args_desc})")
+        
+        if not tools_list:
+            return None
+            
+        tools_str = "\n".join(tools_list)
+        
+        prompt = (
+            "You are an AI tool router. You MUST select one of the following tools.\n"
+            f"Available tools:\n{tools_str}\n\n"
+            f"Current working directory: {cwd}\n"
+            "RULES:\n"
+            "1. If the user asks to read files, use the tool.\n"
+            "2. Return ONLY valid JSON.\n"
+            "3. NEVER use placeholder paths like '/path/to/your/project/'.\n"
+            f"4. If user asks for 'README.md', use '{cwd}/README.md'.\n"
+            "--- EXAMPLES ---\n"
+            "User: Read README.md\n"
+            f"Assistant: {{\"tool\": \"read_file\", \"args\": {{\"path\": \"{cwd}/README.md\"}}}}\n"
+            "User: What is the weather?\n"
+            "Assistant: {\"tool\": \"none\"}\n"
+            "------------------\n"
+            f"User: {text}\n"
+            "Assistant: "
+        )
+        
+        def _call_llm():
+            req = urllib.request.Request(
+                "http://localhost:11434/api/generate",
+                data=json.dumps({
+                    "model": "qwen2.5:7b-instruct-q4_K_M",
+                    "prompt": prompt,
+                    "stream": False,
+                    "format": "json",
+                    "options": {"temperature": 0.0}
+                }).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=20) as r:
+                return json.loads(r.read().decode("utf-8"))
+                
+        try:
+            resp = await asyncio.to_thread(_call_llm)
+            raw_str = resp.get("response", "{}").strip()
+            
+            if raw_str.startswith("```json"): raw_str = raw_str[7:]
+            if raw_str.endswith("```"): raw_str = raw_str[:-3]
+            raw_str = raw_str.strip()
+            
+            raw = json.loads(raw_str)
+            tool_name = raw.get("tool")
+            
+            if tool_name and tool_name != "none" and tool_name in self.mcp_manager.tools:
+                args = raw.get("args", {})
+                
+                if "path" in args:
+                    path_val = str(args["path"])
+                    if "/path/to/your/project" in path_val or "/path/to/" in path_val:
+                        filename = os.path.basename(path_val)
+                        args["path"] = os.path.join(cwd, filename)
+                        print(f"🔧 [MCP] Исправлен галлюцинированный путь на: {args['path']}")
+                    elif not path_val.startswith("/"):
+                        args["path"] = os.path.join(cwd, path_val)
+                        print(f"🔧 [MCP] Относительный путь преобразован в: {args['path']}")
+
+                print(f"🔌 [MCP] Вызов {tool_name} с аргументами {args}")
+                result = await self.mcp_manager.call(tool_name, args)
+                return f"🔌 [MCP:{tool_name}] {json.dumps(result, ensure_ascii=False)}"
+            else:
+                print(f"🔌 [MCP] LLM решила не использовать инструмент. Сырой ответ: {raw_str}")
+        except Exception as e:
+            print(f"⚠️ MCP Fallback error: {e}")
+            
+        return None
+
     FACTUAL_PREFIXES = ("погод", "курс ", "новост", "пробк", "гороскоп", "астро")
 
     def _is_factual_intent(self, text: str) -> bool:
@@ -277,7 +499,7 @@ class Orchestrator:
         "деньнед": "день недели", "деньнеделю": "день недели",
         "число": "какое число", "погод": "погода",
         "музы": "музыку", "муз": "музыку", "включи музы": "включи музыку",
-        "какая": "какая погода",
+        # "какая": "какая погода",  # FIX: ломало "какая гарнитура"
     }
 
     def _normalize(self, text: str) -> str:
@@ -356,7 +578,45 @@ class Orchestrator:
         Fail-open для unmapped агентов (раздел 20 промта: backward compat).
         TODO: через 2-3 итерации → fail-closed.
         """
+        # Intent Parser (Декомпозиция)
+        if self._is_complex_goal(text):
+            plan = self.intent_parser.parse(text)
+            if plan.get("steps"):
+                results = []
+                for step in plan["steps"]:
+                    agent_id = step.get("agent")
+                    step_text = step.get("text", text)
+                    args = step.get("args", {})
+                    # Ищем агента по id
+                    a = next((ag for ag in self.registry._agents if ag.name == agent_id), None)
+                    if a:
+                        try:
+                            req = AgentRequest(text=step_text, args=args)
+                            resp = await a.handle(req)
+                            if resp and resp.text:
+                                results.append(f"[{agent_id}] {resp.text}")
+                        except Exception as e:
+                            results.append(f"[{agent_id}] Ошибка: {e}")
+                if results:
+                    final_text = "\n".join(results)
+                    _mem_write(text, final_text)
+                    return final_text
+
+
+        if self._is_complex_goal(text):
+            if self.procedural is not None:
+                proc = self.procedural.recall(text)
+                if proc is not None:
+                    replay = await self._replay_procedure(proc, text)
+                    if replay is not None:
+                        _mem_write(text, replay)
+                        return replay
+
+
+
         agent = self.registry.find(request)
+
+
         if agent is None:
             return AgentResponse.not_handled()
 

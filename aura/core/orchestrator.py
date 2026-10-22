@@ -426,11 +426,19 @@ class Orchestrator:
         return None
 
     async def _try_mcp_fallback(self, text: str) -> str | None:
-        """MCP Chaining: Многошаговое выполнение через ReAct-цикл."""
         import asyncio, json, urllib.request, re, os
+        from pathlib import Path
+        
+        status_file = Path.home() / ".cache/aura/mcp_status.json"
+        def update_status(status: str, tool: str = ""):
+            try:
+                status_file.write_text(json.dumps({"status": status, "tool": tool}, ensure_ascii=False))
+            except Exception:
+                pass
+
+        update_status("thinking")
         
         cwd = os.getcwd()
-        
         tools_list = []
         for name, data in self.mcp_manager.tools.items():
             schema = data["schema"]
@@ -440,10 +448,10 @@ class Orchestrator:
             tools_list.append(f"- {name}: {desc} (args: {args_desc})")
         
         if not tools_list:
+            update_status("idle")
             return None
             
         tools_str = "\n".join(tools_list)
-        
         history = []
         max_steps = 3
         called_tools = set()
@@ -465,7 +473,9 @@ class Orchestrator:
                 "RULES:\n"
                 "1. If you need to perform an action, return JSON: {\"tool\": \"tool_name\", \"args\": {...}}\n"
                 "2. If the task is fully completed, or if a tool failed and you cannot fix it, return: {\"tool\": \"done\"}\n"
-                "3. DO NOT repeat the same tool call twice. If you see an error in history, use a different tool or return done.\n"
+                "3. DO NOT repeat the same tool call twice. If the result is already in history, return done.\n"
+                "4. If you have read a file, answer using the history and return done. Do NOT read it again.\n"
+                "5. ALWAYS respond in Russian.\n"
                 f"4. If you write a file, use absolute path like '{cwd}/filename.txt'.\n"
                 "5. Do NOT wrap JSON in markdown. Return ONLY valid JSON.\n"
                 "--- EXAMPLES ---\n"
@@ -527,16 +537,22 @@ class Orchestrator:
                         elif not path_val.startswith("/"):
                             args["path"] = os.path.join(cwd, path_val)
 
-                    # === HITL (Human-in-the-Loop) ===
                     DANGEROUS_TOOLS = ["write_file", "edit_file", "create_issue", "add_issue_comment", "update_issue"]
                     if tool_name in DANGEROUS_TOOLS:
                         print(f"⚠️ [HITL] Запрос на опасное действие: {tool_name} с {args}")
                         self.pending_mcp_action = (tool_name, args)
+                        update_status("idle")
                         return f"⚠️ Капитан, для выполнения '{tool_name}' с аргументами {args} требуется подтверждение. Скажи «Подтверждаю» и повтори команду."
-                    
+
                     print(f"🔌 [MCP Chain] Шаг {step+1}: Вызов {tool_name} с {args}")
-                    import json
-                    result = await self.mcp_manager.call(tool_name, args)
+                    update_status("running", tool_name)
+                    
+                    try:
+                        result = await self.mcp_manager.call(tool_name, args)
+                    except Exception as e:
+                        update_status("idle")
+                        raise e
+                        
                     raw_result = json.dumps(result, ensure_ascii=False)
                     
                     clean_text = raw_result
@@ -560,6 +576,8 @@ class Orchestrator:
                 print(f"⚠️ MCP Chain error: {type(e).__name__}: {e}")
                 break
 
+        update_status("idle")
+        
         if history:
             final_prompt = (
                 f"Пользователь спросил: '{text}'.\n"
@@ -580,7 +598,6 @@ class Orchestrator:
                 pass
                 
         return None
-
 
     def _is_factual_intent(self, text: str) -> bool:
         """True = факт-запрос, LLM не должен отвечать. AURA_CORE_FIX_V1."""

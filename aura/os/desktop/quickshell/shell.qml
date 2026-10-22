@@ -1,3 +1,4 @@
+import "modules"
 import Quickshell
 import Quickshell.Io
 import QtQuick
@@ -46,9 +47,7 @@ ShellRoot {
         id: weatherProc
         command: ["bash", "/home/pythonvenom/.config/quickshell/scripts/weather.sh"]
         running: false
-        stdout: StdioCollector {
-            onStreamFinished: weatherText = text.trim()
-        }
+        stdout: StdioCollector { onStreamFinished: weatherText = text.trim() }
     }
     Timer {
         interval: 900000
@@ -63,9 +62,7 @@ ShellRoot {
         id: updateProc
         command: ["bash", "/home/pythonvenom/.config/quickshell/scripts/updates.sh"]
         running: false
-        stdout: StdioCollector {
-            onStreamFinished: updateText = text.trim()
-        }
+        stdout: StdioCollector { onStreamFinished: updateText = text.trim() }
     }
     Timer {
         interval: 3600000
@@ -86,6 +83,11 @@ ShellRoot {
 
     // ВЕРХНЯЯ ПАНЕЛЬ
     PanelWindow {
+    AuraStatus {
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: 20
+    }
         anchors { top: true; left: true; right: true }
         implicitHeight: 32
         color: "#1e1e2e"
@@ -102,7 +104,7 @@ ShellRoot {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        logEvent("system", "Открыто меню")
+                        logEvent("system", "Меню")
                         Quickshell.execDetached(["rofi", "-show", "drun"])
                     }
                 }
@@ -115,7 +117,7 @@ ShellRoot {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        logEvent("system", "Обзор окон")
+                        logEvent("system", "Обзор")
                         Quickshell.execDetached(["bash", "/home/pythonvenom/.config/quickshell/scripts/aura-wm.sh", "overview"])
                     }
                 }
@@ -294,7 +296,7 @@ ShellRoot {
         }
     }
 
-    // ОКНО ЧАТА (Исправлено чтение через Process)
+    // ОКНО ЧАТА
     FloatingWindow {
         id: chatWindow
         visible: chatOpen
@@ -303,26 +305,22 @@ ShellRoot {
         implicitHeight: 500
         color: "#1e1e2e"
         
-        property string chatHistoryText: "Загрузка..."
+        property string chatHistoryText: "История пуста"
 
         Process {
             id: historyProc
-            command: ["bash", "-c", "cat /home/pythonvenom/.cache/aura/chat_history.jsonl 2>/dev/null | tail -n 15"]
+            command: ["python3", "/home/pythonvenom/.config/quickshell/scripts/format_history.py"]
             running: false
             stdout: StdioCollector {
-                onStreamFinished: {
-                    let lines = text.trim().split('\n');
-                    let result = "";
-                    for (let line of lines) {
-                        try {
-                            let d = JSON.parse(line);
-                            if (d.user) result += `Вы: ${d.user}\n`;
-                            if (d.aura) result += `Aura: ${d.aura}\n\n`;
-                        } catch(e) {}
-                    }
-                    chatWindow.chatHistoryText = result.trim() || "История пуста";
-                }
+                onStreamFinished: chatWindow.chatHistoryText = text.trim() || "История пуста"
             }
+        }
+        
+        Timer {
+            interval: 2000
+            running: chatWindow.visible
+            repeat: true
+            onTriggered: historyProc.running = true
         }
         
         Timer {
@@ -333,8 +331,9 @@ ShellRoot {
         }
         
         Component.onCompleted: {
-            if (visible) inputField.forceActiveFocus()
+            if (chatOpen) inputField.forceActiveFocus()
         }
+        
         onVisibleChanged: {
             if (visible) {
                 inputField.forceActiveFocus()

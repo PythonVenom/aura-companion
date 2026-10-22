@@ -121,16 +121,11 @@ class Orchestrator:
         3. Если не найден — fallback
         """
 
-        print(f"DEBUG_START: self.mcp_manager={self.mcp_manager}")
         if self.mcp_manager is not None:
-            if not self.mcp_manager.tools:
-                try:
-                    await self.mcp_manager.load_all()
-                except Exception as e:
-                    print(f"⚠️ Failed to load MCP tools: {e}")
             
-            if any(w in text.lower() for w in ["файл", "readme", "прочитай", "list", "find", "cat", "grep", "директор"]):
-                print(f"🔌 [MCP] Попытка MCP Fallback... (tools loaded: {len(self.mcp_manager.tools)})")
+            if any(w in text.lower() for w in ["файл", "readme", "прочитай", "list", "find", "cat", "grep", "директор", "база", "sql", "таблиц", "users", "test.db", "database"]):
+                import logging
+                logging.getLogger("aura.orchestrator").debug(f"MCP Fallback attempt (tools loaded: {len(self.mcp_manager.tools)})")
                 mcp_res = await self._try_mcp_fallback(text)
                 if mcp_res:
                     _mem_write(text, mcp_res)
@@ -423,12 +418,17 @@ class Orchestrator:
             "1. If the user asks to read files, use the tool.\n"
             "2. Return ONLY valid JSON.\n"
             "3. NEVER use placeholder paths like '/path/to/your/project/'.\n"
+            "4. For SQLite queries, NEVER include the database name or filename in the SQL query (e.g., no 'WHERE dbname=...'). Just use standard SQL.\n"
             f"4. If user asks for 'README.md', use '{cwd}/README.md'.\n"
             "--- EXAMPLES ---\n"
             "User: Read README.md\n"
             f"Assistant: {{\"tool\": \"read_file\", \"args\": {{\"path\": \"{cwd}/README.md\"}}}}\n"
             "User: What is the weather?\n"
             "Assistant: {\"tool\": \"none\"}\n"
+            "User: How many users in the database?\n"
+            "Assistant: {\"tool\": \"query\", \"args\": {\"sql\": \"SELECT COUNT(*) FROM users\"}}\n"
+            "User: What tables are in the database?\n"
+            "Assistant: {\"tool\": \"get_schema\", \"args\": {}}\n"
             "------------------\n"
             f"User: {text}\n"
             "Assistant: "
@@ -475,7 +475,35 @@ class Orchestrator:
 
                 print(f"🔌 [MCP] Вызов {tool_name} с аргументами {args}")
                 result = await self.mcp_manager.call(tool_name, args)
-                return f"🔌 [MCP:{tool_name}] {json.dumps(result, ensure_ascii=False)}"
+                raw_result = json.dumps(result, ensure_ascii=False)
+                print(f"🔌 [MCP] Результат: {raw_result}")
+                
+                # Извлекаем чистый текст из MCP-ответа
+                clean_text = raw_result
+                try:
+                    parsed = json.loads(raw_result)
+                    if isinstance(parsed, dict) and "content" in parsed:
+                        texts = [c.get("text", "") for c in parsed["content"] if c.get("type") == "text"]
+                        clean_text = "\n".join(texts)
+                except Exception:
+                    pass
+
+                # Форматируем ответ через LLM
+                if self.brain is not None:
+                    try:
+                        fmt_prompt = (
+                            f"Данные от инструмента {tool_name}: {clean_text}\n"
+                            f"Сформулируй краткий и понятный ответ на вопрос: '{text}'. "
+                            f"Не упоминай JSON или служебные данные. Ответь на русском языке."
+                        )
+                        final_text = await asyncio.to_thread(self.brain.ask, fmt_prompt)
+                        print(f"DEBUG: LLM format response: {final_text}")
+                        if final_text and not final_text.startswith("❌"):
+                            return final_text
+                    except Exception as e:
+                        print(f"⚠️ Ошибка форматирования MCP-ответа: {e}")
+                        
+                return f"🔌 [MCP:{tool_name}] {clean_text}"
             else:
                 print(f"🔌 [MCP] LLM решила не использовать инструмент. Сырой ответ: {raw_str}")
         except Exception as e:

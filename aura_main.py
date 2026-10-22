@@ -103,6 +103,9 @@ class AuraOrchestrator:
         print("✅ Push-to-stop: /tmp/aura.stop watcher запущен")
         self.heartbeat = Heartbeat()
         self.orch = build_orchestrator()
+        if hasattr(self.orch, 'mcp_manager') and self.orch.mcp_manager:
+            import asyncio
+            asyncio.create_task(self.orch.mcp_manager.load_all())
 
         # F-067: ONE-SHOT отключен в __init__ (блокирует старт)
 
@@ -848,6 +851,8 @@ class AuraOrchestrator:
                     try:
                         result = self.rag_memory.remember(cmd, response)
                         print(f"🧠 {result}")
+                    except Exception as e:
+                        print(f"⚠️ Ошибка RAG (не критично): {e}")
                     except Exception as e:
                         print(f"⚠️ RAG не сохранил: {e}")
 

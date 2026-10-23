@@ -3,6 +3,7 @@ import threading
 import time
 import webrtcvad
 import os
+from aura.core.system_profiler import SystemProfiler
 
 class AgentBargeIn:
     def __init__(self):
@@ -27,7 +28,8 @@ class AgentBargeIn:
 
     def _listen_loop(self):
         # ИСПРАВЛЕНИЕ: Слушаем target 72 напрямую
-        cmd = ["pw-record", "--target", "100", "--rate", "16000", "--channels", "1", "--format", "s16", "-"]
+        mic = SystemProfiler.get_default_mic()
+        cmd = ["parec", f"--device={mic}", "--rate=16000", "--channels=1", "--format=s16le"]
         
         try:
             self._process = subprocess.Popen(

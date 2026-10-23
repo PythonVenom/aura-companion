@@ -3,6 +3,7 @@ import subprocess
 import time
 import numpy as np
 import sherpa_onnx
+from aura.core.system_profiler import SystemProfiler
 
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "../../sherpa-onnx-streaming-t-one-russian-2025-09-08")
 
@@ -41,7 +42,8 @@ class AgentListener:
         self.stream = self.recognizer.create_stream()
         
         # Читаем напрямую с железа (ID 72)
-        cmd = ["pw-record", "--target", "100", "--rate", "16000", "--channels", "1", "--format", "s16", "-"]
+        mic = SystemProfiler.get_default_mic()
+        cmd = ["parec", f"--device={mic}", "--rate=16000", "--channels=1", "--format=s16le"]
         self._process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         
         start_time = time.time()

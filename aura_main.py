@@ -874,7 +874,7 @@ class AuraOrchestrator:
 
                 if self.rag_memory:
                     try:
-                        result = self.rag_memory.remember(cmd, response)
+                        result = # self.rag_memory.remember(cmd, response) # RAG OFFLINE FOR SPEED TEST
                         print(f"🧠 {result}")
                     except Exception as e:
                         print(f"⚠️ Ошибка RAG (не критично): {e}")

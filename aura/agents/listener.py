@@ -44,7 +44,8 @@ class AgentListener:
         # Читаем напрямую с железа (ID 72)
         mic = SystemProfiler.get_default_mic()
         cmd = ["parec", f"--device={mic}", "--rate=16000", "--channels=1", "--format=s16le"]
-        self._process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        if self._process is None or self._process.poll() is not None:
+            self._process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         
         start_time = time.time()
         result_text = None
@@ -66,9 +67,8 @@ class AgentListener:
                     if result_text:
                         break
         finally:
-            if self._process:
-                self._process.terminate()
-                self._process = None
+            # Процесс parec не убиваем, он живет постоянно
+            pass
         
         if not result_text:
             self.stream.accept_waveform(self.sample_rate, np.zeros(int(0.5*self.sample_rate), dtype=np.float32))

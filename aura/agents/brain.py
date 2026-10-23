@@ -108,7 +108,7 @@ class AgentBrain:
                 "keep_alive": "30m",   # #103: модель не выгружается 30 мин
                 "options": {
                     "temperature": 0.7,
-                    "num_predict": 150,  # Bug 28: 700 → 400 (быстрее)
+                    "num_predict": 80,  # Bug 28: 700 → 400 (быстрее)
                     "num_ctx": 2048,     # #103: 4096 → 2048 (быстрее prompt)
                     "num_thread": os.cpu_count() or 4,  # #103: все CPU ядра
                 },
@@ -149,7 +149,7 @@ class AgentBrain:
             "keep_alive": "30m",
             "options": {
                 "temperature": 0.7,
-                "num_predict": 150,
+                "num_predict": 80,
                 "num_ctx": 2048,
                 "num_thread": os.cpu_count() or 4,
             },
